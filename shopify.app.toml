@@ -1,0 +1,52 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+ 
+client_id = "0b78c8e17dedea0ae29b959aa1b969ab"
+
+name = "barcodedemo-app"
+
+application_url = "https://calls-elections-glass-bunny.trycloudflare.com/"
+
+embedded = true
+
+handle = "barcodedemo-app_handle"
+ 
+[webhooks]
+
+api_version = "2025-04"
+ 
+  [[webhooks.subscriptions]]
+
+  uri = "https://calls-elections-glass-bunny.trycloudflare.com/webhook/customers-data-request"
+
+  compliance_topics = [ "customers/data_request" ]
+ 
+  [[webhooks.subscriptions]]
+
+  uri = "https://calls-elections-glass-bunny.trycloudflare.com/webhook/customers-redact"
+
+  compliance_topics = [ "customers/redact" ]
+ 
+  [[webhooks.subscriptions]]
+
+  uri = "https://calls-elections-glass-bunny.trycloudflare.com/webhook/shop-redact"
+
+  compliance_topics = [ "shop/redact" ]
+ 
+[access_scopes]
+
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+
+scopes = "read_assigned_fulfillment_orders,read_customers,write_delivery_customizations,write_discounts,read_draft_orders,read_fulfillments,read_merchant_managed_fulfillment_orders,read_orders,write_orders,read_products,write_products,read_themes,read_third_party_fulfillment_orders"
+
+optional_scopes = [ ]
+
+use_legacy_install_flow = false
+ 
+[auth]
+
+redirect_urls = [
+
+  "https://calls-elections-glass-bunny.trycloudflare.com/authenticate"
+
+]
+ 
