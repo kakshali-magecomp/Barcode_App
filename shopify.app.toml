@@ -4,7 +4,7 @@ client_id = "0b78c8e17dedea0ae29b959aa1b969ab"
 
 name = "barcodedemo-app"
 
-application_url = "https://calls-elections-glass-bunny.trycloudflare.com/"
+application_url = "https://figured-way-baghdad-mono.trycloudflare.com/"
 
 embedded = true
 
@@ -16,19 +16,19 @@ api_version = "2025-04"
  
   [[webhooks.subscriptions]]
 
-  uri = "https://calls-elections-glass-bunny.trycloudflare.com/webhook/customers-data-request"
+  uri = "https://figured-way-baghdad-mono.trycloudflare.com/webhook/customers-data-request"
 
   compliance_topics = [ "customers/data_request" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://calls-elections-glass-bunny.trycloudflare.com/webhook/customers-redact"
+  uri = "https://figured-way-baghdad-mono.trycloudflare.com/webhook/customers-redact"
 
   compliance_topics = [ "customers/redact" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://calls-elections-glass-bunny.trycloudflare.com/webhook/shop-redact"
+  uri = "https://figured-way-baghdad-mono.trycloudflare.com/webhook/shop-redact"
 
   compliance_topics = [ "shop/redact" ]
  
@@ -46,7 +46,7 @@ use_legacy_install_flow = false
 
 redirect_urls = [
 
-  "https://calls-elections-glass-bunny.trycloudflare.com/authenticate"
+  "https://figured-way-baghdad-mono.trycloudflare.com/authenticate"
 
 ]
  

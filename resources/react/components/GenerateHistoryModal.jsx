@@ -10,11 +10,8 @@ export default function GenerateHistoryModal({
   open,
   onClose,
 }) {
-  const [loading, setLoading] =
-    useState(true);
-
-  const [histories, setHistories] =
-    useState([]);
+  const [loading, setLoading] =useState(true);
+  const [histories, setHistories] =useState([]);
 
   useEffect(() => {
     if (open) {
@@ -23,28 +20,19 @@ export default function GenerateHistoryModal({
   }, [open]);
 
   const fetchHistory = async () => {
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const response = await fetch(
-        "/api/label-history"
-      );
+    const response = await fetch("/api/label-history?type=generate");
+    const result = await response.json();
 
-      const result =
-        await response.json();
-
-      setHistories(
-        result.data.filter(
-          (item) =>
-            item.type === "generate"
-        )
-      );
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setHistories(result.data || []);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Modal
