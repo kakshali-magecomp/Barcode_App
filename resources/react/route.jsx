@@ -16,6 +16,7 @@ const AppRoute = () => {
 		<Routes>
 			<Route path="/" element={<IndexPage />} />
 			<Route path="/Templateslist" element={<Templateslist />} />
+			<Route path="/CreateTemplate" element={< CreateTemplate />}/>
 			<Route path="/Generateprint" element={<GeneratePrint />} />
 			<Route path="/ImportBarcode" element={<ImportBarcode />} />
 			<Route path="/layout" element={<Layout />} />
@@ -23,7 +24,6 @@ const AppRoute = () => {
 			<Route path="/Subscription" element={<Subscription />} />
 			<Route path="/GetMoreLabel" element={<GetMoreLabel />} />		
 			<Route path="/UserPermission" element={<UserPermission />} />
-			<Route path="/templates/create" element={<CreateTemplate />} />
 		</Routes>
 	);
 };

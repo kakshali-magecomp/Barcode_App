@@ -22,10 +22,10 @@ export default function TemplateList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] =
-  useState(false);
+    useState(false);
 
-const [deleteLoading, setDeleteLoading] =
-  useState(false);
+  const [deleteLoading, setDeleteLoading] =
+    useState(false);
 
   const fetchTemplates = async () => {
     try {
@@ -67,43 +67,43 @@ const [deleteLoading, setDeleteLoading] =
   } = useIndexResourceState(templates);
 
   const deleteTemplates = async () => {
-  try {
-    setDeleteLoading(true);
+    try {
+      setDeleteLoading(true);
 
-    const response = await fetch(
-      "/api/templates/delete",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          ids: selectedResources,
-        }),
-      }
-    );
-
-    const result = await response.json();
-
-    if (result.success) {
-      setTemplates((prev) =>
-        prev.filter(
-          (template) =>
-            !selectedResources.includes(
-              String(template.id)
-            )
-        )
+      const response = await fetch(
+        "/api/templates/delete",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            ids: selectedResources,
+          }),
+        }
       );
 
-      setDeleteModalOpen(false);
+      const result = await response.json();
+
+      if (result.success) {
+        setTemplates((prev) =>
+          prev.filter(
+            (template) =>
+              !selectedResources.includes(
+                String(template.id)
+              )
+          )
+        );
+
+        setDeleteModalOpen(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setDeleteLoading(false);
     }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setDeleteLoading(false);
-  }
-};
+  };
 
   const rowMarkup = templates.map((template, index) => (
     <IndexTable.Row
@@ -155,16 +155,16 @@ const [deleteLoading, setDeleteLoading] =
         title="Manage Templates"
         primaryAction={{
           content: "Create Template",
-          onAction: () => navigate("/templates/create"),
+          onAction: () => navigate("/CreateTemplate"),
         }}
         secondaryActions={[
-  {
-    content: `Delete Selected (${selectedResources.length})`,
-    destructive: true,
-    disabled: selectedResources.length === 0,
-    onAction: () => setDeleteModalOpen(true),
-  },
-]}
+          {
+            content: `Delete Selected (${selectedResources.length})`,
+            destructive: true,
+            disabled: selectedResources.length === 0,
+            onAction: () => setDeleteModalOpen(true),
+          },
+        ]}
       >
         <BlockStack gap="400">
           <Card>
@@ -208,12 +208,12 @@ const [deleteLoading, setDeleteLoading] =
         template={selectedTemplate}
       />
       <DeleteConfirmationModal
-  open={deleteModalOpen}
-  onClose={() => setDeleteModalOpen(false)}
-  onConfirm={deleteTemplates}
-  loading={deleteLoading}
-  count={selectedResources.length}
-/>
+        open={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={deleteTemplates}
+        loading={deleteLoading}
+        count={selectedResources.length}
+      />
     </>
   );
 }

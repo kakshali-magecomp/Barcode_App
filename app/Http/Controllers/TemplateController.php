@@ -4,12 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Template;
+use Illuminate\Support\Facades\Storage;
 
 class TemplateController extends Controller
 {
-    /**
-     * Get all templates
-     */
+    //get all tamplate
     public function index()
     {
         try {
@@ -27,20 +26,31 @@ class TemplateController extends Controller
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
-
         }
     }
 
-    /**
-     * Create template
-     */
+    //create tamplate
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'template_type' => 'required|in:barcode,image',
+            'template_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         try {
+
+            $imagePath = null;
+
+            if (
+                $request->template_type === 'image' &&
+                $request->hasFile('template_image')
+            ) {
+
+                $imagePath = $request
+                    ->file('template_image')
+                    ->store('template-images', 'public');
+            }
 
             $template = Template::create([
                 'name' => $request->name,
@@ -52,6 +62,7 @@ class TemplateController extends Controller
                 'paper_size' => $request->paper_size,
 
                 'template_type' => $request->template_type,
+                'template_image' => $imagePath,
 
                 'label_width' => $request->label_width,
                 'label_height' => $request->label_height,
@@ -66,70 +77,70 @@ class TemplateController extends Controller
                 'margin_left' => $request->margin_left,
                 'margin_right' => $request->margin_right,
 
-                'show_product_name' => $request->show_product_name,
-                'show_price' => $request->show_price,
-                'show_sku' => $request->show_sku,
-                'show_barcode' => $request->show_barcode,
-                'show_qrcode' => $request->show_qrcode,
+                'show_product_name' => $request->boolean('show_product_name'),
+                'show_price' => $request->boolean('show_price'),
+                'show_sku' => $request->boolean('show_sku'),
+                'show_barcode' => $request->boolean('show_barcode'),
+                'show_qrcode' => $request->boolean('show_qrcode'),
+
+                'custom_css' => $request->custom_css,
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Template created successfully',
-                'data' => $template
+                'data' => $template,
             ]);
 
         } catch (\Exception $e) {
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
-
         }
     }
-    public function destroyMultiple(Request $request)
+
+    //delete selected template
+    public function deleteTemplates(Request $request)
     {
+        $request->validate([
+            'ids' => 'required|array',
+        ]);
+
         try {
 
-            Template::whereIn(
-                'id',
-                $request->ids
-            )->delete();
+            $templates = Template::whereIn('id', $request->ids)->get();
+
+            foreach ($templates as $template) {
+
+                if (
+                    $template->template_image &&
+                    Storage::disk('public')->exists($template->template_image)
+                ) {
+                    Storage::disk('public')->delete($template->template_image);
+                }
+
+                $template->delete();
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Templates deleted successfully'
+                'message' => 'Templates deleted successfully',
             ]);
 
         } catch (\Exception $e) {
 
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
-    public function deleteTemplates(Request $request)
-{
-    try {
 
-        Template::whereIn(
-            'id',
-            $request->ids
-        )->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Templates deleted successfully'
-        ]);
-
-    } catch (\Exception $e) {
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 500);
+    //alise
+    public function destroyMultiple(Request $request)
+    {
+        return $this->deleteTemplates($request);
     }
-}
 }
