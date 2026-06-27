@@ -32,6 +32,8 @@ Route::get('/label-history', [LabelHistoryController::class, 'index']);
 
 Route::post('/label-history', [LabelHistoryController::class, 'store']);
 
+Route::delete('/label-history/{id}',[LabelHistoryController::class, 'destroy']);
+
 //barcode
 Route::post('/barcode/generate', [BarcodeController::class, 'generate']);
 

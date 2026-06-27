@@ -9,48 +9,57 @@ class LabelHistoryController extends Controller
 {
     // STORE HISTORY
     public function store(Request $request)
-{
-    try {
-        $request->validate([
-            'type' => 'required|string',
-            'template_id' => 'nullable',
-            'template_name' => 'nullable|string',
-            'products' => 'array'
-        ]);
+    {
+        try {
+            $request->validate([
+                'type' => 'required|string',
+                'template_id' => 'nullable',
+                'template_name' => 'nullable|string',
+                'products' => 'array'
+            ]);
 
-        $history = LabelHistory::create([
-            'type' => $request->type,
-            'template_id' => $request->template_id,
-            'template_name' => $request->template_name,
-            'product_count' => count($request->products ?? []),
-            'products' => $request->products ?? [],
-        ]);
+            $history = LabelHistory::create([
+                'type' => $request->type,
+                'template_id' => $request->template_id,
+                'template_name' => $request->template_name,
+                'product_count' => count($request->products ?? []),
+                'products' => $request->products ?? [],
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => $history
-        ]);
+            return response()->json([
+                'success' => true,
+                'data' => $history
+            ]);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     // FETCH HISTORY
     public function index(Request $request)
     {
         $query = LabelHistory::query();
 
-        if ($request->filled('type')) {
+        if ($request->filled('type') && $request->type != "all") {
             $query->where('type', $request->type);
         }
 
         return response()->json([
             'success' => true,
             'data' => $query->latest()->get()
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        LabelHistory::findOrFail($id)->delete();
+
+        return response()->json([
+            'success' => true
         ]);
     }
 }
