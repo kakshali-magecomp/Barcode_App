@@ -18,7 +18,7 @@ const App = () => {
 					<a href="/Templateslist">Templates</a>
 					<a href="/Generateprint">Generate & Print</a>
 					<a href="/ImportBarcode">Import Barcode & SKUs</a>
-					<a href="/layout">Setting</a>
+					<a href="/Settings/*">Setting</a>
 					<a href="/stockpo">Stocky PO</a>
 					<a href="/Subscription">Subscription</a>
 					<a href="/GetMoreLabel">Get More Labels</a>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Card,
   Text,
@@ -10,133 +10,130 @@ import {
   TextField,
 } from "@shopify/polaris";
 
-export default function Barcode() {
-  const [autoGenerate, setAutoGenerate] = useState(true);
-  const [autoDetectGTIN, setAutoDetectGTIN] = useState(true);
-  const [allowNonZero, setAllowNonZero] = useState(false);
-
-  const [barcodeFormat, setBarcodeFormat] = useState("code128");
-  const [barcodePattern, setBarcodePattern] = useState("[N.8][N.8]");
-  const [contextualPricing, setContextualPricing] = useState("US");
-
-  const handleSave = () => {
-    console.log({
-      autoGenerate,
-      autoDetectGTIN,
-      allowNonZero,
-      barcodeFormat,
-      barcodePattern,
-      contextualPricing,
-    });
-
-    // Save API Call Here
-  };
-
+export default function Barcode({
+  settings,
+  updateSetting,
+  saveSettings,
+  loading,
+}) {
   return (
     <BlockStack gap="500">
-
       <Text variant="headingLg" as="h2">
         Barcode Settings
       </Text>
 
       <Banner tone="info">
-        Configure automatic barcode generation and barcode formats for your products.
+        Configure automatic barcode generation and barcode
+        display settings.
       </Banner>
 
+      {/* Auto Generation */}
+
       <Card>
-        <div style={{ padding: "20px" }}>
+        <div style={{ padding: 20 }}>
           <BlockStack gap="400">
-
             <Checkbox
-              label="Auto generate barcode after create new product"
-              checked={autoGenerate}
-              onChange={setAutoGenerate}
+              label="Auto generate barcode after creating product"
+              checked={settings.auto_generate_barcode}
+              onChange={(value) =>
+                updateSetting("auto_generate_barcode", value)
+              }
             />
 
             <Checkbox
-              label="Auto detect barcode GTIN format and render correct symbol"
-              checked={autoDetectGTIN}
-              onChange={setAutoDetectGTIN}
+              label="Auto detect GTIN format"
+              checked={settings.auto_detect_gtin}
+              onChange={(value) =>
+                updateSetting("auto_detect_gtin", value)
+              }
             />
 
             <Checkbox
-              label="Generate barcodes that do not begin or end with zero"
-              checked={allowNonZero}
-              onChange={setAllowNonZero}
+              label="Generate barcode without leading zero"
+              checked={settings.allow_non_zero}
+              onChange={(value) =>
+                updateSetting("allow_non_zero", value)
+              }
             />
-
           </BlockStack>
         </div>
       </Card>
 
-      <Card>
-        <div style={{ padding: "20px" }}>
-          <BlockStack gap="400">
+      {/* Barcode */}
 
+      <Card>
+        <div style={{ padding: 20 }}>
+          <BlockStack gap="400">
             <Text variant="headingMd">
               Barcode Format
             </Text>
 
             <Select
-              label="Barcode Format"
-              value={barcodeFormat}
-              onChange={setBarcodeFormat}
+              label="Barcode Type"
+              value={settings.barcode_type}
+              onChange={(value) =>
+                updateSetting("barcode_type", value)
+              }
               options={[
                 {
-                  label: "Code 128",
-                  value: "code128",
+                  label: "CODE128",
+                  value: "CODE128",
                 },
                 {
-                  label: "EAN-13",
-                  value: "ean13",
+                  label: "EAN13",
+                  value: "EAN13",
                 },
                 {
-                  label: "UPC-A",
-                  value: "upca",
+                  label: "EAN8",
+                  value: "EAN8",
                 },
                 {
-                  label: "EAN-8",
-                  value: "ean8",
+                  label: "UPC",
+                  value: "UPC",
+                },
+                {
+                  label: "CODE39",
+                  value: "CODE39",
                 },
               ]}
             />
 
+            <Checkbox
+              label="Show Human Readable Text"
+              checked={settings.show_human_text}
+              onChange={(value) =>
+                updateSetting("show_human_text", value)
+              }
+            />
+
             <TextField
               label="Barcode Pattern"
-              value={barcodePattern}
-              onChange={setBarcodePattern}
+              value={settings.barcode_pattern || ""}
+              onChange={(value) =>
+                updateSetting("barcode_pattern", value)
+              }
               autoComplete="off"
-              helpText="Example: [N.8][N.8] = 16 numeric digits"
+              helpText="Example : [N.8][N.8]"
             />
-
-          </BlockStack>
-        </div>
-      </Card>
-
-      <Card>
-        <div style={{ padding: "20px" }}>
-          <BlockStack gap="400">
-
-            <Text variant="headingMd">
-              Contextual Pricing Value
-            </Text>
 
             <TextField
-              label="Country Code"
-              value={contextualPricing}
-              onChange={setContextualPricing}
+              label="Contextual Pricing Country"
+              value={settings.country_code || ""}
+              onChange={(value) =>
+                updateSetting("country_code", value)
+              }
               autoComplete="off"
-              helpText="Example: US, IN, UA, VN"
+              helpText="Example : US, IN, UK"
             />
-
           </BlockStack>
         </div>
       </Card>
 
-      <Card>
-        <div style={{ padding: "20px" }}>
-          <BlockStack gap="300">
+      {/* Examples */}
 
+      <Card>
+        <div style={{ padding: 20 }}>
+          <BlockStack gap="200">
             <Text variant="headingMd">
               Barcode Pattern Examples
             </Text>
@@ -145,40 +142,34 @@ export default function Barcode() {
             <Text>[N.4] → 1234</Text>
             <Text>[A.6] → ABCDEF</Text>
             <Text>[AN.8] → A1B2C3D4</Text>
-
           </BlockStack>
         </div>
       </Card>
 
-      <Card>
-        <div style={{ padding: "20px" }}>
-          <BlockStack gap="300">
+      {/* Shopify Flow */}
 
+      <Card>
+        <div style={{ padding: 20 }}>
+          <BlockStack gap="300">
             <Text variant="headingMd">
               Shopify Flow Integration
             </Text>
 
             <Text tone="subdued">
-              Use Shopify Flow actions to automatically generate
-              barcodes for products or variants that do not have
-              barcode values yet.
+              Automatically generate missing barcodes using
+              Shopify Flow.
             </Text>
-
-            <Text tone="subdued">
-              This feature is available in the Pro Plan.
-            </Text>
-
           </BlockStack>
         </div>
       </Card>
 
       <Button
         variant="primary"
-        onClick={handleSave}
+        loading={loading}
+        onClick={saveSettings}
       >
         Save Barcode Settings
       </Button>
-
     </BlockStack>
   );
 }

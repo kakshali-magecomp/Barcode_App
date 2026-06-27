@@ -8,6 +8,8 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LabelHistoryController;
 use App\Http\Controllers\BarcodeController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\AppSettingController;
 
 //user
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -40,3 +42,11 @@ Route::post('/barcode/generate', [BarcodeController::class, 'generate']);
 Route::get('/barcode/generate-history', [BarcodeController::class, 'generateHistory']);
 
 Route::get('/barcode/print-history', [BarcodeController::class, 'printHistory']);
+
+Route::get('/settings', [SettingsController::class, 'index']);
+
+Route::post('/settings', [SettingsController::class, 'update']);
+
+Route::get('/settings', [AppSettingController::class,'index']);
+
+Route::post('/settings', [AppSettingController::class,'update']);
