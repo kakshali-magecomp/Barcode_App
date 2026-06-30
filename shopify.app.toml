@@ -4,7 +4,7 @@ client_id = "0b78c8e17dedea0ae29b959aa1b969ab"
 
 name = "barcodedemo-app"
 
-application_url = "https://adrian-vision-constitute-wondering.trycloudflare.com/"
+application_url = "https://predict-tree-baker-heath.trycloudflare.com/"
 
 embedded = true
 
@@ -16,23 +16,24 @@ api_version = "2025-04"
  
   [[webhooks.subscriptions]]
 
-  uri = "https://adrian-vision-constitute-wondering.trycloudflare.com/webhook/customers-data-request"
+  uri = "https://predict-tree-baker-heath.trycloudflare.com/webhook/customers-data-request"
 
   compliance_topics = [ "customers/data_request" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://adrian-vision-constitute-wondering.trycloudflare.com/webhook/customers-redact"
+  uri = "https://predict-tree-baker-heath.trycloudflare.com/webhook/customers-redact"
 
   compliance_topics = [ "customers/redact" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://adrian-vision-constitute-wondering.trycloudflare.com/webhook/shop-redact"
+  uri = "https://predict-tree-baker-heath.trycloudflare.com/webhook/shop-redact"
 
   compliance_topics = [ "shop/redact" ]
  
 [access_scopes]
+
 
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 
@@ -46,7 +47,7 @@ use_legacy_install_flow = false
 
 redirect_urls = [
 
-  "https://adrian-vision-constitute-wondering.trycloudflare.com/authenticate"
+  "https://predict-tree-baker-heath.trycloudflare.com/authenticate"
 
 ]
  

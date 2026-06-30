@@ -8,6 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Osiset\ShopifyApp\Contracts\ShopModel as IShopModel;
 use Osiset\ShopifyApp\Traits\ShopModel;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
+
+
 
 class User extends Authenticatable implements IShopModel
 {
@@ -47,5 +52,17 @@ class User extends Authenticatable implements IShopModel
             'email_verified_at' => 'datetime',
             // 'password' => 'hashed',
         ];
+    }
+    public function barcodeTemplates(): HasMany
+    {
+        return $this->hasMany(BarcodeTemplate::class, 'user_id');
+    }
+    public function barcodeSetting(): HasOne
+    {
+        return $this->hasOne(BarcodeSetting::class, 'user_id');
+    }
+    public function skuSetting(): HasOne
+    {
+        return $this->hasOne(SkuSetting::class, 'user_id');
     }
 }

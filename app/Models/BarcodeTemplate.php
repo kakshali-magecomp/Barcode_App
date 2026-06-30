@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class BarcodeTemplate extends Model
+{
+    protected $fillable = [
+        'shop_id',
+        'template_name',
+        'description',
+        'note',
+        'paper_brand',
+        'paper_model',
+        'layout_setings'
+    ];
+
+    protected $casts = [
+        'layout_setings'=>'array',
+    ];
+
+    public function barcode(){
+        return $this->belongsTo(BarcodeTemplate::class);
+    }
+
+    public function barcodeTemplates():HasMany{
+        return $this->hasMany(BarcodeTemplate::class,'user_id');
+    }
+}

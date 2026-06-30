@@ -1,31 +1,22 @@
-import { Route, Routes } from "react-router-dom";
-import React from "react";
-import IndexPage from "./pages/Dashboard/index";
-import Templateslist from "./pages/Templates/list";
-import GeneratePrint from "./pages/GeneratePrint/index";
-import ImportBarcode from './pages/ImportBarcode/index';
-import SettingsLayout from "./pages/Settings/layout";
-import StockPO from "./pages/StockPO/index";
-import Subscription from "./pages/Subscription/index"
-import GetMoreLabel from "./pages/GetMoreLabel/index";
-import UserPermission from "./pages/UserPermission/index";
-import CreateTemplate from "./pages/Templates/create";
+ import { Route, Routes } from "react-router-dom";
+	import ListPage from "./pages/list";
+	import React from "react";
+	import IndexPage from "./pages";
+	import TamplateCreate from "./pages/Template/create";
+	import Settingindex from "./pages/Settings/index";
+	import BarcodeSkuPanel from "./pages/Settings/BarcodeSkuPanel";
+	import SkuSettingsIndex from "./pages/Settings/SkuSettingsIndex";
 
-const AppRoute = () => {
-	return (
+
+	const AppRoute = () => {
+	    return (
 		<Routes>
-			<Route path="/" element={<IndexPage />} />
-			<Route path="/Templateslist" element={<Templateslist />} />
-			<Route path="/CreateTemplate" element={< CreateTemplate />}/>
-			<Route path="/Generateprint" element={<GeneratePrint />} />
-			<Route path="/ImportBarcode" element={<ImportBarcode />} />
-			<Route path="/Settings/*" element={<SettingsLayout />} />
-			<Route path="/stockpo" element={<StockPO />} />
-			<Route path="/Subscription" element={<Subscription />} />
-			<Route path="/GetMoreLabel" element={<GetMoreLabel />} />		
-			<Route path="/UserPermission" element={<UserPermission />} />
+		    <Route path="/" element={<TamplateCreate/>} />
+		    <Route path="/Settingindex" element={<Settingindex/>} />
+			<Route path="/BarcodeSkuPanel" element={<BarcodeSkuPanel/>} />
+			<Route path="/SkuSettingsIndex" element={<SkuSettingsIndex/>} />
 		</Routes>
-	);
-};
+	    );
+	};
 
-export default AppRoute;
+	export default AppRoute;
