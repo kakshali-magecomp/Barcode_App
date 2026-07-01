@@ -31,12 +31,15 @@ export default function SkuSettingsIndex() {
 
     // Dynamic Position Selection Dropdown Items
     const positionOptions = [
-        { label: 'Do Not Include (Disabled)', value: 'none' },
-        { label: 'Position 1', value: 'pos_1' },
-        { label: 'Position 2', value: 'pos_2' },
-        { label: 'Position 3', value: 'pos_3' },
-        { label: 'Position 4', value: 'pos_4' },
+        { label: 'Choose an option', value: 'none' },
+        { label: 'Not used', value: 'disabled' },
+        { label: 'First character', value: 'char_1' },
+        { label: 'First 2 characters', value: 'char_2' },
+        { label: 'First 3 characters', value: 'char_3' },
+        { label: 'First 4 characters', value: 'char_4' },
+        { label: 'Full value', value: 'full' }
     ];
+
 
     const metafieldOptions = [
         { label: 'Disabled', value: 'none' },
@@ -46,28 +49,54 @@ export default function SkuSettingsIndex() {
 
     // Real-Time Generated SKU Output Preview Engine
     const generateSkuPreview = () => {
-        const delimiter = skuSettings.sku_delimiter || '-';
-        let segments = [];
-
-        if (skuSettings.sku_prefix) segments.push(skuSettings.sku_prefix);
-
-        // Logical ordering sequence parser based on dropdown positional value mapping
-        let orderedSegments = [
-            { label: 'TITLE', position: skuSettings.segment_product_title },
-            { label: 'VNDR', position: skuSettings.segment_product_vendor },
-            { label: 'TYPE', position: skuSettings.segment_product_type },
-            { label: 'OPT1', position: skuSettings.segment_option1 },
-        ].filter(item => item.position !== 'none')
-            .sort((a, b) => a.position.localeCompare(b.position));
-
-        orderedSegments.forEach(item => segments.push(item.label));
-
-        segments.push(skuSettings.sku_auto_number_start || '1001');
-        if (skuSettings.sku_suffix) segments.push(skuSettings.sku_suffix);
-
-        let finalPreview = segments.join(delimiter);
-        return skuSettings.force_uppercase_fields ? finalPreview.toUpperCase() : finalPreview;
+    const delimiter = skuSettings.sku_delimiter || '-';
+    let segments = [];
+    
+    // 1. Static Prefix
+    if (skuSettings.sku_prefix) segments.push(skuSettings.sku_prefix);
+    
+    // Helper function to extract correct substrings based on the dropdown choice
+    const extractSubstring = (text, rule) => {
+        if (!rule || rule === 'none' || rule === 'disabled') return null;
+        if (rule === 'full') return text;
+        if (rule === 'char_1') return text.substring(0, 1);
+        if (rule === 'char_2') return text.substring(0, 2);
+        if (rule === 'char_3') return text.substring(0, 3);
+        if (rule === 'char_4') return text.substring(0, 4);
+        return null;
     };
+
+    // Mock store data mimicking a live Shopify item (e.g., "Nike Running Shoes")
+    const mockProduct = {
+        title: 'Product Name Example',
+        vendor: 'Example Vendor',
+        type: 'Example Type',
+        option1: 'example_option1',
+    };
+
+    // Parse each attribute sequentially 
+    const titlePart = extractSubstring(mockProduct.title, skuSettings.segment_product_title);
+    if (titlePart) segments.push(titlePart);
+
+    const vendorPart = extractSubstring(mockProduct.vendor, skuSettings.segment_product_vendor);
+    if (vendorPart) segments.push(vendorPart);
+
+    const typePart = extractSubstring(mockProduct.type, skuSettings.segment_product_type);
+    if (typePart) segments.push(typePart);
+
+    const opt1Part = extractSubstring(mockProduct.option1, skuSettings.segment_option1);
+    if (opt1Part) segments.push(opt1Part);
+
+    // 2. Incremental Serial Number Block
+    segments.push(skuSettings.sku_auto_number_start || '1001');
+    
+    // 3. Static Suffix
+    if (skuSettings.sku_suffix) segments.push(skuSettings.sku_suffix);
+
+    let finalPreview = segments.join(delimiter);
+    return skuSettings.force_uppercase_fields ? finalPreview.toUpperCase() : finalPreview;
+};
+
 
     // Pull initial SKU profile from backend database
     useEffect(() => {
@@ -177,7 +206,7 @@ export default function SkuSettingsIndex() {
                                             value={skuSettings.sku_prefix}
                                             onChange={(val) => handleFieldChange('sku_prefix', val)}
                                             autoComplete="off"
-                                            placeholder="e.g., TSHIRT"
+                                            placeholder="e.g., PROD"
                                         />
                                         <TextField
                                             label="Auto Number Start From"
@@ -193,7 +222,7 @@ export default function SkuSettingsIndex() {
                                             value={skuSettings.sku_suffix}
                                             onChange={(val) => handleFieldChange('sku_suffix', val)}
                                             autoComplete="off"
-                                            placeholder="e.g., XL"
+                                            placeholder="e.g., 2024"
                                         />
                                         <TextField
                                             label="Use Delimiter"

@@ -65,4 +65,9 @@ class User extends Authenticatable implements IShopModel
     {
         return $this->hasOne(SkuSetting::class, 'user_id');
     }
+    public function printSetting(): HasOne
+    {
+        return $this->hasOne(PrintSetting::class, 'user_id');
+    }
+    
 }

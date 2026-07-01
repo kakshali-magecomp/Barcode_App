@@ -5,6 +5,7 @@ import { NavMenu } from '@shopify/app-bridge-react';
 	import enTranslations from '@shopify/polaris/locales/en.json';
 	import { BrowserRouter as Router } from 'react-router-dom';
 	import AppRoute from './route';
+	import ProductsList from './pages/ProductsList';
 
 	import '@shopify/polaris/build/esm/styles.css';
 
@@ -15,6 +16,7 @@ import { NavMenu } from '@shopify/app-bridge-react';
 		    <Router>
 		        <NavMenu>
 					<a href='/Settingindex'>Setting</a>
+					<a href='/ProductsList'>Products List</a>
 		        </NavMenu>
 		        <AppRoute />
 		    </Router>
