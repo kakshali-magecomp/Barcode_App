@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Helpers\ShopifyQueryHelper;
 use Illuminate\Support\Facades\Log;
-
+use App\Helpers\ShopifyQueryHelper;
 
 class SkuSettingController extends Controller
 {
@@ -14,124 +13,163 @@ class SkuSettingController extends Controller
     public function show()
     {
         $user = Auth::user();
-
-        $setting = $user->skuSetting()->firstOrCreate([
-            'user_id' => $user->id
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'data' => $setting
-        ]);
+        $sku = $user->skuSetting()->firstOrCreate([]);
+        return response()->json($sku);
     }
+
+
     public function update(Request $request)
     {
         $user = Auth::user();
 
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated session.'], 401);
+        }
+
+        //Validate incoming criteria parameters from your React settings form
         $validated = $request->validate([
             'sku_prefix' => 'nullable|string|max:255',
             'sku_auto_number_start' => 'nullable|string|max:255',
             'sku_suffix' => 'nullable|string|max:255',
             'sku_delimiter' => 'nullable|string|max:10',
-            'segment_product_title' => 'nullable|string',
-            'segment_product_vendor' => 'nullable|string',
-            'segment_product_type' => 'nullable|string',
-            'segment_option1' => 'nullable|string',
-            'segment_option2' => 'nullable|string',
-            'segment_option3' => 'nullable|string',
+            'segment_product_title' => 'required|string',
+            'segment_product_vendor' => 'required|string',
+            'segment_product_type' => 'required|string',
+            'segment_option1' => 'required|string',
+            'segment_option2' => 'required|string',
+            'segment_option3' => 'required|string',
+            'segment_metafields' => 'required|string',
             'hide_options_1_2_3' => 'required|boolean',
             'force_uppercase_fields' => 'required|boolean',
         ]);
 
-        $setting = $user->skuSetting()->updateOrCreate(
+        //  Commit the new pattern formula values directly to your local mysql table
+        $skuSettings = $user->skuSetting()->updateOrCreate(
             ['user_id' => $user->id],
             $validated
         );
 
-        $this->generateSku();
+        Log::info("AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: " . $user->id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'SKU settings saved successfully.'
-        ]);
-    }
+        try {
+            // Fetch all active variations from Shopify via your query helper class
+            $listQuery = ShopifyQueryHelper::showproduct();
+            $rawResponse = $user->api()->graph($listQuery);
+            $responseArray = json_decode(json_encode($rawResponse), true);
 
-    // NEW METHOD
-    public function generateSku()
-{
-    $user = Auth::user();
+            $productsEdges = $responseArray['body']['container']['data']['products']['edges'] ??
+                $responseArray['body']['data']['products']['edges'] ?? [];
 
-    $setting = $user->skuSetting;
+            $mutationQuery = ShopifyQueryHelper::updateVariant();
+            $syncCount = 0;
 
-    if (!$setting) {
-        return response()->json([
-            "success" => false,
-            "message" => "SKU settings not found."
-        ], 404);
-    }
+            //  Overwrite Loop: Calculate and update variants immediately on Shopify
+            foreach ($productsEdges as $productEdge) {
+                if (!isset($productEdge['node']))
+                    continue;
+                $product = $productEdge['node'];
 
-    $query = ShopifyQueryHelper::showproduct();
+                foreach ($product['variants']['edges'] as $variantEdge) {
+                    if (!isset($variantEdge['node']))
+                        continue;
+                    $variant = $variantEdge['node'];
 
-    $response = $user->api()->graph($query);
+                    // FIXED: Extract variable values safely out of the sequential objects array list
+                    $optionsList = $variant['selectedOptions'] ?? [];
+                    $opt1 = isset($optionsList[0]['value']) ? $optionsList[0]['value'] : '';
+                    $opt2 = isset($optionsList[1]['value']) ? $optionsList[1]['value'] : '';
+                    $opt3 = isset($optionsList[2]['value']) ? $optionsList[2]['value'] : '';
 
-    $products = json_decode(json_encode($response), true);
+                    // Build the new SKU string based on your updated settings model parameters
+                    $newSku = $this->compileSkuString($product, $skuSettings, $opt1, $opt2, $opt3);
 
-    $edges =
-        $products['body']['container']['data']['products']['edges']
-        ??
-        $products['body']['data']['products']['edges']
-        ??
-        [];
+                    // Skip the API call if the SKU matches to save network bandwidth credits
+                    if ($variant['sku'] === $newSku) {
+                        continue;
+                    }
 
-    $counter = (int)$setting->sku_auto_number_start;
+                    $variables = [
+                        "input" => [
+                            "id" => $variant['id'],
+                            "sku" => (string) $newSku
+                        ]
+                    ];
 
-    foreach ($edges as $productEdge) {
+                    // Fire GraphQL Mutation directly to Shopify's live cloud server
+                    $user->api()->graph($mutationQuery, $variables);
+                    $syncCount++;
 
-        $product = $productEdge['node'];
+                    // Throttling switch to ensure compliance with Shopify API Leaky Bucket limits
+                    usleep(40000);
+                }
+            }
 
-        $productId = $product['id'];
 
-        foreach ($product['variants']['edges'] as $variantEdge) {
+            return response()->json([
+                'success' => true,
+                'message' => "Settings applied! Automatically updated {$syncCount} product variant SKUs across your live store.",
+                'data' => $skuSettings
+            ], 200);
 
-            $variant = $variantEdge['node'];
-
-            $sku = strtoupper(
-                $setting->sku_prefix .
-                $setting->sku_delimiter .
-                substr(
-                    preg_replace('/[^A-Za-z0-9]/', '', $product['title']),
-                    0,
-                    3
-                ) .
-                $setting->sku_delimiter .
-                $counter .
-                $setting->sku_delimiter .
-                $setting->sku_suffix
-            );
-
-            $mutation = ShopifyQueryHelper::updateVariant();
-
-            $variables = [
-                "productId" => $productId,
-                "variants" => [
-                    [
-                        "id" => $variant['id'],
-                        "sku" => $sku
-                    ]
-                ]
-            ];
-
-            $result = $user->api()->graph($mutation, $variables);
-
-            Log::info(json_encode($result, JSON_PRETTY_PRINT));
-
-            $counter++;
+        } catch (\Exception $e) {
+            Log::error("AUTOMATED SKU UPDATE FAIL: " . $e->getMessage());
+            return response()->json([
+                'success' => true, // Still true because configurations saved successfully in database
+                'message' => 'Settings stored locally, but live store sync failed: ' . $e->getMessage(),
+                'data' => $skuSettings
+            ], 200);
         }
     }
 
-    return response()->json([
-        "success" => true,
-        "message" => "SKU updated successfully."
-    ]);
-}
+
+    private function compileSkuString($product, $rules, $o1, $o2, $o3)
+    {
+        $delimiter = $rules->sku_delimiter ?? '-';
+        $segments = [];
+
+        if ($rules->sku_prefix) {
+            $segments[] = $rules->sku_prefix;
+        }
+
+        $parse = function ($text, $mode) {
+            if (!$mode || $mode === 'none' || $mode === 'disabled')
+                return null;
+            if ($mode === 'full')
+                return $text;
+            if ($mode === 'char_1')
+                return substr($text, 0, 1);
+            if ($mode === 'char_2')
+                return substr($text, 0, 2);
+            if ($mode === 'char_3')
+                return substr($text, 0, 3);
+            if ($mode === 'char_4')
+                return substr($text, 0, 4);
+            return null;
+        };
+
+        if ($p = $parse($product['title'] ?? '', $rules->segment_product_title))
+            $segments[] = $p;
+        if ($p = $parse($product['vendor'] ?? '', $rules->segment_product_vendor))
+            $segments[] = $p;
+        if ($p = $parse($product['productType'] ?? '', $rules->segment_product_type))
+            $segments[] = $p;
+
+        if (!$rules->hide_options_1_2_3) {
+            if ($p = $parse($o1, $rules->segment_option1))
+                $segments[] = $p;
+            if ($p = $parse($o2, $rules->segment_option2))
+                $segments[] = $p;
+            if ($p = $parse($o3, $rules->segment_option3))
+                $segments[] = $p;
+        }
+
+        $segments[] = $rules->sku_auto_number_start ?? '1001';
+
+        if ($rules->sku_suffix) {
+            $segments[] = $rules->sku_suffix;
+        }
+
+        $finalStr = str_replace(' ', '', implode($delimiter, $segments));
+        return $rules->force_uppercase_fields ? strtoupper($finalStr) : $finalStr;
+    }
 }

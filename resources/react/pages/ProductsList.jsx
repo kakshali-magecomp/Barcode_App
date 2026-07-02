@@ -4,6 +4,7 @@ import { useAppBridge } from '@shopify/app-bridge-react';
 
 export default function ProductsList() {
     const appBridge = useAppBridge();
+    // Use App Bridge fetch to automatically attach shop session headers
     const fetch = appBridge.fetch || window.fetch;
 
     const [variants, setVariants] = useState([]);
@@ -41,17 +42,14 @@ export default function ProductsList() {
         fetchProductsAndRules();
     }, []);
 
-    // Core logic engine generating dynamic pattern variants strings on the fly
     const calculateSuggestedSku = (item) => {
         if (!skuRules) return "Formula Missing";
 
         const delimiter = skuRules.sku_delimiter || '-';
         let segments = [];
 
-        //  Check for custom prefix string fields entries
         if (skuRules.sku_prefix) segments.push(skuRules.sku_prefix);
 
-        // Helper tracking method matching column option variables rules to live item strings
         const extractPart = (text, rule) => {
             if (!rule || rule === 'none' || rule === 'disabled') return null;
             if (rule === 'full') return text;
@@ -62,7 +60,6 @@ export default function ProductsList() {
             return null;
         };
 
-        // Parse individual items attributes strings positions order maps arrays
         const titlePart = extractPart(item.product_title, skuRules.segment_product_title);
         if (titlePart) segments.push(titlePart);
 
@@ -81,10 +78,8 @@ export default function ProductsList() {
             if (opt3Part) segments.push(opt3Part);
         }
 
-        //  Incremental base number sequence block
         segments.push(skuRules.sku_auto_number_start || '1001');
 
-        //Static suffix strings entries
         if (skuRules.sku_suffix) segments.push(skuRules.sku_suffix);
 
         let finalResult = segments.join(delimiter).replace(/\s+/g, '');
@@ -101,8 +96,45 @@ export default function ProductsList() {
         }
     };
 
-    const handleBulkSkuSync = () => {
-        console.log("Pushing SKU generation update values to Shopify for variant IDs:", selectedItems);
+    const handleBulkSkuSync = async () => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const itemsToUpdate = variants
+                .filter(item => selectedItems.includes(item.variant_id))
+                .map(item => ({
+                    variant_id: item.variant_id,
+                    suggested_sku: calculateSuggestedSku(item)
+                }));
+
+            if (itemsToUpdate.length === 0) return;
+
+            const response = await fetch("/api/products/bulk-update", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({ variants: itemsToUpdate })
+            });
+
+            const json = await response.json();
+
+            if (json.status === 1) {
+                setSelectedItems([]); 
+                await fetchProductsAndRules(); 
+                if (appBridge && appBridge.toast) {
+                    appBridge.toast.show("Store variant SKUs synchronized successfully!");
+                }
+            } else {
+                throw new Error(json.error || "Failed to push variation updates.");
+            }
+        } catch (err) {
+            setError(err.message || "A transaction error occurred.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const resourceName = { singular: 'variant', plural: 'variants' };
@@ -111,6 +143,7 @@ export default function ProductsList() {
     const rowMarkup = variants.map((item, index) => {
         const isSelected = selectedItems.includes(item.variant_id);
         const suggestedSku = calculateSuggestedSku(item);
+        const thumbnailSrc = item.image || '';
 
         return (
             <IndexTable.Row 
@@ -120,11 +153,15 @@ export default function ProductsList() {
                 selected={isSelected}
             >
                 <IndexTable.Cell>
-                    <Thumbnail source={item.image || ''} alt={item.product_title} size="small" />
+                    {thumbnailSrc ? (
+                        <Thumbnail source={thumbnailSrc} alt={item.product_title} size="small" />
+                    ) : (
+                        <div style={{ width: '40px', height: '40px', backgroundColor: '#f1f1f1', borderRadius: '4px' }} />
+                    )}
                 </IndexTable.Cell>
                 <IndexTable.Cell>
                     <Text fontWeight="bold" as="span">{item.product_title}</Text>
-                    {item.variant_title !== 'Default Title' && (
+                    {item.variant_title && item.variant_title !== 'Default Title' && (
                         <Box color="text-secondary" as="span"> — {item.variant_title}</Box>
                     )}
                 </IndexTable.Cell>

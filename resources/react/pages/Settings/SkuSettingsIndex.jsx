@@ -52,7 +52,7 @@ export default function SkuSettingsIndex() {
     const delimiter = skuSettings.sku_delimiter || '-';
     let segments = [];
     
-    // 1. Static Prefix
+    // Static Prefix
     if (skuSettings.sku_prefix) segments.push(skuSettings.sku_prefix);
     
     // Helper function to extract correct substrings based on the dropdown choice
@@ -87,10 +87,10 @@ export default function SkuSettingsIndex() {
     const opt1Part = extractSubstring(mockProduct.option1, skuSettings.segment_option1);
     if (opt1Part) segments.push(opt1Part);
 
-    // 2. Incremental Serial Number Block
+    // Incremental Serial Number Block
     segments.push(skuSettings.sku_auto_number_start || '1001');
     
-    // 3. Static Suffix
+    // Static Suffix
     if (skuSettings.sku_suffix) segments.push(skuSettings.sku_suffix);
 
     let finalPreview = segments.join(delimiter);
@@ -189,7 +189,7 @@ export default function SkuSettingsIndex() {
                             </Banner>
                         </Layout.Section>
 
-                        {/* Row 1: Structural String Base Blocks */}
+                        {/* Structural String Base Blocks */}
                         <Layout.Section variant="oneThird">
                             <BlockStack gap="200">
                                 <h2 style={{ fontSize: '16px', fontWeight: '600' }}>Pattern Base Parameters</h2>
@@ -237,7 +237,7 @@ export default function SkuSettingsIndex() {
                             </Card>
                         </Layout.Section>
 
-                        {/* Row 2: Product Attribute Dropdowns */}
+                        {/* Product Attribute Dropdowns */}
                         <Layout.Section variant="oneThird">
                             <BlockStack gap="200">
                                 <h2 style={{ fontSize: '16px', fontWeight: '600' }}>Dynamic Attribute Ordering</h2>
@@ -300,7 +300,7 @@ export default function SkuSettingsIndex() {
                             </Card>
                         </Layout.Section>
 
-                        {/* Row 3: Rule Logic Checkboxes */}
+                        {/* Rule Logic Checkboxes */}
                         <Layout.Section variant="oneThird">
                             <BlockStack gap="200">
                                 <h2 style={{ fontSize: '16px', fontWeight: '600' }}>Automation Enforcements</h2>

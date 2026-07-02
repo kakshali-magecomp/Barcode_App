@@ -1,18 +1,22 @@
  import { Route, Routes } from "react-router-dom";
-	import ListPage from "./pages/list";
 	import React from "react";
-	import IndexPage from "./pages";
 	import TamplateCreate from "./pages/Template/create";
+	import TemplateList from "./pages/Template/List";
 	import Settingindex from "./pages/Settings/index";
 	import BarcodeSkuPanel from "./pages/Settings/BarcodeSkuPanel";
 	import SkuSettingsIndex from "./pages/Settings/SkuSettingsIndex";
 	import ProductsList from "./pages/ProductsList";
+	import Dashboard from "./pages/Dashboard";
+	import EditTemplate from "./pages/Template/Edit";
 
 
 	const AppRoute = () => {
 	    return (
 		<Routes>
-		    <Route path="/" element={<TamplateCreate/>} />
+			<Route path="/" element={<Dashboard/>} />
+			<Route path='/TemplateList' element={<TemplateList/>} />
+		    <Route path="/TamplateCreate" element={<TamplateCreate/>} />
+			<Route path="/templates/edit/:id" element={<EditTemplate/>} />
 		    <Route path="/Settingindex" element={<Settingindex/>} />
 			<Route path="/BarcodeSkuPanel" element={<BarcodeSkuPanel/>} />
 			<Route path="/SkuSettingsIndex" element={<SkuSettingsIndex/>} />

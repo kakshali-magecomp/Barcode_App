@@ -17,7 +17,7 @@ export default function SettingsIndex() {
         { id: 'advanced-tab', content: 'Advanced Options', panelID: 'advanced-panel' }     
     ];
 
-    // State 1: Barcode Parameters
+    // Barcode Parameters
     const [barcodeSettings, setBarcodeSettings] = useState({
         auto_generate_on_create: false,
         auto_detect_gtin_format: true,
@@ -27,7 +27,7 @@ export default function SettingsIndex() {
         contextual_pricing_value: ''
     });
 
-    // State 2: SKU Parameters
+    // SKU Parameters
     const [skuSettings, setSkuSettings] = useState({
         sku_prefix: '',
         sku_auto_number_start: '1001',
@@ -44,7 +44,7 @@ export default function SettingsIndex() {
         force_uppercase_fields: true
     });
 
-    // State 3: Print Parameters (Unified properties matching your model attributes)
+    // Print Parameters (Unified properties matching your model attributes)
     const [printSettings, setPrintSettings] = useState({
         print_mode: 'dialog',
         rotate_180: false,
@@ -179,7 +179,7 @@ export default function SettingsIndex() {
                             <SkuSettingsIndex settings={skuSettings} onChange={handleSettingChange} />
                         )}
 
-                        {/* Tab 2: Mount your fresh, full-featured PrintPanel */}
+                        {/* Mount your fresh, full-featured PrintPanel */}
                         {selectedTab === 2 && (
                             <PrintPanel settings={printSettings} templates={dbTemplates} onChange={handleSettingChange} />
                         )}

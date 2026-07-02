@@ -1,14 +1,18 @@
-import React, { useState, useCallback } from 'react';
-import { Page, Layout, Card, FormLayout, TextField, Select, Banner, Toast, Frame, ContextualSaveBar } from '@shopify/polaris';
+import React, { useState, useCallback, useEffect } from 'react';
+import { Page, Layout, Card, FormLayout, TextField, Select, Banner, Toast, Frame, ContextualSaveBar, Box, Spinner } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
-import { useNavigate } from 'react-router-dom'; 
+import { useParams, useNavigate } from 'react-router-dom';
 
-export default function CreateTemplate() {
+export default function EditTemplate() {
     const appBridge = useAppBridge();
     const fetch = window.fetch; 
+    const navigate = useNavigate();
+    const { id } = useParams(); // Extracts the template ID from the route path parameter
     
-    // INITIALIZE THE NAVIGATE INSTANCE
-    const navigate = useNavigate(); 
+    // Page Rendering Controls
+    const [pageLoading, setPageLoading] = useState(true);
+    const [isDirty, setIsDirty] = useState(false);
+    const [loading, setLoading] = useState(false);
     
     // Form State
     const [name, setName] = useState('');
@@ -16,12 +20,8 @@ export default function CreateTemplate() {
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
-    
-    // Form Dirty State tracking (Controls the Save Bar visibility)
-    const [isDirty, setIsDirty] = useState(false);
 
     // UI Feedback State
-    const [loading, setLoading] = useState(false);
     const [toastActive, setToastActive] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [errorBanner, setErrorBanner] = useState(null);
@@ -53,6 +53,33 @@ export default function CreateTemplate() {
         ]
     };
 
+    // Load existing values from backend database on mount
+    useEffect(() => {
+        async function fetchTemplateData() {
+            try {
+                setPageLoading(true);
+                const response = await fetch(`/api/templates/${id}`);
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    const t = result.data;
+                    setName(t.template_name || '');
+                    setDescription(t.description || '');
+                    setNote(t.note || '');
+                    setBrand(t.paper_brand || '');
+                    setModel(t.paper_model || '');
+                } else {
+                    setErrorBanner(result.message || "Failed to load template profile details.");
+                }
+            } catch (err) {
+                setErrorBanner("Could not establish communication with the server channel.");
+            } finally {
+                setPageLoading(false);
+            }
+        }
+        fetchTemplateData();
+    }, [id, fetch]);
+
     // State Mutators with Dirty Checks
     const handleFieldChange = (setter) => (value) => {
         setter(value);
@@ -65,17 +92,13 @@ export default function CreateTemplate() {
         setIsDirty(true);
     };
 
-    const handleDiscard = useCallback(() => {
-        setName('');
-        setDescription('');
-        setNote('');
-        setBrand('');
-        setModel('');
+    const handleDiscard = () => {
         setIsDirty(false);
         setErrorBanner(null);
-    }, []);
+        window.location.reload(); // Quick refresh to roll back state values cleanly
+    };
 
-    // Form Submission
+    // Form Update Submission Handler
     const handleSubmit = useCallback(async () => {
         if (!name) {
             setErrorBanner('Template Name is required.');
@@ -86,8 +109,8 @@ export default function CreateTemplate() {
         setErrorBanner(null);
 
         try {
-            const response = await fetch('/api/templates', {
-                method: 'POST',
+            const response = await fetch(`/api/templates/${id}`, {
+                method: 'PUT', // Uses PUT method to map down an overwrite sequence updates
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     template_name: name,
@@ -102,33 +125,39 @@ export default function CreateTemplate() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                setToastMessage('Template saved successfully!');
+                setToastMessage('Template updated successfully!');
                 setToastActive(true);
                 setIsDirty(false); // Hide the Save Bar
                 
-                //TRIGGER AUTOMATIC REDIRECTION DELAYED BY 1.5 SECONDS TO LET TOAST SHOW
+                // Redirect back to listing grid after a brief visibility delay interval
                 setTimeout(() => {
-                    navigate('/TemplateList'); 
+                    navigate('/TemplateList');
                 }, 1500);
-                
             } else {
-                setErrorBanner(result.message || 'Failed to save template.');
+                setErrorBanner(result.message || 'Failed to update template.');
             }
         } catch (error) {
-            setErrorBanner('A server error occurred while saving.');
+            setErrorBanner('A server error occurred while executing the update.');
         } finally {
             setLoading(false);
         }
-    }, [name, description, note, brand, model, fetch, navigate]);
+    }, [id, name, description, note, brand, model, fetch, navigate]);
+
+    if (pageLoading) {
+        return (
+            <Box padding="1200" align="center">
+                <Spinner accessibilityLabel="Syncing template profile details" size="large" />
+            </Box>
+        );
+    }
 
     return (
         <Frame>
-            {/* The Floating Contextual Save Bar at the top */}
             {isDirty && (
                 <ContextualSaveBar
-                    message="Unsaved changes"
+                    message="Unsaved configuration changes"
                     saveAction={{
-                        label: 'Save template',
+                        label: 'Save adjustments',
                         loading: loading,
                         onAction: handleSubmit,
                     }}
@@ -139,9 +168,8 @@ export default function CreateTemplate() {
                 />
             )}
 
-            {/* Back action breadcrumb navigation helper button context mapping */}
             <Page 
-                title="Create Barcode Template"
+                title={`Edit Template: ${name}`}
                 backAction={{ content: 'Templates', url: '/TemplateList' }}
             >
                 <Layout>
@@ -159,7 +187,6 @@ export default function CreateTemplate() {
                                     value={name}
                                     onChange={handleFieldChange(setName)}
                                     autoComplete="off"
-                                    placeholder="e.g., Standard Dymo Label"
                                 />
                                 
                                 <TextField

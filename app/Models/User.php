@@ -63,7 +63,7 @@ class User extends Authenticatable implements IShopModel
     }
     public function skuSetting(): HasOne
     {
-        return $this->hasOne(SkuSetting::class, 'user_id');
+    return $this->hasOne(SkuSetting::class, 'user_id');
     }
     public function printSetting(): HasOne
     {
