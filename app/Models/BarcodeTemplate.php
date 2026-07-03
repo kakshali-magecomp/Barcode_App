@@ -28,4 +28,10 @@ class BarcodeTemplate extends Model
     public function barcodeTemplates():HasMany{
         return $this->hasMany(BarcodeTemplate::class,'user_id');
     }
+
+        public function design()
+    {
+        return $this->hasOne(TemplateDesign::class, 'barcode_template_id');
+    }
+
 }

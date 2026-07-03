@@ -9,7 +9,7 @@ use App\Helpers\ShopifyQueryHelper;
 
 class ShopifyProductController extends Controller
 {
-    
+
     public function list(Request $request)
     {
         try {
@@ -42,33 +42,38 @@ class ShopifyProductController extends Controller
 
                         $productImage = isset($product['featuredImage']['url']) ? $product['featuredImage']['url'] : null;
                         $variantImage = isset($variant['image']['url']) ? $variant['image']['url'] : null;
-                        $finalImage   = $productImage ?? $variantImage ?? '';
+                        $finalImage = $productImage ?? $variantImage ?? '';
 
+                        // Find this section inside your variants iteration loop:
                         $flattenedVariants[] = [
-                            'product_id'    => $product['id'] ?? '',
+                            'product_id' => $product['id'] ?? '',
                             'product_title' => $product['title'] ?? '',
-                            'vendor'        => $product['vendor'] ?? '',
-                            'product_type'  => $product['productType'] ?? '',
-                            'variant_id'    => $variant['id'] ?? '',
+                            'vendor' => $product['vendor'] ?? '',
+                            'product_type' => $product['productType'] ?? '',
+
+                            // ADDED: Forward store URLs and handles to your React frontend states
+                            'online_url' => $product['onlineStoreUrl'] ?? '',
+                            'handle' => $product['handle'] ?? '',
+
+                            'variant_id' => $variant['id'] ?? '',
                             'variant_title' => $variant['title'] ?? '',
-                            'current_sku'   => $variant['sku'] ?? '',
-                            'barcode'       => $variant['barcode'] ?? '',
-                            'price'         => $variant['price'] ?? '0.00',
-                            'image'         => $finalImage,
-                            
-                            // Safe absolute array indexing matching Shopify's list structures
-                            'option_1'      => $options[0]['value'] ?? '',
-                            'option_2'      => $options[1]['value'] ?? '',
-                            'option_3'      => $options[2]['value'] ?? '',
+                            'current_sku' => $variant['sku'] ?? '',
+                            'barcode' => $variant['barcode'] ?? '',
+                            'price' => $variant['price'] ?? '0.00',
+                            'image' => $finalImage,
+                            'option_1' => $options[0]['value'] ?? '',
+                            'option_2' => $options[1]['value'] ?? '',
+                            'option_3' => $options[2]['value'] ?? '',
                         ];
+
                     }
                 }
             }
 
             return response()->json([
-                "status"    => 1,
-                "variants"  => $flattenedVariants,
-                "sku_rules" => $skuSettings 
+                "status" => 1,
+                "variants" => $flattenedVariants,
+                "sku_rules" => $skuSettings
             ]);
 
         } catch (\Exception $e) {
@@ -76,7 +81,7 @@ class ShopifyProductController extends Controller
         }
     }
 
-    
+
     public function bulkUpdate(Request $request)
     {
         $request->validate([
@@ -97,8 +102,8 @@ class ShopifyProductController extends Controller
             foreach ($request->variants as $item) {
                 $variables = [
                     "input" => [
-                        "id"  => trim((string)$item['variant_id']),
-                        "sku" => trim((string)$item['suggested_sku'])
+                        "id" => trim((string) $item['variant_id']),
+                        "sku" => trim((string) $item['suggested_sku'])
                     ]
                 ];
 
@@ -106,9 +111,9 @@ class ShopifyProductController extends Controller
                 $response = $shop->api()->graph($mutationQuery, $variables);
                 $resArray = json_decode(json_encode($response), true);
 
-                $errors = $resArray['body']['container']['data']['productVariantUpdate']['userErrors'] ?? 
-                          $resArray['body']['data']['productVariantUpdate']['userErrors'] ?? 
-                          $resArray['data']['productVariantUpdate']['userErrors'] ?? [];
+                $errors = $resArray['body']['container']['data']['productVariantUpdate']['userErrors'] ??
+                    $resArray['body']['data']['productVariantUpdate']['userErrors'] ??
+                    $resArray['data']['productVariantUpdate']['userErrors'] ?? [];
 
                 if (empty($errors)) {
                     $syncCount++;

@@ -1,23 +1,21 @@
 import React, { useState, useCallback } from 'react';
-import { Page, Layout, Card, FormLayout, TextField, Select, Banner, Toast, Frame, ContextualSaveBar } from '@shopify/polaris';
-import { useAppBridge } from '@shopify/app-bridge-react';
-import { useNavigate } from 'react-router-dom'; 
+import { Page, Layout, Card, FormLayout, TextField, Select, Banner, Toast, Frame } from '@shopify/polaris';
+import { useAppBridge, SaveBar } from '@shopify/app-bridge-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function CreateTemplate() {
     const appBridge = useAppBridge();
-    const fetch = window.fetch; 
-    
-    // INITIALIZE THE NAVIGATE INSTANCE
-    const navigate = useNavigate(); 
-    
+    const fetch = appBridge.fetch || window.fetch;
+    const navigate = useNavigate();
+
     // Form State
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
-    
-    // Form Dirty State tracking (Controls the Save Bar visibility)
+
+    // Form Dirty State tracking
     const [isDirty, setIsDirty] = useState(false);
 
     // UI Feedback State
@@ -102,15 +100,19 @@ export default function CreateTemplate() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                setToastMessage('Template saved successfully!');
+                setToastMessage('Template baseline created successfully! Loading Design Studio...');
                 setToastActive(true);
-                setIsDirty(false); // Hide the Save Bar
-                
-                //TRIGGER AUTOMATIC REDIRECTION DELAYED BY 1.5 SECONDS TO LET TOAST SHOW
+                setIsDirty(false); // Hide the Save Bar smoothly
+
+                const newTemplateId = result.data?.id;
+
                 setTimeout(() => {
-                    navigate('/TemplateList'); 
+                    if (newTemplateId) {
+                        navigate(`/templates/design/${newTemplateId}`);
+                    } else {
+                        navigate('/templates');
+                    }
                 }, 1500);
-                
             } else {
                 setErrorBanner(result.message || 'Failed to save template.');
             }
@@ -123,26 +125,17 @@ export default function CreateTemplate() {
 
     return (
         <Frame>
-            {/* The Floating Contextual Save Bar at the top */}
-            {isDirty && (
-                <ContextualSaveBar
-                    message="Unsaved changes"
-                    saveAction={{
-                        label: 'Save template',
-                        loading: loading,
-                        onAction: handleSubmit,
-                    }}
-                    discardAction={{
-                        label: 'Discard',
-                        onAction: handleDiscard,
-                    }}
-                />
-            )}
+            {/* The native SaveBar handles dirty state tracking and leave policy natively inside open={isDirty} */}
+            <SaveBar id="create-template-save-bar" open={isDirty}>
+                <button variant="primary" loading={loading ? "true" : undefined} onClick={handleSubmit}>
+                    Save template
+                </button>
+                <button onClick={handleDiscard}>Discard</button>
+            </SaveBar>
 
-            {/* Back action breadcrumb navigation helper button context mapping */}
-            <Page 
+            <Page
                 title="Create Barcode Template"
-                backAction={{ content: 'Templates', url: '/TemplateList' }}
+                backAction={{ content: 'Templates', url: '/templates' }}
             >
                 <Layout>
                     <Layout.Section>
@@ -151,7 +144,7 @@ export default function CreateTemplate() {
                                 <p>{errorBanner}</p>
                             </Banner>
                         )}
-                        
+
                         <Card padding="500">
                             <FormLayout>
                                 <TextField
@@ -161,7 +154,7 @@ export default function CreateTemplate() {
                                     autoComplete="off"
                                     placeholder="e.g., Standard Dymo Label"
                                 />
-                                
+
                                 <TextField
                                     label="Description"
                                     value={description}

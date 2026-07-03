@@ -1,10 +1,10 @@
 import React from 'react';
-import { Card, FormLayout, TextField, Select, Checkbox, Box, Badge } from '@shopify/polaris';
+import { Card, FormLayout, TextField, Select, Checkbox, Box } from '@shopify/polaris';
 
-export default function PrintPanel({ settings, templates = [], onChange }) {
+export default function PrintPanel({ settings = {}, templates = [], onChange }) {
     
     const currencyOptions = [
-        { label: 'Email without currency', value: 'without_currency' },
+        { label: 'Amount without currency (e.g., 10.00)', value: 'without_currency' },
         { label: 'Email with currency', value: 'with_currency' }
     ];
 
@@ -24,8 +24,9 @@ export default function PrintPanel({ settings, templates = [], onChange }) {
                 <TextField
                     label="Price Decimal Number"
                     type="number"
-                    value={String(settings.price_decimal_number ?? '2')}
-                    onChange={(val) => onChange('price_decimal_number', parseInt(val) || 0)}
+                    // SAFE FALLBACK: Ensures empty fields don't mismatch string snapshots
+                    value={settings.price_decimal_number !== undefined ? String(settings.price_decimal_number) : '2'}
+                    onChange={(val) => onChange('price_decimal_number', val === '' ? '' : (parseInt(val) || 0))}
                     helpText="Leave blank to round automatic"
                     autoComplete="off"
                 />
@@ -33,7 +34,7 @@ export default function PrintPanel({ settings, templates = [], onChange }) {
                 <Select
                     label="Currency Format"
                     options={currencyOptions}
-                    value={settings.currency_format}
+                    value={settings.currency_format || 'without_currency'}
                     onChange={(val) => onChange('currency_format', val)}
                     helpText="This configuration is following the Setting of Shopify here"
                 />
@@ -48,15 +49,15 @@ export default function PrintPanel({ settings, templates = [], onChange }) {
                 <Select
                     label="Default Generate Option"
                     options={generateOptions}
-                    value={settings.default_generate_option}
+                    value={settings.default_generate_option || 'manual'}
                     onChange={(val) => onChange('default_generate_option', val)}
                 />
 
                 <TextField
                     label="Default Print Label Quantity"
                     type="number"
-                    value={String(settings.default_print_label_quantity ?? '1')}
-                    onChange={(val) => onChange('default_print_label_quantity', parseInt(val) || 1)}
+                    value={settings.default_print_label_quantity !== undefined ? String(settings.default_print_label_quantity) : '1'}
+                    onChange={(val) => onChange('default_print_label_quantity', val === '' ? '' : (parseInt(val) || 1))}
                     helpText="Leave blank to match inventory quantity"
                     autoComplete="off"
                 />
@@ -65,13 +66,12 @@ export default function PrintPanel({ settings, templates = [], onChange }) {
                     label={
                         <Box display="flex" alignItems="center" gap="200">
                             <span>VAT Percentage</span>
-                            
                         </Box>
                     }
                     type="number"
                     suffix="%"
-                    value={String(settings.vat_percentage ?? '')}
-                    onChange={(val) => onChange('vat_percentage', parseFloat(val) || 0.00)}
+                    value={settings.vat_percentage !== undefined ? String(settings.vat_percentage) : ''}
+                    onChange={(val) => onChange('vat_percentage', val === '' ? '' : (parseFloat(val) || 0.00))}
                     helpText="A combination of both original Price and VAT."
                     autoComplete="off"
                 />
@@ -82,7 +82,6 @@ export default function PrintPanel({ settings, templates = [], onChange }) {
                     onChange={(val) => onChange('sort_by_sku', val)}
                 />
 
-                {/* BRAND NEW LOWER SECTIONS MATCHING THE SCREENSHOT */}
                 <Checkbox
                     label="Hide product draft when selection"
                     checked={!!settings.hide_product_draft}
@@ -99,7 +98,6 @@ export default function PrintPanel({ settings, templates = [], onChange }) {
                     label={
                         <Box display="flex" alignItems="center" gap="200">
                             <span>Use Shopify flow action to generate barcode labels</span>
-                            
                         </Box>
                     }
                     checked={!!settings.use_shopify_flow_action}

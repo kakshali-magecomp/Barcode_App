@@ -1,23 +1,31 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Page, Tabs, ContextualSaveBar, Frame, Toast, Banner } from '@shopify/polaris';
+import { Page, Tabs, Frame, Toast, Banner } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
+import { SaveBar } from '@shopify/app-bridge-react';
+
+
 import BarcodeSkuPanel from './BarcodeSkuPanel';
 import SkuSettingsIndex from './SkuSettingsIndex.jsx'; 
-import PrintPanel from './PrintPanel'; // Ensure this is imported correctly
+import PrintPanel from './PrintPanel'; 
 
 export default function SettingsIndex() {
     const appBridge = useAppBridge();
-    const fetch = window.fetch; 
+    const fetch = appBridge.fetch || window.fetch; 
 
     const [selectedTab, setSelectedTab] = useState(0);
     const tabs = [
         { id: 'barcode', content: 'Barcode', panelID: 'barcode-panel' },
         { id: 'sku', content: 'SKU Generation', panelID: 'sku-panel' }, 
         { id: 'printing-tab', content: 'Printing Configurations', panelID: 'printing-panel' }, 
-        { id: 'advanced-tab', content: 'Advanced Options', panelID: 'advanced-panel' }     
     ];
 
-    // Barcode Parameters
+    // Form Tracking States
+    const [isDirty, setIsDirty] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [toastActive, setToastActive] = useState(false);
+    const [errorBanner, setErrorBanner] = useState(null);
+
+    // 1. Barcode Parameters State
     const [barcodeSettings, setBarcodeSettings] = useState({
         auto_generate_on_create: false,
         auto_detect_gtin_format: true,
@@ -27,7 +35,7 @@ export default function SettingsIndex() {
         contextual_pricing_value: ''
     });
 
-    // SKU Parameters
+    // 2. SKU Parameters State
     const [skuSettings, setSkuSettings] = useState({
         sku_prefix: '',
         sku_auto_number_start: '1001',
@@ -44,7 +52,7 @@ export default function SettingsIndex() {
         force_uppercase_fields: true
     });
 
-    // Print Parameters (Unified properties matching your model attributes)
+    // 3. Print Parameters State
     const [printSettings, setPrintSettings] = useState({
         print_mode: 'dialog',
         rotate_180: false,
@@ -64,50 +72,50 @@ export default function SettingsIndex() {
         use_shopify_flow_action: false
     });
 
-    // Dynamic Database Templates state array
     const [dbTemplates, setDbTemplates] = useState([]);
 
-    const [isDirty, setIsDirty] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [toastActive, setToastActive] = useState(false);
-    const [errorBanner, setErrorBanner] = useState(null);
+    // Fetch initial database records on mount
+    const loadAllSettings = useCallback(async () => {
+        try {
+            setErrorBanner(null);
+            const [barcodeRes, skuRes, printRes] = await Promise.all([
+                fetch('/api/barcode-settings'),
+                fetch('/api/sku-settings'),
+                fetch('/api/print-settings')
+            ]);
 
-    // Initial Multi-fetch Cycle logic
-    useEffect(() => {
-        async function loadAllSettings() {
-            try {
-                const [barcodeRes, skuRes, printRes] = await Promise.all([
-                    fetch('/api/barcode-settings'),
-                    fetch('/api/sku-settings'),
-                    fetch('/api/print-settings') // Hits PrintSettingController@show
-                ]);
-
-                if (barcodeRes.ok) {
-                    const bData = await barcodeRes.json();
-                    setBarcodeSettings(prev => ({ ...prev, ...bData }));
-                }
-                if (skuRes.ok) {
-                    const sData = await skuRes.json();
-                    setSkuSettings(prev => ({ ...prev, ...sData }));
-                }
-                if (printRes.ok) {
-                    const jsonResult = await printRes.json();
-                    // Unpacks the nested objects layout from your controller response
-                    if (jsonResult.success) {
-                        setPrintSettings(prev => ({ ...prev, ...jsonResult.settings }));
-                        setDbTemplates(jsonResult.templates || []);
-                    }
-                }
-            } catch (err) {
-                setErrorBanner("Could not sync backend application config records.");
+            if (barcodeRes.ok) {
+                const bData = await barcodeRes.json();
+                setBarcodeSettings(prev => ({ ...prev, ...bData }));
             }
+            if (skuRes.ok) {
+                const sData = await skuRes.json();
+                setSkuSettings(prev => ({ ...prev, ...sData }));
+            }
+            if (printRes.ok) {
+                const jsonResult = await printRes.json();
+                if (jsonResult.success) {
+                    setPrintSettings(prev => ({ ...prev, ...jsonResult.settings }));
+                    setDbTemplates(jsonResult.templates || []);
+                }
+            }
+            setIsDirty(false); // Clear baseline dirty flag state mapping references
+        } catch (err) {
+            setErrorBanner("Could not sync backend application config records.");
         }
-        loadAllSettings();
     }, [fetch]);
 
-    // Handle updates across specific state objects depending on active tab indices
+    useEffect(() => {
+        loadAllSettings();
+    }, [loadAllSettings]);
+
+       
+
+
+    // Handle incoming input edits and trigger dirty status instantly
     const handleSettingChange = (key, value) => {
-        setIsDirty(true);
+        setIsDirty(true); 
+        
         if (selectedTab === 0) {
             setBarcodeSettings(prev => ({ ...prev, [key]: value }));
         } else if (selectedTab === 1) {
@@ -141,7 +149,7 @@ export default function SettingsIndex() {
             
             if (res.ok) {
                 setToastActive(true);
-                setIsDirty(false); // Cleans state (Hides Save Bar)
+                setIsDirty(false); // Successfully clears dirty state to hide the Save Bar smoothly
             } else {
                 setErrorBanner("Failed to save changes profile settings configuration.");
             }
@@ -152,18 +160,28 @@ export default function SettingsIndex() {
         }
     }, [selectedTab, barcodeSettings, skuSettings, printSettings, fetch]);
 
+    const handleDiscard = useCallback(async () => {
+        setIsDirty(false);
+        await loadAllSettings();
+    }, [loadAllSettings]);
+
     return (
         <Frame>
-            {isDirty && (
-                <ContextualSaveBar
-                    message="Unsaved configuration changes"
-                    saveAction={{ loading, onAction: handleSave }}
-                    discardAction={{ onAction: () => setIsDirty(false) }}
-                />
-            )}
-            
+            {/* 2. MOUNT THE COMPONENT DIRECTLY. Shopify opens it automatically whenever isDirty={true} */}
+            <SaveBar id="app-save-bar" open={isDirty}>
+                <button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save</button>
+                <button onClick={handleDiscard}>Discard</button>
+            </SaveBar>
+
             <Page title="App Settings">
-                <Tabs tabs={tabs} selected={selectedTab} onSelect={(index) => { setSelectedTab(index); setIsDirty(false); }}>
+                <Tabs 
+                    tabs={tabs} 
+                    selected={selectedTab} 
+                    onSelect={(index) => { 
+                        setSelectedTab(index); 
+                        setIsDirty(false); // Resets smoothly when swapping tabs panel space views
+                    }}
+                >
                     <div style={{ marginTop: '20px' }}>
                         {errorBanner && (
                             <Banner tone="critical" onDismiss={() => setErrorBanner(null)}>
@@ -179,15 +197,8 @@ export default function SettingsIndex() {
                             <SkuSettingsIndex settings={skuSettings} onChange={handleSettingChange} />
                         )}
 
-                        {/* Mount your fresh, full-featured PrintPanel */}
                         {selectedTab === 2 && (
                             <PrintPanel settings={printSettings} templates={dbTemplates} onChange={handleSettingChange} />
-                        )}
-
-                        {selectedTab === 3 && (
-                            <div style={{ padding: '20px', textAlign: 'center' }}>
-                                <h3>Advanced Rules Customizations Layout (Coming Soon)</h3>
-                            </div>
                         )}
                     </div>
                 </Tabs>
