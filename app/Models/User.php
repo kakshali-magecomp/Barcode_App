@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
-
-
 class User extends Authenticatable implements IShopModel
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -69,5 +67,9 @@ class User extends Authenticatable implements IShopModel
     {
         return $this->hasOne(PrintSetting::class, 'user_id');
     }
+    public function labelHistories(): HasMany
+{
+    return $this->hasMany(LabelHistory::class, 'user_id');
+}
     
 }

@@ -6,10 +6,7 @@ import { NavMenu } from '@shopify/app-bridge-react';
 	import { BrowserRouter as Router } from 'react-router-dom';
 	import AppRoute from './route';
 	import ProductsList from './pages/ProductsList';
-	
-
 	import '@shopify/polaris/build/esm/styles.css';
-
 
 	const App = () => {
 	    return (
@@ -19,6 +16,7 @@ import { NavMenu } from '@shopify/app-bridge-react';
 					<a href='/TemplateList'>Template</a>
 					<a href='/Settingindex'>Setting</a>
 					<a href='/ProductsList'>Products List</a>
+					<a href="/LabelHistory">Label History</a>
 		        </NavMenu>
 		        <AppRoute />
 		    </Router>

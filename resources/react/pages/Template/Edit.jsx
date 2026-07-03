@@ -9,7 +9,7 @@ export default function EditTemplate() {
     const navigate = useNavigate();
     const { id } = useParams(); // Extracts the template ID from the route path parameter
     
-    // Page Rendering Controls
+    // Page Rendering 
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -110,7 +110,7 @@ export default function EditTemplate() {
 
         try {
             const response = await fetch(`/api/templates/${id}`, {
-                method: 'PUT', // Uses PUT method to map down an overwrite sequence updates
+                method: 'PUT', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     template_name: name,
@@ -127,9 +127,9 @@ export default function EditTemplate() {
             if (response.ok && result.success) {
                 setToastMessage('Template updated successfully!');
                 setToastActive(true);
-                setIsDirty(false); // Hide the Save Bar
+                setIsDirty(false);
                 
-                // Redirect back to listing grid after a brief visibility delay interval
+                //Redirect to template list
                 setTimeout(() => {
                     navigate('/TemplateList');
                 }, 1500);

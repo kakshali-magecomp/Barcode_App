@@ -25,7 +25,7 @@ export default function SettingsIndex() {
     const [toastActive, setToastActive] = useState(false);
     const [errorBanner, setErrorBanner] = useState(null);
 
-    // 1. Barcode Parameters State
+    // Barcode Parameters State
     const [barcodeSettings, setBarcodeSettings] = useState({
         auto_generate_on_create: false,
         auto_detect_gtin_format: true,
@@ -35,7 +35,7 @@ export default function SettingsIndex() {
         contextual_pricing_value: ''
     });
 
-    // 2. SKU Parameters State
+    // SKU Parameters State
     const [skuSettings, setSkuSettings] = useState({
         sku_prefix: '',
         sku_auto_number_start: '1001',
@@ -52,7 +52,7 @@ export default function SettingsIndex() {
         force_uppercase_fields: true
     });
 
-    // 3. Print Parameters State
+    // Print Parameters State
     const [printSettings, setPrintSettings] = useState({
         print_mode: 'dialog',
         rotate_180: false,
@@ -167,7 +167,7 @@ export default function SettingsIndex() {
 
     return (
         <Frame>
-            {/* 2. MOUNT THE COMPONENT DIRECTLY. Shopify opens it automatically whenever isDirty={true} */}
+            {/*  MOUNT THE COMPONENT DIRECTLY. Shopify opens it automatically whenever isDirty={true} */}
             <SaveBar id="app-save-bar" open={isDirty}>
                 <button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save</button>
                 <button onClick={handleDiscard}>Discard</button>

@@ -26,7 +26,7 @@ class ShopifyProductController extends Controller
             $skuSettings = $shop->skuSetting()->firstOrCreate([]);
 
             $productsEdges = $responseArray['body']['container']['data']['products']['edges'] ??
-                $responseArray['body']['data']['products']['edges'] ?? [];
+            $responseArray['body']['data']['products']['edges'] ?? [];
 
             $flattenedVariants = [];
 
@@ -100,7 +100,7 @@ class ShopifyProductController extends Controller
             $syncCount = 0;
 
             foreach ($request->variants as $item) {
-                $variables = [
+                $variables = [  
                     "input" => [
                         "id" => trim((string) $item['variant_id']),
                         "sku" => trim((string) $item['suggested_sku'])
@@ -111,9 +111,7 @@ class ShopifyProductController extends Controller
                 $response = $shop->api()->graph($mutationQuery, $variables);
                 $resArray = json_decode(json_encode($response), true);
 
-                $errors = $resArray['body']['container']['data']['productVariantUpdate']['userErrors'] ??
-                    $resArray['body']['data']['productVariantUpdate']['userErrors'] ??
-                    $resArray['data']['productVariantUpdate']['userErrors'] ?? [];
+                Log::info($resArray);
 
                 if (empty($errors)) {
                     $syncCount++;

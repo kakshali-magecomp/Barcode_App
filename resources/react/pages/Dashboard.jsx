@@ -117,7 +117,6 @@ export default function Dashboard() {
                         </BlockStack>
                     </Card>
                 </Layout.Section>
-
             </Layout>
         </Page>
     );

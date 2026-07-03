@@ -18,6 +18,7 @@ export default function DesignCanvas() {
     const [toastActive, setToastActive] = useState(false);
     const [errorBanner, setErrorBanner] = useState(null);
 
+
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [previewItem, setPreviewItem] = useState({ title: 'Sample Item', sku: 'SKU-1001', price: '10.00', vendor: 'Vendor', option_1: '' });
@@ -35,10 +36,10 @@ export default function DesignCanvas() {
             try {
                 const [tRes, pRes] = await Promise.all([fetch(`/api/templates/design/${id}`), fetch('/api/products')]);
                 if (tRes.ok) { const r = await tRes.json(); if (r.success) setDesign(r.data); }
-                if (pRes.ok) { 
-                    const r = await pRes.json(); 
+                if (pRes.ok) {
+                    const r = await pRes.json();
                     if (r.status === 1 && r.variants?.length > 0) {
-                        setStoreVariants(r.variants); 
+                        setStoreVariants(r.variants);
                         const firstItem = r.variants[0];
                         setSelectedVariantId(firstItem.variant_id);
                         setPreviewItem({ title: firstItem.product_title, sku: firstItem.current_sku || 'NO-SKU', price: firstItem.price, vendor: firstItem.vendor, option_1: firstItem.variant_title !== 'Default Title' ? firstItem.variant_title : '' });
@@ -55,75 +56,87 @@ export default function DesignCanvas() {
     const handleSave = useCallback(async () => {
         setLoading(true); setErrorBanner(null);
         try {
-            const res = await fetch(`/api/templates/design/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ design }) });
-            if (res.ok) { setToastActive(true); setIsDirty(false); }
+            const res = await fetch(`/api/templates/design/${id}`,
+                {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(design)
+                });
+
+            const result = await res.json();
+            if (result.success) {
+                setToastActive(true);
+                setIsDirty(false);
+            }
+            else {
+                setErrorBanner(result.message);
+            }
         } catch { setErrorBanner("Could not sync layout profiles to database table parameters."); }
         finally { setLoading(false); }
     }, [id, design, fetch]);
 
     const handleTestPrintDownload = async () => {
-    try {
-        setLoading(true);
+        try {
+            setLoading(true);
 
-        const res = await fetch("/api/products/print-pdf", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/pdf",
-            },
-            body: JSON.stringify({
-                template_id: id,
-                variant_id: selectedVariantId,
-                product_title: previewItem.title,
-                sku: previewItem.sku,
-                price: previewItem.price,
-                vendor: previewItem.vendor,
-                option_1: previewItem.option_1,
-                print_qty: parseInt(design.print_qty) || 1,
-                design,
-            }),
-        });
+            const res = await fetch("/api/products/print-pdf", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/pdf",
+                },
+                body: JSON.stringify({
+                    template_id: id,
+                    variant_id: selectedVariantId,
+                    product_title: previewItem.title,
+                    sku: previewItem.sku,
+                    price: previewItem.price,
+                    vendor: previewItem.vendor,
+                    option_1: previewItem.option_1,
+                    print_qty: parseInt(design.print_qty) || 1,
+                    design,
+                }),
+            });
 
-        console.log("Status:", res.status);
-        console.log("Content-Type:", res.headers.get("content-type"));
+            console.log("Status:", res.status);
+            console.log("Content-Type:", res.headers.get("content-type"));
 
-        if (!res.ok) {
-            const error = await res.text();
-            console.error(error);
-            alert(error);
-            return;
+            if (!res.ok) {
+                const error = await res.text();
+                console.error(error);
+                alert(error);
+                return;
+            }
+
+            const blob = await res.blob();
+
+            console.log(blob.type);
+
+            if (blob.type !== "application/pdf") {
+                const text = await blob.text();
+                console.log(text);
+                alert("Server didn't return a PDF. Check console.");
+                return;
+            }
+
+            const url = window.URL.createObjectURL(blob);
+
+            window.open(url);
+
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
         }
-
-        const blob = await res.blob();
-
-        console.log(blob.type);
-
-        if (blob.type !== "application/pdf") {
-            const text = await blob.text();
-            console.log(text);
-            alert("Server didn't return a PDF. Check console.");
-            return;
-        }
-
-        const url = window.URL.createObjectURL(blob);
-
-        window.open(url);
-
-    } catch (e) {
-        console.error(e);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     if (pageLoading) return <Box padding="1200" align="center"><Spinner size="large" /></Box>;
 
     return (
         <Frame>
             <SaveBar id="designer-bar" open={isDirty}><button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save Design</button><button onClick={() => setIsDirty(false)}>Discard</button></SaveBar>
-            <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/templates' }}>
+            <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
                 <BlockStack gap="400">
-                    <Card padding="400"><Select label="Preview Product Variant Context" options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))} value={selectedVariantId} onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if(m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} /></Card>
+                    <Card padding="400"><Select label="Preview Product Variant Context" options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))} value={selectedVariantId} onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if (m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} /></Card>
                     <Grid>
                         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 7, lg: 7 }}>
                             <BlockStack gap="400">

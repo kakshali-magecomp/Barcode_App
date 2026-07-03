@@ -75,8 +75,8 @@ export default function CreateTemplate() {
 
     // Form Submission
     const handleSubmit = useCallback(async () => {
-        if (!name) {
-            setErrorBanner('Template Name is required.');
+        if (!name.trim()) {
+            setErrorBanner("Template name is required.");
             return;
         }
 
@@ -89,30 +89,26 @@ export default function CreateTemplate() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     template_name: name,
-                    description: description,
-                    note: note,
+                    description,
+                    note,
                     paper_brand: brand,
                     paper_model: model,
-                    layout_settings: { default_columns: 3 }
-                }),
+                    layout_settings: {
+                        default_columns: 3
+                    }
+                })
             });
 
             const result = await response.json();
 
             if (response.ok && result.success) {
-                setToastMessage('Template baseline created successfully! Loading Design Studio...');
+                const newTemplateId = result.data.id;
+
+                setToastMessage("Template created successfully.");
                 setToastActive(true);
-                setIsDirty(false); // Hide the Save Bar smoothly
+                setIsDirty(false);
 
-                const newTemplateId = result.data?.id;
-
-                setTimeout(() => {
-                    if (newTemplateId) {
-                        navigate(`/templates/design/${newTemplateId}`);
-                    } else {
-                        navigate('/templates');
-                    }
-                }, 1500);
+                navigate(`/templates/design/${newTemplateId}`);
             } else {
                 setErrorBanner(result.message || 'Failed to save template.');
             }
@@ -135,7 +131,7 @@ export default function CreateTemplate() {
 
             <Page
                 title="Create Barcode Template"
-                backAction={{ content: 'Templates', url: '/templates' }}
+                backAction={{ content: 'Templates', url: '/TemplateList' }}
             >
                 <Layout>
                     <Layout.Section>

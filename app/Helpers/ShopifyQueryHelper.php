@@ -43,13 +43,11 @@ class ShopifyQueryHelper
     GRAPHQL;
 }
 
-
-
   public static function updateVariant(): string
   {
     return <<<'GRAPHQL'
         mutation productVariantUpdate($input: ProductVariantInput!) {
-            productVariantUpdate(input: $input) {
+            productVariantsBulkUpdate(input: $input) {
                 productVariant {
                     id
                     sku

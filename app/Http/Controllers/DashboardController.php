@@ -2,43 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\LabelHistory;
 use App\Helpers\ShopifyQueryHelper;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    
     public function index()
     {
         $user = Auth::user();
 
-        //Compute total layouts designed by this shop in the local table database
         $templatesCount = $user->barcodeTemplates()->count();
 
-        //Fetch total live store product count directly out of Shopify's GraphQL count headers
-        $countQuery = '{ products(first: 1) { pageInfo { hasNextPage } } }';
-        
-        // Default safe baseline fallback count metric definition
-        $productsCount = 0; 
-        
+        $totalPrints = LabelHistory::where('user_id', $user->id)
+            ->sum('quantity');
+
+        $todayPrints = LabelHistory::where('user_id', $user->id)
+            ->whereDate('printed_at', Carbon::today())
+            ->sum('quantity');
+
+        $monthPrints = LabelHistory::where('user_id', $user->id)
+            ->whereMonth('printed_at', Carbon::now()->month)
+            ->whereYear('printed_at', Carbon::now()->year)
+            ->sum('quantity');
+
+        $recentPrints = LabelHistory::with('template')
+            ->where('user_id', $user->id)
+            ->latest('printed_at')
+            ->take(5)
+            ->get();
+
+        $topTemplate = LabelHistory::selectRaw('barcode_template_id, COUNT(*) as total')
+            ->where('user_id', $user->id)
+            ->groupBy('barcode_template_id')
+            ->orderByDesc('total')
+            ->with('template')
+            ->first();
+
+       
+
+        $productsCount = 0;
+
         try {
-            // Re-use our existing GraphQL query helper list to count total edges rows array items lengths
-            $listQuery = ShopifyQueryHelper::showproduct();
-            $rawResponse = $user->api()->graph($listQuery);
-            $responseArray = json_decode(json_encode($rawResponse), true);
-            
-            $edges = $responseArray['body']['container']['data']['products']['edges'] ?? 
-                     $responseArray['body']['data']['products']['edges'] ?? [];
-                     
+
+            $query = ShopifyQueryHelper::showproduct();
+
+            $response = $user->api()->graph($query);
+
+            $response = json_decode(json_encode($response), true);
+
+            $edges =
+                $response['body']['container']['data']['products']['edges']
+                ??
+                $response['body']['data']['products']['edges']
+                ??
+                [];
+
             $productsCount = count($edges);
+
         } catch (\Exception $e) {
-            // Continue processing gracefully if API handshake drops out temporary
+            $productsCount = 0;
         }
 
         return response()->json([
-            'templates_count' => $templatesCount,
-            'products_count'  => $productsCount
-        ], 200);
+
+            "success" => true,
+
+            "statistics" => [
+
+                "templates_count" => $templatesCount,
+
+                "products_count" => $productsCount,
+
+                "total_prints" => $totalPrints,
+
+                "today_prints" => $todayPrints,
+
+                "month_prints" => $monthPrints,
+
+                "top_template" => $topTemplate,
+
+                "recent_prints" => $recentPrints
+
+            ]
+
+        ]);
     }
 }

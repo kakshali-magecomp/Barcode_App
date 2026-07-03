@@ -5,32 +5,33 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\BarcodeTemplate;
+use App\Models\LabelHistory;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class BarcodePrintController extends Controller
 {
-   
+
     public function printToPdf(Request $request)
     {
         ini_set('memory_limit', '256M');
 
         $request->validate([
-            'template_id'   => 'required|string',
-            'variant_id'    => 'required|string',
+            'template_id' => 'required|string',
+            'variant_id' => 'required|string',
             'product_title' => 'required|string',
-            'sku'           => 'required|string',
-            'price'         => 'required|string',
-            'vendor'        => 'nullable|string',
-            'print_qty'     => 'required|integer|min:1',
-            'design'        => 'required|array'
+            'sku' => 'required|string',
+            'price' => 'required|string',
+            'vendor' => 'nullable|string',
+            'print_qty' => 'required|integer|min:1',
+            'design' => 'required|array'
         ]);
 
         $design = $request->input('design');
-        $qty = (int)$request->input('print_qty');
+        $qty = (int) $request->input('print_qty');
         $skuValue = $request->input('sku');
-        
+
         $symbolValue = $skuValue;
         if (($design['symbol_field_source'] ?? '') === 'product_name') {
             $symbolValue = $request->input('product_title');
@@ -38,7 +39,7 @@ class BarcodePrintController extends Controller
             $symbolValue = $request->input('price');
         }
 
-        $symbolValue = trim((string)$symbolValue);
+        $symbolValue = trim((string) $symbolValue);
         if (empty($symbolValue)) {
             $symbolValue = "123456789";
         }
@@ -49,16 +50,16 @@ class BarcodePrintController extends Controller
         if (!empty($design['symbol_enabled'])) {
             if (($design['symbol_type'] ?? 'QR') === 'BARCODE') {
                 $generator = new BarcodeGeneratorPNG();
-                $widthMultiplier = isset($design['symbol_bar_width']) ? (int)$design['symbol_bar_width'] : 2;
-                $heightMm = isset($design['symbol_bar_height']) ? (int)$design['symbol_bar_height'] : 30;
-                
+                $widthMultiplier = isset($design['symbol_bar_width']) ? (int) $design['symbol_bar_width'] : 2;
+                $heightMm = isset($design['symbol_bar_height']) ? (int) $design['symbol_bar_height'] : 30;
+
                 $barcodeBase64 = base64_encode(
                     $generator->getBarcode($symbolValue, $generator::TYPE_CODE_128, $widthMultiplier, $heightMm, [$r, $g, $b])
                 );
                 $renderedSymbolHtml = '<img src="data:image/png;base64,' . $barcodeBase64 . '" style="width: 140px; height: auto; display: block; margin: 0 auto;" />';
             } else {
-                $qrWidth = isset($design['symbol_width_px']) && !empty($design['symbol_width_px']) ? (int)$design['symbol_width_px'] : 120;
-                
+                $qrWidth = isset($design['symbol_width_px']) && !empty($design['symbol_width_px']) ? (int) $design['symbol_width_px'] : 120;
+
                 // Pure vector strings converted to clean base64 image strings to shield the DOMPDF parser
                 $rawSvgString = QrCode::size($qrWidth)
                     ->color($r, $g, $b)
@@ -66,9 +67,9 @@ class BarcodePrintController extends Controller
                     ->margin(1)
                     ->generate($symbolValue);
 
-                $cleanSvg = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', (string)$rawSvgString);
+                $cleanSvg = str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', (string) $rawSvgString);
                 $svgBase64 = base64_encode($cleanSvg);
-                
+
                 $renderedSymbolHtml = '<img src="data:image/svg+xml;base64,' . $svgBase64 . '" style="width: ' . $qrWidth . 'px; height: auto; display: block; margin: 0 auto;" />';
             }
         }
@@ -105,7 +106,7 @@ class BarcodePrintController extends Controller
 
         for ($i = 0; $i < $qty; $i++) {
             $htmlMarkup .= '<div class="label-sticker-grid-cell">';
-            
+
             if (!empty($design['line1_sku'])) {
                 $htmlMarkup .= '<div class="text-sku">' . htmlspecialchars($skuValue) . '</div>';
             }
@@ -137,6 +138,27 @@ class BarcodePrintController extends Controller
         $htmlMarkup .= '</body></html>';
 
         $pdf = Pdf::loadHTML($htmlMarkup);
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthenticated.'
+            ], 401);
+        }
+
+
+        LabelHistory::create([
+            'user_id' => $user->id,
+            'barcode_template_id' => $request->template_id,
+            'variant_id' => $request->variant_id,
+            'product_title' => $request->product_title,
+            'sku' => $request->sku,
+            'price' => $request->price,
+            'vendor' => $request->vendor,
+            'quantity' => $qty,
+            'printed_at' => now(),
+        ]);
         return $pdf->download('barcode_labels_sheet_' . $request->input('template_id') . '.pdf');
     }
 }

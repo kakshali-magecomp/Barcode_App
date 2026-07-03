@@ -9,6 +9,7 @@
 	import Dashboard from "./pages/Dashboard";
 	import EditTemplate from "./pages/Template/Edit";
 	import DesignCanvas from "./pages/Template/DesignCanvas";
+	import LabelHistory from "./pages/LabelHistory/index";
 
 
 	const AppRoute = () => {
@@ -23,6 +24,7 @@
 			<Route path="/BarcodeSkuPanel" element={<BarcodeSkuPanel/>} />
 			<Route path="/SkuSettingsIndex" element={<SkuSettingsIndex/>} />
 			<Route path="/ProductsList" element={<ProductsList/>} />
+			<Route path="/LabelHistory" element={<LabelHistory/>} />
 		</Routes>
 	    );
 	};

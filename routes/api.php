@@ -11,6 +11,7 @@ use App\Http\Controllers\PrintSettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BarcodePrintController;
 use App\Http\Controllers\TemplateDesignController;
+use App\Http\Controllers\LabelHistoryController;
 
 Route::middleware(['verify.shopify'])->group(function () {
 
@@ -19,8 +20,8 @@ Route::middleware(['verify.shopify'])->group(function () {
 
     Route::get('/templates', [BarcodeTemplateController::class, 'index']);
     Route::post('/templates', [BarcodeTemplateController::class, 'store']);
-    Route::get('/templates/{id}', [BarcodeTemplateController::class, 'show']);       
-    Route::put('/templates/{id}', [BarcodeTemplateController::class, 'update']);     
+    Route::get('/templates/{id}', [BarcodeTemplateController::class, 'show']);
+    Route::put('/templates/{id}', [BarcodeTemplateController::class, 'update']);
     Route::delete('/templates/{id}', [BarcodeTemplateController::class, 'destroy']);
 
     Route::get('/barcode-settings', [BarcodeSettingController::class, 'show']);
@@ -38,5 +39,9 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/dashboard-stats', [DashboardController::class, 'index']);
 
     Route::post('/products/print-pdf', [BarcodePrintController::class, 'printToPdf']);
-    
+
+    Route::get('/label-history', [LabelHistoryController::class, 'index']);
+    Route::get('/label-history/{id}', [LabelHistoryController::class, 'show']);
+    Route::delete('/label-history/{id}', [LabelHistoryController::class, 'destroy']);
+
 });
