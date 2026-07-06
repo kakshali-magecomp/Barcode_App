@@ -1,19 +1,20 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Page, Layout, Card, FormLayout, TextField, Select, Banner, Toast, Frame, ContextualSaveBar, Box, Spinner } from '@shopify/polaris';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import { useAppBridge, SaveBar } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 
 export default function EditTemplate() {
-    const appBridge = useAppBridge();
-    const fetch = window.fetch; 
+    const shopify = useAppBridge();
+    const fetch = window.fetch;
     const navigate = useNavigate();
     const { id } = useParams(); // Extracts the template ID from the route path parameter
-    
+
     // Page Rendering 
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
-    
+
     // Form State
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -25,6 +26,9 @@ export default function EditTemplate() {
     const [toastActive, setToastActive] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [errorBanner, setErrorBanner] = useState(null);
+    const [originalTemplate, setOriginalTemplate] = useState(null);
+    const [design, setDesign] = useState({});
+
 
     // Dropdown Configuration Data
     const brandOptions = [
@@ -51,6 +55,103 @@ export default function EditTemplate() {
             { label: '5160 (Address 30-per-sheet)', value: '5160' },
             { label: '5167 (Return Address)', value: '5167' }
         ]
+    };
+
+    const PAPER_TEMPLATES = {
+        dymo: {
+            "30334": {
+                name: "Jewelry Label",
+
+                paper: {
+                    width: 54,
+                    height: 25
+                },
+
+                label: {
+                    width: 54,
+                    height: 25
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0,
+
+                marginTop: 0,
+                marginLeft: 0
+            },
+
+            "30252": {
+                name: "Address Label",
+
+                paper: {
+                    width: 89,
+                    height: 36
+                },
+
+                label: {
+                    width: 89,
+                    height: 36
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0,
+
+                marginTop: 0,
+                marginLeft: 0
+            }
+        },
+
+        zebra: {
+            "4000d-4x6": {
+                name: "Shipping Label",
+
+                paper: {
+                    width: 101.6,
+                    height: 152.4
+                },
+
+                label: {
+                    width: 101.6,
+                    height: 152.4
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0
+            }
+        },
+
+        avery: {
+            "5160": {
+                name: "Address",
+
+                paper: {
+                    width: 215.9,
+                    height: 279.4
+                },
+
+                label: {
+                    width: 66.7,
+                    height: 25.4
+                },
+
+                rows: 10,
+                columns: 3,
+
+                gapX: 3.2,
+                gapY: 0,
+
+                marginTop: 12.7,
+                marginLeft: 4.8
+            }
+        }
     };
 
     // Load existing values from backend database on mount
@@ -93,9 +194,17 @@ export default function EditTemplate() {
     };
 
     const handleDiscard = () => {
-        setIsDirty(false);
+
+        if (!originalTemplate) return;
+
+        setName(originalTemplate.template_name || "");
+        setDescription(originalTemplate.description || "");
+        setNote(originalTemplate.note || "");
+        setBrand(originalTemplate.paper_brand || "");
+        setModel(originalTemplate.paper_model || "");
+
         setErrorBanner(null);
-        window.location.reload(); // Quick refresh to roll back state values cleanly
+        setIsDirty(false);
     };
 
     // Form Update Submission Handler
@@ -110,7 +219,7 @@ export default function EditTemplate() {
 
         try {
             const response = await fetch(`/api/templates/${id}`, {
-                method: 'PUT', 
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     template_name: name,
@@ -118,6 +227,7 @@ export default function EditTemplate() {
                     note: note,
                     paper_brand: brand,
                     paper_model: model,
+                    design,
                     layout_settings: { default_columns: 3 }
                 }),
             });
@@ -128,7 +238,7 @@ export default function EditTemplate() {
                 setToastMessage('Template updated successfully!');
                 setToastActive(true);
                 setIsDirty(false);
-                
+
                 //Redirect to template list
                 setTimeout(() => {
                     navigate('/TemplateList');
@@ -153,22 +263,21 @@ export default function EditTemplate() {
 
     return (
         <Frame>
-            {isDirty && (
-                <ContextualSaveBar
-                    message="Unsaved configuration changes"
-                    saveAction={{
-                        label: 'Save adjustments',
-                        loading: loading,
-                        onAction: handleSubmit,
-                    }}
-                    discardAction={{
-                        label: 'Discard',
-                        onAction: handleDiscard,
-                    }}
-                />
-            )}
+            <SaveBar id="edit-template-savebar" open={isDirty}>
+                <button
+                    variant="primary"
+                    loading={loading ? "true" : undefined}
+                    onClick={handleSubmit}
+                >
+                    Save
+                </button>
 
-            <Page 
+                <button onClick={handleDiscard}>
+                    Discard
+                </button>
+            </SaveBar>
+
+            <Page
                 title={`Edit Template: ${name}`}
                 backAction={{ content: 'Templates', url: '/TemplateList' }}
             >
@@ -179,7 +288,7 @@ export default function EditTemplate() {
                                 <p>{errorBanner}</p>
                             </Banner>
                         )}
-                        
+
                         <Card padding="500">
                             <FormLayout>
                                 <TextField
@@ -188,7 +297,7 @@ export default function EditTemplate() {
                                     onChange={handleFieldChange(setName)}
                                     autoComplete="off"
                                 />
-                                
+
                                 <TextField
                                     label="Description"
                                     value={description}
@@ -221,6 +330,15 @@ export default function EditTemplate() {
                                     autoComplete="off"
                                 />
                             </FormLayout>
+                            <Box paddingBlockStart="600">
+                                <DesignCanvasEdit
+                                    templateId={id}
+                                    onChange={(updatedDesign) => {
+                                        setDesign(updatedDesign);
+                                        setIsDirty(true);
+                                    }}
+                                />
+                            </Box>
                         </Card>
                     </Layout.Section>
                 </Layout>

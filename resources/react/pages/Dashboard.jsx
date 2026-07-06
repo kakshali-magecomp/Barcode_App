@@ -81,8 +81,8 @@ export default function Dashboard() {
                         <Card>
                             <BlockStack gap="300">
                                 <Text as="h3" variant="headingMd" fontWeight="semibold">Quick Actions</Text>
-                                <Button fullWidth variant="primary" icon={PrintIcon} url="/products">
-                                    Generate & Print Labels
+                                <Button fullWidth variant="primary" icon={PrintIcon} url="/ProductsList">
+                                    Product List
                                 </Button>
                                 <Button fullWidth icon={PageAddIcon} url="/TamplateCreate">
                                     Create Custom Template

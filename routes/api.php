@@ -12,6 +12,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BarcodePrintController;
 use App\Http\Controllers\TemplateDesignController;
 use App\Http\Controllers\LabelHistoryController;
+use App\Http\Controllers\ProductWebhookController;
+
 
 Route::middleware(['verify.shopify'])->group(function () {
 
@@ -44,4 +46,6 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/label-history/{id}', [LabelHistoryController::class, 'show']);
     Route::delete('/label-history/{id}', [LabelHistoryController::class, 'destroy']);
 
+
 });
+    Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);

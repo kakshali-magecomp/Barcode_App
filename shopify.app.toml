@@ -4,7 +4,7 @@ client_id = "0b78c8e17dedea0ae29b959aa1b969ab"
 
 name = "barcodedemo-app"
 
-application_url = "https://containers-sms-pioneer-ever.trycloudflare.com/"
+application_url = "https://tions-down-totally-meets.trycloudflare.com/"
 
 embedded = true
 
@@ -16,19 +16,19 @@ api_version = "2025-04"
  
   [[webhooks.subscriptions]]
 
-  uri = "https://containers-sms-pioneer-ever.trycloudflare.com/webhook/customers-data-request"
+  uri = "https://tions-down-totally-meets.trycloudflare.com/webhook/customers-data-request"
 
   compliance_topics = [ "customers/data_request" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://containers-sms-pioneer-ever.trycloudflare.com/webhook/customers-redact"
+  uri = "https://tions-down-totally-meets.trycloudflare.com/webhook/customers-redact"
 
   compliance_topics = [ "customers/redact" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://containers-sms-pioneer-ever.trycloudflare.com/webhook/shop-redact"
+  uri = "https://tions-down-totally-meets.trycloudflare.com/webhook/shop-redact"
 
   compliance_topics = [ "shop/redact" ]
  
@@ -37,7 +37,7 @@ api_version = "2025-04"
 
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 
-scopes = "read_assigned_fulfillment_orders,read_customers,write_delivery_customizations,write_discounts,read_draft_orders,read_fulfillments,read_merchant_managed_fulfillment_orders,read_orders,write_orders,read_products,write_products,read_themes,read_third_party_fulfillment_orders"
+scopes = "read_assigned_fulfillment_orders,read_customers,write_delivery_customizations,write_discounts,read_draft_orders,read_fulfillments,read_merchant_managed_fulfillment_orders,read_orders,write_orders,read_products,write_products,read_themes,read_third_party_fulfillment_orders,write_inventory,read_inventory"
 
 optional_scopes = [ ]
 
@@ -47,7 +47,7 @@ use_legacy_install_flow = false
 
 redirect_urls = [
 
-  "https://containers-sms-pioneer-ever.trycloudflare.com/authenticate"
+  "https://tions-down-totally-meets.trycloudflare.com/authenticate"
 
 ]
  

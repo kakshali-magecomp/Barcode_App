@@ -60,7 +60,7 @@ class SkuSettingController extends Controller
             $productsEdges = $responseArray['body']['container']['data']['products']['edges'] ??
                 $responseArray['body']['data']['products']['edges'] ?? [];
 
-            $mutationQuery = ShopifyQueryHelper::updateVariant();
+            $mutationQuery = ShopifyQueryHelper::updateInventoryItem();
             $syncCount = 0;
 
             //  Overwrite Loop: Calculate and update variants immediately on Shopify

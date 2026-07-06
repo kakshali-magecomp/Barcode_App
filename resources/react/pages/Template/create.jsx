@@ -51,6 +51,103 @@ export default function CreateTemplate() {
         ]
     };
 
+    const PAPER_TEMPLATES = {
+        dymo: {
+            "30334": {
+                name: "Jewelry Label",
+
+                paper: {
+                    width: 54,
+                    height: 25
+                },
+
+                label: {
+                    width: 54,
+                    height: 25
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0,
+
+                marginTop: 0,
+                marginLeft: 0
+            },
+
+            "30252": {
+                name: "Address Label",
+
+                paper: {
+                    width: 89,
+                    height: 36
+                },
+
+                label: {
+                    width: 89,
+                    height: 36
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0,
+
+                marginTop: 0,
+                marginLeft: 0
+            }
+        },
+
+        zebra: {
+            "4000d-4x6": {
+                name: "Shipping Label",
+
+                paper: {
+                    width: 101.6,
+                    height: 152.4
+                },
+
+                label: {
+                    width: 101.6,
+                    height: 152.4
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0
+            }
+        },
+
+        avery: {
+            "5160": {
+                name: "Address",
+
+                paper: {
+                    width: 215.9,
+                    height: 279.4
+                },
+
+                label: {
+                    width: 66.7,
+                    height: 25.4
+                },
+
+                rows: 10,
+                columns: 3,
+
+                gapX: 3.2,
+                gapY: 0,
+
+                marginTop: 12.7,
+                marginLeft: 4.8
+            }
+        }
+    };
+
     // State Mutators with Dirty Checks
     const handleFieldChange = (setter) => (value) => {
         setter(value);
@@ -75,49 +172,99 @@ export default function CreateTemplate() {
 
     // Form Submission
     const handleSubmit = useCallback(async () => {
-        if (!name.trim()) {
-            setErrorBanner("Template name is required.");
-            return;
+    // Validation
+    if (!name.trim()) {
+        setErrorBanner("Template name is required.");
+        return;
+    }
+
+    if (!brand) {
+        setErrorBanner("Please select a paper brand.");
+        return;
+    }
+
+    if (!model) {
+        setErrorBanner("Please select a paper model.");
+        return;
+    }
+
+    // Get selected template
+    const selectedTemplate = PAPER_TEMPLATES?.[brand]?.[model];
+
+    if (!selectedTemplate) {
+        setErrorBanner("Invalid paper template selected.");
+        return;
+    }
+
+    setLoading(true);
+    setErrorBanner(null);
+
+    try {
+
+        const response = await fetch("/api/templates", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+
+            body: JSON.stringify({
+                template_name: name,
+                description: description,
+                note: note,
+
+                paper_brand: brand,
+                paper_model: model,
+
+                layout_settings: {
+                    ...selectedTemplate
+                }
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Failed to save template.");
         }
 
-        setLoading(true);
-        setErrorBanner(null);
+        if (result.success) {
 
-        try {
-            const response = await fetch('/api/templates', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    template_name: name,
-                    description,
-                    note,
-                    paper_brand: brand,
-                    paper_model: model,
-                    layout_settings: {
-                        default_columns: 3
-                    }
-                })
-            });
+            setToastMessage("Template created successfully.");
+            setToastActive(true);
+            setIsDirty(false);
 
-            const result = await response.json();
+            // Open designer page
+            navigate(`/templates/design/${result.data.id}`);
 
-            if (response.ok && result.success) {
-                const newTemplateId = result.data.id;
-
-                setToastMessage("Template created successfully.");
-                setToastActive(true);
-                setIsDirty(false);
-
-                navigate(`/templates/design/${newTemplateId}`);
-            } else {
-                setErrorBanner(result.message || 'Failed to save template.');
-            }
-        } catch (error) {
-            setErrorBanner('A server error occurred while saving.');
-        } finally {
-            setLoading(false);
+        } else {
+            setErrorBanner(result.message || "Failed to save template.");
         }
-    }, [name, description, note, brand, model, fetch, navigate]);
+
+    } catch (error) {
+
+        console.error(error);
+
+        setErrorBanner(
+            error.message || "A server error occurred while saving."
+        );
+
+    } finally {
+
+        setLoading(false);
+
+    }
+
+}, [
+    name,
+    description,
+    note,
+    brand,
+    model,
+    fetch,
+    navigate,
+    PAPER_TEMPLATES
+]);
 
     return (
         <Frame>

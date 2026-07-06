@@ -104,15 +104,18 @@ export default function ProductsList() {
             const itemsToUpdate = variants
                 .filter(item => selectedItems.includes(item.variant_id))
                 .map(item => ({
+                    product_id: item.product_id,
                     variant_id: item.variant_id,
-                    suggested_sku: calculateSuggestedSku(item)
+                    inventory_item_id: item.inventory_item_id,
+                    suggested_sku: calculateSuggestedSku(item),
                 }));
+                console.log(itemsToUpdate);
 
             if (itemsToUpdate.length === 0) return;
 
             const response = await fetch("/api/products/bulk-update", {
                 method: "POST",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     "Accept": "application/json"
                 },
@@ -122,8 +125,8 @@ export default function ProductsList() {
             const json = await response.json();
 
             if (json.status === 1) {
-                setSelectedItems([]); 
-                await fetchProductsAndRules(); 
+                setSelectedItems([]);
+                await fetchProductsAndRules();
                 if (appBridge && appBridge.toast) {
                     appBridge.toast.show("Store variant SKUs synchronized successfully!");
                 }
@@ -146,9 +149,9 @@ export default function ProductsList() {
         const thumbnailSrc = item.image || '';
 
         return (
-            <IndexTable.Row 
-                id={item.variant_id} 
-                key={item.variant_id} 
+            <IndexTable.Row
+                id={item.variant_id}
+                key={item.variant_id}
                 position={index}
                 selected={isSelected}
             >

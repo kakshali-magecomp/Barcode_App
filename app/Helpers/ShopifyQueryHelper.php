@@ -5,9 +5,9 @@ namespace App\Helpers;
 class ShopifyQueryHelper
 {
 
-  public static function showproduct(): string
-{
-    return <<<'GRAPHQL'
+    public static function showproduct(): string
+    {
+        return <<<'GRAPHQL'
     {
         products(first: 50) {
             edges {
@@ -29,6 +29,9 @@ class ShopifyQueryHelper
                                 price
                                 sku
                                 barcode
+                                 inventoryItem {
+                                    id
+                                }
                                 selectedOptions {
                                     name
                                     value
@@ -41,24 +44,29 @@ class ShopifyQueryHelper
         }
     }
     GRAPHQL;
-}
+    }
 
-  public static function updateVariant(): string
-  {
+    public static function updateInventoryItem(): string
+{
     return <<<'GRAPHQL'
-        mutation productVariantUpdate($input: ProductVariantInput!) {
-            productVariantsBulkUpdate(input: $input) {
-                productVariant {
-                    id
-                    sku
-                    title
-                }
-                userErrors {
-                    field
-                    message
-                }
-            }
+mutation inventoryItemUpdate(
+    $id: ID!,
+    $input: InventoryItemInput!
+) {
+    inventoryItemUpdate(
+        id: $id,
+        input: $input
+    ) {
+        inventoryItem {
+            id
+            sku
         }
-        GRAPHQL;
-  }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+GRAPHQL;
+}
 }

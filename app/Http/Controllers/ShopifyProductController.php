@@ -26,7 +26,7 @@ class ShopifyProductController extends Controller
             $skuSettings = $shop->skuSetting()->firstOrCreate([]);
 
             $productsEdges = $responseArray['body']['container']['data']['products']['edges'] ??
-            $responseArray['body']['data']['products']['edges'] ?? [];
+                $responseArray['body']['data']['products']['edges'] ?? [];
 
             $flattenedVariants = [];
 
@@ -47,6 +47,7 @@ class ShopifyProductController extends Controller
                         // Find this section inside your variants iteration loop:
                         $flattenedVariants[] = [
                             'product_id' => $product['id'] ?? '',
+                            'inventory_item_id' => $variant['inventoryItem']['id'] ?? '',
                             'product_title' => $product['title'] ?? '',
                             'vendor' => $product['vendor'] ?? '',
                             'product_type' => $product['productType'] ?? '',
@@ -69,7 +70,6 @@ class ShopifyProductController extends Controller
                     }
                 }
             }
-
             return response()->json([
                 "status" => 1,
                 "variants" => $flattenedVariants,
@@ -86,39 +86,97 @@ class ShopifyProductController extends Controller
     {
         $request->validate([
             'variants' => 'required|array',
-            'variants.*.variant_id' => 'required|string',
+            'variants.*.inventory_item_id' => 'required|string',
             'variants.*.suggested_sku' => 'required|string',
         ]);
 
         try {
+
+            Log::info('BULK UPDATE START');
+
             $shop = Auth::user();
+
             if (!$shop) {
-                return response()->json(["status" => 0, "error" => "Unauthenticated"], 401);
+                Log::error('User not authenticated.');
+                return response()->json([
+                    "status" => 0,
+                    "error" => "Unauthenticated"
+                ], 401);
             }
 
-            $mutationQuery = ShopifyQueryHelper::updateVariant();
+            Log::info('Authenticated User', [
+                'user_id' => $shop->id,
+                'shop' => $shop->name ?? '',
+                'email' => $shop->email ?? ''
+            ]);
+
+            Log::info('Incoming Request', $request->all());
+
+            $mutationQuery = ShopifyQueryHelper::updateInventoryItem();
+
+            Log::info('GraphQL Mutation');
+            Log::info($mutationQuery);
+
             $syncCount = 0;
 
-            foreach ($request->variants as $item) {
-                $variables = [  
+            foreach ($request->variants as $index => $item) {
+
+                Log::info(" VARIANT {$index} ");
+
+                Log::info('Current Variant Data', $item);
+                Log::info('Product ID', [
+                    'product_id' => $item['product_id']
+                ]);
+
+                $variables = [
+                    "id" => trim($item['inventory_item_id']),
                     "input" => [
-                        "id" => trim((string) $item['variant_id']),
-                        "sku" => trim((string) $item['suggested_sku'])
+                        "sku" => trim($item['suggested_sku']),
                     ]
                 ];
 
-                // Fire mutation directly to Shopify cloud servers
-                $response = $shop->api()->graph($mutationQuery, $variables);
-                $resArray = json_decode(json_encode($response), true);
+                Log::info('GraphQL Variables', $variables);
 
-                Log::info($resArray);
+                $response = $shop->api()->graph($mutationQuery, $variables);
+
+                $responseArray = json_decode(json_encode($response), true);
+
+                Log::info('Complete Shopify Response', $responseArray);
+
+                $errors =
+                    $responseArray['body']['container']['data']['inventoryItemUpdate']['userErrors']
+                    ?? $responseArray['body']['data']['inventoryItemUpdate']['userErrors']
+                    ?? $responseArray['body']['errors']
+                    ?? $responseArray['errors']
+                    ?? [];
+
+                Log::info('Parsed Errors', [
+                    'errors' => $errors
+                ]);
 
                 if (empty($errors)) {
+
                     $syncCount++;
+
+                    Log::info('Variant Updated Successfully', [
+                        'variant_id' => $item['variant_id'],
+                        'sku' => $item['suggested_sku']
+                    ]);
+
                 } else {
-                    Log::error("Shopify Write Rejected for Variant: " . $item['variant_id'], ['errors' => $errors]);
+
+                    Log::error('Variant Update Failed', [
+                        'variant_id' => $item['variant_id'],
+                        'sku' => $item['suggested_sku'],
+                        'errors' => $errors
+                    ]);
                 }
             }
+
+            Log::info(' BULK UPDATE FINISHED ');
+            Log::info('Total Updated', [
+                'count' => $syncCount
+            ]);
 
             return response()->json([
                 "status" => 1,
@@ -126,8 +184,17 @@ class ShopifyProductController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error("BULK SYNC CRASH: " . $e->getMessage());
-            return response()->json(["status" => 0, "error" => $e->getMessage()], 500);
+
+            Log::error(' BULK UPDATE EXCEPTION ');
+
+            Log::error($e->getMessage());
+
+            Log::error($e->getTraceAsString());
+
+            return response()->json([
+                "status" => 0,
+                "error" => $e->getMessage()
+            ], 500);
         }
     }
 }
