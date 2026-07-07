@@ -45,7 +45,7 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/label-history', [LabelHistoryController::class, 'index']);
     Route::get('/label-history/{id}', [LabelHistoryController::class, 'show']);
     Route::delete('/label-history/{id}', [LabelHistoryController::class, 'destroy']);
-    
+
+    Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);
 
 });
-    Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);

@@ -1,0 +1,24 @@
+[90m= [39m[34;4mIlluminate\Database\Eloquent\Collection[39;24m {#8090
+    [34mall[39m: [
+      [34;4mApp\Models\User[39;24m {#8091
+        [34mid[39m: [35m6[39m,
+        [34mname[39m: [32m"[39m[32mkakshalijani.myshopify.com[39m[32m"[39m,
+        [34memail[39m: [32m"[39m[32mshop@kakshalijani.myshopify.com[39m[32m"[39m,
+        [34memail_verified_at[39m: [36mnull[39m,
+        #[33mpassword[39m: [32m"[39m[32mshpua_808c512d1b1367156fac01dd808d01b5[39m[32m"[39m,
+        #[33mremember_token[39m: [36mnull[39m,
+        [34mcreated_at[39m: [32m"[39m[32m2026-07-07 07:37:39[39m[32m"[39m,
+        [34mupdated_at[39m: [32m"[39m[32m2026-07-07 07:37:49[39m[32m"[39m,
+        [34mshopify_grandfathered[39m: [35m0[39m,
+        [34mshopify_namespace[39m: [36mnull[39m,
+        [34mshopify_freemium[39m: [35m0[39m,
+        [34mplan_id[39m: [36mnull[39m,
+        [34mdeleted_at[39m: [36mnull[39m,
+        [34mpassword_updated_at[39m: [32m"[39m[32m2026-07-07[39m[32m"[39m,
+        [34mtheme_support_level[39m: [35m1[39m,
+        [34mshopify_offline_refresh_token[39m: [36mnull[39m,
+        [34mshopify_offline_access_token_expires_at[39m: [36mnull[39m,
+        [34mshopify_offline_refresh_token_expires_at[39m: [36mnull[39m,
+      },
+    ],
+  }

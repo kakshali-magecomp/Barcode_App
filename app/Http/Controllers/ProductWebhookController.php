@@ -9,35 +9,11 @@ class ProductWebhookController extends Controller
 {
     public function created(Request $request)
     {
-        try {
+        Log::info('PRODUCT CREATED');
+        Log::info($request->all());
 
-            $payload = $request->json()->all();
-
-            Log::info("PRODUCTS_CREATE WEBHOOK");
-
-            Log::info('Product Details', [
-                'Product ID' => $payload['id'] ?? null,
-                'Title' => $payload['title'] ?? null,
-                'Handle' => $payload['handle'] ?? null,
-                'Vendor' => $payload['vendor'] ?? null,
-            ]);
-
-            Log::info('Full Payload', $payload);
-
-            return response()->json([
-                'success' => true,
-            ], 200);
-
-        } catch (\Exception $e) {
-
-            Log::error('Webhook Error');
-
-            Log::error($e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => true
+        ]);
     }
 }

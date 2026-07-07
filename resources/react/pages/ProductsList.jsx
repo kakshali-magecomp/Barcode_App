@@ -109,7 +109,7 @@ export default function ProductsList() {
                     inventory_item_id: item.inventory_item_id,
                     suggested_sku: calculateSuggestedSku(item),
                 }));
-                console.log(itemsToUpdate);
+            console.log(itemsToUpdate);
 
             if (itemsToUpdate.length === 0) return;
 
@@ -194,11 +194,13 @@ export default function ProductsList() {
         <Page title="Inventory SKU Management">
             {selectedItems.length > 0 && (
                 <Box paddingBlockEnd="400">
-                    <Card padding="300">
-                        <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Text as="span">{selectedItems.length} items queued for processing</Text>
-                            <Button variant="primary" onClick={handleBulkSkuSync}>
-                                Generate & Sync SKUs to Shopify Store
+                    <Card padding="400">
+                        <Box display="flex" justifyContent="space-between" alignItems="center" gap="400" style={{ flexWrap: "wrap",}}>
+                            <Text as="p" variant="bodyMd" fontWeight="medium" tone="subdued" >
+                                {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""} queued for processing
+                            </Text>
+                            <Button variant="primary" size="large" onClick={handleBulkSkuSync}>
+                                Generate & Sync SKUs to Shopify
                             </Button>
                         </Box>
                     </Card>
