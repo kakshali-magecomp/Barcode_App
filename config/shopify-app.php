@@ -426,8 +426,12 @@ return [
                 'topic' => env('SHOPIFY_WEBHOOK_3_TOPIC', 'ORDERS_PAID'),
                 'address' => env('SHOPIFY_WEBHOOK_3_ADDRESS', 'https://example.com/webhook/orders-create'),
                 'class' => \App\Shopify\Actions\ExampleAppJob::class
-            ],
-        */],
+            ],  */
+            [
+                'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://task-reno-expression-seniors.trycloudflare.com/webhooks/products/create'),   
+            ], 
+    ],     
 
     /*
     |--------------------------------------------------------------------------

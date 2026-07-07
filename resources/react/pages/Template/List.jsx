@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Frame } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal.jsx';
+import { EditIcon, DeleteIcon } from "@shopify/polaris-icons";
 
 export default function TemplateList() {
     const appBridge = useAppBridge();
@@ -104,14 +105,22 @@ export default function TemplateList() {
                 </IndexTable.Cell>
                 <IndexTable.Cell>
                     <Box display="flex" gap="200">
-                        <Button variant="tertiary" url={`/templates/edit/${id}`}>Edit Layout</Button>
-                        <Button
-                            variant="primary"
-                            tone="critical"
-                            onClick={() => openDeleteConfirmation(id)}
-                        >
-                            Delete
-                        </Button>
+                        <Box display="flex" gap="200">
+                            <Button
+                                icon={EditIcon}
+                                variant="tertiary"
+                                accessibilityLabel="Edit Template"
+                                url={`/templates/edit/${id}`}
+                            />
+
+                            <Button
+                                icon={DeleteIcon}
+                                variant="tertiary"
+                                tone="critical"
+                                accessibilityLabel="Delete Template"
+                                onClick={() => openDeleteConfirmation(id)}
+                            />
+                        </Box>
                     </Box>
                 </IndexTable.Cell>
             </IndexTable.Row>

@@ -6,7 +6,8 @@ import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 
 export default function EditTemplate() {
     const shopify = useAppBridge();
-    const fetch = window.fetch;
+    const app = useAppBridge();
+    const fetch = app.fetch || window.fetch;
     const navigate = useNavigate();
     const { id } = useParams(); // Extracts the template ID from the route path parameter
 
@@ -164,11 +165,16 @@ export default function EditTemplate() {
 
                 if (response.ok && result.success) {
                     const t = result.data;
-                    setName(t.template_name || '');
-                    setDescription(t.description || '');
-                    setNote(t.note || '');
-                    setBrand(t.paper_brand || '');
-                    setModel(t.paper_model || '');
+
+                    setOriginalTemplate(t);
+
+                    setName(t.template_name || "");
+                    setDescription(t.description || "");
+                    setNote(t.note || "");
+                    setBrand(t.paper_brand || "");
+                    setModel(t.paper_model || "");
+
+                    setIsDirty(false);
                 } else {
                     setErrorBanner(result.message || "Failed to load template profile details.");
                 }
@@ -194,7 +200,6 @@ export default function EditTemplate() {
     };
 
     const handleDiscard = () => {
-
         if (!originalTemplate) return;
 
         setName(originalTemplate.template_name || "");
@@ -203,8 +208,8 @@ export default function EditTemplate() {
         setBrand(originalTemplate.paper_brand || "");
         setModel(originalTemplate.paper_model || "");
 
-        setErrorBanner(null);
         setIsDirty(false);
+        setErrorBanner(null);
     };
 
     // Form Update Submission Handler
@@ -227,9 +232,14 @@ export default function EditTemplate() {
                     note: note,
                     paper_brand: brand,
                     paper_model: model,
-                    design,
                     layout_settings: { default_columns: 3 }
                 }),
+            });
+
+            await fetch(`/api/templates/design/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(design),
             });
 
             const result = await response.json();
@@ -251,7 +261,7 @@ export default function EditTemplate() {
         } finally {
             setLoading(false);
         }
-    }, [id, name, description, note, brand, model, fetch, navigate]);
+    }, [id, name, description, note, brand, model, design, fetch, navigate]);
 
     if (pageLoading) {
         return (
@@ -333,10 +343,8 @@ export default function EditTemplate() {
                             <Box paddingBlockStart="600">
                                 <DesignCanvasEdit
                                     templateId={id}
-                                    onChange={(updatedDesign) => {
-                                        setDesign(updatedDesign);
-                                        setIsDirty(true);
-                                    }}
+                                    onChange={setDesign}
+                                    onDirty={() => setIsDirty(true)}
                                 />
                             </Box>
                         </Card>

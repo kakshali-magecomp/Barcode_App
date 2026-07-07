@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Layout, Card, FormLayout, TextField, Select, Checkbox, BlockStack } from '@shopify/polaris';
 
 export default function BarcodeSkuPanel({ settings, onChange }) {
@@ -10,6 +10,27 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
         { label: 'EAN 13', value: 'EAN13' },
         { label: 'ITF-14', value: 'EAN14' }
     ];
+
+    useEffect(() => {
+        async function fetchSettings() {
+            try {
+                const response = await fetch('/api/barcode-settings');
+                const data = await response.json();
+                if (data.success) {
+                    onChange('barcode_format', data.settings.barcode_format || 'CODE128');
+                    onChange('barcode_pattern', data.settings.barcode_pattern || '');
+                    onChange('contextual_pricing_value', data.settings.contextual_pricing_value || '');
+                    onChange('auto_generate_on_create', data.settings.auto_generate_on_create || false);
+                    onChange('auto_detect_gtin_format', data.settings.auto_detect_gtin_format || false);
+                    onChange('prevent_zero_start_end', data.settings.prevent_zero_start_end || false);
+                }
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        }
+
+        fetchSettings();
+    }, [settings]);
 
     return (
         <Layout>

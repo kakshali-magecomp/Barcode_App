@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Page, Card, Select, TextField, Box, Frame, Toast, BlockStack, Spinner, Grid, Banner } from '@shopify/polaris';
 import { useAppBridge, SaveBar } from '@shopify/app-bridge-react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
@@ -11,13 +11,13 @@ export default function DesignCanvas() {
     const appBridge = useAppBridge();
     const fetch = appBridge.fetch || window.fetch;
     const { id } = useParams();
+    const navigate = useNavigate();
 
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
     const [toastActive, setToastActive] = useState(false);
     const [errorBanner, setErrorBanner] = useState(null);
-
 
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState('');
@@ -66,6 +66,10 @@ export default function DesignCanvas() {
             if (result.success) {
                 setToastActive(true);
                 setIsDirty(false);
+
+                setTimeout(() => {
+                    navigate("/TemplateList");
+                }, 1000);
             }
             else {
                 setErrorBanner(result.message);

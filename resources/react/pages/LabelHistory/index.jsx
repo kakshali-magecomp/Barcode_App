@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { DeleteIcon } from "@shopify/polaris-icons";
 import {
   Page,
   Card,
@@ -12,8 +13,10 @@ import {
   Banner,
   Modal,
   Toast,
+  Frame,
 } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function LabelHistory() {
   const appBridge = useAppBridge();
@@ -70,6 +73,10 @@ export default function LabelHistory() {
         setToastMessage("History deleted.");
         setToastActive(true);
         loadHistory();
+        
+        setTimeout(() => {
+          navigate("/label-history");
+        }, 3000);
       } else {
         setError(json.message);
       }
@@ -88,10 +95,112 @@ export default function LabelHistory() {
       </Box>
     );
   }
+  const handlePrintAll = () => {
+    const printWindow = window.open("", "_blank");
 
+    const rows = histories
+      .map(
+        (item, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${item.product_title}</td>
+        <td>${item.sku}</td>
+        <td>${item.template?.template_name || "-"}</td>
+        <td>${item.quantity}</td>
+        <td>${new Date(item.printed_at).toLocaleString()}</td>
+      </tr>
+    `
+      )
+      .join("");
+
+    printWindow.document.write(`
+      <html>
+      <head>
+          <title>Print History</title>
+
+          <style>
+              body{
+                  font-family:Arial;
+                  padding:30px;
+              }
+
+              h2{
+                  text-align:center;
+                  margin-bottom:25px;
+              }
+
+              table{
+                  width:100%;
+                  border-collapse:collapse;
+              }
+
+              th,td{
+                  border:1px solid #000;
+                  padding:10px;
+                  text-align:left;
+                  font-size:14px;
+              }
+
+              th{
+                  background:#f3f3f3;
+              }
+
+              @media print{
+                  button{
+                      display:none;
+                  }
+              }
+          </style>
+      </head>
+
+      <body>
+
+          <h2>Barcode Print History</h2>
+
+          <table>
+
+              <thead>
+
+                  <tr>
+                      <th>#</th>
+                      <th>Product</th>
+                      <th>SKU</th>
+                      <th>Template</th>
+                      <th>Qty</th>
+                      <th>Printed At</th>
+                  </tr>
+
+              </thead>
+
+              <tbody>
+
+                  ${rows}
+
+              </tbody>
+
+          </table>
+
+          <script>
+              window.onload = function(){
+                  window.print();
+                  window.close();
+              }
+          </script>
+
+      </body>
+
+      </html>
+  `);
+
+    printWindow.document.close();
+  };
   return (
-    <>
-      <Page title="Print History">
+    <Frame>
+      <Page title="Print History"
+        primaryAction={{
+          content: "Print All History",
+          onAction: handlePrintAll,}}
+          >
         {error && (
           <Box paddingBlockEnd="400">
             <Banner tone="critical">
@@ -157,14 +266,15 @@ export default function LabelHistory() {
 
                   <IndexTable.Cell>
                     <Button
+                      icon={DeleteIcon}
                       tone="critical"
+                      variant="plain"
+                      accessibilityLabel="Delete History"
                       onClick={() => {
                         setSelectedHistory(item);
                         setDeleteModal(true);
                       }}
-                    >
-                      Delete
-                    </Button>
+                    />
                   </IndexTable.Cell>
                 </IndexTable.Row>
               ))}
@@ -202,6 +312,6 @@ export default function LabelHistory() {
           </Text>
         </Modal.Section>
       </Modal>
-    </>
+    </Frame>
   );
 }
