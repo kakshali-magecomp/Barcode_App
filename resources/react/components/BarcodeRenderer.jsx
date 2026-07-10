@@ -112,13 +112,16 @@ export default function BarcodeRenderer({
         const barcodeValue = getBarcodeValue();
 
         try {
+            const format =
+                barcodeSettings?.auto_detect_gtin_format
+                    ? detectFormat(barcodeValue)
+                    : barcodeSettings?.barcode_format || "CODE128";
 
+            console.log("Barcode Format:", format);
+            console.log("Barcode Value:", barcodeValue);
             JsBarcode(barcodeRef.current, barcodeValue, {
 
-                format:
-                    barcodeSettings?.auto_detect_gtin_format
-                        ? detectFormat(barcodeValue)
-                        : barcodeSettings?.barcode_format || "CODE128",
+                format: format,
 
                 width:
                     parseInt(settings.symbol_bar_width) || 2,

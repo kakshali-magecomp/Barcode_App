@@ -68,6 +68,7 @@ class TemplateDesignController extends Controller
 
             // Enforce explicit database type constraints
             $fieldsPayload = [
+                'selected_variant_id'       => $incoming['selected_variant_id'] ?? null,
                 'margin_top'                => (int)($incoming['margin_top'] ?? 5),
                 'margin_bottom'             => (int)($incoming['margin_bottom'] ?? 5),
                 'margin_left'               => (int)($incoming['margin_left'] ?? 5),

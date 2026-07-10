@@ -70,6 +70,9 @@ export default function DesignCanvasEdit({
                 };
 
                 setDesign(loadedDesign);
+
+                // IMPORTANT
+                onChange?.(loadedDesign);
             }
 
             if (products.status === 1 && products.variants?.length) {

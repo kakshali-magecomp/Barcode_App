@@ -8,7 +8,7 @@ class TemplateDesign extends Model
 {
    // Verify these exact column name properties arrays keys are declared inside your $fillable array model:
 protected $fillable = [
-    'barcode_template_id', 'margin_top', 'margin_bottom', 'margin_left', 'margin_right',
+    'barcode_template_id','selected_variant_id', 'margin_top', 'margin_bottom', 'margin_left', 'margin_right',
     'line1_sku', 'line2_name', 'line2_price', 'line2_currency_format', 
     'line2_show_price_per_unit', 'line2_variant_option1', 'line3_vendor',
     'symbol_enabled', 'symbol_type', 'symbol_color', 'symbol_logo_filename',

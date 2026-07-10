@@ -429,7 +429,7 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://task-reno-expression-seniors.trycloudflare.com/webhooks/products/create'),   
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://harder-spoken-extract-realize.trycloudflare.com/webhooks/products/create'),   
             ], 
     ],     
 

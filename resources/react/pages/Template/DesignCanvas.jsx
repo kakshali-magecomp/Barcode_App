@@ -35,14 +35,38 @@ export default function DesignCanvas() {
         async function loadData() {
             try {
                 const [tRes, pRes] = await Promise.all([fetch(`/api/templates/design/${id}`), fetch('/api/products')]);
-                if (tRes.ok) { const r = await tRes.json(); if (r.success) setDesign(r.data); }
-                if (pRes.ok) {
+                let savedVariantId = "";
+
+                if (tRes.ok) {
+                    const r = await tRes.json();
+
+                    if (r.success) {
+                        setDesign(r.data);
+
+                        savedVariantId = r.data.selected_variant_id || "";
+                    }
+                } if (pRes.ok) {
                     const r = await pRes.json();
                     if (r.status === 1 && r.variants?.length > 0) {
                         setStoreVariants(r.variants);
-                        const firstItem = r.variants[0];
-                        setSelectedVariantId(firstItem.variant_id);
-                        setPreviewItem({ title: firstItem.product_title, sku: firstItem.current_sku || 'NO-SKU', price: firstItem.price, vendor: firstItem.vendor, option_1: firstItem.variant_title !== 'Default Title' ? firstItem.variant_title : '' });
+                        const selected =
+                            r.variants.find(
+                                item => item.variant_id === savedVariantId
+                            ) || r.variants[0];
+
+                        setSelectedVariantId(selected.variant_id);
+
+                        setPreviewItem({
+                            title: selected.product_title,
+                            sku: selected.current_sku || "NO-SKU",
+                            price: selected.price,
+                            vendor: selected.vendor,
+                            option_1:
+                                selected.variant_title !== "Default Title"
+                                    ? selected.variant_title
+                                    : "",
+                            online_url: selected.online_url || "",
+                        });
                     }
                 }
             } catch { setErrorBanner("Failed to communicate with template design configurations."); }
@@ -59,7 +83,10 @@ export default function DesignCanvas() {
             const res = await fetch(`/api/templates/design/${id}`,
                 {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(design)
+                    body: JSON.stringify({
+                        ...design,
+                        selected_variant_id: selectedVariantId,
+                    })
                 });
 
             const result = await res.json();
@@ -76,7 +103,7 @@ export default function DesignCanvas() {
             }
         } catch { setErrorBanner("Could not sync layout profiles to database table parameters."); }
         finally { setLoading(false); }
-    }, [id, design, fetch]);
+    }, [id, design, fetch , selectedVariantId]);
 
     const handleTestPrintDownload = async () => {
         try {
@@ -140,7 +167,12 @@ export default function DesignCanvas() {
             <SaveBar id="designer-bar" open={isDirty}><button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save Design</button><button onClick={() => setIsDirty(false)}>Discard</button></SaveBar>
             <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
                 <BlockStack gap="400">
-                    <Card padding="400"><Select label="Preview Product Variant Context" options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))} value={selectedVariantId} onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if (m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} /></Card>
+                    <Card padding="400">
+                        <Select label="Preview Product Variant Context" 
+                        options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))} 
+                        value={selectedVariantId} 
+                        onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if (m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} />
+                    </Card>
                     <Grid>
                         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 7, lg: 7 }}>
                             <BlockStack gap="400">
