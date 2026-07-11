@@ -8,7 +8,7 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
         { label: 'UPC-A', value: 'UPCA' },
         { label: 'EAN 8', value: 'EAN8' },
         { label: 'EAN 13', value: 'EAN13' },
-        { label: 'ITF-14', value: 'EAN14' }
+        { label: 'ITF-14', value: 'ITF14' }
     ];
 
     useEffect(() => {

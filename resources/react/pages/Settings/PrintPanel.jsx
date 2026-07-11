@@ -4,7 +4,7 @@ import { Card, FormLayout, TextField, Select, Checkbox, Box } from '@shopify/pol
 export default function PrintPanel({ settings = {}, templates = [], onChange }) {
     
     const currencyOptions = [
-        { label: 'Amount without currency (e.g., 10.00)', value: 'without_currency' },
+        { label: 'Email without currency (e.g., 10.00)', value: 'without_currency' },
         { label: 'Email with currency', value: 'with_currency' }
     ];
 
@@ -39,12 +39,12 @@ export default function PrintPanel({ settings = {}, templates = [], onChange }) 
                     helpText="This configuration is following the Setting of Shopify here"
                 />
 
-                <Select
+                {/* <Select
                     label="Default Print Template"
                     options={templateOptions}
                     value={String(settings.default_print_template_id || 'manual')}
                     onChange={(val) => onChange('default_print_template_id', val === 'manual' ? null : parseInt(val))}
-                />
+                /> */}
 
                 <Select
                     label="Default Generate Option"

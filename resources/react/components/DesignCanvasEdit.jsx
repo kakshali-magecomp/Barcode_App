@@ -5,6 +5,8 @@ import {
     Banner,
     Spinner,
     Box,
+    Select,
+    TextField,
 } from "@shopify/polaris";
 
 import LineControls from "../components/LineControls";
@@ -47,6 +49,9 @@ export default function DesignCanvasEdit({
     });
     const printRef = useRef(null);
 
+    const [storeVariants, setStoreVariants] = useState([]);
+    const [selectedVariantId, setSelectedVariantId] = useState("");
+    const [printSettings, setPrintSettings] = useState({});
     useEffect(() => {
         loadDesign();
     }, [templateId]);
@@ -55,20 +60,32 @@ export default function DesignCanvasEdit({
         try {
             setLoading(true);
 
-            const [templateRes, productRes] = await Promise.all([
+            const [templateRes, productRes, settingRes] = await Promise.all([
                 fetch(`/api/templates/design/${templateId}`),
                 fetch(`/api/products`),
+                fetch(`/api/print-settings`),
             ]);
-
             const template = await templateRes.json();
+            console.log("Template:", template.data);
+            console.log("Template print_qty:", template.data.print_qty);
             const products = await productRes.json();
+            const settings = await settingRes.json();
+            console.log("PRINT SETTINGS:", settings);
+            let defaultQty = 1;
+
+            if (settings.success) {
+                setPrintSettings(settings.settings);
+
+                defaultQty =
+                    settings.settings.default_print_label_quantity || 1;
+            }
 
             if (template.success) {
                 const loadedDesign = {
                     ...defaultDesign,
                     ...template.data,
+                    print_qty: defaultQty,
                 };
-
                 setDesign(loadedDesign);
 
                 // IMPORTANT
@@ -76,18 +93,28 @@ export default function DesignCanvasEdit({
             }
 
             if (products.status === 1 && products.variants?.length) {
-                const first = products.variants[0];
+
+                setStoreVariants(products.variants);
+                const savedVariantId =
+                    template.data?.selected_variant_id || "";
+
+                const selected =
+                    products.variants.find(
+                        item => item.variant_id === savedVariantId
+                    ) || products.variants[0];
+
+                setSelectedVariantId(selected.variant_id);
 
                 setPreviewItem({
-                    title: first.product_title,
-                    sku: first.current_sku || "NO SKU",
-                    price: first.price,
-                    vendor: first.vendor,
+                    title: selected.product_title,
+                    sku: selected.current_sku || "NO SKU",
+                    price: selected.price,
+                    vendor: selected.vendor,
                     option_1:
-                        first.variant_title !== "Default Title"
-                            ? first.variant_title
+                        selected.variant_title !== "Default Title"
+                            ? selected.variant_title
                             : "",
-                    online_url: first.online_url || "",
+                    online_url: selected.online_url || "",
                 });
             }
         } catch (err) {
@@ -112,42 +139,62 @@ export default function DesignCanvasEdit({
         });
     }
     const handlePrint = () => {
-        const printContents = printRef.current.innerHTML;
 
-        const printWindow = window.open("", "", "width=800,height=600");
+        const qty = Number(design.print_qty) || 1;
+        let labels = "";
+
+        for (let i = 0; i < qty; i++) {
+            labels += `
+            <div class="label">
+                ${printRef.current.innerHTML}
+            </div>
+        `;
+        }
+
+        const printWindow = window.open("", "", "width=900,height=700");
 
         printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print Label</title>
-        <style>
-          body{
-            margin:20px;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            font-family:Arial,sans-serif;
-          }
+<html>
+<head>
 
-          .label{
-            border:1px solid #ddd;
-            padding:20px;
-            text-align:center;
-            width:250px;
-          }
+<title>Print Label</title>
 
-          svg{
-            max-width:100%;
-          }
-        </style>
-      </head>
-      <body>
-        ${printContents}
-      </body>
-    </html>
-  `);
+<style>
+
+body{
+    margin:20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    font-family:Arial,sans-serif;
+}
+
+.label{
+    width:250px;
+    border:1px solid #ddd;
+    padding:20px;
+    page-break-inside:avoid;
+}
+
+svg{
+    max-width:100%;
+}
+
+</style>
+
+</head>
+
+<body>
+
+${labels}
+
+</body>
+
+</html>
+`);
 
         printWindow.document.close();
+
         printWindow.focus();
 
         setTimeout(() => {
@@ -173,6 +220,45 @@ export default function DesignCanvasEdit({
                         <p>{error}</p>
                     </Banner>
                 )}
+                <Card padding="400">
+                    <Select
+                        label="Preview Product"
+
+                        options={storeVariants.map(item => ({
+                            label: `${item.product_title} (${item.current_sku || "No SKU"})`,
+                            value: item.variant_id,
+                        }))}
+
+                        value={selectedVariantId}
+
+                        onChange={(value) => {
+
+                            setSelectedVariantId(value);
+
+                            const selected = storeVariants.find(
+                                item => item.variant_id === value
+                            );
+
+                            if (!selected) return;
+
+                            setPreviewItem({
+                                title: selected.product_title,
+                                sku: selected.current_sku || "NO SKU",
+                                price: selected.price,
+                                vendor: selected.vendor,
+                                option_1:
+                                    selected.variant_title !== "Default Title"
+                                        ? selected.variant_title
+                                        : "",
+                                online_url: selected.online_url || "",
+                            });
+
+                            // save selected variant into design
+                            updateField("selected_variant_id", value);
+                        }}
+                    />
+
+                </Card>
 
                 <LineControls
                     design={design}
@@ -278,6 +364,18 @@ export default function DesignCanvasEdit({
                     </div>
                 </Card>
                 <Box paddingBlockStart="400">
+                    <TextField
+                        label="Print Quantity"
+                        type="number"
+                        value={String(design.print_qty || 1)}
+                        onChange={(value) =>
+                            updateField(
+                                "print_qty",
+                                Math.max(1, parseInt(value) || 1)
+                            )
+                        }
+                        autoComplete="off"
+                    />
                     <button
                         onClick={handlePrint}
                         style={{

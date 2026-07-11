@@ -6,7 +6,6 @@ export default function BarcodeRenderer({
     settings = {},
 }) {
     const barcodeRef = useRef(null);
-
     const [barcodeSettings, setBarcodeSettings] = useState(null);
 
     useEffect(() => {
@@ -16,9 +15,7 @@ export default function BarcodeRenderer({
     async function loadBarcodeSettings() {
         try {
             const res = await fetch("/api/barcode-settings");
-
             const data = await res.json();
-
             setBarcodeSettings(data);
 
         } catch (e) {
@@ -29,40 +26,29 @@ export default function BarcodeRenderer({
     function generateRandomBarcode(pattern) {
 
         if (!pattern) return value;
-
         const match = pattern.match(/\[([AN])\.(\d+)\]/);
-
         if (!match) return value;
-
         const type = match[1];
-
         const length = parseInt(match[2]);
-
         let result = "";
-
         const numbers = "0123456789";
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         for (let i = 0; i < length; i++) {
 
             if (type === "N") {
-
                 result += numbers[Math.floor(Math.random() * numbers.length)];
-
             } else {
-
                 result += letters[Math.floor(Math.random() * letters.length)];
-
             }
 
         }
-
         return result;
     }
-
     function detectFormat(barcode) {
-
         switch (barcode.length) {
+            case 7:
+                return "Code39";
 
             case 8:
                 return "EAN8";
@@ -72,6 +58,9 @@ export default function BarcodeRenderer({
 
             case 13:
                 return "EAN13";
+
+            case 14:
+                return "ITF14";
 
             default:
                 return barcodeSettings?.barcode_format || "CODE128";

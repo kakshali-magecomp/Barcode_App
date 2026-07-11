@@ -126,6 +126,25 @@ export default function EditTemplate() {
 
                 gapX: 0,
                 gapY: 0
+            },
+            "4000d-2x1": {
+                name: "Small Label",
+
+                paper: {
+                    width: 50.8,
+                    height: 25.4
+                },
+
+                label: {
+                    width: 50.8,
+                    height: 25.4
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0
             }
         },
 
@@ -158,7 +177,7 @@ export default function EditTemplate() {
     // Load existing values from backend database on mount
     useEffect(() => {
         async function fetchTemplateData() {
-            try {
+            try { 
                 setPageLoading(true);
                 const response = await fetch(`/api/templates/${id}`);
                 const result = await response.json();

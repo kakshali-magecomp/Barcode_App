@@ -47,26 +47,26 @@ class ShopifyQueryHelper
     }
 
     public static function updateInventoryItem(): string
-{
-    return <<<'GRAPHQL'
-mutation inventoryItemUpdate(
-    $id: ID!,
-    $input: InventoryItemInput!
-) {
-    inventoryItemUpdate(
-        id: $id,
-        input: $input
+    {
+        return <<<'GRAPHQL'
+    mutation inventoryItemUpdate(
+        $id: ID!,
+        $input: InventoryItemInput!
     ) {
-        inventoryItem {
-            id
-            sku
-        }
-        userErrors {
-            field
-            message
+        inventoryItemUpdate(
+            id: $id,
+            input: $input
+        ) {
+            inventoryItem {
+                id
+                sku
+            }
+            userErrors {
+                field
+                message
+            }
         }
     }
-}
-GRAPHQL;
-}
+    GRAPHQL;
+    }
 }

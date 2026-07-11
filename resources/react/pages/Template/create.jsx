@@ -119,6 +119,25 @@ export default function CreateTemplate() {
 
                 gapX: 0,
                 gapY: 0
+            },
+            "4000d-2x1": {
+                name: "Small Label",
+
+                paper: {
+                    width: 50.8,
+                    height: 25.4
+                },
+
+                label: {
+                    width: 50.8,
+                    height: 25.4
+                },
+
+                rows: 1,
+                columns: 1,
+
+                gapX: 0,
+                gapY: 0
             }
         },
 

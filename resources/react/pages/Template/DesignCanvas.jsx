@@ -12,7 +12,7 @@ export default function DesignCanvas() {
     const fetch = appBridge.fetch || window.fetch;
     const { id } = useParams();
     const navigate = useNavigate();
-
+    const [printSettings, setPrintSettings] = useState({});
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -30,20 +30,60 @@ export default function DesignCanvas() {
         if (design.symbol_field_source === 'product_online_url') return previewItem.online_url || `https://${window.location.hostname}`;
         return previewItem.sku;
     }, [design.symbol_field_source, previewItem]);
+    const formatPrice = useCallback(
+        (price) => {
+            const decimals =
+                printSettings.price_decimal_number ?? 2;
+
+            const formatted = Number(price).toFixed(decimals);
+
+            if (
+                printSettings.currency_format ===
+                "without_currency"
+            ) {
+                return formatted;
+            }
+
+            return `$${formatted}`;
+        },
+        [printSettings]
+    );
+
 
     useEffect(() => {
         async function loadData() {
             try {
-                const [tRes, pRes] = await Promise.all([fetch(`/api/templates/design/${id}`), fetch('/api/products')]);
+                const [tRes, pRes, sRes] = await Promise.all([
+                    fetch(`/api/templates/design/${id}`),
+                    fetch('/api/products'),
+                    fetch('/api/print-settings')
+                ]);
                 let savedVariantId = "";
+                let defaultPrintQty = 1;
+
+                if (sRes.ok) {
+                    const settings = await sRes.json();
+
+                    if (settings.success) {
+                        setPrintSettings(settings.settings);
+
+                        defaultPrintQty =
+                            settings.settings.default_print_label_quantity || 1;
+                    }
+                }
 
                 if (tRes.ok) {
                     const r = await tRes.json();
 
                     if (r.success) {
-                        setDesign(r.data);
 
-                        savedVariantId = r.data.selected_variant_id || "";
+                        setDesign({
+                            ...r.data,
+                            print_qty: defaultPrintQty,
+                        });
+
+                        savedVariantId =
+                            r.data.selected_variant_id || "";
                     }
                 } if (pRes.ok) {
                     const r = await pRes.json();
@@ -103,7 +143,7 @@ export default function DesignCanvas() {
             }
         } catch { setErrorBanner("Could not sync layout profiles to database table parameters."); }
         finally { setLoading(false); }
-    }, [id, design, fetch , selectedVariantId]);
+    }, [id, design, fetch, selectedVariantId]);
 
     const handleTestPrintDownload = async () => {
         try {
@@ -120,10 +160,10 @@ export default function DesignCanvas() {
                     variant_id: selectedVariantId,
                     product_title: previewItem.title,
                     sku: previewItem.sku,
-                    price: previewItem.price,
+                    price: formatPrice(previewItem.price),
                     vendor: previewItem.vendor,
                     option_1: previewItem.option_1,
-                    print_qty: parseInt(design.print_qty) || 1,
+                    print_qty: design.print_qty,
                     design,
                 }),
             });
@@ -168,10 +208,10 @@ export default function DesignCanvas() {
             <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
                 <BlockStack gap="400">
                     <Card padding="400">
-                        <Select label="Preview Product Variant Context" 
-                        options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))} 
-                        value={selectedVariantId} 
-                        onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if (m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} />
+                        <Select label="Preview Product Variant Context"
+                            options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))}
+                            value={selectedVariantId}
+                            onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if (m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} />
                     </Card>
                     <Grid>
                         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 7, lg: 7 }}>
@@ -188,12 +228,34 @@ export default function DesignCanvas() {
                                     <Box display="flex" gap="100" flexWrap="wrap" justifyContent="center">
                                         {design.line2_name && <span style={{ fontSize: '15px', fontWeight: 'bold' }}>{previewItem.title}</span>}
                                         {design.line2_variant_option1 && previewItem.option_1 && <span style={{ fontSize: '14px', color: '#6d7175' }}> — {previewItem.option_1}</span>}
-                                        {design.line2_price && <span style={{ fontSize: '15px', fontWeight: 'bold', color: '#108043' }}> | {design.line2_currency_format === '${{amount}}' ? `$${previewItem.price}` : previewItem.price}</span>}
-                                    </Box>
+                                        {design.line2_price && (
+                                            <span
+                                                style={{
+                                                    fontSize: "15px",
+                                                    fontWeight: "bold",
+                                                    color: "#108043",
+                                                }}
+                                            >
+                                                | {formatPrice(previewItem.price)}
+                                            </span>
+                                        )}                                    </Box>
                                     {design.line3_vendor && <div style={{ fontSize: '12px', color: '#6d7175', marginTop: '2px' }}>{previewItem.vendor}</div>}
                                     {design.symbol_enabled && <Box marginTop="300" display="flex" justifyContent="center" style={{ width: '100%' }}>{design.symbol_type === 'BARCODE' ? <BarcodeRenderer value={getSymbolTargetValue()} settings={design} /> : <QrCodeRenderer value={getSymbolTargetValue()} settings={design} />}</Box>}
                                 </div>
-                                <Card padding="300"><Box display="flex" gap="300" alignItems="center"><div style={{ flexGrow: 1 }}><TextField type="number" label="Qty" value={String(design.print_qty || 1)} onChange={(v) => handleUpdate('print_qty', parseInt(v) || 1)} autoComplete="off" /></div><Box paddingTop="400"><button style={{ backgroundColor: '#1a1a1a', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer', height: '36px' }} onClick={handleTestPrintDownload}>Test Print</button></Box></Box></Card>
+                                <Card padding="300"><Box display="flex" gap="300" alignItems="center"><div style={{ flexGrow: 1 }}>
+                                    <TextField
+                                        type="number"
+                                        label="Qty"
+                                        value={String(design.print_qty || 1)}
+                                        onChange={(value) =>
+                                            handleUpdate(
+                                                "print_qty",
+                                                Math.max(1, parseInt(value) || 1)
+                                            )
+                                        }
+                                        autoComplete="off"
+                                    />
+                                </div><Box paddingTop="400"><button style={{ backgroundColor: '#1a1a1a', color: '#ffffff', border: 'none', borderRadius: '4px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer', height: '36px' }} onClick={handleTestPrintDownload}>Test Print</button></Box></Box></Card>
                             </BlockStack>
                         </Grid.Cell>
                     </Grid>
