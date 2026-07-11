@@ -4,24 +4,11 @@ import JsBarcode from "jsbarcode";
 export default function BarcodeRenderer({
     value,
     settings = {},
+    barcodeSettings = null,
 }) {
     const barcodeRef = useRef(null);
-    const [barcodeSettings, setBarcodeSettings] = useState(null);
 
-    useEffect(() => {
-        loadBarcodeSettings();
-    }, []);
-
-    async function loadBarcodeSettings() {
-        try {
-            const res = await fetch("/api/barcode-settings");
-            const data = await res.json();
-            setBarcodeSettings(data);
-
-        } catch (e) {
-            console.error(e);
-        }
-    }
+   
 
     function generateRandomBarcode(pattern) {
 
