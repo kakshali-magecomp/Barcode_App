@@ -69,4 +69,28 @@ class ShopifyQueryHelper
     }
     GRAPHQL;
     }
+    public static function updateBarcode(): string
+{
+    return <<<'GRAPHQL'
+    mutation updateProductVariantBarcode(
+        $productId: ID!,
+        $variants: [ProductVariantsBulkInput!]!
+    ) {
+        productVariantsBulkUpdate(
+            productId: $productId,
+            variants: $variants
+        ) {
+            productVariants {
+                id
+                barcode
+            }
+            userErrors {
+                field
+                message
+            }
+        }
+    }
+    GRAPHQL;
+}
+
 }

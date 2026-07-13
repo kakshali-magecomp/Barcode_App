@@ -48,4 +48,6 @@ Route::middleware(['verify.shopify'])->group(function () {
 
     Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);
 
+    Route::post('/products/barcode-update', [ShopifyProductController::class, 'bulkBarcodeUpdate']);
+
 });

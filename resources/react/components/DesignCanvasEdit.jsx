@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
     Card,
     BlockStack,
@@ -108,6 +108,7 @@ export default function DesignCanvasEdit({
                 setPreviewItem({
                     title: selected.product_title,
                     sku: selected.current_sku || "NO SKU",
+                    barcode: selected.barcode || "",
                     price: selected.price,
                     vendor: selected.vendor,
                     option_1:
@@ -210,6 +211,29 @@ ${labels}
             </Box>
         );
     }
+    const getSymbolTargetValue = () => {
+
+    switch (design.symbol_field_source) {
+
+        case "product_name":
+            return previewItem.title || "";
+
+        case "product_price":
+            return previewItem.price || "";
+
+        case "product_online_url":
+            return previewItem.online_url || "";
+
+        case "barcode_value":
+            return previewItem.barcode || "";
+
+        case "sku_value":
+            return previewItem.sku || "";
+
+        default:
+            return previewItem.sku || "";
+    }
+};
 
     return (
         <Card padding="500">
@@ -244,6 +268,7 @@ ${labels}
                             setPreviewItem({
                                 title: selected.product_title,
                                 sku: selected.current_sku || "NO SKU",
+                                barcode: selected.barcode || "",
                                 price: selected.price,
                                 vendor: selected.vendor,
                                 option_1:
@@ -349,12 +374,14 @@ ${labels}
                             <Box paddingBlockStart="400">
                                 {design.symbol_type === "BARCODE" ? (
                                     <BarcodeRenderer
-                                        value={previewItem.sku}
+                                        value={getSymbolTargetValue()}
                                         settings={design}
                                     />
-                                ) : (
+                                ) : 
+                                
+                                (
                                     <QrCodeRenderer
-                                        value={previewItem.sku}
+                                        value={getSymbolTargetValue()}
                                         settings={design}
                                     />
                                 )}

@@ -53,7 +53,7 @@ class ShopifyProductController extends Controller
                             'product_type' => $product['productType'] ?? '',
 
                             // ADDED: Forward store URLs and handles to your React frontend states
-                            'online_url' => $product['onlineStoreUrl'] ?? '',
+                            'online_url' => "https://{$shop->name}/products/".$product['handle'],
                             'handle' => $product['handle'] ?? '',
 
                             'variant_id' => $variant['id'] ?? '',
@@ -89,7 +89,7 @@ class ShopifyProductController extends Controller
             'variants.*.inventory_item_id' => 'required|string',
             'variants.*.suggested_sku' => 'required|string',
         ]);
-
+ 
         try {
 
             Log::info('BULK UPDATE START');
@@ -197,4 +197,81 @@ class ShopifyProductController extends Controller
             ], 500);
         }
     }
+ public function bulkBarcodeUpdate(Request $request)
+{
+    $request->validate([
+        'product_id' => 'required|string', // MUST provide parent product GID
+        'variants' => 'required|array',
+        'variants.*.variant_id' => 'required|string',
+        'variants.*.suggested_barcode' => 'required|string',
+    ]);
+
+    try {
+        Log::info('BULK BARCODE UPDATE START');
+
+        $shop = Auth::user();
+        if (!$shop) {
+            Log::error('User not authenticated.');
+            return response()->json(["status" => 0, "error" => "Unauthenticated"], 401);
+        }
+
+        Log::info('Incoming Request', $request->all());
+
+        // Prepare the variants collection for Shopify's expected structure
+        $shopifyVariantsPayload = [];
+        foreach ($request->variants as $item) {
+            $shopifyVariantsPayload[] = [
+                "id" => trim($item['variant_id']),
+                "barcode" => trim($item['suggested_barcode'])
+            ];
+        }
+
+        // Build the variables payload matching the GraphQL string definition
+        $variables = [
+            "productId" => trim($request->product_id), // maps to $productId
+            "variants"  => $shopifyVariantsPayload     // maps to $variants
+        ];
+
+        $mutationQuery = ShopifyQueryHelper::updateBarcode();
+
+        Log::info('Sending GraphQL Bulk Mutation payload to Shopify');
+        
+        // Execute ONE single high-efficiency API request
+        $response = $shop->api()->graph($mutationQuery, $variables);
+
+        $responseArray = json_decode(json_encode($response), true);
+        Log::info('Shopify Response', $responseArray);
+
+        // Safe path resolution for userErrors inside productVariantsBulkUpdate
+        $errors = $responseArray['body']['container']['data']['productVariantsBulkUpdate']['userErrors']
+            ?? $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors']
+            ?? $responseArray['body']['errors']
+            ?? $responseArray['errors']
+            ?? [];
+
+        if (!empty($errors)) {
+            Log::error('Bulk Barcode Update Failed', ['errors' => $errors]);
+            return response()->json([
+                "status" => 0,
+                "error" => "Shopify validation failed",
+                "details" => $errors
+            ], 422);
+        }
+
+        Log::info("BULK BARCODE UPDATE FINISHED SUCCESSFULLY");
+
+        return response()->json([
+            "status" => 1,
+            "message" => "Successfully synchronized product variant barcodes.",
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('BULK BARCODE UPDATE EXCEPTION: ' . $e->getMessage());
+        return response()->json([
+            "status" => 0,
+            "error" => $e->getMessage(),
+        ], 500);
+    }
+}
+
 }

@@ -10,6 +10,7 @@
 	import EditTemplate from "./pages/Template/Edit";
 	import DesignCanvas from "./pages/Template/DesignCanvas";
 	import LabelHistory from "./pages/LabelHistory/index";
+	import ProductsBarcodeList from "./pages/Barcode/ProductsBarcodeList";
 
 
 	const AppRoute = () => {
@@ -25,6 +26,7 @@
 			<Route path="/SkuSettingsIndex" element={<SkuSettingsIndex/>} />
 			<Route path="/ProductsList" element={<ProductsList/>} />
 			<Route path="/LabelHistory" element={<LabelHistory/>} />
+			<Route path="/ProductsBarcodeList" element={<ProductsBarcodeList/>} />
 		</Routes>
 	    );
 	};

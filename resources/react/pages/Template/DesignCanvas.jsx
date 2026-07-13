@@ -25,11 +25,41 @@ export default function DesignCanvas() {
     const [design, setDesign] = useState({ symbol_type: 'QR', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 });
 
     const getSymbolTargetValue = useCallback(() => {
-        if (design.symbol_field_source === 'product_name') return previewItem.title;
-        if (design.symbol_field_source === 'product_price') return `$${previewItem.price}`;
-        if (design.symbol_field_source === 'product_online_url') return previewItem.online_url || `https://${window.location.hostname}`;
-        return previewItem.sku;
-    }, [design.symbol_field_source, previewItem]);
+
+        switch (design.symbol_field_source) {
+
+            case "product_name":
+                return previewItem.title;
+
+            case "product_price":
+                return previewItem.price;
+
+            case "product_online_url":
+
+                // Shopify already gives us the real URL
+                if (previewItem.online_url) {
+                    return previewItem.online_url;
+                }
+
+                // Fallback
+                // if (previewItem.handle) {
+                //     return `https://${window.location.hostname}/products/${previewItem.handle}`;
+                // }
+
+                return "";
+
+            case "barcode_value":
+                return previewItem.barcode || "";
+
+            case "sku_value":
+                return previewItem.sku || "";
+
+            default:
+                return previewItem.sku || "";
+        }
+
+    }, [design, previewItem]);
+
     const formatPrice = useCallback(
         (price) => {
             const decimals =
@@ -94,18 +124,28 @@ export default function DesignCanvas() {
                                 item => item.variant_id === savedVariantId
                             ) || r.variants[0];
 
+                        console.log("Selected Variant");
+                        console.log(selected);
+
+                        console.log("ONLINE URL:", selected.online_url);
+                        console.log("HANDLE:", selected.handle);
+
                         setSelectedVariantId(selected.variant_id);
 
                         setPreviewItem({
                             title: selected.product_title,
                             sku: selected.current_sku || "NO-SKU",
+                            barcode: selected.barcode || "",
                             price: selected.price,
                             vendor: selected.vendor,
+
                             option_1:
                                 selected.variant_title !== "Default Title"
                                     ? selected.variant_title
                                     : "",
+
                             online_url: selected.online_url || "",
+                            handle: selected.handle || "",
                         });
                     }
                 }
@@ -113,7 +153,9 @@ export default function DesignCanvas() {
             finally { setPageLoading(false); }
         }
         loadData();
+
     }, [id, fetch]);
+
 
     const handleUpdate = (key, value) => { setIsDirty(true); setDesign(prev => ({ ...prev, [key]: value })); };
 
@@ -201,6 +243,12 @@ export default function DesignCanvas() {
     };
 
     if (pageLoading) return <Box padding="1200" align="center"><Spinner size="large" /></Box>;
+    console.log("Preview Item", previewItem);
+    console.log("QR Value", getSymbolTargetValue());
+    console.log("Field", design.symbol_field_source);
+    console.log("Preview Item:", previewItem);
+    console.log("QR Value:", getSymbolTargetValue());
+    console.log("Field:", design.symbol_field_source);
 
     return (
         <Frame>
@@ -211,7 +259,35 @@ export default function DesignCanvas() {
                         <Select label="Preview Product Variant Context"
                             options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))}
                             value={selectedVariantId}
-                            onChange={(id) => { setSelectedVariantId(id); const m = storeVariants.find(x => x.variant_id === id); if (m) setPreviewItem({ title: m.product_title, sku: m.current_sku || 'NO-SKU', price: m.price, vendor: m.vendor, option_1: m.variant_title !== 'Default Title' ? m.variant_title : '' }) }} />
+                            onChange={(id) => {
+
+                                setSelectedVariantId(id);
+
+                                const selected = storeVariants.find(
+                                    item => item.variant_id === id
+                                );
+
+                                if (!selected) return;
+
+                                setPreviewItem({
+
+                                    title: selected.product_title,
+                                    sku: selected.current_sku || "NO-SKU",
+                                    barcode: selected.barcode || "",
+                                    price: selected.price,
+                                    vendor: selected.vendor,
+
+                                    option_1:
+                                        selected.variant_title !== "Default Title"
+                                            ? selected.variant_title
+                                            : "",
+
+                                    online_url: selected.online_url || "",
+                                    handle: selected.handle || "",
+
+                                });
+
+                            }} />
                     </Card>
                     <Grid>
                         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 7, lg: 7 }}>
@@ -238,9 +314,45 @@ export default function DesignCanvas() {
                                             >
                                                 | {formatPrice(previewItem.price)}
                                             </span>
-                                        )}                                    </Box>
-                                    {design.line3_vendor && <div style={{ fontSize: '12px', color: '#6d7175', marginTop: '2px' }}>{previewItem.vendor}</div>}
-                                    {design.symbol_enabled && <Box marginTop="300" display="flex" justifyContent="center" style={{ width: '100%' }}>{design.symbol_type === 'BARCODE' ? <BarcodeRenderer value={getSymbolTargetValue()} settings={design} /> : <QrCodeRenderer value={getSymbolTargetValue()} settings={design} />}</Box>}
+                                        )}
+                                    </Box>
+
+                                    {design.symbol_enabled && (
+                                        <Box
+                                            marginTop="300"
+                                            display="flex"
+                                            flexDirection="column"
+                                            alignItems="center"
+                                            style={{ width: "100%" }}
+                                        >
+
+                                            {/* Debug value */}
+                                            <div
+                                                style={{
+                                                    fontSize: "11px",
+                                                    color: "red",
+                                                    marginBottom: "10px",
+                                                    wordBreak: "break-all",
+                                                }}
+                                            >
+                                                QR VALUE:
+                                                <br />
+                                                {getSymbolTargetValue()}
+                                            </div>
+
+                                            {design.symbol_type === "BARCODE" ? (
+                                                <BarcodeRenderer
+                                                    value={getSymbolTargetValue()}
+                                                    settings={design}
+                                                />
+                                            ) : (
+                                                <QrCodeRenderer
+                                                    value={getSymbolTargetValue()}
+                                                    settings={design}
+                                                />
+                                            )}
+                                        </Box>
+                                    )}
                                 </div>
                                 <Card padding="300"><Box display="flex" gap="300" alignItems="center"><div style={{ flexGrow: 1 }}>
                                     <TextField

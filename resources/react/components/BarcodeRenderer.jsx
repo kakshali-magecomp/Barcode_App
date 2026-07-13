@@ -1,115 +1,50 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import JsBarcode from "jsbarcode";
+
+import {
+    generateBarcode,
+    detectBarcodeFormat,
+} from "./barcode/BarcodeUtils"; 
 
 export default function BarcodeRenderer({
     value,
     settings = {},
     barcodeSettings = null,
 }) {
+
     const barcodeRef = useRef(null);
-
-   
-
-    function generateRandomBarcode(pattern) {
-
-        if (!pattern) return value;
-        const match = pattern.match(/\[([AN])\.(\d+)\]/);
-        if (!match) return value;
-        const type = match[1];
-        const length = parseInt(match[2]);
-        let result = "";
-        const numbers = "0123456789";
-        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        for (let i = 0; i < length; i++) {
-
-            if (type === "N") {
-                result += numbers[Math.floor(Math.random() * numbers.length)];
-            } else {
-                result += letters[Math.floor(Math.random() * letters.length)];
-            }
-
-        }
-        return result;
-    }
-    function detectFormat(barcode) {
-        switch (barcode.length) {
-            case 7:
-                return "Code39";
-
-            case 8:
-                return "EAN8";
-
-            case 12:
-                return "UPCA";
-
-            case 13:
-                return "EAN13";
-
-            case 14:
-                return "ITF14";
-
-            default:
-                return barcodeSettings?.barcode_format || "CODE128";
-        }
-
-    }
-
-    function getBarcodeValue() {
-
-        let barcode =
-            barcodeSettings?.barcode_pattern
-                ? generateRandomBarcode(barcodeSettings.barcode_pattern)
-                : String(value);
-
-        if (barcodeSettings?.prevent_zero_start_end) {
-
-            while (
-                barcode.startsWith("0") ||
-                barcode.endsWith("0")
-            ) {
-
-                barcode =
-                    generateRandomBarcode(
-                        barcodeSettings.barcode_pattern
-                    );
-
-            }
-
-        }
-
-        return barcode;
-    }
 
     useEffect(() => {
 
         if (!barcodeRef.current) return;
 
-        const barcodeValue = getBarcodeValue();
+        const barcodeValue = generateBarcode(
+            { barcode: value },
+            barcodeSettings
+        );
+
+        const format = detectBarcodeFormat(
+            barcodeValue,
+            barcodeSettings
+        );
 
         try {
-            const format =
-                barcodeSettings?.auto_detect_gtin_format
-                    ? detectFormat(barcodeValue)
-                    : barcodeSettings?.barcode_format || "CODE128";
 
-            console.log("Barcode Format:", format);
-            console.log("Barcode Value:", barcodeValue);
             JsBarcode(barcodeRef.current, barcodeValue, {
 
-                format: format,
+                format,
 
                 width:
-                    parseInt(settings.symbol_bar_width) || 2,
+                    Number(settings.symbol_bar_width) || 2,
 
                 height:
-                    parseInt(settings.symbol_bar_height) || 40,
+                    Number(settings.symbol_bar_height) || 40,
 
                 displayValue:
                     !settings.hide_barcode_value,
 
                 fontSize:
-                    parseInt(settings.symbol_font_size) || 12,
+                    Number(settings.symbol_font_size) || 12,
 
                 lineColor:
                     settings.symbol_color || "#000000",
@@ -120,19 +55,16 @@ export default function BarcodeRenderer({
 
         } catch (err) {
 
-            console.error(err);
+            console.error("Barcode Error:", err);
 
         }
 
     }, [value, settings, barcodeSettings]);
 
     return (
-        <div
-            style={{
-                textAlign: "center",
-            }}
-        >
+        <div style={{ textAlign: "center" }}>
             <svg ref={barcodeRef}></svg>
         </div>
     );
+
 }
