@@ -20,28 +20,52 @@ class BarcodePrintController extends Controller
         $request->validate([
             'template_id' => 'required|string',
             'variant_id' => 'required|string',
-            'product_title' => 'required|string',
-            'sku' => 'required|string',
-            'price' => 'required|string',
-            'vendor' => 'nullable|string',
-            'print_qty' => 'required|integer|min:1',
-            'design' => 'required|array'
-        ]);
 
+            'product_title' => 'required|string',
+            'sku' => 'nullable|string',
+            'barcode' => 'nullable|string',
+            'online_url' => 'nullable|string',
+
+            'price' => 'nullable|string',
+            'vendor' => 'nullable|string',
+            'option_1' => 'nullable|string',
+
+            'print_qty' => 'required|integer|min:1',
+
+            'design' => 'required|array',
+        ]);
         $design = $request->input('design');
         $qty = (int) $request->input('print_qty');
-        $skuValue = $request->input('sku');
+        $fieldSource = $design['symbol_field_source'] ?? 'sku_value';
 
-        $symbolValue = $skuValue;
-        if (($design['symbol_field_source'] ?? '') === 'product_name') {
-            $symbolValue = $request->input('product_title');
-        } elseif (($design['symbol_field_source'] ?? '') === 'product_price') {
-            $symbolValue = $request->input('price');
+        switch ($fieldSource) {
+
+            case 'product_name':
+                $symbolValue = $request->input('product_title');
+                break;
+
+            case 'product_price':
+                $symbolValue = $request->input('price');
+                break;
+
+            case 'product_online_url':
+                $symbolValue = $request->input('online_url');
+                break;
+
+            case 'barcode_value':
+                $symbolValue = $request->input('barcode');
+                break;
+
+            case 'sku_value':
+            default:
+                $symbolValue = $request->input('sku');
+                break;
         }
 
         $symbolValue = trim((string) $symbolValue);
-        if (empty($symbolValue)) {
-            $symbolValue = "123456789";
+
+        if ($symbolValue === '') {
+            $symbolValue = 'EMPTY';
         }
 
         $renderedSymbolHtml = '';
@@ -49,6 +73,7 @@ class BarcodePrintController extends Controller
 
         if (!empty($design['symbol_enabled'])) {
             if (($design['symbol_type'] ?? 'QR') === 'BARCODE') {
+                
                 $generator = new BarcodeGeneratorPNG();
                 $widthMultiplier = isset($design['symbol_bar_width']) ? (int) $design['symbol_bar_width'] : 2;
                 $heightMm = isset($design['symbol_bar_height']) ? (int) $design['symbol_bar_height'] : 30;
@@ -108,7 +133,7 @@ class BarcodePrintController extends Controller
             $htmlMarkup .= '<div class="label-sticker-grid-cell">';
 
             if (!empty($design['line1_sku'])) {
-                $htmlMarkup .= '<div class="text-sku">' . htmlspecialchars($skuValue) . '</div>';
+                $htmlMarkup .= '<div class="text-sku">' . htmlspecialchars($request->sku) . '</div>';
             }
 
             $htmlMarkup .= '<div class="text-title-row">';

@@ -210,7 +210,7 @@ export default function SkuSettingsIndex() {
                                         <Select label="Vendor" options={positionOptions} value={skuSettings.segment_product_vendor} onChange={(val) => handleFieldChange('segment_product_vendor', val)} />
                                     </FormLayout.Group>
                                     <FormLayout.Group>
-                                                                                <Select label="Product Type" options={positionOptions} value={skuSettings.segment_product_type} onChange={(val) => handleFieldChange('segment_product_type', val)} />
+                                        <Select label="Product Type" options={positionOptions} value={skuSettings.segment_product_type} onChange={(val) => handleFieldChange('segment_product_type', val)} />
                                         <Select label="Metafields Selection" options={metafieldOptions} value={skuSettings.segment_metafields} onChange={(val) => handleFieldChange('segment_metafields', val)} />
                                     </FormLayout.Group>
                                     <FormLayout.Group>

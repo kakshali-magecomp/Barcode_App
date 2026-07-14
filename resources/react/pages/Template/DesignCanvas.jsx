@@ -112,6 +112,7 @@ export default function DesignCanvas() {
                             print_qty: defaultPrintQty,
                         });
 
+                        setIsDirty(true);
                         savedVariantId =
                             r.data.selected_variant_id || "";
                     }
@@ -139,6 +140,7 @@ export default function DesignCanvas() {
                             price: selected.price,
                             vendor: selected.vendor,
 
+
                             option_1:
                                 selected.variant_title !== "Default Title"
                                     ? selected.variant_title
@@ -150,7 +152,7 @@ export default function DesignCanvas() {
                     }
                 }
             } catch { setErrorBanner("Failed to communicate with template design configurations."); }
-            finally { setPageLoading(false); }
+            finally { setPageLoading(false); setIsDirty(true); }
         }
         loadData();
 
@@ -200,14 +202,20 @@ export default function DesignCanvas() {
                 body: JSON.stringify({
                     template_id: id,
                     variant_id: selectedVariantId,
+
                     product_title: previewItem.title,
                     sku: previewItem.sku,
+                    barcode: previewItem.barcode,
+                    online_url: previewItem.online_url,
+                    handle: previewItem.handle,
+
                     price: formatPrice(previewItem.price),
                     vendor: previewItem.vendor,
                     option_1: previewItem.option_1,
+
                     print_qty: design.print_qty,
                     design,
-                }),
+                })
             });
 
             console.log("Status:", res.status);
@@ -252,8 +260,23 @@ export default function DesignCanvas() {
 
     return (
         <Frame>
-            <SaveBar id="designer-bar" open={isDirty}><button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save Design</button><button onClick={() => setIsDirty(false)}>Discard</button></SaveBar>
-            <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
+            <SaveBar id="designer-bar" open={isDirty}>
+                <button
+                    variant="primary"
+                    onClick={handleSave}
+                    disabled={loading}
+                >
+                    Save Design
+                </button>
+
+                <button
+                    onClick={() => {
+                        setIsDirty(false);
+                    }}
+                >
+                    Discard
+                </button>
+            </SaveBar>            <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
                 <BlockStack gap="400">
                     <Card padding="400">
                         <Select label="Preview Product Variant Context"

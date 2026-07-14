@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Page, Box, Spinner, Text } from "@shopify/polaris";
+import { Page, Box, Spinner, Text, useIndexResourceState, } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 
 import BarcodeBulkAction from "../../components/barcode/BarcodeToolbar";
@@ -12,103 +12,143 @@ export default function ProductsBarcodeList() {
     const fetch = appBridge.fetch || window.fetch;
 
     const [variants, setVariants] = useState([]);
+    const {
+        selectedResources,
+        handleSelectionChange,
+    } = useIndexResourceState(variants, {
+        resourceIDResolver: (item) => item.variant_id,
+    });
     const [barcodeSettings, setBarcodeSettings] = useState(null);
-
-    const [selectedItems, setSelectedItems] = useState([]);
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [tableKey, setTableKey] = useState(0);
 
-    const onSelectionChange = (selectionType, isSelected, selection) => {
+    function handleGenerateBarcodes() {
 
-        if (selectionType === "all") {
+        const updatedVariants = variants.map(item => {
 
-            setSelectedItems(
-                isSelected
-                    ? variants.map(item => item.variant_id)
-                    : []
-            );
+            if (!selectedResources.includes(item.variant_id)) {
+                return item;
+            }
 
-            return;
-        }
+            return {
 
-        setSelectedItems(selection);
-    };
+                ...item,
 
-    async function handleGenerateBarcodes() {
+                generated_barcode: generateBarcode(
+                    item,
+                    barcodeSettings
+                ),
 
-        console.log("Button Clicked");
+            };
+
+        });
+
+        setVariants(updatedVariants);
+
+        appBridge.toast.show(
+            "Barcode Preview Generated"
+        );
+
+    }
+    async function handleSaveBarcodes() {
+
+        console.log("SAVE BUTTON CLICKED");
 
         try {
 
             setLoading(true);
 
-            const selectedVariants = variants
-                .filter(item =>
-                    selectedItems.includes(item.variant_id)
-                )
-                .map(item => ({
-                    product_id: item.product_id,
-                    variant_id: item.variant_id,
-                    suggested_barcode: generateBarcode(
-                        item,
-                        barcodeSettings
-                    ),
-                }));
-
-            console.log(selectedVariants);
-
-            const response = await fetch(
-                "/api/products/barcode-update",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify({
-                        product_id: selectedVariants[0].product_id,
-                        variants: selectedVariants.map(item => ({
-                            variant_id: item.variant_id,
-                            suggested_barcode: generateBarcode(
-                                item,
-                                barcodeSettings
-                            )
-                        }))
-                    }),
-                }
+            // Only selected rows with generated barcode
+            const selectedVariants = variants.filter(
+                item =>
+                    selectedResources.includes(item.variant_id) &&
+                    item.generated_barcode
             );
 
-            console.log(response.status);
-
-            const json = await response.json();
-
-            console.log("HTTP Status:", response.status);
-            console.log("API Response:", json);
-
-            if (json.status === 1) {
+            if (selectedVariants.length === 0) {
 
                 appBridge.toast.show(
-                    "Barcode updated successfully"
+                    "Generate barcode first."
                 );
 
-                setSelectedItems([]);
-
-                await loadData();
-
-            } else {
-
-                throw new Error(
-                    json.error || "Barcode update failed."
-                );
+                return;
 
             }
+
+            // Group by Product ID
+            const groupedProducts = {};
+
+            selectedVariants.forEach(item => {
+
+                if (!groupedProducts[item.product_id]) {
+
+                    groupedProducts[item.product_id] = [];
+
+                }
+
+                groupedProducts[item.product_id].push({
+
+                    variant_id: item.variant_id,
+                    suggested_barcode: item.generated_barcode,
+
+                });
+
+            });
+            console.log("Grouped Products:", groupedProducts);
+            // Save every product separately
+            for (const productId of Object.keys(groupedProducts)) {
+                console.log("Saving Product:", productId);
+                console.log(groupedProducts[productId]);
+
+                const response = await fetch(
+                    "/api/products/barcode-update",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
+                        body: JSON.stringify({
+
+                            product_id: productId,
+
+                            variants: groupedProducts[productId],
+
+                        }),
+                    }
+                );
+
+                const json = await response.json();
+
+                console.log(json);
+
+                if (!response.ok || json.status !== 1) {
+
+                    throw new Error(
+                        json.error || "Unable to save barcode."
+                    );
+
+                }
+
+            }
+
+            appBridge.toast.show(
+                "Barcode saved successfully."
+            );
+
+            await loadData();
+
+            setTableKey(prev => prev + 1);
 
         } catch (e) {
 
             console.error(e);
 
-            setError(e.message);
+            appBridge.toast.show(
+                e.message
+            );
 
         } finally {
 
@@ -141,8 +181,12 @@ export default function ProductsBarcodeList() {
                 throw new Error(products.error);
             }
 
-            setVariants(products.variants);
-
+            setVariants(
+                products.variants.map(item => ({
+                    ...item,
+                    generated_barcode: "",
+                }))
+            );
             setBarcodeSettings(settings);
 
         } catch (err) {
@@ -172,20 +216,21 @@ export default function ProductsBarcodeList() {
         );
 
     }
-    console.log("handleGenerateBarcodes:", handleGenerateBarcodes);
     return (
 
         <Page title="Inventory Barcode Management">
 
             <BarcodeBulkAction
-                selectedCount={selectedItems.length}
+                selectedCount={selectedResources.length}
                 onGenerate={handleGenerateBarcodes}
+                onSave={handleSaveBarcodes}
             />
 
             <BarcodeProductTable
+                key={tableKey}
                 variants={variants}
-                selectedItems={selectedItems}
-                onSelectionChange={onSelectionChange}
+                selectedItems={selectedResources}
+                onSelectionChange={handleSelectionChange}
                 barcodeSettings={barcodeSettings}
             />
 

@@ -1,18 +1,15 @@
+import React from "react";
 import {
     IndexTable,
     Thumbnail,
     Badge,
     Text,
-    Box,
 } from "@shopify/polaris";
-import React from "react";
-import { generateBarcode } from "./BarcodeUtils";
 
 export default function BarcodeTable({
     variants,
     selectedItems,
     onSelectionChange,
-    barcodeSettings,
 }) {
 
     const resourceName = {
@@ -21,8 +18,8 @@ export default function BarcodeTable({
     };
 
     const allSelected =
-        variants.length &&
-        variants.length === selectedItems.length;
+        variants.length > 0 &&
+        selectedItems.length === variants.length;
 
     return (
         <IndexTable
@@ -45,42 +42,66 @@ export default function BarcodeTable({
                     id={item.variant_id}
                     key={item.variant_id}
                     position={index}
-                    selected={selectedItems.includes(
-                        item.variant_id
-                    )}
+                    selected={selectedItems.includes(item.variant_id)}
                 >
                     <IndexTable.Cell>
                         <Thumbnail
-                            source={item.image}
+                            source={item.image || ""}
+                            alt={item.product_title}
                             size="small"
-                            alt=""
                         />
                     </IndexTable.Cell>
 
                     <IndexTable.Cell>
-                        <Text fontWeight="bold">
+                        <Text
+                            as="span"
+                            variant="bodyMd"
+                            fontWeight="bold"
+                        >
                             {item.product_title}
                         </Text>
+
+                        {item.variant_title !== "Default Title" && (
+                            <>
+                                <br />
+                                <Text
+                                    as="span"
+                                    variant="bodySm"
+                                    tone="subdued"
+                                >
+                                    {item.variant_title}
+                                </Text>
+                            </>
+                        )}
                     </IndexTable.Cell>
 
                     <IndexTable.Cell>
-                        <Badge>
+                        <Badge tone="info">
                             {item.barcode || "None"}
                         </Badge>
                     </IndexTable.Cell>
 
                     <IndexTable.Cell>
-                        <Text
-                            fontWeight="bold"
-                            tone="success"
-                        >
-                            {generateBarcode(item, barcodeSettings)}
-                        </Text>
+                        {item.generated_barcode ? (
+                            <Badge tone="success">
+                                {item.generated_barcode}
+                            </Badge>
+                        ) : (
+                            <Text
+                                as="span"
+                                tone="subdued"
+                            >
+                                -
+                            </Text>
+                        )}
                     </IndexTable.Cell>
 
                     <IndexTable.Cell>
-                        ${item.price}
+                        <Text as="span">
+                            ${item.price}
+                        </Text>
                     </IndexTable.Cell>
+
                 </IndexTable.Row>
             ))}
         </IndexTable>

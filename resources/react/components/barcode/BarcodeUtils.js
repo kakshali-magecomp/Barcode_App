@@ -1,77 +1,155 @@
 export function generateBarcode(item, barcodeSettings) {
 
-    if (!barcodeSettings) {
-        return item.barcode || "";
-    }
-
-    const pattern = barcodeSettings.barcode_pattern;
+    const pattern = barcodeSettings?.barcode_pattern;
 
     if (!pattern) {
         return "";
     }
 
-    const match = pattern.match(/\[([AN])\.(\d+)\]/);
+    return pattern.replace(
+        /\[(PRODUCT(?:\.\d+)?|SKU|VENDOR|HANDLE|A\.\d+|N\.\d+)\]/g,
 
-    if (!match) {
-        return "";
-    }
+        (match, token) => {
 
-    const type = match[1];
-    const length = parseInt(match[2], 10);
+            // PRODUCT
+            if (token.startsWith("PRODUCT")) {
 
-    const numbers = "0123456789";
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                let product =
+                    item?.product_title ||
+                    item?.title ||
+                    "";
 
-    let barcode = "";
+                product = product
+                    .replace(/[^A-Za-z0-9]/g, "")
+                    .toUpperCase();
 
-    do {
+                if (token.includes(".")) {
 
-        barcode = "";
+                    const length = parseInt(token.split(".")[1]);
 
-        for (let i = 0; i < length; i++) {
+                    return product.substring(0, length);
 
-            barcode +=
-                type === "N"
-                    ? numbers[Math.floor(Math.random() * numbers.length)]
-                    : letters[Math.floor(Math.random() * letters.length)];
+                }
 
+                return product;
+            }
+
+            // SKU
+            if (token === "SKU") {
+
+                return (item?.current_sku || item?.sku || "")
+                    .replace(/[^A-Za-z0-9]/g, "")
+                    .toUpperCase();
+
+            }
+
+            // Vendor
+            if (token === "VENDOR") {
+
+                return (item?.vendor || "")
+                    .replace(/[^A-Za-z0-9]/g, "")
+                    .toUpperCase();
+
+            }
+
+            // Handle
+            if (token === "HANDLE") {
+
+                return (item?.handle || "")
+                    .replace(/[^A-Za-z0-9]/g, "")
+                    .toUpperCase();
+
+            }
+
+            // Random Letters
+            if (token.startsWith("A.")) {
+
+                const length = parseInt(token.split(".")[1]);
+
+                const letters =
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+                let value = "";
+
+                for (let i = 0; i < length; i++) {
+
+                    value +=
+                        letters[
+                        Math.floor(
+                            Math.random() *
+                            letters.length
+                        )
+                        ];
+
+                }
+
+                return value;
+
+            }
+
+            // Random Numbers
+            if (token.startsWith("N.")) {
+
+                const length = parseInt(token.split(".")[1]);
+
+                const numbers = "0123456789";
+
+                let value = "";
+
+                for (let i = 0; i < length; i++) {
+
+                    value +=
+                        numbers[
+                        Math.floor(
+                            Math.random() *
+                            numbers.length
+                        )
+                        ];
+
+                }
+
+                return value;
+
+            }
+
+            return "";
         }
-
-    } while (
-
-        barcodeSettings.prevent_zero_start_end &&
-
-        (
-            barcode.startsWith("0") ||
-            barcode.endsWith("0")
-        )
-
     );
 
-    return barcode;
-
 }
-export function detectBarcodeFormat(barcode, barcodeSettings) {
+export function detectBarcodeFormat(
+    barcode,
+    barcodeSettings
+) {
 
-    if (!barcodeSettings?.auto_detect_gtin_format) {
-        return barcodeSettings?.barcode_format || "CODE128";
+    if (!barcodeSettings) {
+        return "CODE128";
     }
 
-    switch (barcode.length) {
+    if (
+        barcodeSettings.auto_detect_gtin_format
+    ) {
 
-        case 8:
-            return "EAN8";
+        switch (barcode.length) {
 
-        case 12:
-            return "UPCA";
+            case 8:
+                return "EAN8";
 
-        case 13:
-            return "EAN13";
+            case 12:
+                return "UPCA";
 
-        case 14:
-            return "ITF14";
+            case 13:
+                return "EAN13";
 
-        default:
-            return barcodeSettings?.barcode_format || "CODE128";
+            case 14:
+                return "ITF14";
+
+            default:
+                return "CODE128";
+        }
+
     }
+
+    return barcodeSettings.barcode_format || "CODE128";
+
 }

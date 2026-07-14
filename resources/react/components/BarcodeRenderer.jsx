@@ -1,10 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import JsBarcode from "jsbarcode";
 
-import {
-    generateBarcode,
-    detectBarcodeFormat,
-} from "./barcode/BarcodeUtils"; 
+import { detectBarcodeFormat } from "./barcode/BarcodeUtils";
 
 export default function BarcodeRenderer({
     value,
@@ -16,38 +13,28 @@ export default function BarcodeRenderer({
 
     useEffect(() => {
 
-        if (!barcodeRef.current) return;
-
-        const barcodeValue = generateBarcode(
-            { barcode: value },
-            barcodeSettings
-        );
+        if (!barcodeRef.current || !value) return;
 
         const format = detectBarcodeFormat(
-            barcodeValue,
+            value,
             barcodeSettings
         );
 
         try {
 
-            JsBarcode(barcodeRef.current, barcodeValue, {
+            JsBarcode(barcodeRef.current, value, {
 
                 format,
 
-                width:
-                    Number(settings.symbol_bar_width) || 2,
+                width: Number(settings.symbol_bar_width) || 2,
 
-                height:
-                    Number(settings.symbol_bar_height) || 40,
+                height: Number(settings.symbol_bar_height) || 40,
 
-                displayValue:
-                    !settings.hide_barcode_value,
+                displayValue: !settings.hide_barcode_value,
 
-                fontSize:
-                    Number(settings.symbol_font_size) || 12,
+                fontSize: Number(settings.symbol_font_size) || 12,
 
-                lineColor:
-                    settings.symbol_color || "#000000",
+                lineColor: settings.symbol_color || "#000000",
 
                 margin: 0,
 
@@ -55,7 +42,7 @@ export default function BarcodeRenderer({
 
         } catch (err) {
 
-            console.error("Barcode Error:", err);
+            console.error(err);
 
         }
 
@@ -66,5 +53,4 @@ export default function BarcodeRenderer({
             <svg ref={barcodeRef}></svg>
         </div>
     );
-
 }

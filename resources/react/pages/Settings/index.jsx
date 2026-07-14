@@ -109,8 +109,6 @@ export default function SettingsIndex() {
         loadAllSettings();
     }, [loadAllSettings]);
 
-       
-
 
     // Handle incoming input edits and trigger dirty status instantly
     const handleSettingChange = (key, value) => {
