@@ -116,6 +116,7 @@ export default function DesignCanvasEdit({
                             ? selected.variant_title
                             : "",
                     online_url: selected.online_url || "",
+                    barcode: selected.barcode || "",
                 });
             }
         } catch (err) {
@@ -230,6 +231,9 @@ ${labels}
         case "sku_value":
             return previewItem.sku || "";
 
+        case "barcode":
+            return previewItem.barcode || "";
+
         default:
             return previewItem.sku || "";
     }
@@ -276,6 +280,7 @@ ${labels}
                                         ? selected.variant_title
                                         : "",
                                 online_url: selected.online_url || "",
+                                barcode: selected.barcode||"",
                             });
 
                             // save selected variant into design
@@ -386,6 +391,14 @@ ${labels}
                                     />
                                 )}
                             </Box>
+                        )}
+                        {design.barcode && (
+                            <div style={{
+                                    marginTop: 5,
+                                    fontSize: 13,
+                                }}>
+                                    {previewItem.barcode}
+                                </div>
                         )}
 
                     </div>

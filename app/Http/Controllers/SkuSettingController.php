@@ -38,7 +38,8 @@ class SkuSettingController extends Controller
             'segment_option1' => 'required|string',
             'segment_option2' => 'required|string',
             'segment_option3' => 'required|string',
-            'segment_metafields' => 'required|string',
+            'segment_metafield' => 'nullable|string',
+            'segment_metafield_rule' => 'nullable|string',
             'hide_options_1_2_3' => 'required|boolean',
             'force_uppercase_fields' => 'required|boolean',
         ]);
@@ -153,6 +154,23 @@ class SkuSettingController extends Controller
             $segments[] = $p;
         if ($p = $parse($product['productType'] ?? '', $rules->segment_product_type))
             $segments[] = $p;
+
+        $metaValue = '';
+        if (!empty($rules->segment_metafield)) {
+            $metaValue =
+                $product['metafields'][$rules->segment_metafield] ?? '';
+        }
+        if ($metaValue) {
+            if (
+                $p = $parse(
+                    $metaValue,
+                    $rules->segment_metafield_rule
+                )
+            ) {
+                $segments[] = $p;
+            }
+
+        }
 
         if (!$rules->hide_options_1_2_3) {
             if ($p = $parse($o1, $rules->segment_option1))

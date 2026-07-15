@@ -18,6 +18,16 @@ class ShopifyQueryHelper
                     productType
                     handle         # ADDED: Essential for building safe fallback URLs
                     onlineStoreUrl # ADDED: The authentic, live store page link
+
+                    metafields(first: 20){
+                        edges{
+                            node{
+                                namespace
+                                key
+                                value
+                            }
+                        }
+                    }
                     featuredImage {
                         url
                     }

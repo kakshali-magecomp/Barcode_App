@@ -69,6 +69,22 @@ export default function ProductsList() {
         const typePart = extractPart(item.product_type, skuRules.segment_product_type);
         if (typePart) segments.push(typePart);
 
+        const selectedMetafield = skuRules.segment_metafield;
+        if (
+            selectedMetafield &&
+            item.metafields &&
+            item.metafields[selectedMetafield]
+        ) {
+            const metafieldValue = item.metafields[selectedMetafield];
+            const metafieldPart = extractPart(
+                String(metafieldValue),
+                skuRules.segment_metafield_rule
+            );
+            if (metafieldPart) {
+                segments.push(metafieldPart);
+            }
+        }
+
         if (!skuRules.hide_options_1_2_3) {
             const opt1Part = extractPart(item.option_1, skuRules.segment_option1);
             if (opt1Part) segments.push(opt1Part);
@@ -195,7 +211,7 @@ export default function ProductsList() {
             {selectedItems.length > 0 && (
                 <Box paddingBlockEnd="400">
                     <Card padding="400">
-                        <Box display="flex" justifyContent="space-between" alignItems="center" gap="400" style={{ flexWrap: "wrap",}}>
+                        <Box display="flex" justifyContent="space-between" alignItems="center" gap="400" style={{ flexWrap: "wrap", }}>
                             <Text as="p" variant="bodyMd" fontWeight="medium" tone="subdued" >
                                 {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""} queued for processing
                             </Text>

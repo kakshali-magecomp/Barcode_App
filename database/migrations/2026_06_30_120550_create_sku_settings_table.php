@@ -26,8 +26,8 @@ return new class extends Migration {
             $table->string('segment_option1')->default('none');
             $table->string('segment_option2')->default('none');
             $table->string('segment_option3')->default('none');
-            $table->string('segment_metafields')->default('none');
-
+            $table->string('segment_metafield')->nullable();
+            $table->string('segment_metafield_rule')->default('full');
             // Toggle Rules Checkboxes
             $table->boolean('hide_options_1_2_3')->default(false);
             $table->boolean('force_uppercase_fields')->default(true);

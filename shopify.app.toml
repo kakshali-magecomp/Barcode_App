@@ -4,7 +4,7 @@ client_id = "0b78c8e17dedea0ae29b959aa1b969ab"
 
 name = "barcodedemo-app"
 
-application_url = "https://post-contrary-toolbox-referral.trycloudflare.com/"
+application_url = "https://soviet-packet-headers-identifying.trycloudflare.com/"
 
 embedded = true
 
@@ -16,19 +16,19 @@ api_version = "2025-04"
  
   [[webhooks.subscriptions]]
 
-  uri = "https://post-contrary-toolbox-referral.trycloudflare.com/webhook/customers-data-request"
+  uri = "https://soviet-packet-headers-identifying.trycloudflare.com/webhook/customers-data-request"
 
   compliance_topics = [ "customers/data_request" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://post-contrary-toolbox-referral.trycloudflare.com/webhook/customers-redact"
+  uri = "https://soviet-packet-headers-identifying.trycloudflare.com/webhook/customers-redact"
 
   compliance_topics = [ "customers/redact" ]
  
   [[webhooks.subscriptions]]
 
-  uri = "https://post-contrary-toolbox-referral.trycloudflare.com/webhook/shop-redact"
+  uri = "https://soviet-packet-headers-identifying.trycloudflare.com/webhook/shop-redact"
 
   compliance_topics = [ "shop/redact" ]
  
@@ -47,7 +47,7 @@ use_legacy_install_flow = false
 
 redirect_urls = [
 
-  "https://post-contrary-toolbox-referral.trycloudflare.com/authenticate"
+  "https://soviet-packet-headers-identifying.trycloudflare.com/authenticate"
 
 ]
  

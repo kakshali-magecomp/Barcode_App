@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Jobs\GenerateBarcodeJob;
 
 class ProductWebhookController extends Controller
 {
     public function created(Request $request)
     {
-        Log::info('PRODUCT CREATED');
-        Log::info($request->all());
+        GenerateBarcodeJob::dispatch([
+            'shop'    => $request->header('X-Shopify-Shop-Domain'),
+            'product' => $request->all(),
+        ]);
 
         return response()->json([
-            'success' => true
+            'success' => true,
         ]);
     }
 }

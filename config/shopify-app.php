@@ -429,7 +429,8 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://post-contrary-toolbox-referral.trycloudflare.com/webhooks/products/create'),   
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://soviet-packet-headers-identifying.trycloudflare.com/webhooks/products/create'),   
+                'class' => \App\Jobs\GenerateBarcodeJob::class,
             ], 
     ],     
 
