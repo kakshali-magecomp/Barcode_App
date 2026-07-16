@@ -1,0 +1,361 @@
+[2026-07-16 12:20:56] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:20:56] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12448375669054","variants":[{"variant_id":"gid://shopify/ProductVariant/53710376599870","suggested_barcode":"85343124"}]} 
+[2026-07-16 12:20:56] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:20:57] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53710376599870","barcode":"85343124"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204456419015]} 
+[2026-07-16 12:20:57] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:20:57] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:20:57] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12448390775102","variants":[{"variant_id":"gid://shopify/ProductVariant/53710409335102","suggested_barcode":"87341144"}]} 
+[2026-07-16 12:20:57] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:20:57] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53710409335102","barcode":"87341144"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204457274920]} 
+[2026-07-16 12:20:57] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:20:58] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:20:58] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12448451494206","variants":[{"variant_id":"gid://shopify/ProductVariant/53710548730174","suggested_barcode":"81833477"}]} 
+[2026-07-16 12:20:58] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:20:58] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53710548730174","barcode":"81833477"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204458082238]} 
+[2026-07-16 12:20:58] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:20:58] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:20:58] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12448925385022","variants":[{"variant_id":"gid://shopify/ProductVariant/53712115695934","suggested_barcode":"51167016"}]} 
+[2026-07-16 12:20:58] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:20:59] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53712115695934","barcode":"51167016"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204458967520]} 
+[2026-07-16 12:20:59] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:20:59] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:20:59] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12518687047998","variants":[{"variant_id":"gid://shopify/ProductVariant/53904975429950","suggested_barcode":"59172220"}]} 
+[2026-07-16 12:20:59] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:21:00] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53904975429950","barcode":"59172220"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204459756709]} 
+[2026-07-16 12:21:00] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:21:00] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:21:00] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12518689407294","variants":[{"variant_id":"gid://shopify/ProductVariant/53904982016318","suggested_barcode":"79393514"}]} 
+[2026-07-16 12:21:00] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:21:01] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53904982016318","barcode":"79393514"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204460623375]} 
+[2026-07-16 12:21:01] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:21:01] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:21:01] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12518689571134","variants":[{"variant_id":"gid://shopify/ProductVariant/53904982769982","suggested_barcode":"15729268"}]} 
+[2026-07-16 12:21:01] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:21:02] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53904982769982","barcode":"15729268"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204461496474]} 
+[2026-07-16 12:21:02] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:21:02] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:21:02] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12521407349054","variants":[{"variant_id":"gid://shopify/ProductVariant/53918468505918","suggested_barcode":"12437204"}]} 
+[2026-07-16 12:21:02] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:21:03] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53918468505918","barcode":"12437204"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204462295440]} 
+[2026-07-16 12:21:03] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:21:03] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:21:03] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12521407873342","variants":[{"variant_id":"gid://shopify/ProductVariant/53918470308158","suggested_barcode":"27945840"}]} 
+[2026-07-16 12:21:03] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:21:03] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53918470308158","barcode":"27945840"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204463112565]} 
+[2026-07-16 12:21:03] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:21:04] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 12:21:04] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12521408135486","variants":[{"variant_id":"gid://shopify/ProductVariant/53918471061822","suggested_barcode":"90516976"}]} 
+[2026-07-16 12:21:04] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 12:21:04] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53918471061822","barcode":"90516976"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784204464066479]} 
+[2026-07-16 12:21:04] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  
+[2026-07-16 12:28:22] local.INFO: array (
+  'sku_prefix' => 'SKU',
+  'sku_auto_number_start' => '2005',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '_',
+  'segment_product_title' => 'char_2',
+  'segment_product_vendor' => 'char_2',
+  'segment_product_type' => 'char_2',
+  'segment_option1' => 'char_2',
+  'segment_option2' => 'char_2',
+  'segment_option3' => 'char_2',
+  'segment_metafield' => 'custom.tasting_notes',
+  'segment_metafield_rule' => 'full',
+  'hide_options_1_2_3' => true,
+  'force_uppercase_fields' => true,
+)  
+[2026-07-16 12:28:22] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 2  
+[2026-07-16 12:31:28] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:33:28] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:36:45] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:36:45] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:37:08] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:37:27] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:39:19] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"5"} 
+[2026-07-16 12:39:50] local.INFO: CREATE TEMPLATE   
+[2026-07-16 12:39:50] local.INFO: array (
+  'template_name' => 'cake',
+  'description' => 'cake',
+  'note' => 'cake',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30334',
+  'layout_settings' => 
+  array (
+    'name' => 'Jewelry Label',
+    'paper' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'label' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-16 12:39:50] local.INFO: Template Created {"id":6} 
+[2026-07-16 12:43:18] local.INFO: CREATE TEMPLATE   
+[2026-07-16 12:43:18] local.INFO: array (
+  'template_name' => 'waffle',
+  'description' => 'waffle',
+  'note' => 'waffle',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30252',
+  'layout_settings' => 
+  array (
+    'name' => 'Address Label',
+    'paper' => 
+    array (
+      'width' => 89,
+      'height' => 36,
+    ),
+    'label' => 
+    array (
+      'width' => 89,
+      'height' => 36,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-16 12:43:18] local.INFO: Template Created {"id":7} 
+[2026-07-16 12:55:54] local.INFO: CREATE TEMPLATE   
+[2026-07-16 12:55:54] local.INFO: array (
+  'template_name' => 'spring chips',
+  'description' => 'spring chips',
+  'note' => 'spring chips',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-2x1',
+  'layout_settings' => 
+  array (
+    'name' => 'Small Label',
+    'paper' => 
+    array (
+      'width' => 50.8,
+      'height' => 25.4,
+    ),
+    'label' => 
+    array (
+      'width' => 50.8,
+      'height' => 25.4,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+  ),
+)  
+[2026-07-16 12:55:54] local.INFO: Template Created {"id":8} 
+[2026-07-16 13:01:39] local.INFO: CREATE TEMPLATE   
+[2026-07-16 13:01:39] local.INFO: array (
+  'template_name' => 'cake',
+  'description' => 'cake',
+  'note' => 'cake',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30334',
+  'layout_settings' => 
+  array (
+    'name' => 'Jewelry Label',
+    'paper' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'label' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-16 13:01:40] local.INFO: Template Created {"id":9} 
+[2026-07-16 13:06:16] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"9"} 
+[2026-07-16 13:06:55] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":2,"requested_template_id":"4"} 
+[2026-07-16 13:11:52] local.INFO: ProductWebhookController call  
+[2026-07-16 13:11:53] local.INFO: generateBarcode job is called  
+[2026-07-16 13:11:53] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-07-16 13:11:53] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12521420751166',
+  'body_html' => '<p>new</p>',
+  'created_at' => '2026-07-16T09:11:49-04:00',
+  'handle' => 'new',
+  'id' => 12521420751166,
+  'product_type' => 'fast food',
+  'published_at' => '2026-07-16T09:11:50-04:00',
+  'template_suffix' => NULL,
+  'title' => 'new',
+  'updated_at' => '2026-07-16T09:11:50-04:00',
+  'vendor' => 'shfb',
+  'status' => 'active',
+  'published_scope' => 'global',
+  'tags' => 'bdcsc',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/53918522769726',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-07-16T09:11:49-04:00',
+      'id' => 53918522769726,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12521420751166,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-07-16T09:11:49-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 55934293541182,
+      'inventory_quantity' => 120,
+      'old_inventory_quantity' => 120,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15093046444350,
+      'product_id' => 12521420751166,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54678043427134,
+      'product_id' => 12521420751166,
+      'position' => 1,
+      'created_at' => '2026-07-16T09:11:11-04:00',
+      'updated_at' => '2026-07-16T09:11:50-04:00',
+      'alt' => NULL,
+      'width' => 736,
+      'height' => 1019,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/cake_47baeada-1ede-4b0c-b85b-a4d2ab6e24eb.jpg?v=1784207473',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54678043427134',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54678043427134,
+    'product_id' => 12521420751166,
+    'position' => 1,
+    'created_at' => '2026-07-16T09:11:11-04:00',
+    'updated_at' => '2026-07-16T09:11:50-04:00',
+    'alt' => NULL,
+    'width' => 736,
+    'height' => 1019,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/cake_47baeada-1ede-4b0c-b85b-a4d2ab6e24eb.jpg?v=1784207473',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54678043427134',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45598300242238,
+      'product_id' => 12521420751166,
+      'position' => 1,
+      'created_at' => '2026-07-16T09:11:11-04:00',
+      'updated_at' => '2026-07-16T09:11:50-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 736,
+        'height' => 1019,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/cake_47baeada-1ede-4b0c-b85b-a4d2ab6e24eb.jpg?v=1784207473',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45598300242238',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/53918522769726',
+      'updated_at' => '2026-07-16T13:11:49.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/na',
+    'name' => 'Uncategorized',
+    'full_name' => 'Uncategorized',
+  ),
+)  
+[2026-07-16 13:11:54] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53918522769726","barcode":null}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1784207513941144.0]}} 
+[2026-07-16 13:18:42] local.INFO: BULK UPDATE START  
+[2026-07-16 13:18:42] local.INFO: Authenticated User {"user_id":2,"shop":"kakshalijani.myshopify.com","email":"shop@kakshalijani.myshopify.com"} 
+[2026-07-16 13:18:42] local.INFO: Incoming Request {"variants":[{"product_id":"gid://shopify/Product/12521420751166","variant_id":"gid://shopify/ProductVariant/53918522769726","inventory_item_id":"gid://shopify/InventoryItem/55934293541182","suggested_sku":"SKU_NE_SH_FA_SWEET_2005_2026"}]} 
+[2026-07-16 13:18:42] local.INFO: GraphQL Mutation  
+[2026-07-16 13:18:42] local.INFO: mutation inventoryItemUpdate(
+    $id: ID!,
+    $input: InventoryItemInput!
+) {
+    inventoryItemUpdate(
+        id: $id,
+        input: $input
+    ) {
+        inventoryItem {
+            id
+            sku
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}  
+[2026-07-16 13:18:42] local.INFO:  VARIANT 0   
+[2026-07-16 13:18:42] local.INFO: Current Variant Data {"product_id":"gid://shopify/Product/12521420751166","variant_id":"gid://shopify/ProductVariant/53918522769726","inventory_item_id":"gid://shopify/InventoryItem/55934293541182","suggested_sku":"SKU_NE_SH_FA_SWEET_2005_2026"} 
+[2026-07-16 13:18:42] local.INFO: Product ID {"product_id":"gid://shopify/Product/12521420751166"} 
+[2026-07-16 13:18:42] local.INFO: GraphQL Variables {"id":"gid://shopify/InventoryItem/55934293541182","input":{"sku":"SKU_NE_SH_FA_SWEET_2005_2026"}} 
+[2026-07-16 13:18:43] local.INFO: Complete Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"inventoryItemUpdate":{"inventoryItem":{"id":"gid://shopify/InventoryItem/55934293541182","sku":"SKU_NE_SH_FA_SWEET_2005_2026"},"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784207922610018]} 
+[2026-07-16 13:18:43] local.INFO: Parsed Errors {"errors":[]} 
+[2026-07-16 13:18:43] local.INFO: Variant Updated Successfully {"variant_id":"gid://shopify/ProductVariant/53918522769726","sku":"SKU_NE_SH_FA_SWEET_2005_2026"} 
+[2026-07-16 13:18:43] local.INFO:  BULK UPDATE FINISHED   
+[2026-07-16 13:18:43] local.INFO: Total Updated {"count":1} 
+[2026-07-16 13:18:57] local.INFO: BULK BARCODE UPDATE START  
+[2026-07-16 13:18:57] local.INFO: Incoming Request {"product_id":"gid://shopify/Product/12521420751166","variants":[{"variant_id":"gid://shopify/ProductVariant/53918522769726","suggested_barcode":"POSQDYWZ"}]} 
+[2026-07-16 13:18:57] local.INFO: Sending GraphQL Bulk Mutation payload to Shopify  
+[2026-07-16 13:18:58] local.INFO: Shopify Response {"errors":false,"response":[],"status":200,"body":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/53918522769726","barcode":"POSQDYWZ"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000,"currentlyAvailable":1990,"restoreRate":100}}}},"timestamps":[1784207937386567]} 
+[2026-07-16 13:18:58] local.INFO: BULK BARCODE UPDATE FINISHED SUCCESSFULLY  

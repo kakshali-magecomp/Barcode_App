@@ -125,10 +125,10 @@ export function detectBarcodeFormat(
     if (!barcodeSettings) {
         return "CODE128";
     }
+    let format =
+        barcodeSettings.barcode_format || "CODE128";
 
-    if (
-        barcodeSettings.auto_detect_gtin_format
-    ) {
+    if (barcodeSettings.auto_detect_gtin_format) {
 
         switch (barcode.length) {
 
@@ -136,20 +136,18 @@ export function detectBarcodeFormat(
                 return "EAN8";
 
             case 12:
-                return "UPCA";
-
+               return "UPCA";
+              
             case 13:
                 return "EAN13";
 
             case 14:
-                return "ITF14";
+               return "ITF14";
 
             default:
-                return "CODE128";
+                return format;
+                
         }
-
     }
-
-    return barcodeSettings.barcode_format || "CODE128";
-
+    return format;
 }

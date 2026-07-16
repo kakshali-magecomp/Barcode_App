@@ -28,7 +28,6 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
                 console.error('Error fetching settings:', error);
             }
         }
-
         fetchSettings();
     }, [settings]);
 

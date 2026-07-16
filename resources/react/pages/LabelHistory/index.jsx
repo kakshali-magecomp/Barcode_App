@@ -1,20 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import {
-  Page,
-  Card,
-  IndexTable,
-  Text,
-  Badge,
-  Spinner,
-  Box,
-  Button,
-  EmptyState,
-  Banner,
-  Modal,
-  Toast,
-  Frame,
-} from "@shopify/polaris";
+import {Page, Card, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Modal, Toast, Frame,} from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useParams, useNavigate } from 'react-router-dom';
 

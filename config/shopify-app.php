@@ -429,8 +429,7 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://soviet-packet-headers-identifying.trycloudflare.com/webhooks/products/create'),   
-                'class' => \App\Jobs\GenerateBarcodeJob::class,
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://bishop-hampshire-thee-consistent.trycloudflare.com/api/webhooks/products/create'),   
             ], 
     ],     
 

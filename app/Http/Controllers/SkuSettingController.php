@@ -32,17 +32,24 @@ class SkuSettingController extends Controller
             'sku_auto_number_start' => 'nullable|string|max:255',
             'sku_suffix' => 'nullable|string|max:255',
             'sku_delimiter' => 'nullable|string|max:10',
+
             'segment_product_title' => 'required|string',
             'segment_product_vendor' => 'required|string',
             'segment_product_type' => 'required|string',
+
             'segment_option1' => 'required|string',
             'segment_option2' => 'required|string',
             'segment_option3' => 'required|string',
+
+            // IMPORTANT
             'segment_metafield' => 'nullable|string',
             'segment_metafield_rule' => 'nullable|string',
+
             'hide_options_1_2_3' => 'required|boolean',
             'force_uppercase_fields' => 'required|boolean',
         ]);
+
+        Log::info($validated);
 
         //  Commit the new pattern formula values directly to your local mysql table
         $skuSettings = $user->skuSetting()->updateOrCreate(

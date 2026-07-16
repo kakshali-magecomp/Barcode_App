@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Thumbnail, Button } from '@shopify/polaris';
+import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Thumbnail, Button, InlineStack } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 
 export default function ProductsList() {
@@ -84,6 +84,9 @@ export default function ProductsList() {
                 segments.push(metafieldPart);
             }
         }
+        console.log("Selected:", skuRules.segment_metafield);
+        console.log("Available:", item.metafields);
+        console.log("Value:", item.metafields?.[skuRules.segment_metafield]);
 
         if (!skuRules.hide_options_1_2_3) {
             const opt1Part = extractPart(item.option_1, skuRules.segment_option1);
@@ -210,15 +213,29 @@ export default function ProductsList() {
         <Page title="Inventory SKU Management">
             {selectedItems.length > 0 && (
                 <Box paddingBlockEnd="400">
-                    <Card padding="400">
-                        <Box display="flex" justifyContent="space-between" alignItems="center" gap="400" style={{ flexWrap: "wrap", }}>
-                            <Text as="p" variant="bodyMd" fontWeight="medium" tone="subdued" >
-                                {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""} queued for processing
+                    <Card padding="400" display="flex" justifyContent="space-between" gap="400">
+                        <InlineStack
+                            align="space-between"
+                            blockAlign="center"
+                        >
+                            <Text
+                                as="p"
+                                variant="bodyMd"
+                                fontWeight="medium"
+                                tone="subdued"
+                            >
+                                {selectedItems.length} item
+                                {selectedItems.length !== 1 ? "s" : ""} queued for processing
                             </Text>
-                            <Button variant="primary" size="large" onClick={handleBulkSkuSync}>
+
+                            <Button
+                                variant="primary"
+                                size="large"
+                                onClick={handleBulkSkuSync}
+                            >
                                 Generate & Sync SKUs to Shopify
                             </Button>
-                        </Box>
+                        </InlineStack>
                     </Card>
                 </Box>
             )}
