@@ -285,5 +285,74 @@ class ShopifyProductController extends Controller
             ], 500);
         }
     }
+    public function generateSku(Request $request)
+    {
+        $request->validate([
+            'method' => 'required',
+            'variants' => 'required|array',
+        ]);
+
+        $shop = Auth::user();
+
+        if (!$shop) {
+            return response()->json([
+                "status" => 0,
+                "error" => "Unauthenticated"
+            ], 401);
+        }
+
+        $skuSetting = $shop->skuSetting()->first();
+        $mutation = ShopifyQueryHelper::updateInventoryItem();
+        $counter = $skuSetting->sku_auto_number_start ?? 1001;
+        foreach ($request->variants as $variant) {
+            $currentSku = $variant['current_sku'] ?? "";
+
+            // method1
+            if (
+                $request->input('method') == "missing" &&
+                !empty($currentSku)
+            ) {
+                continue;
+            }
+
+            //method3
+            if (
+                $request->input('method') == "barcode"
+            ) {
+
+                $newSku = $variant["barcode"];
+
+            } else {
+
+                $newSku =
+                    ($skuSetting->sku_prefix ?? "") .
+                    $counter .
+                    ($skuSetting->sku_suffix ?? "");
+
+                $counter++;
+            }
+
+            $variables = [
+
+                "id" => $variant["inventory_item_id"],
+                "input" => [
+                    "sku" => $newSku
+                ]
+            ];
+            $shop->api()->graph($mutation, $variables);
+
+        }
+        $updatedProducts[] = [
+            "product_title" => $variant['product_title'],
+            "variant_title" => $variant['variant_title'],
+            "old_sku" => $currentSku,
+            "new_sku" => $newSku,
+        ];
+        return response()->json([
+            "status" => 1,
+            "message" => "SKU Generated Successfully.",
+            "update_Product" => $updatedProducts
+        ]);
+    }
 
 }

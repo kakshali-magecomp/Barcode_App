@@ -26,7 +26,7 @@ class GenerateBarcodeJob implements ShouldQueue
     {
         try {
 
-
+        
             Log::info("generateBarcode job is called");
             $user = User::where('name', $this->shop)->first();
 
@@ -65,7 +65,7 @@ class GenerateBarcodeJob implements ShouldQueue
             foreach ($product['variants'] as $variant) {
 
                 $barcode = $this->generateBarcode(
-                    $setting,
+                    $setting->barcode_pattern,
                     $product,
                     $variant
                 );
@@ -99,163 +99,125 @@ class GenerateBarcodeJob implements ShouldQueue
         }
     }
 
-    private function generateBarcode($setting, $product, $variant)
-{
-    $pattern = $setting->barcode_pattern ?? "";
-    $format  = strtoupper($setting->barcode_format ?? "CODE128");
+    private function generateBarcode($pattern, $product, $variant)
+    {
+        if (!$pattern) {
+            return "";
+        }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GTIN Formats
-    |--------------------------------------------------------------------------
-    */
+        return preg_replace_callback(
+            '/\[(PRODUCT(?:\.\d+)?|SKU|VENDOR|HANDLE|A\.\d+|N\.\d+)\]/',
+            function ($match) use ($product, $variant) {
 
-    switch ($format) {
+                $token = $match[1];
 
-        case "EAN8":
-            return $this->randomNumeric(8);
+                // PRODUCT
+                if (str_starts_with($token, "PRODUCT")) {
 
-        case "EAN13":
-            return $this->randomNumeric(13);
+                    $text = strtoupper(
+                        preg_replace(
+                            '/[^A-Za-z0-9]/',
+                            '',
+                            $product["title"] ?? ""
+                        )
+                    );
 
-        case "UPC":
-        case "UPCA":
-            return $this->randomNumeric(12);
+                    if (str_contains($token, ".")) {
 
-        case "ITF14":
-            return $this->randomNumeric(14);
+                        $len = (int) explode(".", $token)[1];
 
-        case "CODE39":
-            return strtoupper(substr(
-                preg_replace('/[^A-Za-z0-9]/', '', $variant["sku"] ?? ""),
-                0,
-                20
-            ));
+                        return substr($text, 0, $len);
+                    }
 
-        case "CODE128":
-        default:
-            break;
-    }
+                    return $text;
+                }
 
-    if (!$pattern) {
-        return strtoupper(
-            preg_replace(
-                '/[^A-Za-z0-9]/',
-                '',
-                $variant["sku"] ?? ""
-            )
-        );
-    }
+                // SKU
+                if ($token == "SKU") {
 
-    return preg_replace_callback(
-        '/\[(PRODUCT(?:\.\d+)?|SKU|VENDOR|HANDLE|A\.\d+|N\.\d+)\]/',
-        function ($match) use ($product, $variant) {
+                    return strtoupper(
+                        preg_replace(
+                            '/[^A-Za-z0-9]/',
+                            '',
+                            $variant["sku"] ?? ""
+                        )
+                    );
+                }
 
-            $token = $match[1];
+                // Vendor
+                if ($token == "VENDOR") {
 
-            if (str_starts_with($token, "PRODUCT")) {
+                    return strtoupper(
+                        preg_replace(
+                            '/[^A-Za-z0-9]/',
+                            '',
+                            $product["vendor"] ?? ""
+                        )
+                    );
+                }
 
-                $text = strtoupper(
-                    preg_replace(
-                        '/[^A-Za-z0-9]/',
-                        '',
-                        $product["title"] ?? ""
-                    )
-                );
+                // Handle
+                if ($token == "HANDLE") {
 
-                if (str_contains($token, ".")) {
+                    return strtoupper(
+                        preg_replace(
+                            '/[^A-Za-z0-9]/',
+                            '',
+                            $product["handle"] ?? ""
+                        )
+                    );
+                }
+
+                // Random Alpha
+                if (str_starts_with($token, "A.")) {
 
                     $len = (int) explode(".", $token)[1];
 
-                    return substr($text, 0, $len);
+                    $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+                    $result = "";
+
+                    for ($i = 0; $i < $len; $i++) {
+
+                        $result .= $letters[random_int(0, 25)];
+                    }
+
+                    return $result;
                 }
 
-                return $text;
-            }
+                // Random Numeric
+                if (str_starts_with($token, "N.")) {
 
-            if ($token == "SKU") {
+                    $len = (int) explode(".", $token)[1];
 
-                return strtoupper(
-                    preg_replace(
-                        '/[^A-Za-z0-9]/',
-                        '',
-                        $variant["sku"] ?? ""
-                    )
-                );
-            }
+                    $numbers = "0123456789";
 
-            if ($token == "VENDOR") {
+                    $result = "";
 
-                return strtoupper(
-                    preg_replace(
-                        '/[^A-Za-z0-9]/',
-                        '',
-                        $product["vendor"] ?? ""
-                    )
-                );
-            }
+                    for ($i = 0; $i < $len; $i++) {
 
-            if ($token == "HANDLE") {
+                        $result .= $numbers[random_int(0, 9)];
+                    }
 
-                return strtoupper(
-                    preg_replace(
-                        '/[^A-Za-z0-9]/',
-                        '',
-                        $product["handle"] ?? ""
-                    )
-                );
-            }
+                    if ($len > 1) {
 
-            if (str_starts_with($token, "A.")) {
+                        // prevent starting with 0
+                        if ($result[0] == "0") {
+                            $result[0] = random_int(1, 9);
+                        }
 
-                $len = (int) explode(".", $token)[1];
+                        // prevent ending with 0
+                        if ($result[$len - 1] == "0") {
+                            $result[$len - 1] = random_int(1, 9);
+                        }
+                    }
 
-                $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-                $result = "";
-
-                for ($i = 0; $i < $len; $i++) {
-
-                    $result .= $letters[random_int(0, 25)];
+                    return $result;
                 }
 
-                return $result;
-            }
-
-            if (str_starts_with($token, "N.")) {
-
-                $len = (int) explode(".", $token)[1];
-
-                return $this->randomNumeric($len);
-            }
-
-            return "";
-        },
-        $pattern
-    );
-}
-private function randomNumeric($length)
-{
-    $numbers = "0123456789";
-
-    $value = "";
-
-    for ($i = 0; $i < $length; $i++) {
-
-        $value .= $numbers[random_int(0, 9)];
+                return "";
+            },
+            $pattern
+        );
     }
-
-    if ($length > 1) {
-
-        if ($value[0] == "0") {
-            $value[0] = random_int(1, 9);
-        }
-
-        if ($value[$length - 1] == "0") {
-            $value[$length - 1] = random_int(1, 9);
-        }
-    }
-
-    return $value;
-}
 }

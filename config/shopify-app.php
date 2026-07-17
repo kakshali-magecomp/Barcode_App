@@ -429,7 +429,7 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://bishop-hampshire-thee-consistent.trycloudflare.com/api/webhooks/products/create'),   
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://anna-viewer-appeals-contrast.trycloudflare.com/api/webhooks/products/create'),   
             ], 
     ],     
 

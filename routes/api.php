@@ -34,6 +34,8 @@
 
         Route::get('/products', [ShopifyProductController::class, 'list']);
         Route::post('/products/bulk-update', [ShopifyProductController::class, 'bulkUpdate']);
+        Route::post('/products/barcode-update', [ShopifyProductController::class, 'bulkBarcodeUpdate']);
+        Route::post('/products/generate-sku',[ShopifyProductController::class, 'generateSku']);
 
         Route::get('/print-settings', [PrintSettingController::class, 'show']);
         Route::post('/print-settings', [PrintSettingController::class, 'update']);
@@ -46,7 +48,6 @@
         Route::get('/label-history/{id}', [LabelHistoryController::class, 'show']);
         Route::delete('/label-history/{id}', [LabelHistoryController::class, 'destroy']);
 
-        Route::post('/products/barcode-update', [ShopifyProductController::class, 'bulkBarcodeUpdate']);
 
     });
         Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { DeleteIcon } from "@shopify/polaris-icons";
-import {Page, Card, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Modal, Toast, Frame,} from "@shopify/polaris";
+import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Modal, Toast, Frame, } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 export default function LabelHistory() {
   const appBridge = useAppBridge();
@@ -18,6 +18,8 @@ export default function LabelHistory() {
   const [deleteModal, setDeleteModal] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
 
+  const navigate = useNavigate();
+  
   const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
@@ -59,7 +61,7 @@ export default function LabelHistory() {
         setToastMessage("History deleted.");
         setToastActive(true);
         loadHistory();
-        
+
         setTimeout(() => {
           navigate("/label-history");
         }, 3000);
@@ -85,18 +87,19 @@ export default function LabelHistory() {
     const printWindow = window.open("", "_blank");
 
     const rows = histories
-      .map(
-        (item, index) => `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${item.product_title}</td>
-        <td>${item.sku}</td>
-        <td>${item.template?.template_name || "-"}</td>
-        <td>${item.quantity}</td>
-        <td>${new Date(item.printed_at).toLocaleString()}</td>
-      </tr>
-    `
-      )
+      .map((item, index) => `
+<tr>
+<td>${index + 1}</td>
+<td>${item.product_title}</td>
+<td>${item.sku ?? "-"}</td>
+<td>${item.barcode_value ?? "-"}</td>
+<td>${item.barcode_format ?? "-"}</td>
+<td>${item.symbol_type ?? "-"}</td>
+<td>${item.template_name ?? item.template?.template_name ?? "-"}</td>
+<td>${item.quantity}</td>
+<td>${new Date(item.printed_at).toLocaleString()}</td>
+</tr>
+`)
       .join("");
 
     printWindow.document.write(`
@@ -144,37 +147,30 @@ export default function LabelHistory() {
           <h2>Barcode Print History</h2>
 
           <table>
-
               <thead>
-
                   <tr>
-                      <th>#</th>
-                      <th>Product</th>
-                      <th>SKU</th>
-                      <th>Template</th>
-                      <th>Qty</th>
-                      <th>Printed At</th>
-                  </tr>
-
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Barcode</th>
+                    <th>Format</th>
+                    <th>Type</th>
+                    <th>Template</th>
+                    <th>Qty</th>
+                    <th>Printed At</th>
+                    </tr>
               </thead>
-
               <tbody>
-
                   ${rows}
-
               </tbody>
-
           </table>
-
           <script>
               window.onload = function(){
                   window.print();
                   window.close();
               }
           </script>
-
       </body>
-
       </html>
   `);
 
@@ -185,8 +181,9 @@ export default function LabelHistory() {
       <Page title="Print History"
         primaryAction={{
           content: "Print All History",
-          onAction: handlePrintAll,}}
-          >
+          onAction: handlePrintAll,
+        }}
+      >
         {error && (
           <Box paddingBlockEnd="400">
             <Banner tone="critical">
@@ -216,8 +213,11 @@ export default function LabelHistory() {
               headings={[
                 { title: "Product" },
                 { title: "SKU" },
+                { title: "Barcode" },
+                { title: "Format" },
+                { title: "Type" },
                 { title: "Template" },
-                { title: "Quantity" },
+                { title: "Qty" },
                 { title: "Printed At" },
                 { title: "Action" },
               ]}
@@ -228,34 +228,60 @@ export default function LabelHistory() {
                   key={item.id}
                   position={index}
                 >
+
                   <IndexTable.Cell>
                     <Text as="span" fontWeight="bold">
                       {item.product_title}
                     </Text>
                   </IndexTable.Cell>
-
                   <IndexTable.Cell>
-                    <Badge>{item.sku}</Badge>
+                    <Badge>{item.sku || "-"}</Badge>
                   </IndexTable.Cell>
-
                   <IndexTable.Cell>
-                    {item.template?.template_name || "-"}
+                    <Text
+                      as="span"
+                      variant="bodySm"
+                    >
+                      {item.barcode_value || "-"}
+                    </Text>
                   </IndexTable.Cell>
+                  <IndexTable.Cell>
+                    <Badge tone="info">
+                      {item.barcode_format || "-"}
+                    </Badge>
+                  </IndexTable.Cell>
+                  <IndexTable.Cell>
+                    <Badge
+                      tone={
+                        item.symbol_type === "QR"
+                          ? "success"
+                          : "attention"
+                      }
+                    >
+                      {item.symbol_type || "-"}
+                    </Badge>
+                  </IndexTable.Cell>
+                  <IndexTable.Cell>
+                    {item.template_name ||
+                      item.template?.template_name ||
+                      "-"}
 
+                  </IndexTable.Cell>
                   <IndexTable.Cell>
                     {item.quantity}
                   </IndexTable.Cell>
-
                   <IndexTable.Cell>
-                    {new Date(item.printed_at).toLocaleString()}
-                  </IndexTable.Cell>
+                    {new Date(
+                      item.printed_at
+                    ).toLocaleString()}
 
+                  </IndexTable.Cell>
                   <IndexTable.Cell>
                     <Button
                       icon={DeleteIcon}
                       tone="critical"
                       variant="plain"
-                      accessibilityLabel="Delete History"
+                      accessibilityLabel="Delete"
                       onClick={() => {
                         setSelectedHistory(item);
                         setDeleteModal(true);
@@ -267,7 +293,6 @@ export default function LabelHistory() {
             </IndexTable>
           )}
         </Card>
-
         {toastActive && (
           <Toast
             content={toastMessage}
@@ -275,7 +300,6 @@ export default function LabelHistory() {
           />
         )}
       </Page>
-
       <Modal
         open={deleteModal}
         onClose={() => setDeleteModal(false)}

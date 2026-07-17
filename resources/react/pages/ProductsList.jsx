@@ -1,266 +1,201 @@
-import React, { useState, useEffect } from 'react';
-import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Thumbnail, Button, InlineStack } from '@shopify/polaris';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import React, { useState } from "react";
+import {
+    Page,
+    Card,
+    RadioButton,
+    Button,
+    Text,
+    BlockStack,
+    Banner,
+    Divider,
+    InlineStack,
+} from "@shopify/polaris";
+import { useAppBridge } from "@shopify/app-bridge-react";
+import ProductPickerModal from "../components/ProductPickerModal";
 
-export default function ProductsList() {
+export default function GenerateSku() {
     const appBridge = useAppBridge();
-    // Use App Bridge fetch to automatically attach shop session headers
     const fetch = appBridge.fetch || window.fetch;
-
-    const [variants, setVariants] = useState([]);
-    const [skuRules, setSkuRules] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [updatedProducts, setUpdatedProducts] = useState([]);
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [pickerOpen, setPickerOpen] = useState(false);
+    const [method, setMethod] = useState("missing");
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [selectedItems, setSelectedItems] = useState([]);
 
-    const fetchProductsAndRules = async () => {
+    const generateSku = async () => {
+        if (selectedProducts.length === 0) {
+            appBridge.toast.show("Please select at least one product.");
+            return;
+        }
+
         try {
             setLoading(true);
             setError("");
 
-            const response = await fetch("/api/products", {
-                method: "GET",
-                headers: { Accept: "application/json" },
-            });
-
-            const json = await response.json();
-
-            if (!json?.status) {
-                throw new Error(json?.error || "Failed to sync catalog feed channels");
-            }
-
-            setVariants(json?.variants ?? []);
-            setSkuRules(json?.sku_rules ?? null);
-        } catch (err) {
-            setError(err.message || "Failed to load products parameters.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchProductsAndRules();
-    }, []);
-
-    const calculateSuggestedSku = (item) => {
-        if (!skuRules) return "Formula Missing";
-
-        const delimiter = skuRules.sku_delimiter || '-';
-        let segments = [];
-
-        if (skuRules.sku_prefix) segments.push(skuRules.sku_prefix);
-
-        const extractPart = (text, rule) => {
-            if (!rule || rule === 'none' || rule === 'disabled') return null;
-            if (rule === 'full') return text;
-            if (rule === 'char_1') return text.substring(0, 1);
-            if (rule === 'char_2') return text.substring(0, 2);
-            if (rule === 'char_3') return text.substring(0, 3);
-            if (rule === 'char_4') return text.substring(0, 4);
-            return null;
-        };
-
-        const titlePart = extractPart(item.product_title, skuRules.segment_product_title);
-        if (titlePart) segments.push(titlePart);
-
-        const vendorPart = extractPart(item.vendor, skuRules.segment_product_vendor);
-        if (vendorPart) segments.push(vendorPart);
-
-        const typePart = extractPart(item.product_type, skuRules.segment_product_type);
-        if (typePart) segments.push(typePart);
-
-        const selectedMetafield = skuRules.segment_metafield;
-        if (
-            selectedMetafield &&
-            item.metafields &&
-            item.metafields[selectedMetafield]
-        ) {
-            const metafieldValue = item.metafields[selectedMetafield];
-            const metafieldPart = extractPart(
-                String(metafieldValue),
-                skuRules.segment_metafield_rule
-            );
-            if (metafieldPart) {
-                segments.push(metafieldPart);
-            }
-        }
-        console.log("Selected:", skuRules.segment_metafield);
-        console.log("Available:", item.metafields);
-        console.log("Value:", item.metafields?.[skuRules.segment_metafield]);
-
-        if (!skuRules.hide_options_1_2_3) {
-            const opt1Part = extractPart(item.option_1, skuRules.segment_option1);
-            if (opt1Part) segments.push(opt1Part);
-            const opt2Part = extractPart(item.option_2, skuRules.segment_option2);
-            if (opt2Part) segments.push(opt2Part);
-            const opt3Part = extractPart(item.option_3, skuRules.segment_option3);
-            if (opt3Part) segments.push(opt3Part);
-        }
-
-        segments.push(skuRules.sku_auto_number_start || '1001');
-
-        if (skuRules.sku_suffix) segments.push(skuRules.sku_suffix);
-
-        let finalResult = segments.join(delimiter).replace(/\s+/g, '');
-        return skuRules.force_uppercase_fields ? finalResult.toUpperCase() : finalResult;
-    };
-
-    const handleSelectionChange = (selectionType, isChecked, id) => {
-        if (selectionType === 'all') {
-            setSelectedItems(isChecked ? variants.map((v) => v.variant_id) : []);
-        } else {
-            setSelectedItems((prev) =>
-                isChecked ? [...prev, id] : prev.filter((item) => item !== id)
-            );
-        }
-    };
-
-    const handleBulkSkuSync = async () => {
-        try {
-            setLoading(true);
-            setError("");
-
-            const itemsToUpdate = variants
-                .filter(item => selectedItems.includes(item.variant_id))
-                .map(item => ({
+            const payload = {
+                method,
+                variants: selectedProducts.map((item) => ({
                     product_id: item.product_id,
                     variant_id: item.variant_id,
                     inventory_item_id: item.inventory_item_id,
-                    suggested_sku: calculateSuggestedSku(item),
-                }));
-            console.log(itemsToUpdate);
+                    current_sku: item.current_sku,
+                    barcode: item.barcode,
+                })),
+            };
 
-            if (itemsToUpdate.length === 0) return;
+            console.log(payload);
 
-            const response = await fetch("/api/products/bulk-update", {
+            const response = await fetch("/api/products/generate-sku", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Accept": "application/json"
+                    Accept: "application/json",
                 },
-                body: JSON.stringify({ variants: itemsToUpdate })
+                body: JSON.stringify(payload),
             });
+
+            if (!response.ok) {
+                throw new Error("Server Error");
+            }
 
             const json = await response.json();
 
             if (json.status === 1) {
-                setSelectedItems([]);
-                await fetchProductsAndRules();
-                if (appBridge && appBridge.toast) {
-                    appBridge.toast.show("Store variant SKUs synchronized successfully!");
-                }
+                appBridge.toast.show(json.message || "SKU generated successfully.");
+                setUpdatedProducts(json.updated_products || []);
+                setSelectedProducts([]);
+                setPickerOpen(false);
             } else {
-                throw new Error(json.error || "Failed to push variation updates.");
+                setError(json.error || "Something went wrong.");
             }
         } catch (err) {
-            setError(err.message || "A transaction error occurred.");
+            console.error(err);
+            setError(err.message || "Server Error");
         } finally {
             setLoading(false);
         }
     };
 
-    const resourceName = { singular: 'variant', plural: 'variants' };
-    const allResourcesSelected = variants.length > 0 && selectedItems.length === variants.length;
-
-    const rowMarkup = variants.map((item, index) => {
-        const isSelected = selectedItems.includes(item.variant_id);
-        const suggestedSku = calculateSuggestedSku(item);
-        const thumbnailSrc = item.image || '';
-
-        return (
-            <IndexTable.Row
-                id={item.variant_id}
-                key={item.variant_id}
-                position={index}
-                selected={isSelected}
-            >
-                <IndexTable.Cell>
-                    {thumbnailSrc ? (
-                        <Thumbnail source={thumbnailSrc} alt={item.product_title} size="small" />
-                    ) : (
-                        <div style={{ width: '40px', height: '40px', backgroundColor: '#f1f1f1', borderRadius: '4px' }} />
-                    )}
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <Text fontWeight="bold" as="span">{item.product_title}</Text>
-                    {item.variant_title && item.variant_title !== 'Default Title' && (
-                        <Box color="text-secondary" as="span"> — {item.variant_title}</Box>
-                    )}
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    {item.current_sku ? <Badge tone="info">{item.current_sku}</Badge> : <Text tone="subdued" as="span">None</Text>}
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <Text fontWeight="bold" tone="success" as="span">{suggestedSku}</Text>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <Text as="span" fontWeight="bold">${item.price}</Text>
-                </IndexTable.Cell>
-            </IndexTable.Row>
-        );
-    });
-
-    if (loading) {
-        return (
-            <Box padding="1200" align="center">
-                <Spinner accessibilityLabel="Syncing data structures" size="large" />
-                <Box marginTop="400"><Text as="p">Loading Product Variants & Pattern Formulas...</Text></Box>
-            </Box>
-        );
-    }
-
     return (
-        <Page title="Inventory SKU Management">
-            {selectedItems.length > 0 && (
-                <Box paddingBlockEnd="400">
-                    <Card padding="400" display="flex" justifyContent="space-between" gap="400">
-                        <InlineStack
-                            align="space-between"
-                            blockAlign="center"
-                        >
-                            <Text
-                                as="p"
-                                variant="bodyMd"
-                                fontWeight="medium"
-                                tone="subdued"
-                            >
-                                {selectedItems.length} item
-                                {selectedItems.length !== 1 ? "s" : ""} queued for processing
-                            </Text>
-
-                            <Button
-                                variant="primary"
-                                size="large"
-                                onClick={handleBulkSkuSync}
-                            >
-                                Generate & Sync SKUs to Shopify
-                            </Button>
-                        </InlineStack>
-                    </Card>
-                </Box>
+        <Page title="Generate SKU">
+            {error && (
+                <Banner tone="critical" onDismiss={() => setError("")}>
+                    {error}
+                </Banner>
             )}
 
-            <Card padding="0">
-                {error ? (
-                    <Box padding="500"><Text tone="critical" as="p">{error}</Text></Box>
-                ) : (
-                    <IndexTable
-                        resourceName={resourceName}
-                        itemCount={variants.length}
-                        selectedItemsCount={allResourcesSelected ? 'All' : selectedItems.length}
-                        onSelectionChange={handleSelectionChange}
-                        headings={[
-                            { title: 'Image' },
-                            { title: 'Product Variant' },
-                            { title: 'Current Store SKU' },
-                            { title: 'Suggested Pattern SKU (New)' },
-                            { title: 'Price' },
-                        ]}
+            <Card>
+                <BlockStack gap="500">
+                    <Text variant="headingMd" as="h2">
+                        SKU Generation Method
+                    </Text>
+
+                    <RadioButton
+                        label="Only generate SKU for selected products or variants that don't have SKU"
+                        checked={method === "missing"}
+                        id="missing"
+                        name="method"
+                        onChange={() => setMethod("missing")}
+                    />
+
+                    <RadioButton
+                        label="Generate SKU for all selected products or variants. Replace existing SKU if already available."
+                        checked={method === "replace"}
+                        id="replace"
+                        name="method"
+                        onChange={() => setMethod("replace")}
+                    />
+
+                    <RadioButton
+                        label="Generate SKU from barcode number"
+                        checked={method === "barcode"}
+                        id="barcode"
+                        name="method"
+                        onChange={() => setMethod("barcode")}
+                    />
+
+                    <Divider />
+                    <InlineStack
+                        align="space-between"
+                        blockAlign="center"
+                        gap="400"
                     >
-                        {rowMarkup}
-                    </IndexTable>
-                )}
+                        <Text variant="headingMd" as="h2">
+                            Selected Products
+                        </Text>
+
+                        <Text as="p" tone="subdued">
+                            {selectedProducts.length} product
+                            {selectedProducts.length !== 1 ? "s" : ""} selected
+                        </Text>
+
+                        <Button onClick={() => setPickerOpen(true)}>
+                            Choose Products
+                        </Button>
+
+                        <Button
+                            variant="primary"
+                            loading={loading}
+                            onClick={generateSku}
+                        >
+                            Generate SKU
+                        </Button>
+                    </InlineStack>
+                </BlockStack>
             </Card>
+            {updatedProducts.length > 0 && (
+                <Card>
+                    <BlockStack gap="400">
+
+                        <Text variant="headingMd" as="h2">
+                            Generated SKU Summary
+                        </Text>
+
+                        {updatedProducts.map((item, index) => (
+
+                            <Card key={index} roundedAbove="sm">
+
+                                <BlockStack gap="200">
+
+                                    <Text fontWeight="bold">
+                                        {item.product_title}
+                                    </Text>
+
+                                    {item.variant_title !== "Default Title" && (
+                                        <Text tone="subdued">
+                                            {item.variant_title}
+                                        </Text>
+                                    )}
+
+                                    <Text>
+                                        Old SKU :
+                                        <strong> {item.old_sku || "-"}</strong>
+                                    </Text>
+
+                                    <Text tone="success">
+                                        New SKU :
+                                        <strong> {item.new_sku}</strong>
+                                    </Text>
+
+                                </BlockStack>
+
+                            </Card>
+
+                        ))}
+
+                    </BlockStack>
+                </Card>
+            )}
+
+            <ProductPickerModal
+                open={pickerOpen}
+                onClose={() => setPickerOpen(false)}
+                onSelect={(products) => {
+                    setSelectedProducts(products);
+                    setPickerOpen(false);
+                }}
+            />
         </Page>
     );
 }

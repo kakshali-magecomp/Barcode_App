@@ -73,7 +73,7 @@ class BarcodePrintController extends Controller
 
         if (!empty($design['symbol_enabled'])) {
             if (($design['symbol_type'] ?? 'QR') === 'BARCODE') {
-                
+
                 $generator = new BarcodeGeneratorPNG();
                 $widthMultiplier = isset($design['symbol_bar_width']) ? (int) $design['symbol_bar_width'] : 2;
                 $heightMm = isset($design['symbol_bar_height']) ? (int) $design['symbol_bar_height'] : 30;
@@ -172,13 +172,23 @@ class BarcodePrintController extends Controller
             ], 401);
         }
 
-
+        $template = BarcodeTemplate::find($request->template_id);
+        $barcodeSetting = $user->barcodeSetting;
+        $barcodeFormat = "QR";
+        if (($design['symbol_type'] ?? "QR") === "BARCODE") {
+            $barcodeFormat = $barcodeSetting?->barcode_format ?? "CODE128";
+        }
         LabelHistory::create([
             'user_id' => $user->id,
             'barcode_template_id' => $request->template_id,
+            'template_name' => $template?->template_name,
             'variant_id' => $request->variant_id,
             'product_title' => $request->product_title,
             'sku' => $request->sku,
+            'barcode_value' => $symbolValue,
+            'barcode_format' => $barcodeFormat,
+            'symbol_type' => $design['symbol_type'] ?? 'QR',
+            'print_type' => 'product',
             'price' => $request->price,
             'vendor' => $request->vendor,
             'quantity' => $qty,

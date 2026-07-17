@@ -138,7 +138,7 @@ export default function CreateTemplate() {
 
                 gapX: 0,
                 gapY: 0
-            }
+            } 
         },
 
         avery: {
@@ -163,6 +163,28 @@ export default function CreateTemplate() {
 
                 marginTop: 12.7,
                 marginLeft: 4.8
+            },
+            "5167":{
+                name: "ReturnAddress",
+
+                paper:{
+                    width: 215.9,
+                    height: 279.4
+                },
+
+                label:{
+                    width:66.7,
+                    height: 279.6
+                },
+
+                rows:10,
+                columns: 3,
+
+                gapx:3.2,
+                gapy: 0,
+
+                marginTop: 12.7,
+                marginLeft: 4.8,
             }
         }
     };
