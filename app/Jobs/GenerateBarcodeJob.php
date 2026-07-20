@@ -26,10 +26,8 @@ class GenerateBarcodeJob implements ShouldQueue
     {
         try {
 
-        
             Log::info("generateBarcode job is called");
             $user = User::where('name', $this->shop)->first();
-
             if (!$user) {
                 Log::error("Shop not found : {$this->shop}");
                 return;
@@ -61,9 +59,7 @@ class GenerateBarcodeJob implements ShouldQueue
             }
 
             $variants = [];
-
             foreach ($product['variants'] as $variant) {
-
                 $barcode = $this->generateBarcode(
                     $setting->barcode_pattern,
                     $product,
@@ -93,9 +89,7 @@ class GenerateBarcodeJob implements ShouldQueue
             ]);
 
         } catch (\Exception $e) {
-
             Log::error($e->getMessage());
-
         }
     }
 
@@ -113,7 +107,6 @@ class GenerateBarcodeJob implements ShouldQueue
 
                 // PRODUCT
                 if (str_starts_with($token, "PRODUCT")) {
-
                     $text = strtoupper(
                         preg_replace(
                             '/[^A-Za-z0-9]/',
@@ -123,18 +116,14 @@ class GenerateBarcodeJob implements ShouldQueue
                     );
 
                     if (str_contains($token, ".")) {
-
                         $len = (int) explode(".", $token)[1];
-
                         return substr($text, 0, $len);
                     }
-
                     return $text;
                 }
 
                 // SKU
                 if ($token == "SKU") {
-
                     return strtoupper(
                         preg_replace(
                             '/[^A-Za-z0-9]/',
@@ -146,7 +135,6 @@ class GenerateBarcodeJob implements ShouldQueue
 
                 // Vendor
                 if ($token == "VENDOR") {
-
                     return strtoupper(
                         preg_replace(
                             '/[^A-Za-z0-9]/',
@@ -158,7 +146,6 @@ class GenerateBarcodeJob implements ShouldQueue
 
                 // Handle
                 if ($token == "HANDLE") {
-
                     return strtoupper(
                         preg_replace(
                             '/[^A-Za-z0-9]/',
@@ -170,51 +157,36 @@ class GenerateBarcodeJob implements ShouldQueue
 
                 // Random Alpha
                 if (str_starts_with($token, "A.")) {
-
                     $len = (int) explode(".", $token)[1];
-
                     $letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
                     $result = "";
-
                     for ($i = 0; $i < $len; $i++) {
-
                         $result .= $letters[random_int(0, 25)];
                     }
-
                     return $result;
                 }
 
                 // Random Numeric
                 if (str_starts_with($token, "N.")) {
-
                     $len = (int) explode(".", $token)[1];
-
                     $numbers = "0123456789";
-
                     $result = "";
-
                     for ($i = 0; $i < $len; $i++) {
-
                         $result .= $numbers[random_int(0, 9)];
                     }
 
                     if ($len > 1) {
-
                         // prevent starting with 0
                         if ($result[0] == "0") {
                             $result[0] = random_int(1, 9);
                         }
-
                         // prevent ending with 0
                         if ($result[$len - 1] == "0") {
                             $result[$len - 1] = random_int(1, 9);
                         }
                     }
-
                     return $result;
                 }
-
                 return "";
             },
             $pattern

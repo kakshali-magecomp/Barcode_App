@@ -1,176 +1,59 @@
-[2026-07-17 12:46:03] local.ERROR: Undefined array key "product_title" {"userId":4,"exception":"[object] (ErrorException(code: 0): Undefined array key \"product_title\" at /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php:346)
-[stacktrace]
-#0 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError()
-#1 /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php(346): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():257}()
-#2 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(47): App\\Http\\Controllers\\ShopifyProductController->generateSku()
-#3 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(266): Illuminate\\Routing\\ControllerDispatcher->dispatch()
-#4 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(212): Illuminate\\Routing\\Route->runController()
-#5 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
-#6 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Routing\\Router->{closure:Illuminate\\Routing\\Router::runRouteWithinStack():807}()
-#7 /var/www/html/Barcodedemo-app/vendor/kyon147/laravel-shopify/src/Http/Middleware/VerifyShopify.php(159): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#8 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Osiset\\ShopifyApp\\Http\\Middleware\\VerifyShopify->handle()
-#9 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#10 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
-#11 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#12 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then()
-#13 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack()
-#14 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute()
-#15 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute()
-#16 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(201): Illuminate\\Routing\\Router->dispatch()
-#17 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():198}()
-#18 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#19 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#20 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
-#21 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#22 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#23 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
-#24 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#25 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle()
-#26 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#27 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
-#28 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(62): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#29 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle()
-#30 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#31 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle()
-#32 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#33 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle()
-#34 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#35 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then()
-#36 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
-#37 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle()
-#38 /var/www/html/Barcodedemo-app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest()
-#39 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
-#40 {main}
-"} 
-[2026-07-17 12:48:15] local.ERROR: Undefined array key "product_title" {"userId":4,"exception":"[object] (ErrorException(code: 0): Undefined array key \"product_title\" at /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php:346)
-[stacktrace]
-#0 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError()
-#1 /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php(346): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():257}()
-#2 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(47): App\\Http\\Controllers\\ShopifyProductController->generateSku()
-#3 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(266): Illuminate\\Routing\\ControllerDispatcher->dispatch()
-#4 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(212): Illuminate\\Routing\\Route->runController()
-#5 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
-#6 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Routing\\Router->{closure:Illuminate\\Routing\\Router::runRouteWithinStack():807}()
-#7 /var/www/html/Barcodedemo-app/vendor/kyon147/laravel-shopify/src/Http/Middleware/VerifyShopify.php(159): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#8 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Osiset\\ShopifyApp\\Http\\Middleware\\VerifyShopify->handle()
-#9 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#10 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
-#11 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#12 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then()
-#13 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack()
-#14 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute()
-#15 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute()
-#16 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(201): Illuminate\\Routing\\Router->dispatch()
-#17 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():198}()
-#18 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#19 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#20 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
-#21 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#22 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#23 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
-#24 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#25 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle()
-#26 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#27 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
-#28 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(62): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#29 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle()
-#30 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#31 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle()
-#32 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#33 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle()
-#34 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#35 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then()
-#36 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
-#37 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle()
-#38 /var/www/html/Barcodedemo-app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest()
-#39 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
-#40 {main}
-"} 
-[2026-07-17 12:50:09] local.ERROR: Undefined array key "product_title" {"userId":4,"exception":"[object] (ErrorException(code: 0): Undefined array key \"product_title\" at /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php:346)
-[stacktrace]
-#0 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError()
-#1 /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php(346): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():257}()
-#2 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(47): App\\Http\\Controllers\\ShopifyProductController->generateSku()
-#3 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(266): Illuminate\\Routing\\ControllerDispatcher->dispatch()
-#4 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(212): Illuminate\\Routing\\Route->runController()
-#5 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
-#6 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Routing\\Router->{closure:Illuminate\\Routing\\Router::runRouteWithinStack():807}()
-#7 /var/www/html/Barcodedemo-app/vendor/kyon147/laravel-shopify/src/Http/Middleware/VerifyShopify.php(159): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#8 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Osiset\\ShopifyApp\\Http\\Middleware\\VerifyShopify->handle()
-#9 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#10 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
-#11 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#12 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then()
-#13 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack()
-#14 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute()
-#15 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute()
-#16 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(201): Illuminate\\Routing\\Router->dispatch()
-#17 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():198}()
-#18 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#19 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#20 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
-#21 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#22 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#23 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
-#24 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#25 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle()
-#26 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#27 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
-#28 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(62): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#29 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle()
-#30 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#31 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle()
-#32 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#33 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle()
-#34 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#35 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then()
-#36 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
-#37 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle()
-#38 /var/www/html/Barcodedemo-app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest()
-#39 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
-#40 {main}
-"} 
-[2026-07-17 12:51:13] local.ERROR: Undefined array key "product_title" {"userId":4,"exception":"[object] (ErrorException(code: 0): Undefined array key \"product_title\" at /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php:346)
-[stacktrace]
-#0 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError()
-#1 /var/www/html/Barcodedemo-app/app/Http/Controllers/ShopifyProductController.php(346): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->{closure:Illuminate\\Foundation\\Bootstrap\\HandleExceptions::forwardsTo():257}()
-#2 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(47): App\\Http\\Controllers\\ShopifyProductController->generateSku()
-#3 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(266): Illuminate\\Routing\\ControllerDispatcher->dispatch()
-#4 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Route.php(212): Illuminate\\Routing\\Route->runController()
-#5 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(808): Illuminate\\Routing\\Route->run()
-#6 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Routing\\Router->{closure:Illuminate\\Routing\\Router::runRouteWithinStack():807}()
-#7 /var/www/html/Barcodedemo-app/vendor/kyon147/laravel-shopify/src/Http/Middleware/VerifyShopify.php(159): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#8 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Osiset\\ShopifyApp\\Http\\Middleware\\VerifyShopify->handle()
-#9 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(51): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#10 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
-#11 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#12 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(807): Illuminate\\Pipeline\\Pipeline->then()
-#13 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(786): Illuminate\\Routing\\Router->runRouteWithinStack()
-#14 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(750): Illuminate\\Routing\\Router->runRoute()
-#15 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Routing/Router.php(739): Illuminate\\Routing\\Router->dispatchToRoute()
-#16 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(201): Illuminate\\Routing\\Router->dispatch()
-#17 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(170): Illuminate\\Foundation\\Http\\Kernel->{closure:Illuminate\\Foundation\\Http\\Kernel::dispatchToRouter():198}()
-#18 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:Illuminate\\Pipeline\\Pipeline::prepareDestination():168}()
-#19 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#20 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
-#21 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#22 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(51): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
-#23 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
-#24 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#25 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\ValidatePostSize->handle()
-#26 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(110): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#27 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
-#28 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(62): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#29 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\HandleCors->handle()
-#30 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(58): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#31 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Http\\Middleware\\TrustProxies->handle()
-#32 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/InvokeDeferredCallbacks.php(22): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#33 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(209): Illuminate\\Foundation\\Http\\Middleware\\InvokeDeferredCallbacks->handle()
-#34 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(127): Illuminate\\Pipeline\\Pipeline->{closure:{closure:Illuminate\\Pipeline\\Pipeline::carry():184}:185}()
-#35 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(176): Illuminate\\Pipeline\\Pipeline->then()
-#36 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(145): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
-#37 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle()
-#38 /var/www/html/Barcodedemo-app/public/index.php(17): Illuminate\\Foundation\\Application->handleRequest()
-#39 /var/www/html/Barcodedemo-app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
-#40 {main}
-"} 
+[2026-07-20 12:55:43] local.INFO: CREATE TEMPLATE   
+[2026-07-20 12:55:43] local.INFO: array (
+  'template_name' => 'ice cream',
+  'description' => 'ice cream',
+  'note' => 'ice cream',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30334',
+  'layout_settings' => 
+  array (
+    'name' => 'Jewelry Label',
+    'paper' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'label' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-20 12:55:43] local.INFO: Template Created {"id":18} 
+[2026-07-20 12:56:25] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":5,"requested_template_id":"18"} 
+[2026-07-20 13:17:41] local.INFO: CREATE TEMPLATE   
+[2026-07-20 13:17:41] local.INFO: array (
+  'template_name' => 'new',
+  'description' => 'new',
+  'note' => 'new',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30334',
+  'layout_settings' => 
+  array (
+    'name' => 'Jewelry Label',
+    'paper' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'label' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-20 13:17:41] local.INFO: Template Created {"id":19} 

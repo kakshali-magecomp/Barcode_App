@@ -17,7 +17,6 @@ export default function ProductPickerModal({
 }) {
   const appBridge = useAppBridge();
   const fetch = appBridge.fetch || window.fetch;
-
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -101,8 +100,8 @@ export default function ProductPickerModal({
                 setSelected(
                   checked
                     ? filteredProducts.map(
-                        (p) => p.variant_id
-                      )
+                      (p) => p.variant_id
+                    )
                     : []
                 );
               } else {
@@ -117,6 +116,7 @@ export default function ProductPickerModal({
               { title: "" },
               { title: "Product" },
               { title: "SKU" },
+              { title: "Barcode" },
             ]}
           >
             {filteredProducts.map((item, index) => (
@@ -145,6 +145,11 @@ export default function ProductPickerModal({
                 <IndexTable.Cell>
                   {item.current_sku || "-"}
                 </IndexTable.Cell>
+
+                <IndexTable.Cell>
+                  {item.barcode || "-"}
+                </IndexTable.Cell>
+
               </IndexTable.Row>
             ))}
           </IndexTable>

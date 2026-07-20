@@ -36,6 +36,7 @@
         Route::post('/products/bulk-update', [ShopifyProductController::class, 'bulkUpdate']);
         Route::post('/products/barcode-update', [ShopifyProductController::class, 'bulkBarcodeUpdate']);
         Route::post('/products/generate-sku',[ShopifyProductController::class, 'generateSku']);
+        Route::post('/products/generate-barcode',[ShopifyProductController::class,'generateBarcode']);
 
         Route::get('/print-settings', [PrintSettingController::class, 'show']);
         Route::post('/print-settings', [PrintSettingController::class, 'update']);

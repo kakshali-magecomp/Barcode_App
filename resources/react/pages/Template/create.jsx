@@ -236,10 +236,8 @@ export default function CreateTemplate() {
         setErrorBanner("Invalid paper template selected.");
         return;
     }
-
     setLoading(true);
     setErrorBanner(null);
-
     try {
 
         const response = await fetch("/api/templates", {
@@ -253,10 +251,8 @@ export default function CreateTemplate() {
                 template_name: name,
                 description: description,
                 note: note,
-
                 paper_brand: brand,
                 paper_model: model,
-
                 layout_settings: {
                     ...selectedTemplate
                 }
@@ -264,17 +260,13 @@ export default function CreateTemplate() {
         });
 
         const result = await response.json();
-
         if (!response.ok) {
             throw new Error(result.message || "Failed to save template.");
         }
-
         if (result.success) {
-
             setToastMessage("Template created successfully.");
             setToastActive(true);
             setIsDirty(false);
-
             // Open designer page
             navigate(`/templates/design/${result.data.id}`);
 
@@ -283,29 +275,15 @@ export default function CreateTemplate() {
         }
 
     } catch (error) {
-
         console.error(error);
-
         setErrorBanner(
             error.message || "A server error occurred while saving."
         );
-
     } finally {
-
         setLoading(false);
-
     }
 
-}, [
-    name,
-    description,
-    note,
-    brand,
-    model,
-    fetch,
-    navigate,
-    PAPER_TEMPLATES
-]);
+}, [name,description,note,brand,model,fetch,navigate,PAPER_TEMPLATES]);
 
     return (
         <Frame>
@@ -316,7 +294,6 @@ export default function CreateTemplate() {
                 </button>
                 <button onClick={handleDiscard}>Discard</button>
             </SaveBar>
-
             <Page
                 title="Create Barcode Template"
                 backAction={{ content: 'Templates', url: '/TemplateList' }}

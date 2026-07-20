@@ -24,7 +24,10 @@ export default function GenerateSku() {
     const [error, setError] = useState("");
 
     const generateSku = async () => {
-        if (selectedProducts.length === 0) {
+        if (
+            method !== "missing" &&
+            selectedProducts.length === 0
+        ) {
             appBridge.toast.show("Please select at least one product.");
             return;
         }
@@ -32,20 +35,28 @@ export default function GenerateSku() {
         try {
             setLoading(true);
             setError("");
-
             const payload = {
                 method,
-                variants: selectedProducts.map((item) => ({
-                    product_id: item.product_id,
-                    variant_id: item.variant_id,
-                    inventory_item_id: item.inventory_item_id,
-                    current_sku: item.current_sku,
-                    barcode: item.barcode,
-                })),
+                variants:
+                    method === "missing"
+                        ? []
+                        : selectedProducts.map(item => ({
+                            product_id: item.product_id,
+                            variant_id: item.variant_id,
+                            inventory_item_id: item.inventory_item_id,
+                            product_title: item.product_title,
+                            vendor: item.vendor,
+                            product_type: item.product_type,
+                            current_sku: item.current_sku,
+                            barcode: item.barcode,
+                            option_1: item.option_1,
+                            option_2: item.option_2,
+                            option_3: item.option_3,
+                            metafields: item.metafields,
+                        })),
             };
 
             console.log(payload);
-
             const response = await fetch("/api/products/generate-sku", {
                 method: "POST",
                 headers: {
@@ -60,7 +71,6 @@ export default function GenerateSku() {
             }
 
             const json = await response.json();
-
             if (json.status === 1) {
                 appBridge.toast.show(json.message || "SKU generated successfully.");
                 setUpdatedProducts(json.updated_products || []);
@@ -125,14 +135,22 @@ export default function GenerateSku() {
                             Selected Products
                         </Text>
 
-                        <Text as="p" tone="subdued">
-                            {selectedProducts.length} product
-                            {selectedProducts.length !== 1 ? "s" : ""} selected
-                        </Text>
+                        {method === "missing" ? (
+                            <Text as="p" tone="subdued">
+                                All products without SKU will be processed automatically.
+                            </Text>
+                        ) : (
+                            <Text as="p" tone="subdued">
+                                {selectedProducts.length} product
+                                {selectedProducts.length !== 1 ? "s" : ""} selected
+                            </Text>
+                        )}
 
-                        <Button onClick={() => setPickerOpen(true)}>
-                            Choose Products
-                        </Button>
+                        {method !== "missing" && (
+                            <Button onClick={() => setPickerOpen(true)}>
+                                Choose Products
+                            </Button>
+                        )}
 
                         <Button
                             variant="primary"

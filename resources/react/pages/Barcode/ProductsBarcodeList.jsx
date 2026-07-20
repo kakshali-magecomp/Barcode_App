@@ -1,195 +1,263 @@
-import React, { useEffect, useState } from "react";
-import { Page, Box, Spinner, Text, useIndexResourceState, } from "@shopify/polaris";
+import React, { useState } from "react";
+import {
+    Page,
+    Card,
+    RadioButton,
+    Button,
+    Text,
+    BlockStack,
+    Banner,
+    Divider,
+    InlineStack,
+} from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import BarcodeBulkAction from "../../components/barcode/BarcodeToolbar";
-import BarcodeProductTable from "../../components/barcode/BarcodeTable";
-import { generateBarcode } from "../../components/barcode/BarcodeUtils";
+import ProductPickerModal from "../../components/ProductPickerModal";
 
-export default function ProductsBarcodeList() {
-
+export default function GenerateBarcode()  {
     const appBridge = useAppBridge();
     const fetch = appBridge.fetch || window.fetch;
-    const [variants, setVariants] = useState([]);
-    const {
-        selectedResources,
-        handleSelectionChange,
-        clearSelection,
-    } = useIndexResourceState(variants, {
-        resourceIDResolver: (item) => item.variant_id,
-    });
-
-    const [barcodeSettings, setBarcodeSettings] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [method, setMethod] = useState("missing");
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [generatedProducts, setGeneratedProducts] = useState([]);
+    const [pickerOpen, setPickerOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [tableKey, setTableKey] = useState(0);
 
-    function handleGenerateBarcodes() {
-        const updatedVariants = variants.map(item => {
-            if (!selectedResources.includes(item.variant_id)) {
-                return item;
-            }
-            return {
-                ...item,
-                generated_barcode: generateBarcode(
-                    item,
-                    barcodeSettings
-                ),
-            };
-        });
-
-        setVariants(updatedVariants);
+    const generateBarcode = async () => {
+    // Validation
+    if (method !== "missing" && selectedProducts.length === 0) {
         appBridge.toast.show(
-            "Barcode Preview Generated"
+            "Please select at least one product."
+        );
+        return;
+    }
+
+    try {
+        setLoading(true);
+        setError("");
+
+        const requestData = {
+            method,
+            variants:
+                method === "missing"
+                    ? []
+                    : selectedProducts.map((item) => ({
+                          product_id: item.product_id,
+                          variant_id: item.variant_id,
+                          inventory_item_id: item.inventory_item_id,
+                          product_title: item.product_title,
+                          variant_title: item.variant_title,
+                          vendor: item.vendor,
+                          product_type: item.product_type,
+                          current_sku: item.current_sku,
+                          barcode: item.barcode,
+                          option_1: item.option_1,
+                          option_2: item.option_2,
+                          option_3: item.option_3,
+                          metafields: item.metafields,
+                      })),
+        };
+
+        console.log("Generate Barcode Payload", requestData);
+
+        const response = await fetch(
+            "/api/products/generate-barcode",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify(requestData),
+            }
         );
 
-    }
-    async function handleSaveBarcodes() {
-        console.log("SAVE BUTTON CLICKED");
-        try {
-            setLoading(true);
-            // Only selected rows with generated barcode
-            const selectedVariants = variants.filter(
-                item =>
-                    selectedResources.includes(item.variant_id) &&
-                    item.generated_barcode
+        const json = await response.json();
+
+        console.log("Generate Barcode Response", json);
+
+        if (!response.ok) {
+            throw new Error(
+                json.error ||
+                    json.message ||
+                    "Unable to generate barcode."
             );
-            if (selectedVariants.length === 0) {
-                appBridge.toast.show(
-                    "Generate barcode first."
-                );
-                return;
-            }
-
-            // Group by Product ID
-            const groupedProducts = {};
-            selectedVariants.forEach(item => {
-                if (!groupedProducts[item.product_id]) {
-                    groupedProducts[item.product_id] = [];
-                }
-
-                groupedProducts[item.product_id].push({
-                    variant_id: item.variant_id,
-                    suggested_barcode: item.generated_barcode,
-                });
-            });
-            console.log("Grouped Products:", groupedProducts);
-            // Save every product separately
-            for (const productId of Object.keys(groupedProducts)) {
-                console.log("Saving Product:", productId);
-                console.log(groupedProducts[productId]);
-
-                const response = await fetch(
-                    "/api/products/barcode-update",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Accept: "application/json",
-                        },
-                        body: JSON.stringify({
-
-                            product_id: productId,
-
-                            variants: groupedProducts[productId],
-
-                        }),
-                    }
-                );
-
-                const json = await response.json();
-                console.log(json);
-                if (!response.ok || json.status !== 1) {
-                    throw new Error(
-                        json.error || "Unable to save barcode."
-                    );
-                }
-            }
-
-            appBridge.toast.show(
-                "Barcode saved successfully."
-            );
-            await loadData();
-            clearSelection(); 
-            setTableKey(prev => prev + 1);
-        } catch (e) {
-            console.error(e);
-            appBridge.toast.show(
-                e.message
-            );
-
-        } finally {
-            setLoading(false);
         }
-    }
-    useEffect(() => {
-        loadData();
-    }, []);
 
-    async function loadData() {
-        try {
-            setLoading(true);
-            setError("");
-            const [productRes, settingRes] = await Promise.all([
-                fetch("/api/products"),
-                fetch("/api/barcode-settings"),
-            ]);
-
-            const products = await productRes.json();
-            const settings = await settingRes.json();
-
-            if (!products.status) {
-                throw new Error(products.error);
-            }
-
-            setVariants(
-                products.variants.map(item => ({
-                    ...item,
-                    generated_barcode: "",
-                }))
+        if (json.status !== 1) {
+            throw new Error(
+                json.error ||
+                    json.message ||
+                    "Barcode generation failed."
             );
-            setBarcodeSettings(settings);
-
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
         }
-    }
 
-    if (loading) {
-
-        return (
-            <Box padding="1200" align="center">
-                <Spinner size="large" />
-                <Box paddingBlockStart="300">
-                    <Text as="p">
-                        Loading Products...
-                    </Text>
-                </Box>
-            </Box>
+        appBridge.toast.show(
+            json.message || "Barcode generated successfully."
         );
 
+        setGeneratedProducts(
+            json.updated_products || []
+        );
+
+        // Close picker only
+        setPickerOpen(false);
+
+        // Optional:
+        // Uncomment if you want to clear selected products after success.
+        // setSelectedProducts([]);
+
+    } catch (err) {
+        console.error("Generate Barcode Error:", err);
+
+        setError(
+            err.message ||
+                "Something went wrong while generating barcode."
+        );
+
+        appBridge.toast.show(
+            err.message || "Server Error"
+        );
+
+    } finally {
+        setLoading(false);
     }
+};
+
     return (
+        <Page title="Generate Barcode">
+            {error && (
+                <Banner tone="critical" onDismiss={() => setError("")}>
+                    {error}
+                </Banner>
+            )}
 
-        <Page title="Inventory Barcode Management">
+            <Card>
+                <BlockStack gap="500">
+                    <Text variant="headingMd" as="h2">
+                        SKU Generation Method
+                    </Text>
 
-            <BarcodeBulkAction
-                selectedCount={selectedResources.length}
-                onGenerate={handleGenerateBarcodes}
-                onSave={handleSaveBarcodes}
+                    <RadioButton
+                        label="Only generate barcode for selected products or variants that don't have barcode value yet"
+                        checked={method === "missing"}
+                        id="missing"
+                        name="method"
+                        onChange={() => setMethod("missing")}
+                    />
+
+                    <RadioButton
+                        label="Generate barcode for all selected products or variants. If products or variants don't have barcode value, generate new barcode data. 
+                        If products or variants already have barcode value, replace the old value with new one"
+                        checked={method === "replace"}
+                        id="replace"
+                        name="method"
+                        onChange={() => setMethod("replace")}
+                    />
+                    {method === "replace" && (
+                        <Banner tone="warning">
+                            <strong>Warning</strong>
+                            <br/>
+                            Be careful with this option, your old barcode will be replaced, old printed labels will not be scanned. This option should be selected only when you want to change the barcode on your system                        </Banner>
+                    )}
+
+                    <RadioButton
+                        label="Generate barcode from SKU"
+                        checked={method === "sku"}
+                        id="SKU"
+                        name="method"
+                        onChange={() => setMethod("sku")}
+                    />
+
+                    <Divider />
+                    <InlineStack
+                        align="space-between"
+                        blockAlign="center"
+                        gap="400"
+                    >
+                        <Text variant="headingMd" as="h2">
+                            Selected Products
+                        </Text>
+
+                        {method === "missing" ? (
+                            <Text as="p" tone="subdued">
+                                All products without Barcode will be processed automatically.
+                            </Text>
+                        ) : (
+                            <Text as="p" tone="subdued">
+                                {selectedProducts.length} product
+                                {selectedProducts.length !== 1 ? "s" : ""} selected
+                            </Text>
+                        )}
+
+                        {method !== "missing" && (
+                            <Button onClick={() => setPickerOpen(true)}>
+                                Choose Products
+                            </Button>
+                        )}
+
+                        <Button
+                            variant="primary"
+                            loading={loading}
+                            onClick={generateBarcode}
+                        >
+                            Generate Barcode
+                        </Button>
+                    </InlineStack>
+                </BlockStack>
+            </Card>
+            {generatedProducts.length > 0 && (
+                <Card>
+                    <BlockStack gap="400">
+
+                        <Text variant="headingMd" as="h2">
+                            Generated Barcode Summary
+                        </Text>
+
+                        {generatedProducts.map((item, index) => (
+
+                            <Card key={index} roundedAbove="sm">
+
+                                <BlockStack gap="200">
+
+                                    <Text fontWeight="bold">
+                                        {item.product_title}
+                                    </Text>
+
+                                    {item.variant_title !== "Default Title" && (
+                                        <Text tone="subdued">
+                                            {item.variant_title}
+                                        </Text>
+                                    )}
+
+                                    <Text>
+                                        Old Barcode :
+                                        <strong> {item.old_barcode || "-"}</strong>
+                                    </Text>
+
+                                    <Text tone="success">
+                                        New Barcode :
+                                        <strong> {item.new_barcode}</strong>
+                                    </Text>
+
+                                </BlockStack>
+
+                            </Card>
+
+                        ))}
+
+                    </BlockStack>
+                </Card>
+            )}
+
+            <ProductPickerModal
+                open={pickerOpen}
+                onClose={() => setPickerOpen(false)}
+                onSelect={(products) => {
+                    setSelectedProducts(products);
+                    setPickerOpen(false);
+                }}
             />
-
-            <BarcodeProductTable
-                key={tableKey}
-                variants={variants}
-                selectedItems={selectedResources}
-                onSelectionChange={handleSelectionChange}
-                barcodeSettings={barcodeSettings}
-            />
-
         </Page>
-
     );
-
-}
+} 

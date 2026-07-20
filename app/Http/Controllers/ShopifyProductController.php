@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\ShopifyQueryHelper;
+use App\Helpers\SkuGeneratorHelper;
+use App\Helpers\BarcodeGeneratorHelper;
 
 class ShopifyProductController extends Controller
 {
@@ -36,9 +38,7 @@ class ShopifyProductController extends Controller
                     $metafields = [];
 
                     foreach ($product['metafields']['edges'] ?? [] as $edge) {
-
                         $node = $edge['node'];
-
                         $metafields[$node['namespace'] . "." . $node['key']] = $node['value'];
 
                     }
@@ -148,13 +148,9 @@ class ShopifyProductController extends Controller
                 ];
 
                 Log::info('GraphQL Variables', $variables);
-
                 $response = $shop->api()->graph($mutationQuery, $variables);
-
                 $responseArray = json_decode(json_encode($response), true);
-
                 Log::info('Complete Shopify Response', $responseArray);
-
                 $errors =
                     $responseArray['body']['container']['data']['inventoryItemUpdate']['userErrors']
                     ?? $responseArray['body']['data']['inventoryItemUpdate']['userErrors']
@@ -167,9 +163,7 @@ class ShopifyProductController extends Controller
                 ]);
 
                 if (empty($errors)) {
-
                     $syncCount++;
-
                     Log::info('Variant Updated Successfully', [
                         'variant_id' => $item['variant_id'],
                         'sku' => $item['suggested_sku']
@@ -212,147 +206,382 @@ class ShopifyProductController extends Controller
     public function bulkBarcodeUpdate(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|string', // MUST provide parent product GID
+            'product_id' => 'required|string',
             'variants' => 'required|array',
-            'variants.*.variant_id' => 'required|string',
-            'variants.*.suggested_barcode' => 'required|string',
         ]);
 
         try {
-            Log::info('BULK BARCODE UPDATE START');
+
+            Log::info("BARCODE GENERATION START");
 
             $shop = Auth::user();
+
             if (!$shop) {
-                Log::error('User not authenticated.');
-                return response()->json(["status" => 0, "error" => "Unauthenticated"], 401);
+                return response()->json([
+                    "status" => 0,
+                    "error" => "Unauthenticated"
+                ], 401);
             }
 
-            Log::info('Incoming Request', $request->all());
+            // Load barcode settings
+            $barcodeSetting = $shop->barcodeSetting()->firstOrCreate([]);
 
-            // Prepare the variants collection for Shopify's expected structure
             $shopifyVariantsPayload = [];
-            foreach ($request->variants as $item) {
+            $updatedProducts = [];
+
+            foreach ($request->variants as $variant) {
+
+                //generate barcode from helper file
+                $barcode = BarcodeGeneratorHelper::generate(
+                    $variant,
+                    $barcodeSetting
+                );
+
+                if (empty($barcode)) {
+                    continue;
+                }
+
                 $shopifyVariantsPayload[] = [
-                    "id" => trim($item['variant_id']),
-                    "barcode" => trim($item['suggested_barcode'])
+                    "id" => trim($variant["variant_id"]),
+                    "barcode" => $barcode,
+                ];
+
+                $updatedProducts[] = [
+                    "product_title" => $variant["product_title"] ?? "",
+                    "variant_title" => $variant["variant_title"] ?? "",
+                    "old_barcode" => $variant["barcode"] ?? "",
+                    "new_barcode" => $barcode,
                 ];
             }
 
-            // Build the variables payload matching the GraphQL string definition
-            $variables = [
-                "productId" => trim($request->product_id), // maps to $productId
-                "variants" => $shopifyVariantsPayload     // maps to $variants
-            ];
+            if (empty($shopifyVariantsPayload)) {
 
-            $mutationQuery = ShopifyQueryHelper::updateBarcode();
-
-            Log::info('Sending GraphQL Bulk Mutation payload to Shopify');
-
-            // Execute ONE single high-efficiency API request
-            $response = $shop->api()->graph($mutationQuery, $variables);
-
-            $responseArray = json_decode(json_encode($response), true);
-            Log::info('Shopify Response', $responseArray);
-
-            // Safe path resolution for userErrors inside productVariantsBulkUpdate
-            $errors = $responseArray['body']['container']['data']['productVariantsBulkUpdate']['userErrors']
-                ?? $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors']
-                ?? $responseArray['body']['errors']
-                ?? $responseArray['errors']
-                ?? [];
-
-            if (!empty($errors)) {
-                Log::error('Bulk Barcode Update Failed', ['errors' => $errors]);
                 return response()->json([
                     "status" => 0,
-                    "error" => "Shopify validation failed",
-                    "details" => $errors
+                    "error" => "No barcode generated."
                 ], 422);
+
             }
 
-            Log::info("BULK BARCODE UPDATE FINISHED SUCCESSFULLY");
+            //shopify GRAPHQL
+            $variables = [
+                "productId" => trim($request->product_id),
+                "variants" => $shopifyVariantsPayload,
+            ];
+
+            $mutation = ShopifyQueryHelper::updateBarcode();
+
+            $response = $shop->api()->graph(
+                $mutation,
+                $variables
+            );
+
+            $responseArray = json_decode(
+                json_encode($response),
+                true
+            );
+
+            $errors =
+                $responseArray['body']['container']['data']['productVariantsBulkUpdate']['userErrors']
+                ??
+                $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors']
+                ??
+                [];
+
+            if (!empty($errors)) {
+
+                return response()->json([
+                    "status" => 0,
+                    "error" => "Shopify validation failed.",
+                    "details" => $errors,
+                ], 422);
+
+            }
+
+            Log::info("BARCODE GENERATION FINISHED");
 
             return response()->json([
                 "status" => 1,
-                "message" => "Successfully synchronized product variant barcodes.",
+                "message" => count($updatedProducts) . " barcode generated successfully.",
+                "updated_products" => $updatedProducts,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('BULK BARCODE UPDATE EXCEPTION: ' . $e->getMessage());
+
+            Log::error($e);
+
             return response()->json([
                 "status" => 0,
                 "error" => $e->getMessage(),
+                "line" => $e->getLine(),
+                "file" => $e->getFile(),
             ], 500);
+
         }
     }
     public function generateSku(Request $request)
     {
         $request->validate([
-            'method' => 'required',
-            'variants' => 'required|array',
+            'method' => 'required|string',
+            'variants' => 'nullable|array',
         ]);
 
-        $shop = Auth::user();
+        try {
 
-        if (!$shop) {
-            return response()->json([
-                "status" => 0,
-                "error" => "Unauthenticated"
-            ], 401);
-        }
-
-        $skuSetting = $shop->skuSetting()->first();
-        $mutation = ShopifyQueryHelper::updateInventoryItem();
-        $counter = $skuSetting->sku_auto_number_start ?? 1001;
-        foreach ($request->variants as $variant) {
-            $currentSku = $variant['current_sku'] ?? "";
-
-            // method1
-            if (
-                $request->input('method') == "missing" &&
-                !empty($currentSku)
-            ) {
-                continue;
+            $shop = Auth::user();
+            if (!$shop) {
+                return response()->json([
+                    "status" => 0,
+                    "error" => "Unauthenticated"
+                ], 401);
             }
+            $skuSetting = $shop->skuSetting()->firstOrCreate([]);
+            $mutation = ShopifyQueryHelper::updateInventoryItem();
+            $counter = (int) ($skuSetting->sku_auto_number_start ?? 1001);
 
-            //method3
-            if (
-                $request->input('method') == "barcode"
-            ) {
+            //variant list
 
-                $newSku = $variant["barcode"];
+            if ($request->input('method') === "missing") {
+                $query = ShopifyQueryHelper::showproduct();
+                $rawResponse = $shop->api()->graph($query);
+                $responseArray = json_decode(json_encode($rawResponse), true);
+                $productsEdges = $responseArray['body']['container']['data']['products']['edges'] ??
+                    $responseArray['body']['data']['products']['edges'] ?? [];
+
+                $variants = [];
+                foreach ($productsEdges as $productEdge) {
+                    $product = $productEdge['node'];
+                    foreach ($product['variants']['edges'] as $variantEdge) {
+                        $v = $variantEdge['node'];
+                        // Skip variants which already have SKU
+                        if (!empty($v['sku'])) {
+                            continue;
+                        }
+                        $variants[] = [
+                            "product_title" => $product["title"],
+                            "vendor" => $product["vendor"] ?? "",
+                            "product_type" => $product["productType"] ?? "",
+                            "variant_title" => $v["title"],
+                            "inventory_item_id" => $v["inventoryItem"]["id"],
+                            "current_sku" => $v["sku"],
+                            "barcode" => $v["barcode"] ?? "",
+                            "option_1" => $v["selectedOptions"][0]["value"] ?? "",
+                            "option_2" => $v["selectedOptions"][1]["value"] ?? "",
+                            "option_3" => $v["selectedOptions"][2]["value"] ?? "",
+                            "metafields" => $product["metafields"] ?? [],
+                        ];
+                    }
+                }
 
             } else {
-
-                $newSku =
-                    ($skuSetting->sku_prefix ?? "") .
-                    $counter .
-                    ($skuSetting->sku_suffix ?? "");
-
-                $counter++;
+                // replace + barcode
+                $variants = $request->variants ?? [];
             }
 
-            $variables = [
+            //generate shopify
+            $updatedProducts = [];
+            foreach ($variants as $variant) {
+                $currentSku = $variant['current_sku'] ?? "";
+                // Barcode Mode
+                if ($request->input('method') === "barcode") {
+                    $newSku = trim($variant['barcode'] ?? '');
+                    if ($newSku === '') {
+                        continue;
+                    }
+                } else {
+                    $newSku = SkuGeneratorHelper::generate(
+                        $variant,
+                        $skuSetting,
+                        $counter,
+                    );
+                }
 
-                "id" => $variant["inventory_item_id"],
-                "input" => [
-                    "sku" => $newSku
-                ]
-            ];
-            $shop->api()->graph($mutation, $variables);
+                if (empty($newSku)) {
+                    continue;
+                }
 
+                //update shopify
+                $variables = [
+                    "id" => trim($variant["inventory_item_id"]),
+                    "input" => [
+                        "sku" => trim($newSku)
+                    ]
+                ];
+
+                $response = $shop->api()->graph($mutation, $variables);
+                $responseArray = json_decode(json_encode($response), true);
+                $errors = $responseArray['body']['container']['data']['inventoryItemUpdate']['userErrors'] ??
+                    $responseArray['body']['data']['inventoryItemUpdate']['userErrors'] ?? [];
+
+                if (!empty($errors)) {
+                    continue;
+                }
+                $updatedProducts[] = [
+                    "product_title" => $variant["product_title"] ?? "",
+                    "variant_title" => $variant["variant_title"] ?? "",
+                    "old_sku" => $currentSku,
+                    "new_sku" => $newSku,
+                ];
+            }
+
+            //save counter
+            if ($request->input('method') !== "barcode") {
+                $skuSetting->sku_auto_number_start = $counter;
+                $skuSetting->save();
+            }
+
+            return response()->json([
+                "status" => 1,
+                "message" => count($updatedProducts) . " SKU generated successfully.",
+                "updated_products" => $updatedProducts,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json([
+                "status" => 0,
+                "error" => $e->getMessage(),
+                "line" => $e->getLine(),
+                "file" => $e->getFile(),
+            ], 500);
         }
-        $updatedProducts[] = [
-            "product_title" => $variant['product_title'],
-            "variant_title" => $variant['variant_title'],
-            "old_sku" => $currentSku,
-            "new_sku" => $newSku,
-        ];
-        return response()->json([
-            "status" => 1,
-            "message" => "SKU Generated Successfully.",
-            "update_Product" => $updatedProducts
-        ]);
     }
+    public function generateBarcode(Request $request)
+    {
+        $request->validate([
+            'method' => 'required|string',
+            'variants' => 'nullable|array',
+        ]);
 
+        try {
+
+            $shop = Auth::user();
+
+            if (!$shop) {
+                return response()->json([
+                    "status" => 0,
+                    "error" => "Unauthenticated"
+                ], 401);
+            }
+
+            $barcodeSetting = $shop->barcodeSetting()->firstOrCreate([]);
+
+           //loard variant
+            if ($request->input('method') == "missing") {
+                $query = ShopifyQueryHelper::showproduct();
+                $rawResponse = $shop->api()->graph($query);
+                $responseArray = json_decode(
+                    json_encode($rawResponse),
+                    true
+                );
+
+                $productsEdges =
+                    $responseArray['body']['container']['data']['products']['edges']??
+                    $responseArray['body']['data']['products']['edges']??[];
+
+                $variants = [];
+                foreach ($productsEdges as $productEdge) {
+                    $product = $productEdge["node"];
+                    foreach ($product["variants"]["edges"] as $variantEdge) {
+                        $v = $variantEdge["node"];
+                        if (!empty($v["barcode"])) {
+                            continue;
+                        }
+                        $variants[] = [
+                            "product_id" => $product["id"],
+                            "variant_id" => $v["id"],
+                            "product_title" => $product["title"],
+                            "vendor" => $product["vendor"],
+                            "product_type" => $product["productType"],
+                            "variant_title" => $v["title"],
+                            "current_barcode" => $v["barcode"],
+                            "current_sku" => $v["sku"],
+                            "option_1" => $v["selectedOptions"][0]["value"] ?? "",
+                            "option_2" => $v["selectedOptions"][1]["value"] ?? "",
+                            "option_3" => $v["selectedOptions"][2]["value"] ?? "",
+                            "metafields" => collect(
+                                $product["metafields"]["edges"] ?? []
+                            )->map(function ($edge) {
+                                return [
+                                    "namespace" => $edge["node"]["namespace"],
+                                    "key" => $edge["node"]["key"],
+                                    "value" => $edge["node"]["value"],
+                                ];
+                            })->toArray(),
+                        ];
+                    }
+                }
+
+            } else {
+                $variants = $request->variants ?? [];
+            }
+
+           //generate barcode
+            $groupedProducts = [];
+            $updatedProducts = [];
+            foreach ($variants as $variant) {
+                $oldBarcode =$variant["barcode"]??
+                    $variant["current_barcode"]??"";
+
+               //barcode fro SKU
+                if ($request->input('method') == "sku") {
+                    $newBarcode = trim(
+                        $variant["current_sku"] ?? ""
+                    );
+                    if ($newBarcode == "") {
+                        continue;
+                    }
+                } else {
+                    $newBarcode = BarcodeGeneratorHelper::generate($variant,$barcodeSetting);
+                    if (empty($newBarcode)) {
+                        continue;
+                    }
+                }
+
+               //gropu by product
+                $groupedProducts[$variant["product_id"]][] = [
+                    "id" => $variant["variant_id"],
+                    "barcode" => $newBarcode,
+                ];
+
+                $updatedProducts[] = [
+                    "product_title" => $variant["product_title"],
+                    "variant_title" => $variant["variant_title"],
+                    "old_barcode" => $oldBarcode,
+                    "new_barcode" => $newBarcode,
+                ];
+            }
+
+            //shopify bulkupdate
+            $mutation = ShopifyQueryHelper::updateBarcode();
+            foreach ($groupedProducts as $productId => $shopifyVariants) {
+                $variables = ["productId" => $productId, "variants" => $shopifyVariants,];
+                $response = $shop->api()->graph($mutation, $variables);
+                $responseArray = json_decode(json_encode($response), true);
+                $errors = $responseArray['body']['container']['data']['productVariantsBulkUpdate']['userErrors'] ??
+                    $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors'] ?? [];
+
+                if (!empty($errors)) {
+                    Log::error($errors);
+                }
+            }
+
+            return response()->json([
+                "status" => 1,
+                "message" => count($updatedProducts) . " barcode generated successfully.",
+                "updated_products" => $updatedProducts,
+
+            ]);
+
+        } catch (\Exception $e) {
+
+            Log::error($e);
+            return response()->json([
+                "status" => 0,
+                "error" => $e->getMessage(),
+                "line" => $e->getLine(),
+                "file" => $e->getFile(),
+            ], 500);
+        }
+    }
 }
