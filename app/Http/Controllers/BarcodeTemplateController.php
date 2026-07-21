@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\BarcodeTemplate;
 
 class BarcodeTemplateController extends Controller
 {
@@ -126,7 +127,7 @@ class BarcodeTemplateController extends Controller
 
             if (!$template) {
                 // Check if the item exists under another user to pinpoint cross-shop leakage bugs
-                $globalCheck = \App\Models\BarcodeTemplate::find($id);
+                $globalCheck = BarcodeTemplate::find($id);
 
                 if ($globalCheck) {
                     Log::warning("Mismatched Owner Conflict: Template ID {$id} exists but belongs to Shop ID: " . $globalCheck->user_id);
@@ -209,4 +210,35 @@ class BarcodeTemplateController extends Controller
             ], 500);
         }
     }
+    public function getTemplateDesign($id)
+{
+    $template = BarcodeTemplate::find($id);
+
+    if (!$template) {
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Template not found',
+        ]);
+
+    }
+
+    return response()->json([
+
+        'status' => true,
+
+        'design' => json_decode(
+            $template->design_settings,
+            true
+        ),
+
+        'layout' => json_decode(
+            $template->layout_settings,
+            true
+        ),
+
+        'template' => $template,
+
+    ]);
+}
 }

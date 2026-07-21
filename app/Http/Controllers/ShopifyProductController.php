@@ -584,4 +584,5 @@ class ShopifyProductController extends Controller
             ], 500);
         }
     }
+    
 }

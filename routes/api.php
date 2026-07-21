@@ -25,6 +25,7 @@
         Route::get('/templates/{id}', [BarcodeTemplateController::class, 'show']);
         Route::put('/templates/{id}', [BarcodeTemplateController::class, 'update']);
         Route::delete('/templates/{id}', [BarcodeTemplateController::class, 'destroy']);
+        Route::get('/templates/design/{id}',[BarcodeTemplateController::class, 'getTemplateDesign']);
 
         Route::get('/barcode-settings', [BarcodeSettingController::class, 'show']);
         Route::post('/barcode-settings', [BarcodeSettingController::class, 'update']);

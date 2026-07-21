@@ -55,7 +55,7 @@ export default function SymbolControls({ design, handleUpdate }) {
                 handleUpdate("symbol_type", value)
               }
             />
-
+             <FormLayout.Group>
             {/* Symbol Color */}
 
             <div>
@@ -139,7 +139,7 @@ export default function SymbolControls({ design, handleUpdate }) {
                 )
               }
             />
-
+            </FormLayout.Group>
             {/* Barcode */}
 
             {design.symbol_type === "BARCODE" ? (
@@ -156,7 +156,7 @@ export default function SymbolControls({ design, handleUpdate }) {
                     )
                   }
                 />
-
+                 <FormLayout.Group>
                 <Select
                   label="Barcode Format"
                   options={[
@@ -166,7 +166,23 @@ export default function SymbolControls({ design, handleUpdate }) {
                     },
                     {
                       label: "Code 39",
-                      value: "CODE39",
+                      value: "Code39",
+                    },
+                    {
+                      label: "UPC-A",
+                      value: "UPCA",
+                    },
+                    {
+                      label: "EAN 8",
+                      value: "EAN8",
+                    },
+                    {
+                      label: "EAN 13",
+                      value: "EAN13",
+                    },
+                    {
+                      label: "ITF-14",
+                      value: "ITF14",
                     },
                   ]}
                   value={
@@ -195,7 +211,8 @@ export default function SymbolControls({ design, handleUpdate }) {
                   }
                   autoComplete="off"
                 />
-
+                </FormLayout.Group>
+                <FormLayout.Group>
                 <TextField
                   label="Symbol Bar Width"
                   type="number"
@@ -225,10 +242,13 @@ export default function SymbolControls({ design, handleUpdate }) {
                   }
                   autoComplete="off"
                 />
+                </FormLayout.Group>
               </BlockStack>
+              
             ) : (
               <BlockStack gap="300">
-                <Select
+                <FormLayout.Group>
+                {/* <Select
                   label="Dot Type"
                   options={[
                     {
@@ -247,9 +267,9 @@ export default function SymbolControls({ design, handleUpdate }) {
                       value
                     )
                   }
-                />
+                /> */}
 
-                <Select
+                {/* <Select
                   label="Corner Dot Type"
                   options={[
                     {
@@ -295,8 +315,8 @@ export default function SymbolControls({ design, handleUpdate }) {
                       value
                     )
                   }
-                />
-
+                /> */}
+                </FormLayout.Group>
                 <FormLayout.Group>
                   <TextField
                     label="Width (px)"

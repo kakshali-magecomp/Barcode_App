@@ -5,7 +5,7 @@ export default function QrCodeRenderer({ value, settings = {} }) {
     const [renderedDataUrl, setRenderedDataUrl] = useState('');
 
     useEffect(() => {
-
+    
     if (!value) {
         setRenderedDataUrl("");
         return;

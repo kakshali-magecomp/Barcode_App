@@ -1,59 +1,27 @@
-[2026-07-20 12:55:43] local.INFO: CREATE TEMPLATE   
-[2026-07-20 12:55:43] local.INFO: array (
-  'template_name' => 'ice cream',
-  'description' => 'ice cream',
-  'note' => 'ice cream',
-  'paper_brand' => 'dymo',
-  'paper_model' => '30334',
+[2026-07-21 12:52:38] local.INFO: CREATE TEMPLATE   
+[2026-07-21 12:52:38] local.INFO: array (
+  'template_name' => 'new_demo',
+  'description' => 'new_demo',
+  'note' => 'new_demo',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-2x1',
   'layout_settings' => 
   array (
-    'name' => 'Jewelry Label',
+    'name' => 'Small Label',
     'paper' => 
     array (
-      'width' => 54,
-      'height' => 25,
+      'width' => 50.8,
+      'height' => 25.4,
     ),
     'label' => 
     array (
-      'width' => 54,
-      'height' => 25,
+      'width' => 50.8,
+      'height' => 25.4,
     ),
     'rows' => 1,
     'columns' => 1,
     'gapX' => 0,
     'gapY' => 0,
-    'marginTop' => 0,
-    'marginLeft' => 0,
   ),
 )  
-[2026-07-20 12:55:43] local.INFO: Template Created {"id":18} 
-[2026-07-20 12:56:25] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":5,"requested_template_id":"18"} 
-[2026-07-20 13:17:41] local.INFO: CREATE TEMPLATE   
-[2026-07-20 13:17:41] local.INFO: array (
-  'template_name' => 'new',
-  'description' => 'new',
-  'note' => 'new',
-  'paper_brand' => 'dymo',
-  'paper_model' => '30334',
-  'layout_settings' => 
-  array (
-    'name' => 'Jewelry Label',
-    'paper' => 
-    array (
-      'width' => 54,
-      'height' => 25,
-    ),
-    'label' => 
-    array (
-      'width' => 54,
-      'height' => 25,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-    'marginTop' => 0,
-    'marginLeft' => 0,
-  ),
-)  
-[2026-07-20 13:17:41] local.INFO: Template Created {"id":19} 
+[2026-07-21 12:52:38] local.INFO: Template Created {"id":27} 

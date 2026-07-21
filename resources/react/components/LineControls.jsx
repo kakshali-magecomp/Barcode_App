@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, FormLayout, TextField, Checkbox, Box, Text, BlockStack } from '@shopify/polaris';
 
 export default function LineControls({ design, handleUpdate }) {
+    
     return (
         <BlockStack gap="400">
             <Card padding="400">

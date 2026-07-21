@@ -7,8 +7,10 @@ import {
     Box,
     Select,
     TextField,
+    FormLayout,
+    Grid,
+    Button,
 } from "@shopify/polaris";
-
 import LineControls from "../components/LineControls";
 import SymbolControls from "../components/SymbolControls";
 import BarcodeRenderer from "../components/BarcodeRenderer";
@@ -48,7 +50,6 @@ export default function DesignCanvasEdit({
         online_url: "",
     });
     const printRef = useRef(null);
-
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState("");
     const [printSettings, setPrintSettings] = useState({});
@@ -238,9 +239,20 @@ ${labels}
             return previewItem.sku || "";
     }
 };
+const formatPrice = (price) => {
+    const amount = Number(price || 0).toFixed(2);
 
-    return (
-        <Card padding="500">
+    let format = design.line2_currency_format || "${amount}";
+
+    return format.replace("{amount}", amount);
+};
+
+  return (
+    <Grid>
+
+        {/* LEFT SIDE */}
+        <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 8, lg: 8 }}>
+
             <BlockStack gap="500">
 
                 {error && (
@@ -248,17 +260,15 @@ ${labels}
                         <p>{error}</p>
                     </Banner>
                 )}
+
                 <Card padding="400">
                     <Select
                         label="Preview Product"
-
                         options={storeVariants.map(item => ({
                             label: `${item.product_title} (${item.current_sku || "No SKU"})`,
                             value: item.variant_id,
                         }))}
-
                         value={selectedVariantId}
-
                         onChange={(value) => {
 
                             setSelectedVariantId(value);
@@ -280,14 +290,12 @@ ${labels}
                                         ? selected.variant_title
                                         : "",
                                 online_url: selected.online_url || "",
-                                barcode: selected.barcode||"",
                             });
 
-                            // save selected variant into design
                             updateField("selected_variant_id", value);
+
                         }}
                     />
-
                 </Card>
 
                 <LineControls
@@ -300,15 +308,31 @@ ${labels}
                     handleUpdate={updateField}
                 />
 
+            </BlockStack>
+
+        </Grid.Cell>
+
+        {/* RIGHT SIDE */}
+        <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
+
+            <div
+                style={{
+                    position: "sticky",
+                    top: "20px",
+                }}
+            >
+
+                {/* Preview */}
                 <Card padding="400">
+
                     <div
                         ref={printRef}
-                        className="label"
                         style={{
+                            border: "1px solid #dfe3e8",
+                            borderRadius: 8,
                             background: "#fff",
-                            border: "1px solid #d9d9d9",
-                            borderRadius: "6px",
-                            padding: "20px",
+                            minHeight: 220,
+                            padding: 20,
                             textAlign: "center",
                         }}
                     >
@@ -317,21 +341,25 @@ ${labels}
                             <div
                                 style={{
                                     fontFamily: "monospace",
-                                    fontSize: 14,
-                                    marginBottom: 5,
+                                    fontSize: 12,
+                                    marginBottom: 8,
                                 }}
                             >
                                 {previewItem.sku}
                             </div>
                         )}
 
-                        <div>
+                        <div
+                            style={{
+                                marginBottom: 15,
+                            }}
+                        >
 
                             {design.line2_name && (
                                 <span
                                     style={{
-                                        fontWeight: "bold",
-                                        fontSize: 16,
+                                        fontWeight: 700,
+                                        fontSize: 18,
                                     }}
                                 >
                                     {previewItem.title}
@@ -353,12 +381,12 @@ ${labels}
                             {design.line2_price && (
                                 <span
                                     style={{
-                                        marginLeft: 10,
-                                        color: "green",
-                                        fontWeight: "bold",
+                                        marginLeft: 8,
+                                        color: "#008060",
+                                        fontWeight: 700,
                                     }}
                                 >
-                                    ${previewItem.price}
+                                    {formatPrice(previewItem.price)}
                                 </span>
                             )}
 
@@ -367,8 +395,8 @@ ${labels}
                         {design.line3_vendor && (
                             <div
                                 style={{
-                                    marginTop: 5,
-                                    fontSize: 13,
+                                    marginBottom: 15,
+                                    color: "#777",
                                 }}
                             >
                                 {previewItem.vendor}
@@ -376,62 +404,76 @@ ${labels}
                         )}
 
                         {design.symbol_enabled && (
-                            <Box paddingBlockStart="400">
-                                {design.symbol_type === "BARCODE" ? (
-                                    <BarcodeRenderer
-                                        value={getSymbolTargetValue()}
-                                        settings={design}
-                                    />
-                                ) : 
-                                
-                                (
-                                    <QrCodeRenderer
-                                        value={getSymbolTargetValue()}
-                                        settings={design}
-                                    />
-                                )}
-                            </Box>
+
+                            design.symbol_type === "BARCODE" ?
+
+                                <BarcodeRenderer
+                                    value={getSymbolTargetValue()}
+                                    settings={design}
+                                />
+
+                                :
+
+                                <QrCodeRenderer
+                                    value={getSymbolTargetValue()}
+                                    settings={design}
+                                />
+
                         )}
+
                         {design.barcode && (
-                            <div style={{
-                                    marginTop: 5,
-                                    fontSize: 13,
-                                }}>
-                                    {previewItem.barcode}
-                                </div>
+
+                            <div
+                                style={{
+                                    marginTop: 12,
+                                    fontWeight: 600,
+                                }}
+                            >
+                                {previewItem.barcode}
+                            </div>
+
                         )}
 
                     </div>
+
                 </Card>
-                <Box paddingBlockStart="400">
-                    <TextField
-                        label="Print Quantity"
-                        type="number"
-                        value={String(design.print_qty || 1)}
-                        onChange={(value) =>
-                            updateField(
-                                "print_qty",
-                                Math.max(1, parseInt(value) || 1)
-                            )
-                        }
-                        autoComplete="off"
-                    />
-                    <button
-                        onClick={handlePrint}
-                        style={{
-                            background: "#008060",
-                            color: "#fff",
-                            border: "none",
-                            padding: "10px 18px",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            fontWeight: "600",
-                        }}
-                    >
-                        🖨 Print Label
-                    </button>
-                </Box>
-            </BlockStack>
-        </Card>
-    );
+
+                <div style={{ height: 15 }} />
+
+                {/* Print */}
+                <Card padding="400">
+
+                    <BlockStack gap="300">
+
+                        <TextField
+                            label="Print Quantity"
+                            type="number"
+                            value={String(design.print_qty || 1)}
+                            onChange={(value) =>
+                                updateField(
+                                    "print_qty",
+                                    Math.max(1, parseInt(value) || 1)
+                                )
+                            }
+                            autoComplete="off"
+                        />
+
+                        <Button
+                            variant="primary"
+                            fullWidth
+                            onClick={handlePrint}
+                        >
+                            🖨 Print Label
+                        </Button>
+
+                    </BlockStack>
+
+                </Card>
+
+            </div>
+
+        </Grid.Cell>
+
+    </Grid>
+);
 }

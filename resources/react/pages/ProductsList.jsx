@@ -22,7 +22,6 @@ export default function GenerateSku() {
     const [method, setMethod] = useState("missing");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
     const generateSku = async () => {
         if (
             method !== "missing" &&
@@ -31,7 +30,6 @@ export default function GenerateSku() {
             appBridge.toast.show("Please select at least one product.");
             return;
         }
-
         try {
             setLoading(true);
             setError("");
@@ -55,7 +53,6 @@ export default function GenerateSku() {
                             metafields: item.metafields,
                         })),
             };
-
             console.log(payload);
             const response = await fetch("/api/products/generate-sku", {
                 method: "POST",
@@ -65,11 +62,9 @@ export default function GenerateSku() {
                 },
                 body: JSON.stringify(payload),
             });
-
             if (!response.ok) {
                 throw new Error("Server Error");
             }
-
             const json = await response.json();
             if (json.status === 1) {
                 appBridge.toast.show(json.message || "SKU generated successfully.");
@@ -88,19 +83,17 @@ export default function GenerateSku() {
     };
 
     return (
-        <Page title="Generate SKU">
+        <Page title="Generate SKU" subtitle="Manage and edit your customized SKU">
             {error && (
                 <Banner tone="critical" onDismiss={() => setError("")}>
                     {error}
                 </Banner>
             )}
-
             <Card>
                 <BlockStack gap="500">
                     <Text variant="headingMd" as="h2">
                         SKU Generation Method
                     </Text>
-
                     <RadioButton
                         label="Only generate SKU for selected products or variants that don't have SKU"
                         checked={method === "missing"}
@@ -108,7 +101,6 @@ export default function GenerateSku() {
                         name="method"
                         onChange={() => setMethod("missing")}
                     />
-
                     <RadioButton
                         label="Generate SKU for all selected products or variants. Replace existing SKU if already available."
                         checked={method === "replace"}
@@ -116,7 +108,6 @@ export default function GenerateSku() {
                         name="method"
                         onChange={() => setMethod("replace")}
                     />
-
                     <RadioButton
                         label="Generate SKU from barcode number"
                         checked={method === "barcode"}
@@ -124,7 +115,6 @@ export default function GenerateSku() {
                         name="method"
                         onChange={() => setMethod("barcode")}
                     />
-
                     <Divider />
                     <InlineStack
                         align="space-between"
@@ -134,7 +124,6 @@ export default function GenerateSku() {
                         <Text variant="headingMd" as="h2">
                             Selected Products
                         </Text>
-
                         {method === "missing" ? (
                             <Text as="p" tone="subdued">
                                 All products without SKU will be processed automatically.
@@ -145,13 +134,11 @@ export default function GenerateSku() {
                                 {selectedProducts.length !== 1 ? "s" : ""} selected
                             </Text>
                         )}
-
                         {method !== "missing" && (
                             <Button onClick={() => setPickerOpen(true)}>
                                 Choose Products
                             </Button>
                         )}
-
                         <Button
                             variant="primary"
                             loading={loading}
@@ -165,47 +152,34 @@ export default function GenerateSku() {
             {updatedProducts.length > 0 && (
                 <Card>
                     <BlockStack gap="400">
-
                         <Text variant="headingMd" as="h2">
                             Generated SKU Summary
                         </Text>
-
                         {updatedProducts.map((item, index) => (
-
                             <Card key={index} roundedAbove="sm">
-
                                 <BlockStack gap="200">
-
                                     <Text fontWeight="bold">
                                         {item.product_title}
                                     </Text>
-
                                     {item.variant_title !== "Default Title" && (
                                         <Text tone="subdued">
                                             {item.variant_title}
                                         </Text>
                                     )}
-
                                     <Text>
                                         Old SKU :
                                         <strong> {item.old_sku || "-"}</strong>
                                     </Text>
-
                                     <Text tone="success">
                                         New SKU :
                                         <strong> {item.new_sku}</strong>
                                     </Text>
-
                                 </BlockStack>
-
                             </Card>
-
                         ))}
-
                     </BlockStack>
                 </Card>
             )}
-
             <ProductPickerModal
                 open={pickerOpen}
                 onClose={() => setPickerOpen(false)}

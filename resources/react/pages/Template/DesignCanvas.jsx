@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Page, Card, Select, TextField, Box, Frame, Toast, BlockStack, Spinner, Grid, Banner, Layout, Button } from '@shopify/polaris';
 import { useAppBridge, SaveBar } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ export default function DesignCanvas() {
     const fetch = appBridge.fetch || window.fetch;
     const { id } = useParams();
     const navigate = useNavigate();
+    const printRef = useRef(null);
     const [printSettings, setPrintSettings] = useState({});
     const [barcodeSettings, setBarcodeSettings] = useState({});
     const [pageLoading, setPageLoading] = useState(true);
@@ -139,7 +140,7 @@ export default function DesignCanvas() {
                                 selected.variant_title !== "Default Title"
                                     ? selected.variant_title
                                     : "",
-                            
+
                             handle: selected.handle || "",
                         });
                     }
@@ -179,62 +180,131 @@ export default function DesignCanvas() {
         finally { setLoading(false); }
     }, [id, design, fetch, selectedVariantId]);
 
-    const handleTestPrintDownload = async () => {
-        try {
-            setLoading(true);
+    const handlePrint = () => {
 
-            const res = await fetch("/api/products/print-pdf", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/pdf",
-                },
-                body: JSON.stringify({
-                    template_id: id,
-                    variant_id: selectedVariantId,
-                    product_title: previewItem.title,
-                    sku: previewItem.sku,
-                    barcode: previewItem.barcode,
-                    online_url: previewItem.online_url,
-                    handle: previewItem.handle,
-                    price: formatPrice(previewItem.price),
-                    vendor: previewItem.vendor,
-                    option_1: previewItem.option_1,
-                    print_qty: design.print_qty,
-                    design,
-                })
-            });
+        if (!printRef.current) return;
 
-            console.log("Status:", res.status);
-            console.log("Content-Type:", res.headers.get("content-type"));
+        const qty = Number(design.print_qty) || 1;
 
-            if (!res.ok) {
-                const error = await res.text();
-                console.error(error);
-                alert(error);
-                return;
-            }
-            const blob = await res.blob();
-            console.log(blob.type);
-            if (blob.type !== "application/pdf") {
-                const text = await blob.text();
-                console.log(text);
-                alert("Server didn't return a PDF. Check console.");
-                return;
-            }
+        let labels = "";
 
-            const url = window.URL.createObjectURL(blob);
-            window.open(url);
+        for (let i = 0; i < qty; i++) {
 
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setLoading(false);
+            labels += `
+            <div class="label">
+                ${printRef.current.innerHTML}
+            </div>
+        `;
+
         }
+
+        const printWindow = window.open(
+            "",
+            "",
+            "width=900,height=700"
+        );
+
+        printWindow.document.write(`
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Print Barcode</title>
+
+<style>
+
+body{
+    margin:15px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    font-family:Arial,sans-serif;
+    justify-content:flex-start;
+}
+
+.label{
+
+    width:250px;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
+    padding:15px;
+
+    text-align:center;
+
+    page-break-inside:avoid;
+
+}
+
+img{
+
+    max-width:100%;
+
+}
+
+svg{
+
+    max-width:100%;
+
+}
+
+@media print{
+
+    body{
+
+        margin:0;
+
+        gap:10px;
+
+    }
+
+    .label{
+
+        border:none;
+
+        page-break-inside:avoid;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+${labels}
+
+</body>
+
+</html>
+`);
+
+        printWindow.document.close();
+
+        printWindow.focus();
+
+        setTimeout(() => {
+
+            printWindow.print();
+
+            printWindow.close();
+
+        }, 500);
+
+    };
+    const formatPreviewPrice = () => {
+        const format = design.line2_currency_format || "${amount}";
+        const amount = Number(previewItem.price || 0).toFixed(2);
+        return format.replace("{amount}", amount);
     };
 
     if (pageLoading) return <Box padding="1200" align="center"><Spinner size="large" /></Box>;
-
     return (
         <Frame>
             <SaveBar id="designer-bar" open={isDirty}>
@@ -255,33 +325,40 @@ export default function DesignCanvas() {
             </SaveBar>
             <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
                 <BlockStack gap="400">
-                    <Card padding="400">
-                        <Select label="Preview Product Variant Context"
-                            options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))}
-                            value={selectedVariantId}
-                            onChange={(id) => {
-                                setSelectedVariantId(id);
-                                const selected = storeVariants.find(
-                                    item => item.variant_id === id
-                                );
+                    <div
+                        style={{
+                            width: "58%",
+                            marginBottom: "5px",
+                        }}
+                    >
+                        <Card padding="400">
+                            <Select label="Preview Product Variant Context"
+                                options={storeVariants.map(v => ({ label: `${v.product_title} (${v.current_sku || 'No SKU'})`, value: v.variant_id }))}
+                                value={selectedVariantId}
+                                onChange={(id) => {
+                                    setSelectedVariantId(id);
+                                    const selected = storeVariants.find(
+                                        item => item.variant_id === id
+                                    );
 
-                                if (!selected) return;
-                                setPreviewItem({
-                                    title: selected.product_title,
-                                    sku: selected.current_sku || "NO-SKU",
-                                    barcode: selected.barcode || "",
-                                    price: selected.price,
-                                    vendor: selected.vendor,
-                                    option_1:
-                                        selected.variant_title !== "Default Title"
-                                            ? selected.variant_title
-                                            : "",
-                                    online_url: selected.online_url || "",
-                                    handle: selected.handle || "",
+                                    if (!selected) return;
+                                    setPreviewItem({
+                                        title: selected.product_title,
+                                        sku: selected.current_sku || "NO-SKU",
+                                        barcode: selected.barcode || "",
+                                        price: selected.price,
+                                        vendor: selected.vendor,
+                                        option_1:
+                                            selected.variant_title !== "Default Title"
+                                                ? selected.variant_title
+                                                : "",
+                                        online_url: selected.online_url || "",
+                                        handle: selected.handle || "",
 
-                                });
-                            }} />
-                    </Card>
+                                    });
+                                }} />
+                        </Card>
+                    </div>
                     <Grid>
                         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 7, lg: 7 }}>
                             <BlockStack gap="400">
@@ -294,8 +371,8 @@ export default function DesignCanvas() {
                             <Layout.Section variant="oneThird">
                                 <div
                                     style={{
-                                        position: "sticky",
-                                        top: "20px",
+                                        position: "fixed",
+                                        top: "70px",
                                         display: "flex",
                                         flexDirection: "column",
                                         gap: "16px",
@@ -304,87 +381,88 @@ export default function DesignCanvas() {
                                 >
                                     {/* Preview Card */}
                                     <Card padding="300">
-
-                                        <div
-                                            style={{
-                                                minHeight: "320px",
-                                                display: "flex",
-                                                flexDirection: "column",
-                                                justifyContent: "flex-start",
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            {design.line1_sku && (
-                                                <div
-                                                    style={{
-                                                        fontWeight: 600,
-                                                        marginBottom: 8,
-                                                        fontSize: 14,
-                                                    }}
-                                                >
-                                                    {previewItem.sku}
-                                                </div>
-                                            )}
-
+                                        <div ref={printRef}>
                                             <div
                                                 style={{
+                                                    minHeight: "220px",
                                                     display: "flex",
-                                                    flexWrap: "wrap",
+                                                    flexDirection: "column",
                                                     justifyContent: "center",
-                                                    gap: 6,
-                                                    marginBottom: 20,
+                                                    alignItems: "center",
                                                 }}
                                             >
-                                                {design.line2_name && (
-                                                    <span
+                                                {design.line1_sku && (
+                                                    <div
                                                         style={{
-                                                            fontWeight: 700,
-                                                            fontSize: 16,
+                                                            fontWeight: 600,
+                                                            marginBottom: 8,
+                                                            fontSize: 14,
                                                         }}
                                                     >
-                                                        {previewItem.title}
-                                                    </span>
+                                                        {previewItem.sku}
+                                                    </div>
                                                 )}
 
-                                                {design.line2_variant_option1 &&
-                                                    previewItem.option_1 && (
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        flexWrap: "wrap",
+                                                        justifyContent: "center",
+                                                        gap: 6,
+                                                        marginBottom: 20,
+                                                    }}
+                                                >
+                                                    {design.line2_name && (
                                                         <span
                                                             style={{
-                                                                color: "#666",
+                                                                fontWeight: 700,
+                                                                fontSize: 16,
                                                             }}
                                                         >
-                                                            • {previewItem.option_1}
+                                                            {previewItem.title}
                                                         </span>
                                                     )}
 
-                                                {design.line2_price && (
-                                                    <span
-                                                        style={{
-                                                            color: "#008060",
-                                                            fontWeight: 700,
-                                                        }}
-                                                    >
-                                                        {formatPrice(previewItem.price)}
-                                                    </span>
+                                                    {design.line2_variant_option1 &&
+                                                        previewItem.option_1 && (
+                                                            <span
+                                                                style={{
+                                                                    color: "#666",
+                                                                }}
+                                                            >
+                                                                • {previewItem.option_1}
+                                                            </span>
+                                                        )}
+
+                                                    {design.line2_price && (
+                                                        <span
+                                                            style={{
+                                                                color: "#008060",
+                                                                fontWeight: 700,
+                                                            }}
+                                                        >
+                                                            {formatPreviewPrice()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                {design.symbol_enabled && (
+                                                    design.symbol_type === "BARCODE" ? (
+                                                        <BarcodeRenderer
+                                                            value={getSymbolTargetValue()}
+                                                            settings={design}
+                                                            barcodeSettings={
+                                                                barcodeSettings.data ??
+                                                                barcodeSettings
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <QrCodeRenderer
+                                                            value={getSymbolTargetValue()}
+                                                            design={design}
+                                                        />
+                                                    )
                                                 )}
                                             </div>
-                                            {design.symbol_enabled && (
-                                                design.symbol_type === "BARCODE" ? (
-                                                    <BarcodeRenderer
-                                                        value={getSymbolTargetValue()}
-                                                        settings={design}
-                                                        barcodeSettings={
-                                                            barcodeSettings.data ??
-                                                            barcodeSettings
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <QrCodeRenderer
-                                                        value={getSymbolTargetValue()}
-                                                        design={design}
-                                                    />
-                                                )
-                                            )}
                                         </div>
                                     </Card>
 
@@ -411,11 +489,10 @@ export default function DesignCanvas() {
 
                                             <Button
                                                 variant="primary"
-                                                size="large"
                                                 fullWidth
-                                                onClick={handleTestPrintDownload}
+                                                onClick={handlePrint}
                                             >
-                                                Test Print
+                                                Print
                                             </Button>
 
                                         </BlockStack>
