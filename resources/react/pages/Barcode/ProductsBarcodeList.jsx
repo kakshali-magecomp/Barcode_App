@@ -1,27 +1,49 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-    Page,
-    Card,
-    RadioButton,
-    Button,
-    Text,
-    BlockStack,
-    Banner,
-    Divider,
-    InlineStack,
-    Select,
-    Box,
-} from "@shopify/polaris";
+import { Page, Card, RadioButton, Button, Text, BlockStack, Banner, Divider, InlineStack, Select, Box, } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import ProductPickerModal from "../../components/ProductPickerModal";
 import BarcodeRenderer from "../../components/BarcodeRenderer";
 import QrCodeRenderer from "../../components/QrCodeRenderer";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function GenerateBarcode() {
     const appBridge = useAppBridge();
     const fetch = appBridge.fetch || window.fetch;
+    const location = useLocation();
+    const {
+        fromHistory = false,
+        historyId = null,
+        mode = "missing",
+        selectedProducts: historySelectedProducts = [],
+        originalHistoryProducts = [],
+        templateId = null,
+    } = location.state || {};
+    const [selectedProducts, setSelectedProducts] = useState([]);
+    const [originalProducts, setOriginalProducts] = useState([]);
+
     const [method, setMethod] = useState("missing");
     const [previewItem, setPreviewItem] = useState(null);
+
+    useEffect(() => {
+        if (!fromHistory) return;
+        setMethod("print");
+        setOriginalProducts(originalHistoryProducts);
+        const products = historySelectedProducts.map(item => ({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            product_title: item.product_title,
+            barcode: item.barcode,
+            current_sku: item.current_sku ?? item.sku,
+            quantity: item.qty ?? item.quantity,
+            generated_barcode: item.barcode,
+            option_1: item.option_1 ?? "",
+            option_2: item.option_2 ?? "",
+            option_3: item.option_3 ?? "",
+            metafields: item.metafields ?? [],
+        }));
+        setSelectedProducts(products);
+    }, [fromHistory, historySelectedProducts, originalHistoryProducts,]);
+
     const updateProductQuantity = (variantId, qty) => {
         setSelectedProducts((prev) =>
             prev.map((item) =>
@@ -34,7 +56,7 @@ export default function GenerateBarcode() {
             )
         );
     };
-    const [selectedProducts, setSelectedProducts] = useState([]);
+
     const [generatedProducts, setGeneratedProducts] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState("");
     const printRef = useRef();
@@ -48,6 +70,7 @@ export default function GenerateBarcode() {
     const [pickerOpen, setPickerOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function loadTemplates() {
@@ -64,6 +87,13 @@ export default function GenerateBarcode() {
         }
         loadTemplates();
     }, []);
+
+    useEffect(() => {
+        if (!fromHistory) return;
+        if (!templateId) return;
+        if (templates.length === 0) return;
+        handleTemplateChange(templateId);
+    }, [templates, templateId, fromHistory]);
 
     const handleTemplateChange = async (templateId) => {
         setSelectedTemplate(templateId);
@@ -85,6 +115,49 @@ export default function GenerateBarcode() {
             console.error(err);
         } finally {
             setLoadingTemplate(false);
+        }
+    };
+
+    const updatedHistoryProducts = originalProducts.map(original => {
+        const edited = selectedProducts.find(
+            p => p.variant_id === original.variant_id
+        );
+        if (!edited) {
+            return original;
+        }
+        return {
+            ...original,
+            qty: edited.quantity,
+            barcode: edited.barcode,
+            current_sku: edited.current_sku,
+        };
+    });
+
+    const savePrintHistory = async () => {
+        try {
+            console.log("Selected Products:", selectedProducts);
+            const response = await fetch("/api/print-history", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    template_id: Number(selectedTemplate),
+                    products: selectedProducts.map(product => ({
+                        product_id: product.product_id ?? null,
+                        variant_id: product.variant_id,
+                        product_title: product.product_title,
+                        current_sku: product.current_sku,
+                        barcode: product.barcode,
+                        qty: product.quantity,
+                    })),
+                }),
+            });
+            const json = await response.json();
+            console.log("History Response:", json);
+
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -151,9 +224,25 @@ export default function GenerateBarcode() {
             appBridge.toast.show(
                 json.message || "Barcode generated successfully."
             );
-            setGeneratedProducts(
-                json.updated_products || []
+
+            const updatedProducts = json.updated_products || [];
+            setGeneratedProducts(updatedProducts);
+            setSelectedProducts(prev =>
+                prev.map(product => {
+                    const updated = updatedProducts.find(
+                        p => p.variant_id === product.variant_id
+                    );
+                    if (!updated) return product;
+                    return {
+                        ...product,
+                        barcode: updated.generated_barcode ?? updated.barcode,
+                        generated_barcode: updated.generated_barcode ?? updated.barcode,
+                    };
+                })
             );
+
+            setMethod("print");
+            setPickerOpen(false);
 
             // Close picker only
             setPickerOpen(false);
@@ -214,18 +303,29 @@ ${labels}
         printWindow.document.close();
         setTimeout(() => {
             printWindow.print();
+            savePrintHistory();
             printWindow.close();
         }, 500);
     };
 
     return (
         <Page title="Generate Barcode"
-            subtitle="Manage and edit your customized Barcode"
-            primaryAction={{
-                content: 'Print History',
-                url: '#',
-            }}
-        >
+            subtitle="Manage and edit your customized Barcode">
+            <Box paddingBlockEnd="400">
+                <InlineStack gap="100">
+                    <Button
+                        variant="primary"
+                        onClick={() => navigate("/LabelHistory")}
+                    >
+                        Print History
+                    </Button>
+                    {/* <Button
+                        onClick={() => navigate("/LabelHistory")}
+                    >
+                        Generate History
+                    </Button> */}
+                </InlineStack>
+            </Box>
             {error && (
                 <Banner tone="critical" onDismiss={() => setError("")}>
                     {error}
@@ -377,7 +477,8 @@ ${labels}
                     setPickerOpen(false);
                 }}
             />
-            {method === "print" && templateDesign && previewItem && (
+            
+            {method === "print" && templateDesign && selectedProducts.length > 0 && (
                 <Card padding="400">
                     <Text variant="headingMd" as="h2">
                         Preview

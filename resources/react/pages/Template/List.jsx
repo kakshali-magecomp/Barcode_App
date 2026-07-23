@@ -3,6 +3,7 @@ import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, 
 import { useAppBridge } from '@shopify/app-bridge-react';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal.jsx';
 import { EditIcon, DeleteIcon } from "@shopify/polaris-icons";
+import { useNavigate } from "react-router-dom";
 
 export default function TemplateList() {
     const appBridge = useAppBridge();
@@ -16,6 +17,7 @@ export default function TemplateList() {
     const [activeModal, setActiveModal] = useState(false);
     const [templateToDelete, setTemplateToDelete] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const navigate = useNavigate();
 
     const loadTemplates = async () => {
         try {
@@ -87,7 +89,6 @@ export default function TemplateList() {
     };
 
     const resourceName = { singular: 'template', plural: 'templates' };
-
     const rowMarkup = templates.map(
         ({ id, template_name, paper_brand, paper_model, created_at }, index) => (
             <IndexTable.Row id={String(id)} key={id} position={index}>

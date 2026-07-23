@@ -48,5 +48,9 @@ class BarcodeTemplate extends Model
     {
         return $this->hasMany(LabelHistory::class, 'barcode_template_id');
     }
+    public function printHistories()
+    {
+        return $this->hasMany(PrintHistory::class,'template_id');
+    }
 
 }

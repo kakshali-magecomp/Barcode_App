@@ -14,16 +14,12 @@ export default function QrCodeRenderer({ value, settings = {} }) {
     QRCode.toDataURL(String(value), {
 
         width: parseInt(settings.symbol_width_px) || 140,
-
         margin: parseInt(settings.symbol_margin_px) || 2,
-
         color: {
             dark: settings.symbol_color || "#000000",
             light: "#FFFFFF"
         },
-
         errorCorrectionLevel: "H"
-
     })
     .then(url => {
 

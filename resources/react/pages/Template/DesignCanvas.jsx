@@ -323,7 +323,7 @@ ${labels}
                     Discard
                 </button>
             </SaveBar>
-            <Page title="Sticker Template Designer Studio" backAction={{ content: 'Templates', url: '/TemplateList' }}>
+            <Page title="Template Designer" backAction={{ content: 'Templates', url: '/TamplateCreate/${id}' }}>
                 <BlockStack gap="400">
                     <div
                         style={{
@@ -458,7 +458,7 @@ ${labels}
                                                     ) : (
                                                         <QrCodeRenderer
                                                             value={getSymbolTargetValue()}
-                                                            design={design}
+                                                            settings={design}
                                                         />
                                                     )
                                                 )}

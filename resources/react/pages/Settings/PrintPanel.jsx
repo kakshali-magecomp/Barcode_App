@@ -9,8 +9,10 @@ export default function PrintPanel({ settings = {}, templates = [], onChange }) 
     ];
 
     const generateOptions = [
-        { label: 'Generate barcode for all selected products or variants. If products or variants don\'t have barcode v', value: 'manual' },
-        { label: 'Auto-generate on inventory receipt', value: 'auto_receipt' }
+        { label: 'Only print barcode labels for selected products or variants that already have barcode value', value: 'exist' },
+        { label: 'Only generate barcode for selected products or variants that do not have barcode value yet', value: 'missing' },
+        { label: 'Generate barcode for all selected products or variants. If products or variants do not have barcode value, generate new barcode data. If products or variants already have barcode value, replace the old value with new one', value: 'replace' },
+        { label: 'Generate barcode for all selected products or variants. If products or variants do not have barcode value, using products SKU attribute for generating barcode', value: 'sku' },
     ];
 
     const templateOptions = [

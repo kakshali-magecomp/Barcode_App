@@ -286,11 +286,11 @@ export default function SkuSettingsIndex() {
                                             }
                                         />
                                     </FormLayout.Group>
-                                    <FormLayout.Group>
+                                    {/* <FormLayout.Group>
                                         <Select label="Option 1" options={positionOptions} value={skuSettings.segment_option1} onChange={(val) => handleFieldChange('segment_option1', val)} />
                                         <Select label="Option 2" options={positionOptions} value={skuSettings.segment_option2} onChange={(val) => handleFieldChange('segment_option2', val)} />
                                         <Select label="Option 3" options={positionOptions} value={skuSettings.segment_option3} onChange={(val) => handleFieldChange('segment_option3', val)} />
-                                    </FormLayout.Group>
+                                    </FormLayout.Group> */}
                                 </FormLayout>
                             </Card>
                         </Layout.Section>
@@ -300,11 +300,11 @@ export default function SkuSettingsIndex() {
                             <Card padding="500">
                                 <FormLayout>
                                     <Text variant="headingMd" as="h3">Formatting Options</Text>
-                                    <Checkbox
+                                    {/* <Checkbox
                                         label="Hide variations options 1, 2, 3 segments"
                                         checked={skuSettings.hide_options_1_2_3}
                                         onChange={(val) => handleFieldChange('hide_options_1_2_3', val)}
-                                    />
+                                    /> */}
                                     <Checkbox
                                         label="Force generated codes text characters to Uppercase"
                                         checked={skuSettings.force_uppercase_fields}
