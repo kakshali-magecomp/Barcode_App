@@ -1,16 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import {
-    Card,
-    BlockStack,
-    Banner,
-    Spinner,
-    Box,
-    Select,
-    TextField,
-    FormLayout,
-    Grid,
-    Button,
-} from "@shopify/polaris";
+import { Card, BlockStack, Banner, Spinner, Box, Select, TextField, FormLayout, Grid, Button,} from "@shopify/polaris";
 import LineControls from "../components/LineControls";
 import SymbolControls from "../components/SymbolControls";
 import BarcodeRenderer from "../components/BarcodeRenderer";
@@ -22,12 +11,10 @@ const defaultDesign = {
     line2_price: false,
     line2_variant_option1: false,
     line3_vendor: false,
-
     symbol_enabled: true,
     symbol_type: "BARCODE",
     symbol_color: "#000000",
     symbol_field_source: "barcode_value",
-
     print_qty: 1,
 };
 
@@ -35,12 +22,11 @@ export default function DesignCanvasEdit({
     templateId,
     onChange,
     onDirty,
+    discardSignal,
 }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
     const [design, setDesign] = useState(defaultDesign);
-
     const [previewItem, setPreviewItem] = useState({
         title: "Sample Item",
         sku: "SKU-1001",
@@ -55,7 +41,7 @@ export default function DesignCanvasEdit({
     const [printSettings, setPrintSettings] = useState({});
     useEffect(() => {
         loadDesign();
-    }, [templateId]);
+    }, [templateId, discardSignal]);
 
     async function loadDesign() {
         try {
@@ -88,24 +74,20 @@ export default function DesignCanvasEdit({
                     print_qty: defaultQty,
                 };
                 setDesign(loadedDesign);
-
                 // IMPORTANT
                 onChange?.(loadedDesign);
             }
 
             if (products.status === 1 && products.variants?.length) {
-
                 setStoreVariants(products.variants);
                 const savedVariantId =
                     template.data?.selected_variant_id || "";
-
                 const selected =
                     products.variants.find(
                         item => item.variant_id === savedVariantId
                     ) || products.variants[0];
 
                 setSelectedVariantId(selected.variant_id);
-
                 setPreviewItem({
                     title: selected.product_title,
                     sku: selected.current_sku || "NO SKU",
@@ -134,18 +116,14 @@ export default function DesignCanvasEdit({
                 ...prev,
                 [key]: value,
             };
-
             onChange?.(updated);
             onDirty?.();
-
             return updated;
         });
     }
     const handlePrint = () => {
-
         const qty = Number(design.print_qty) || 1;
         let labels = "";
-
         for (let i = 0; i < qty; i++) {
             labels += `
             <div class="label">
@@ -155,15 +133,11 @@ export default function DesignCanvasEdit({
         }
 
         const printWindow = window.open("", "", "width=900,height=700");
-
         printWindow.document.write(`
 <html>
 <head>
-
 <title>Print Label</title>
-
 <style>
-
 body{
     margin:20px;
     display:flex;
@@ -171,41 +145,29 @@ body{
     gap:12px;
     font-family:Arial,sans-serif;
 }
-
 .label{
     width:250px;
     border:1px solid #ddd;
     padding:20px;
     page-break-inside:avoid;
 }
-
 svg{
     max-width:100%;
 }
-
 </style>
-
 </head>
-
 <body>
-
 ${labels}
-
 </body>
-
 </html>
 `);
-
         printWindow.document.close();
-
         printWindow.focus();
-
         setTimeout(() => {
             printWindow.print();
             printWindow.close();
         }, 500);
     };
-
     if (loading) {
         return (
             <Box padding="400">
@@ -214,53 +176,39 @@ ${labels}
         );
     }
     const getSymbolTargetValue = () => {
-
     switch (design.symbol_field_source) {
-
         case "product_name":
             return previewItem.title || "";
-
         case "product_price":
             return previewItem.price || "";
-
         case "product_online_url":
             return previewItem.online_url || "";
-
         case "barcode_value":
             return previewItem.barcode || "";
-
         case "sku_value":
             return previewItem.sku || "";
-
         case "barcode":
             return previewItem.barcode || "";
-
         default:
             return previewItem.sku || "";
     }
 };
 const formatPrice = (price) => {
     const amount = Number(price || 0).toFixed(2);
-
     let format = design.line2_currency_format || "${amount}";
-
     return format.replace("{amount}", amount);
 };
 
   return (
     <Grid>
-
         {/* LEFT SIDE */}
         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 8, lg: 8 }}>
-
             <BlockStack gap="500">
-
                 {error && (
                     <Banner tone="critical">
                         <p>{error}</p>
                     </Banner>
                 )}
-
                 <Card padding="400">
                     <Select
                         label="Preview Product"
@@ -270,15 +218,11 @@ const formatPrice = (price) => {
                         }))}
                         value={selectedVariantId}
                         onChange={(value) => {
-
                             setSelectedVariantId(value);
-
                             const selected = storeVariants.find(
                                 item => item.variant_id === value
                             );
-
                             if (!selected) return;
-
                             setPreviewItem({
                                 title: selected.product_title,
                                 sku: selected.current_sku || "NO SKU",
@@ -291,40 +235,32 @@ const formatPrice = (price) => {
                                         : "",
                                 online_url: selected.online_url || "",
                             });
-
                             updateField("selected_variant_id", value);
 
                         }}
                     />
                 </Card>
-
                 <LineControls
                     design={design}
                     handleUpdate={updateField}
                 />
-
                 <SymbolControls
                     design={design}
                     handleUpdate={updateField}
                 />
-
             </BlockStack>
-
         </Grid.Cell>
 
         {/* RIGHT SIDE */}
         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
-
             <div
                 style={{
                     position: "sticky",
                     top: "20px",
                 }}
             >
-
                 {/* Preview */}
                 <Card padding="400">
-
                     <div
                         ref={printRef}
                         style={{
@@ -336,7 +272,6 @@ const formatPrice = (price) => {
                             textAlign: "center",
                         }}
                     >
-
                         {design.line1_sku && (
                             <div
                                 style={{
@@ -348,13 +283,11 @@ const formatPrice = (price) => {
                                 {previewItem.sku}
                             </div>
                         )}
-
                         <div
                             style={{
                                 marginBottom: 15,
                             }}
                         >
-
                             {design.line2_name && (
                                 <span
                                     style={{
@@ -365,7 +298,6 @@ const formatPrice = (price) => {
                                     {previewItem.title}
                                 </span>
                             )}
-
                             {design.line2_variant_option1 &&
                                 previewItem.option_1 && (
                                     <span
@@ -377,7 +309,6 @@ const formatPrice = (price) => {
                                         {previewItem.option_1}
                                     </span>
                                 )}
-
                             {design.line2_price && (
                                 <span
                                     style={{
@@ -391,7 +322,6 @@ const formatPrice = (price) => {
                             )}
 
                         </div>
-
                         {design.line3_vendor && (
                             <div
                                 style={{
@@ -402,27 +332,19 @@ const formatPrice = (price) => {
                                 {previewItem.vendor}
                             </div>
                         )}
-
                         {design.symbol_enabled && (
-
                             design.symbol_type === "BARCODE" ?
-
                                 <BarcodeRenderer
                                     value={getSymbolTargetValue()}
                                     settings={design}
                                 />
-
                                 :
-
                                 <QrCodeRenderer
                                     value={getSymbolTargetValue()}
                                     settings={design}
                                 />
-
                         )}
-
                         {design.barcode && (
-
                             <div
                                 style={{
                                     marginTop: 12,
@@ -431,20 +353,13 @@ const formatPrice = (price) => {
                             >
                                 {previewItem.barcode}
                             </div>
-
                         )}
-
                     </div>
-
                 </Card>
-
                 <div style={{ height: 15 }} />
-
                 {/* Print */}
                 <Card padding="400">
-
                     <BlockStack gap="300">
-
                         <TextField
                             label="Print Quantity"
                             type="number"
@@ -457,7 +372,6 @@ const formatPrice = (price) => {
                             }
                             autoComplete="off"
                         />
-
                         <Button
                             variant="primary"
                             fullWidth
@@ -465,15 +379,10 @@ const formatPrice = (price) => {
                         >
                             🖨 Print Label
                         </Button>
-
                     </BlockStack>
-
                 </Card>
-
             </div>
-
         </Grid.Cell>
-
     </Grid>
 );
 }

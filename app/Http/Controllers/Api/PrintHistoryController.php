@@ -23,6 +23,7 @@ class PrintHistoryController extends Controller
             'products.*.product_title' => 'required',
             'products.*.current_sku' => 'nullable',
             'products.*.barcode' => 'nullable',
+            'products.*.online_url' => 'nullable',
             'products.*.qty' => 'required|integer|min:1',
         ]);
 
@@ -44,8 +45,8 @@ class PrintHistoryController extends Controller
                 'product_title' => $product['product_title'],
                 'sku' => $product['current_sku'] ?? $product['sku'] ?? null,
                 'barcode' => $product['barcode'] ?? null,
+                'online_url' => $product['online_url'] ?? null,
                 'qty' => $product['qty'] ?? 1,
-
             ]);
         }
 

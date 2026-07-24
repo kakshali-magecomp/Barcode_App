@@ -7,6 +7,7 @@ import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
 import QrCodeRenderer from '../../components/QrCodeRenderer';
 
+
 export default function DesignCanvas() {
     const appBridge = useAppBridge();
     const fetch = appBridge.fetch || window.fetch;
@@ -22,6 +23,8 @@ export default function DesignCanvas() {
     const [errorBanner, setErrorBanner] = useState(null);
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState('');
+    const [originalDesign, setOriginalDesign] = useState(null);
+    const [originalVariantId, setOriginalVariantId] = useState("");
     const [previewItem, setPreviewItem] = useState({ title: 'Sample Item', sku: 'SKU-1001', price: '10.00', vendor: 'Vendor', option_1: '' });
     const [design, setDesign] = useState({ symbol_type: 'QR', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 });
 
@@ -50,7 +53,7 @@ export default function DesignCanvas() {
                 return previewItem.sku || "";
         }
 
-    }, [design, previewItem]);
+    }, [design.symbol_field_source, , previewItem]);
 
     const formatPrice = useCallback(
         (price) => {
@@ -70,7 +73,42 @@ export default function DesignCanvas() {
         },
         [printSettings]
     );
+    useEffect(() => {
 
+        if (designFromParent) {
+            setDesign(designFromParent);
+        }
+
+    }, [designFromParent]);
+
+    const handleDiscard = () => {
+        if (!originalDesign) return;
+        // Restore design
+        setDesign(JSON.parse(JSON.stringify(originalDesign)));
+        // Restore selected variant
+        setSelectedVariantId(originalVariantId);
+        // Restore preview product
+        const selected = storeVariants.find(
+            item => item.variant_id === originalVariantId
+        );
+        if (selected) {
+            setPreviewItem({
+                title: selected.product_title,
+                sku: selected.current_sku || "NO-SKU",
+                current_sku: selected.current_sku || "",
+                barcode: selected.barcode || "",
+                price: selected.price,
+                vendor: selected.vendor,
+                option_1:
+                    selected.variant_title !== "Default Title"
+                        ? selected.variant_title
+                        : "",
+                online_url: selected.online_url || "",
+                handle: selected.handle || "",
+            });
+        }
+        setIsDirty(false);
+    };
 
     useEffect(() => {
         async function loadData() {
@@ -86,10 +124,8 @@ export default function DesignCanvas() {
 
                 if (sRes.ok) {
                     const settings = await sRes.json();
-
                     if (settings.success) {
                         setPrintSettings(settings.settings);
-
                         defaultPrintQty =
                             settings.settings.default_print_label_quantity || 1;
                     }
@@ -98,7 +134,6 @@ export default function DesignCanvas() {
                     const barcode = await bRes.json();
                     setBarcodeSettings(barcode);
                 }
-
                 if (tRes.ok) {
                     const r = await tRes.json();
                     if (r.success) {
@@ -108,10 +143,10 @@ export default function DesignCanvas() {
                         };
 
                         console.log("Loaded Design:", designData);
-
                         setDesign(designData);
-
-                        setIsDirty(true);
+                        setOriginalDesign(structuredClone(designData));
+                        setOriginalVariantId(savedVariantId);
+                        setIsDirty(false);
                         savedVariantId =
                             r.data.selected_variant_id || "";
                     }
@@ -315,11 +350,7 @@ ${labels}
                 >
                     Save Design
                 </button>
-                <button
-                    onClick={() => {
-                        setIsDirty(false);
-                    }}
-                >
+                <button onClick={handleDiscard}>
                     Discard
                 </button>
             </SaveBar>

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Card, FormLayout, TextField, Select, Checkbox, Box } from '@shopify/polaris';
+import React ,{useState, useEffect,} from 'react';
+import { Card, FormLayout, TextField, Select, Checkbox, Box, Autocomplete, } from '@shopify/polaris';
+
 
 export default function PrintPanel({ settings = {}, templates = [], onChange }) {
     
@@ -9,16 +10,26 @@ export default function PrintPanel({ settings = {}, templates = [], onChange }) 
     ];
 
     const generateOptions = [
-        { label: 'Only print barcode labels for selected products or variants that already have barcode value', value: 'exist' },
-        { label: 'Only generate barcode for selected products or variants that do not have barcode value yet', value: 'missing' },
-        { label: 'Generate barcode for all selected products or variants. If products or variants do not have barcode value, generate new barcode data. If products or variants already have barcode value, replace the old value with new one', value: 'replace' },
+        { label: "Only generate barcode for selected products or variants that don't have barcode value yet", value: 'missing' },
+        { label: "Generate barcode for all selected products or variants. If products or variants don't have barcode value, generate new barcode data. If products or variants already have barcode value, replace the old value with new one", value: 'replace' },
         { label: 'Generate barcode for all selected products or variants. If products or variants do not have barcode value, using products SKU attribute for generating barcode', value: 'sku' },
+        { label: 'Only Print Labels for selected products or variants already have barcode', value: 'print' },
     ];
 
     const templateOptions = [
         { label: 'Select manually', value: 'manual' },
         ...templates.map(t => ({ label: t.template_name, value: String(t.id) }))
     ];
+    const [generateInput, setGenerateInput] = useState("");
+    useEffect(() => {
+    const option = generateOptions.find(
+        item => item.value === settings.default_generate_option
+    );
+
+    if (option) {
+        setGenerateInput(option.label);
+    }
+}, [settings.default_generate_option]);
 
     return (
         <Card padding="500">
@@ -48,12 +59,30 @@ export default function PrintPanel({ settings = {}, templates = [], onChange }) 
                     onChange={(val) => onChange('default_print_template_id', val === 'manual' ? null : parseInt(val))}
                 /> */}
 
-                <Select
-                    label="Default Generate Option"
-                    options={generateOptions}
-                    value={settings.default_generate_option || 'manual'}
-                    onChange={(val) => onChange('default_generate_option', val)}
-                />
+                <Autocomplete
+    options={generateOptions}
+    selected={[settings.default_generate_option || "missing"]}
+    textField={
+        <Autocomplete.TextField
+            label="Default Generate Option"
+            value={generateInput}
+            onChange={setGenerateInput}
+            autoComplete="off"
+        />
+    }
+    onSelect={(selected) => {
+        const value = selected[0];
+
+        const option = generateOptions.find(
+            item => item.value === value
+        );
+
+        if (option) {
+            setGenerateInput(option.label);
+            onChange("default_generate_option", value);
+        }
+    }}
+/>
 
                 <TextField
                     label="Default Print Label Quantity"

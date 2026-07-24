@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef, } from "react";
 import { DeleteIcon } from "@shopify/polaris-icons";
 import { Page, Card, InlineStack, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Modal, Toast, Frame, InlineGrid, TextField, } from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { useNavigate } from "react-router-dom";
+import { Pagination } from "@shopify/polaris";
 
 export default function LabelHistory() {
   const appBridge = useAppBridge();
@@ -20,7 +21,13 @@ export default function LabelHistory() {
   const [viewModal, setViewModal] = useState(false);
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const printRef = useRef(null);
   const [selectedItems, setSelectedItems] = useState([]);
+  const ITEMS_PER_PAGE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -118,6 +125,129 @@ export default function LabelHistory() {
     );
   }
 
+  const handlePrintHistory = () => {
+  if (!historyDetails) return;
+
+  const printWindow = window.open("", "_blank");
+
+  const rows = historyDetails.items
+    .filter((_, index) => selectedItems.includes(index))
+    .map(
+      (item) => `
+      <tr>
+        <td>${item.product_title}</td>
+        <td>${item.sku}</td>
+        <td>${item.barcode}</td>
+        <td style="text-align:center">${item.qty}</td>
+      </tr>
+    `
+    )
+    .join("");
+
+  printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+<title>Print Job #${historyDetails.id}</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    margin:25px;
+    color:#222;
+}
+
+h2{
+    margin-bottom:5px;
+}
+
+.info{
+    margin-bottom:20px;
+    color:#666;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#f3f3f3;
+    border:1px solid #ddd;
+    padding:12px;
+    text-align:left;
+    font-weight:bold;
+}
+
+td{
+    border:1px solid #ddd;
+    padding:12px;
+}
+
+tbody tr:nth-child(even){
+    background:#fafafa;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Print Job #${historyDetails.id}</h2>
+
+<div class="info">
+
+Template : ${historyDetails.template_id}
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Product</th>
+
+<th>SKU</th>
+
+<th>Barcode</th>
+
+<th>Qty</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${rows}
+
+</tbody>
+
+</table>
+
+<script>
+
+window.onload=function(){
+
+window.print();
+
+window.close();
+
+}
+
+</script>
+
+</body>
+
+</html>
+`);
+
+  printWindow.document.close();
+};
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
     const rows = histories.map((item, index) => `
@@ -199,6 +329,15 @@ window.close();
         ).toLocaleDateString()
         : "-",
   };
+  const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  const paginatedHistory = filteredHistory.slice(
+    startIndex,
+    endIndex
+  );
 
   return (
     <Frame>
@@ -266,7 +405,7 @@ window.close();
                 singular: "Print History",
                 plural: "Print Histories",
               }}
-              itemCount={filteredHistory.length}
+              itemCount={paginatedHistory.length}
               selectable={false}
               headings={[
                 { title: "Print ID" },
@@ -277,7 +416,7 @@ window.close();
                 // { title: "Actions" },
               ]}
             >
-              {filteredHistory.map((item, index) => (
+              {paginatedHistory.map((item, index) => (
                 <IndexTable.Row
                   id={String(item.id)}
                   key={item.id}
@@ -337,6 +476,20 @@ window.close();
               ))}
             </IndexTable>
           )}
+          <Box padding="400">
+            <InlineStack align="center">
+              <Pagination
+                hasPrevious={currentPage > 1}
+                onPrevious={() =>
+                  setCurrentPage((prev) => prev - 1)
+                }
+                hasNext={currentPage < totalPages}
+                onNext={() =>
+                  setCurrentPage((prev) => prev + 1)
+                }
+              />
+            </InlineStack>
+          </Box>
         </Card>
         {toastActive && (
           <Toast
@@ -374,9 +527,7 @@ window.close();
         large
         primaryAction={{
           content: "Print",
-          onAction: () => {
-            window.print();
-          },
+          onAction: handlePrintHistory,
         }}
       >
         <Modal.Section>
@@ -387,6 +538,7 @@ window.close();
           ) : (
             historyDetails && (
               <div
+                ref={printRef}
                 style={{
                   border: "1px solid #dfe3e8",
                   borderRadius: "10px",
@@ -395,6 +547,7 @@ window.close();
               >
                 {/* Header */}
                 <div
+                  className="no-print"
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -418,7 +571,7 @@ window.close();
                           fromHistory: true,
                           historyId: historyDetails.id,
                           mode: "print_existing",
-                          selectedProducts,                     
+                          selectedProducts,
                           originalHistoryProducts: historyDetails.items,
                           templateId: historyDetails.template_id,
                           historyProducts: historyDetails.items,

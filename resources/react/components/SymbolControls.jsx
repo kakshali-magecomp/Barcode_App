@@ -166,7 +166,7 @@ export default function SymbolControls({ design, handleUpdate }) {
                     },
                     {
                       label: "Code 39",
-                      value: "Code39",
+                      value: "CODE39",
                     },
                     {
                       label: "UPC-A",

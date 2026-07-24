@@ -10,25 +10,23 @@ export default function EditTemplate() {
     const fetch = app.fetch || window.fetch;
     const navigate = useNavigate();
     const { id } = useParams(); // Extracts the template ID from the route path parameter
-
     // Page Rendering 
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
-
     // Form State
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
-
     // UI Feedback State
     const [toastActive, setToastActive] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
     const [errorBanner, setErrorBanner] = useState(null);
     const [originalTemplate, setOriginalTemplate] = useState(null);
     const [design, setDesign] = useState({});
+    const [discardSignal, setDiscardSignal] = useState(0);
 
 
     // Dropdown Configuration Data
@@ -177,7 +175,7 @@ export default function EditTemplate() {
     // Load existing values from backend database on mount
     useEffect(() => {
         async function fetchTemplateData() {
-            try { 
+            try {
                 setPageLoading(true);
                 const response = await fetch(`/api/templates/${id}`);
                 const result = await response.json();
@@ -226,6 +224,9 @@ export default function EditTemplate() {
         setNote(originalTemplate.note || "");
         setBrand(originalTemplate.paper_brand || "");
         setModel(originalTemplate.paper_model || "");
+
+        setDesign({});             // clear edited design
+        setDiscardSignal(prev => prev + 1); // tell child to reload
 
         setIsDirty(false);
         setErrorBanner(null);
@@ -300,7 +301,6 @@ export default function EditTemplate() {
                 >
                     Save
                 </button>
-
                 <button onClick={handleDiscard}>
                     Discard
                 </button>
@@ -362,6 +362,7 @@ export default function EditTemplate() {
                             <Box paddingBlockStart="600">
                                 <DesignCanvasEdit
                                     templateId={id}
+                                    discardSignal={discardSignal}
                                     onChange={setDesign}
                                     onDirty={() => setIsDirty(true)}
                                 />

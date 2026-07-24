@@ -5,6 +5,8 @@ import ProductPickerModal from "../../components/ProductPickerModal";
 import BarcodeRenderer from "../../components/BarcodeRenderer";
 import QrCodeRenderer from "../../components/QrCodeRenderer";
 import { useNavigate, useLocation } from "react-router-dom";
+import { DeleteIcon } from "@shopify/polaris-icons";
+import QRCode from "react-qr-code";
 
 export default function GenerateBarcode() {
     const appBridge = useAppBridge();
@@ -21,27 +23,46 @@ export default function GenerateBarcode() {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [originalProducts, setOriginalProducts] = useState([]);
 
-    const [method, setMethod] = useState("missing");
+    const [method, setMethod] = useState("");
     const [previewItem, setPreviewItem] = useState(null);
 
     useEffect(() => {
         if (!fromHistory) return;
         setMethod("print");
         setOriginalProducts(originalHistoryProducts);
+        console.log(historySelectedProducts);
         const products = historySelectedProducts.map(item => ({
             product_id: item.product_id,
             variant_id: item.variant_id,
             product_title: item.product_title,
             barcode: item.barcode,
+            online_url: item.online_url,
             current_sku: item.current_sku ?? item.sku,
-            quantity: item.qty ?? item.quantity,
+            quantity:
+                item.qty ??
+                item.quantity ??
+                printSettings?.default_print_label_quantity ??
+                1,
             generated_barcode: item.barcode,
             option_1: item.option_1 ?? "",
             option_2: item.option_2 ?? "",
             option_3: item.option_3 ?? "",
             metafields: item.metafields ?? [],
         }));
-        setSelectedProducts(products);
+        console.log("History Products:", products);
+        let list = [...products];
+
+        if (printSettings?.sort_by_sku) {
+
+            list.sort((a, b) =>
+                (a.current_sku || "").localeCompare(
+                    b.current_sku || ""
+                )
+            );
+
+        }
+
+        setSelectedProducts(list);
     }, [fromHistory, historySelectedProducts, originalHistoryProducts,]);
 
     const updateProductQuantity = (variantId, qty) => {
@@ -71,6 +92,7 @@ export default function GenerateBarcode() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const [printSettings, setPrintSettings] = useState(null);
 
     useEffect(() => {
         async function loadTemplates() {
@@ -87,6 +109,32 @@ export default function GenerateBarcode() {
         }
         loadTemplates();
     }, []);
+
+    useEffect(() => {
+        async function loadPrintSettings() {
+            try {
+                const res = await fetch("/api/print-settings");
+                const json = await res.json();
+                if (json.success) {
+                    setPrintSettings(json.settings);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        loadPrintSettings();
+    }, []);
+    useEffect(() => {
+
+        if (!printSettings) return;
+        if (!fromHistory) {
+            setMethod(
+                printSettings.default_generate_option || "missing"
+            );
+        }
+
+    }, [printSettings, fromHistory]);
 
     useEffect(() => {
         if (!fromHistory) return;
@@ -133,9 +181,12 @@ export default function GenerateBarcode() {
         };
     });
 
+    console.log("Selected Products Before Save:", selectedProducts);
     const savePrintHistory = async () => {
         try {
-            console.log("Selected Products:", selectedProducts);
+            console.log(
+    JSON.stringify(selectedProducts, null, 2)
+);
             const response = await fetch("/api/print-history", {
                 method: "POST",
                 headers: {
@@ -149,6 +200,7 @@ export default function GenerateBarcode() {
                         product_title: product.product_title,
                         current_sku: product.current_sku,
                         barcode: product.barcode,
+                        online_url: product.online_url,
                         qty: product.quantity,
                     })),
                 }),
@@ -187,6 +239,7 @@ export default function GenerateBarcode() {
                             product_type: item.product_type,
                             current_sku: item.current_sku,
                             barcode: item.barcode,
+                            online_url: item.online_url,
                             option_1: item.option_1,
                             option_2: item.option_2,
                             option_3: item.option_3,
@@ -237,6 +290,7 @@ export default function GenerateBarcode() {
                         ...product,
                         barcode: updated.generated_barcode ?? updated.barcode,
                         generated_barcode: updated.generated_barcode ?? updated.barcode,
+                        online_url: updated.online_url ?? product.online_url,
                     };
                 })
             );
@@ -257,6 +311,18 @@ export default function GenerateBarcode() {
             );
         } finally {
             setLoading(false);
+        }
+    };
+    const removeProduct = (variantId) => {
+        setSelectedProducts((prevProducts) =>
+            prevProducts.filter(
+                (product) => product.variant_id !== variantId
+            )
+        );
+
+        // If all products are removed, hide the preview
+        if (selectedProducts.length === 1) {
+            setPreviewItem(null);
         }
     };
     const handlePrint = () => {
@@ -307,7 +373,9 @@ ${labels}
             printWindow.close();
         }, 500);
     };
-
+    console.log("Template Symbol Type:", templateDesign?.symbol_type);
+console.log("Field Source:", templateDesign?.symbol_field_source);
+console.log(selectedProducts);
     return (
         <Page title="Generate Barcode"
             subtitle="Manage and edit your customized Barcode">
@@ -456,28 +524,41 @@ ${labels}
                 open={pickerOpen}
                 onClose={() => setPickerOpen(false)}
                 onSelect={(products) => {
-                    console.log("Selected Products:", products);
-                    const productsWithQty = products.map(product => ({  // Add default quantity to every selected product
+
+                    const productsWithQty = products.map(product => ({
                         ...product,
-                        quantity: 1,
+                        quantity: product.quantity ?? 1,
                     }));
-                    setSelectedProducts(productsWithQty);// Save products with quantity
-                    if (productsWithQty.length > 0) {// Show first product in preview
-                        const first = productsWithQty[0];
-                        setPreviewItem({
-                            title: first.product_title,
-                            sku: first.current_sku,
-                            barcode: first.barcode || first.current_barcode,
-                            price: first.price,
-                            vendor: first.vendor,
-                            option_1: first.option_1,
-                            online_url: first.online_url,
+
+                    setSelectedProducts(prev => {
+
+                        const merged = [...prev];
+
+                        productsWithQty.forEach(product => {
+
+                            const exist = merged.find(
+                                p => p.variant_id === product.variant_id
+                            );
+
+                            if (!exist) {
+                                merged.push(product);
+                            }
+
                         });
-                    }
+
+                        return merged;
+
+                    });
+
+                    setPreviewItem(prev =>
+                        prev || productsWithQty[0] || null
+                    );
+
                     setPickerOpen(false);
+
                 }}
             />
-            
+
             {method === "print" && templateDesign && selectedProducts.length > 0 && (
                 <Card padding="400">
                     <Text variant="headingMd" as="h2">
@@ -511,10 +592,17 @@ ${labels}
                                     style={{
                                         display: "flex",
                                         justifyContent: "space-between",
-                                        alignItems: "center",
+                                        alignItems: "flex-start",
                                         marginBottom: "12px",
                                     }}
                                 >
+                                    <s-button
+                                        icon="delete"
+                                        variant="tertiary"
+                                        tone="critical"
+                                        onClick={() => removeProduct(product.variant_id)}
+                                    >
+                                    </s-button>
                                     <strong>{product.product_title}</strong>
                                     <div style={{ display: "flex", gap: "6px" }}>
                                         <Button
@@ -555,7 +643,11 @@ ${labels}
                                     )}
 
                                     {templateDesign?.line2_price && (
-                                        <div>${product.price}</div>
+                                        <div>{
+                                            Number(product.price || 0).toFixed(
+                                                Number(printSettings?.price_decimal_number ?? 2)
+                                            )
+                                        }</div>
                                     )}
 
                                     {templateDesign.symbol_type === "BARCODE" ? (

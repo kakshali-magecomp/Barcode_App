@@ -21,25 +21,85 @@ export default function ProductPickerModal({
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState("");
+  const [printSettings, setPrintSettings] = useState(null);
+  useEffect(() => {
+    async function loadPrintSettings() {
+        try {
+            const res = await fetch("/api/print-settings");
+            const json = await res.json();
+
+            if (json.success) {
+                setPrintSettings(json.settings);
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    loadPrintSettings();
+
+}, []);
 
   useEffect(() => {
     if (!open) return;
-
+    if (!printSettings) return;
     loadProducts();
-  }, [open]);
+}, [open, printSettings]);
 
   async function loadProducts() {
     setLoading(true);
+    try {
+        const res = await fetch("/api/products");
+        const json = await res.json();
+        if (!json.status) {
+            setProducts([]);
+            return;
+        }
+        let variants = [...json.variants];
 
-    const res = await fetch("/api/products");
-    const json = await res.json();
+        //hide draft product
+        if (printSettings?.hide_product_draft) {
 
-    if (json.status) {
-      setProducts(json.variants);
+            variants = variants.filter(
+                product => product.status !== "draft"
+            );
+
+        }
+
+        //Hide Archived Products
+        if (printSettings?.hide_product_archived) {
+
+            variants = variants.filter(
+                product => product.status !== "archived"
+            );
+
+        }
+
+        //short by SKU
+        if (printSettings?.sort_by_sku) {
+
+            variants.sort((a, b) =>
+                (a.current_sku || "").localeCompare(
+                    b.current_sku || ""
+                )
+            );
+
+        }
+
+        setProducts(variants);
+
+    } catch (err) {
+
+        console.log(err);
+
+    } finally {
+
+        setLoading(false);
+
     }
 
-    setLoading(false);
-  }
+}
 
   const filteredProducts = products.filter((item) =>
     item.product_title
