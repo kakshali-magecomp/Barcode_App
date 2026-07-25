@@ -73,13 +73,7 @@ export default function DesignCanvas() {
         },
         [printSettings]
     );
-    useEffect(() => {
-
-        if (designFromParent) {
-            setDesign(designFromParent);
-        }
-
-    }, [designFromParent]);
+    
 
     const handleDiscard = () => {
         if (!originalDesign) return;

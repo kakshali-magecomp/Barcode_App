@@ -38,16 +38,17 @@ export default function GenerateBarcode() {
             barcode: item.barcode,
             online_url: item.online_url,
             current_sku: item.current_sku ?? item.sku,
+            price: item.price,
+            vendor: item.vendor,
+            variant_title: item.variant_title,
+            option_1: item.option_1,
+            option_2: item.option_2,
+            option_3: item.option_3,
             quantity:
                 item.qty ??
                 item.quantity ??
                 printSettings?.default_print_label_quantity ??
                 1,
-            generated_barcode: item.barcode,
-            option_1: item.option_1 ?? "",
-            option_2: item.option_2 ?? "",
-            option_3: item.option_3 ?? "",
-            metafields: item.metafields ?? [],
         }));
         console.log("History Products:", products);
         let list = [...products];
@@ -83,6 +84,7 @@ export default function GenerateBarcode() {
     const printRef = useRef();
     const [templates, setTemplates] = useState([]);
     const [templateDesign, setTemplateDesign] = useState(null);
+    const [barcodeSettings, setBarcodeSettings] = useState({});
     useEffect(() => {
         console.log("Template Design");
         console.log(templateDesign);
@@ -159,6 +161,10 @@ export default function GenerateBarcode() {
             if (json.success) {
                 setTemplateDesign(json.data);
             }
+            console.log("========== TEMPLATE ==========");
+            console.log(json.data);
+            console.log("symbol_field_source =", json.data.symbol_field_source);
+            console.log("symbol_type =", json.data.symbol_type);
         } catch (err) {
             console.error(err);
         } finally {
@@ -185,13 +191,18 @@ export default function GenerateBarcode() {
     const savePrintHistory = async () => {
         try {
             console.log(
-    JSON.stringify(selectedProducts, null, 2)
-);
+                JSON.stringify(selectedProducts, null, 2)
+            );
+            console.log(
+                "SAVE HISTORY",
+                JSON.stringify(selectedProducts, null, 2)
+            );
             const response = await fetch("/api/print-history", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+
                 body: JSON.stringify({
                     template_id: Number(selectedTemplate),
                     products: selectedProducts.map(product => ({
@@ -201,8 +212,14 @@ export default function GenerateBarcode() {
                         current_sku: product.current_sku,
                         barcode: product.barcode,
                         online_url: product.online_url,
+                        price: product.price,
+                        vendor: product.vendor,
+                        variant_title: product.variant_title,
+                        option_1: product.option_1,
+                        option_2: product.option_2,
+                        option_3: product.option_3,
                         qty: product.quantity,
-                    })),
+                    }))
                 }),
             });
             const json = await response.json();
@@ -373,9 +390,32 @@ ${labels}
             printWindow.close();
         }, 500);
     };
-    console.log("Template Symbol Type:", templateDesign?.symbol_type);
-console.log("Field Source:", templateDesign?.symbol_field_source);
-console.log(selectedProducts);
+    const getSymbolValue = (product) => {
+
+        switch (templateDesign.symbol_field_source) {
+
+            case "barcode_value":
+                return product.barcode || "";
+
+            case "sku_value":
+                return product.current_sku || "";
+
+            case "product_name":
+                return product.product_title || "";
+
+            case "product_price":
+                console.log("PRICE =", product.price);
+                return String(product.price || "");
+
+            case "product_online_url":
+                return product.online_url || "";
+
+            default:
+                return product.barcode || "";
+        }
+
+    };
+
     return (
         <Page title="Generate Barcode"
             subtitle="Manage and edit your customized Barcode">
@@ -652,20 +692,13 @@ console.log(selectedProducts);
 
                                     {templateDesign.symbol_type === "BARCODE" ? (
                                         <BarcodeRenderer
-                                            value={
-                                                templateDesign.symbol_field_source === "barcode_value"
-                                                    ? product.barcode
-                                                    : product.current_sku
-                                            }
+                                            value={getSymbolValue(product)}
                                             settings={templateDesign}
+                                            barcodeSettings={templateDesign}
                                         />
                                     ) : (
                                         <QrCodeRenderer
-                                            value={
-                                                templateDesign.symbol_field_source === "product_online_url"
-                                                    ? product.online_url
-                                                    : product.barcode
-                                            }
+                                            value={getSymbolValue(product)}
                                             settings={templateDesign}
                                         />
                                     )}

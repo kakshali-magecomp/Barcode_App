@@ -19,11 +19,21 @@ class PrintHistoryController extends Controller
         $request->validate([
             'template_id' => 'nullable|integer',
             'products' => 'required|array|min:1',
+
             'products.*.variant_id' => 'required',
             'products.*.product_title' => 'required',
+
             'products.*.current_sku' => 'nullable',
             'products.*.barcode' => 'nullable',
             'products.*.online_url' => 'nullable',
+
+            'products.*.price' => 'nullable',
+            'products.*.vendor' => 'nullable',
+            'products.*.variant_title' => 'nullable',
+            'products.*.option_1' => 'nullable',
+            'products.*.option_2' => 'nullable',
+            'products.*.option_3' => 'nullable',
+
             'products.*.qty' => 'required|integer|min:1',
         ]);
 
@@ -34,11 +44,10 @@ class PrintHistoryController extends Controller
             'client_ip' => $request->ip(),
             'printed_at' => now(),
         ]);
-
+        \Log::info($request->products);
         foreach ($request->products as $product) {
 
             PrintHistoryItem::create([
-
                 'print_history_id' => $history->id,
                 'product_id' => $product['product_id'] ?? null,
                 'variant_id' => $product['variant_id'],
@@ -46,6 +55,12 @@ class PrintHistoryController extends Controller
                 'sku' => $product['current_sku'] ?? $product['sku'] ?? null,
                 'barcode' => $product['barcode'] ?? null,
                 'online_url' => $product['online_url'] ?? null,
+                'price' => $product['price'] ?? null,
+                'vendor' => $product['vendor'] ?? null,
+                'variant_title' => $product['variant_title'] ?? null,
+                'option_1' => $product['option_1'] ?? null,
+                'option_2' => $product['option_2'] ?? null,
+                'option_3' => $product['option_3'] ?? null,
                 'qty' => $product['qty'] ?? 1,
             ]);
         }

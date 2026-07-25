@@ -126,14 +126,14 @@ export default function LabelHistory() {
   }
 
   const handlePrintHistory = () => {
-  if (!historyDetails) return;
+    if (!historyDetails) return;
 
-  const printWindow = window.open("", "_blank");
+    const printWindow = window.open("", "_blank");
 
-  const rows = historyDetails.items
-    .filter((_, index) => selectedItems.includes(index))
-    .map(
-      (item) => `
+    const rows = historyDetails.items
+      .filter((_, index) => selectedItems.includes(index))
+      .map(
+        (item) => `
       <tr>
         <td>${item.product_title}</td>
         <td>${item.sku}</td>
@@ -141,37 +141,31 @@ export default function LabelHistory() {
         <td style="text-align:center">${item.qty}</td>
       </tr>
     `
-    )
-    .join("");
+      )
+      .join("");
 
-  printWindow.document.write(`
+    printWindow.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
 <title>Print Job #${historyDetails.id}</title>
-
 <style>
-
 body{
     font-family:Arial,sans-serif;
     margin:25px;
     color:#222;
 }
-
 h2{
     margin-bottom:5px;
 }
-
 .info{
     margin-bottom:20px;
     color:#666;
 }
-
 table{
     width:100%;
     border-collapse:collapse;
 }
-
 th{
     background:#f3f3f3;
     border:1px solid #ddd;
@@ -179,75 +173,45 @@ th{
     text-align:left;
     font-weight:bold;
 }
-
 td{
     border:1px solid #ddd;
     padding:12px;
 }
-
 tbody tr:nth-child(even){
     background:#fafafa;
 }
-
 </style>
-
 </head>
-
 <body>
-
 <h2>Print Job #${historyDetails.id}</h2>
-
 <div class="info">
-
 Template : ${historyDetails.template_id}
-
 </div>
-
 <table>
-
 <thead>
-
 <tr>
-
 <th>Product</th>
-
 <th>SKU</th>
-
 <th>Barcode</th>
-
 <th>Qty</th>
-
 </tr>
-
 </thead>
-
 <tbody>
-
 ${rows}
-
 </tbody>
-
 </table>
-
 <script>
-
 window.onload=function(){
-
 window.print();
-
 window.close();
-
 }
-
 </script>
-
 </body>
-
 </html>
 `);
 
-  printWindow.document.close();
-};
+    printWindow.document.close();
+  };
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
     const rows = histories.map((item, index) => `
@@ -338,6 +302,7 @@ window.close();
     startIndex,
     endIndex
   );
+
 
   return (
     <Frame>
@@ -566,6 +531,8 @@ window.close();
                       const selectedProducts = historyDetails.items.filter((_, index) =>
                         selectedItems.includes(index)
                       );
+                      console.log("Selected Products:");
+                      console.log(selectedProducts);
                       navigate("/ProductsBarcodeList", {
                         state: {
                           fromHistory: true,
