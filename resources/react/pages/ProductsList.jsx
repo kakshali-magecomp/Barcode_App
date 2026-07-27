@@ -47,6 +47,7 @@ export default function GenerateSku() {
                             product_type: item.product_type,
                             current_sku: item.current_sku,
                             barcode: item.barcode,
+                            price: item.price,
                             option_1: item.option_1,
                             option_2: item.option_2,
                             option_3: item.option_3,

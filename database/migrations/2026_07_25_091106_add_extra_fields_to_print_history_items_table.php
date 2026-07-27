@@ -9,25 +9,38 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::table('print_history_items', function (Blueprint $table) {
+{
+    Schema::table('print_history_items', function (Blueprint $table) {
 
+        if (!Schema::hasColumn('print_history_items', 'price')) {
             $table->decimal('price', 10, 2)->nullable()->after('barcode');
+        }
 
+        if (!Schema::hasColumn('print_history_items', 'online_url')) {
             $table->string('online_url')->nullable()->after('price');
+        }
 
-            $table->string('vendor')->nullable()->after('online_url');
+        if (!Schema::hasColumn('print_history_items', 'vendor')) {
+            $table->string('vendor')->nullable();
+        }
 
-            $table->string('variant_title')->nullable()->after('vendor');
+        if (!Schema::hasColumn('print_history_items', 'variant_title')) {
+            $table->string('variant_title')->nullable();
+        }
 
+        if (!Schema::hasColumn('print_history_items', 'option_1')) {
             $table->string('option_1')->nullable();
+        }
 
+        if (!Schema::hasColumn('print_history_items', 'option_2')) {
             $table->string('option_2')->nullable();
+        }
 
+        if (!Schema::hasColumn('print_history_items', 'option_3')) {
             $table->string('option_3')->nullable();
-
-        });
-    }
+        }
+    });
+}
 
     public function down(): void
     {

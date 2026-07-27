@@ -54,13 +54,11 @@ export default function GenerateBarcode() {
         let list = [...products];
 
         if (printSettings?.sort_by_sku) {
-
             list.sort((a, b) =>
                 (a.current_sku || "").localeCompare(
                     b.current_sku || ""
                 )
             );
-
         }
 
         setSelectedProducts(list);
@@ -145,26 +143,21 @@ export default function GenerateBarcode() {
         handleTemplateChange(templateId);
     }, [templates, templateId, fromHistory]);
 
-    const handleTemplateChange = async (templateId) => {
-        setSelectedTemplate(templateId);
-        if (!templateId) {
+    const handleTemplateChange = async (value) => {
+        setSelectedTemplate(String(value));
+        if (!value) {
             setTemplateDesign(null);
             return;
         }
         try {
             setLoadingTemplate(true);
             const response = await fetch(
-                `/api/templates/design/${templateId}`
+                `/api/templates/design/${value}`
             );
             const json = await response.json();
-            console.log("Template Design Response:", json);
             if (json.success) {
                 setTemplateDesign(json.data);
             }
-            console.log("========== TEMPLATE ==========");
-            console.log(json.data);
-            console.log("symbol_field_source =", json.data.symbol_field_source);
-            console.log("symbol_type =", json.data.symbol_type);
         } catch (err) {
             console.error(err);
         } finally {
@@ -187,14 +180,9 @@ export default function GenerateBarcode() {
         };
     });
 
-    console.log("Selected Products Before Save:", selectedProducts);
     const savePrintHistory = async () => {
         try {
             console.log(
-                JSON.stringify(selectedProducts, null, 2)
-            );
-            console.log(
-                "SAVE HISTORY",
                 JSON.stringify(selectedProducts, null, 2)
             );
             const response = await fetch("/api/print-history", {
@@ -257,6 +245,7 @@ export default function GenerateBarcode() {
                             current_sku: item.current_sku,
                             barcode: item.barcode,
                             online_url: item.online_url,
+                            price: item.price,
                             option_1: item.option_1,
                             option_2: item.option_2,
                             option_3: item.option_3,
@@ -296,6 +285,7 @@ export default function GenerateBarcode() {
             );
 
             const updatedProducts = json.updated_products || [];
+            console.log("UPDATED PRODUCTS", updatedProducts);
             setGeneratedProducts(updatedProducts);
             setSelectedProducts(prev =>
                 prev.map(product => {
@@ -484,14 +474,20 @@ ${labels}
                             <Select
                                 label="Choose a template to print"
                                 options={[
-                                    { label: "Select Template", value: "" },
-                                    ...templates.map((t) => ({
-                                        label: t.template_name,
-                                        value: String(t.id),
+                                    {
+                                        label: "Select Template",
+                                        value: "",
+                                    },
+                                    ...templates.map((template) => ({
+                                        label: template.template_name,
+                                        value: String(template.id),
                                     })),
                                 ]}
-                                value={selectedTemplate}
-                                onChange={handleTemplateChange}
+                                value={selectedTemplate ? String(selectedTemplate) : ""}
+                                onChange={(value) => {
+                                    setSelectedTemplate(value);
+                                    handleTemplateChange(value);
+                                }}
                             />
                         </Box>
                     )}

@@ -24,9 +24,29 @@ export default function DesignCanvas() {
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [originalDesign, setOriginalDesign] = useState(null);
+    const [templateTitle, setTemplateTitle] = useState("Template Designer");
     const [originalVariantId, setOriginalVariantId] = useState("");
     const [previewItem, setPreviewItem] = useState({ title: 'Sample Item', sku: 'SKU-1001', price: '10.00', vendor: 'Vendor', option_1: '' });
     const [design, setDesign] = useState({ symbol_type: 'QR', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 });
+
+    useEffect(() => {
+        async function loadTemplateTitle() {
+            try {
+                const response = await fetch(`/api/templates/${id}`);
+                const json = await response.json();
+
+                if (json.success) {
+                    setTemplateTitle(json.data.template_name);
+                }
+            } catch (error) {
+                console.error("Failed to load template title:", error);
+            }
+        }
+
+        if (id) {
+            loadTemplateTitle();
+        }
+    }, [id]);
 
     const getSymbolTargetValue = useCallback(() => {
         switch (design.symbol_field_source) {
@@ -73,7 +93,7 @@ export default function DesignCanvas() {
         },
         [printSettings]
     );
-    
+
 
     const handleDiscard = () => {
         if (!originalDesign) return;
@@ -210,34 +230,24 @@ export default function DesignCanvas() {
     }, [id, design, fetch, selectedVariantId]);
 
     const handlePrint = () => {
-
         if (!printRef.current) return;
-
         const qty = Number(design.print_qty) || 1;
-
         let labels = "";
-
         for (let i = 0; i < qty; i++) {
-
             labels += `
             <div class="label">
                 ${printRef.current.innerHTML}
             </div>
         `;
-
         }
-
         const printWindow = window.open(
             "",
             "",
             "width=900,height=700"
         );
-
         printWindow.document.write(`
 <!DOCTYPE html>
-
 <html>
-
 <head>
 
 <title>Print Barcode</title>
@@ -348,7 +358,7 @@ ${labels}
                     Discard
                 </button>
             </SaveBar>
-            <Page title="Template Designer" backAction={{ content: 'Templates', url: '/TamplateCreate/${id}' }}>
+            <Page title={`${templateTitle} - Design`} backAction={{ content: 'Templates', url: '/TamplateCreate/${id}' }}>
                 <BlockStack gap="400">
                     <div
                         style={{

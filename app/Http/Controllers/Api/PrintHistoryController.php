@@ -10,32 +10,26 @@ use Illuminate\Support\Facades\Auth;
 
 class PrintHistoryController extends Controller
 {
-    /**
-     * Save a new print history
-     */
+    // save new print history
     public function store(Request $request)
     {
-        \Log::info($request->all());
         $request->validate([
             'template_id' => 'nullable|integer',
             'products' => 'required|array|min:1',
-
             'products.*.variant_id' => 'required',
             'products.*.product_title' => 'required',
-
             'products.*.current_sku' => 'nullable',
             'products.*.barcode' => 'nullable',
             'products.*.online_url' => 'nullable',
-
             'products.*.price' => 'nullable',
             'products.*.vendor' => 'nullable',
             'products.*.variant_title' => 'nullable',
             'products.*.option_1' => 'nullable',
             'products.*.option_2' => 'nullable',
             'products.*.option_3' => 'nullable',
-
             'products.*.qty' => 'required|integer|min:1',
         ]);
+        
 
         $history = PrintHistory::create([
             'user_id' => Auth::id(),
@@ -44,9 +38,8 @@ class PrintHistoryController extends Controller
             'client_ip' => $request->ip(),
             'printed_at' => now(),
         ]);
-        \Log::info($request->products);
+        
         foreach ($request->products as $product) {
-
             PrintHistoryItem::create([
                 'print_history_id' => $history->id,
                 'product_id' => $product['product_id'] ?? null,
@@ -71,9 +64,7 @@ class PrintHistoryController extends Controller
         ]);
     }
 
-    /**
-     * History List
-     */
+    // history list
     public function index()
     {
         $histories = PrintHistory::with('template')
@@ -87,9 +78,7 @@ class PrintHistoryController extends Controller
         ]);
     }
 
-    /**
-     * Single History Details
-     */
+    //single history detail
     public function show($id)
     {
         $history = PrintHistory::with('items')
@@ -102,16 +91,13 @@ class PrintHistoryController extends Controller
         ]);
     }
 
-    /**
-     * Delete History
-     */
+    //delete history
     public function destroy($id)
     {
         $history = PrintHistory::where('user_id', Auth::id())
             ->findOrFail($id);
 
         $history->delete();
-
         return response()->json([
             'success' => true,
         ]);

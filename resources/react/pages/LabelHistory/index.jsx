@@ -29,6 +29,7 @@ export default function LabelHistory() {
     setCurrentPage(1);
   }, [search]);
 
+
   const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
@@ -294,10 +295,8 @@ window.close();
         : "-",
   };
   const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
-
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-
   const paginatedHistory = filteredHistory.slice(
     startIndex,
     endIndex
