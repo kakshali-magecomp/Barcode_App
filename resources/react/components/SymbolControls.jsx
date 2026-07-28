@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect,} from "react";
 import {
   Card,
   FormLayout,
@@ -10,7 +10,89 @@ import {
   BlockStack,
 } from "@shopify/polaris";
 
-export default function SymbolControls({ design, handleUpdate }) {
+export default function SymbolControls({ design, handleUpdate, barcodeSettings, }) {
+  const barcodeFormat =
+    barcodeSettings?.barcode_format || "CODE128";
+
+  const fieldOptions = [
+  {
+    label: "Barcode Value",
+    value: "barcode_value",
+  },
+  {
+    label: "SKU",
+    value: "sku_value",
+  },
+  {
+    label: "Product Name",
+    value: "product_name",
+  },
+  {
+    label: "Product Price",
+    value: "product_price",
+  },
+  {
+    label: "Product Page URL",
+    value: "product_online_url",
+  },
+];
+
+const allowedFields = {
+    CODE128: [
+        "barcode_value",
+        "sku_value",
+        "product_name",
+        "product_price",
+        "product_online_url",
+    ],
+
+    Code39: [
+        "barcode_value",
+        "sku_value",
+        "product_name",
+        "product_price",
+        "product_online_url",
+    ],
+
+    EAN8: [
+        "barcode_value",
+        "sku_value",
+    ],
+
+    EAN13: [
+        "barcode_value",
+        "sku_value",
+    ],
+
+    UPCA: [
+        "barcode_value",
+        "sku_value",
+    ],
+
+    ITF14: [
+        "barcode_value",
+    ],
+};
+useEffect(() => {
+
+    const validFields = allowedFields[barcodeFormat];
+
+    if (!validFields) return;
+
+    if (
+        !validFields.includes(design.symbol_field_source)
+    ) {
+
+        handleUpdate(
+            "symbol_field_source",
+            validFields[0]
+        );
+    }
+
+}, [
+    barcodeFormat,
+    design.symbol_field_source
+]);
   return (
     <Card padding="400">
       <Box
@@ -55,90 +137,68 @@ export default function SymbolControls({ design, handleUpdate }) {
                 handleUpdate("symbol_type", value)
               }
             />
-             <FormLayout.Group>
-            {/* Symbol Color */}
+            <FormLayout.Group>
+              {/* Symbol Color */}
 
-            <div>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 14,
-                  marginBottom: 4,
-                }}
-              >
-                Symbol Color
-              </label>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  alignItems: "center",
-                }}
-              >
-                <input
-                  type="color"
-                  value={design.symbol_color || "#000000"}
-                  onChange={(e) =>
-                    handleUpdate(
-                      "symbol_color",
-                      e.target.value
-                    )
-                  }
+              <div>
+                <label
                   style={{
-                    width: 40,
-                    height: 32,
-                    cursor: "pointer",
+                    display: "block",
+                    fontSize: 14,
+                    marginBottom: 4,
                   }}
-                />
+                >
+                  Symbol Color
+                </label>
 
-                <TextField
-                  value={design.symbol_color || "#000000"}
-                  onChange={(value) =>
-                    handleUpdate(
-                      "symbol_color",
-                      value
-                    )
-                  }
-                  autoComplete="off"
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                  }}
+                >
+                  <input
+                    type="color"
+                    value={design.symbol_color || "#000000"}
+                    onChange={(e) =>
+                      handleUpdate(
+                        "symbol_color",
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      width: 40,
+                      height: 32,
+                      cursor: "pointer",
+                    }}
+                  />
+
+                  <TextField
+                    value={design.symbol_color || "#000000"}
+                    onChange={(value) =>
+                      handleUpdate(
+                        "symbol_color",
+                        value
+                      )
+                    }
+                    autoComplete="off"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Field */}
+              {/* Field */}
 
-            <Select
-              label="Field"
-              options={[
-                {
-                  label: "Barcode Value",
-                  value: "barcode_value",
-                },
-                {
-                  label: "SKU",
-                  value: "sku_value",
-                },
-                {
-                  label: "Product Name",
-                  value: "product_name",
-                },
-                {
-                  label: "Product Price",
-                  value: "product_price",
-                },
-                {
-                  label: "Product Page URL",
-                  value: "product_online_url",
-                },
-              ]}
-              value={design.symbol_field_source}
-              onChange={(value) =>
-                handleUpdate(
-                  "symbol_field_source",
-                  value
-                )
-              }
-            />
+              <Select
+                label="Field"
+                options={fieldOptions.filter(option =>
+                  allowedFields[barcodeFormat]?.includes(option.value)
+                )}
+                value={design.symbol_field_source}
+                onChange={(value) =>
+                  handleUpdate("symbol_field_source", value)
+                }
+              />
             </FormLayout.Group>
             {/* Barcode */}
 
@@ -156,99 +216,99 @@ export default function SymbolControls({ design, handleUpdate }) {
                     )
                   }
                 />
-                 <FormLayout.Group>
-                <Select
-                  label="Barcode Format"
-                  options={[
-                    {
-                      label: "Code 128",
-                      value: "CODE128",
-                    },
-                    {
-                      label: "Code 39",
-                      value: "CODE39",
-                    },
-                    {
-                      label: "UPC-A",
-                      value: "UPCA",
-                    },
-                    {
-                      label: "EAN 8",
-                      value: "EAN8",
-                    },
-                    {
-                      label: "EAN 13",
-                      value: "EAN13",
-                    },
-                    {
-                      label: "ITF-14",
-                      value: "ITF14",
-                    },
-                  ]}
-                  value={
-                    design.symbol_barcode_format ||
-                    "CODE128"
-                  }
-                  onChange={(value) =>
-                    handleUpdate(
-                      "symbol_barcode_format",
-                      value
-                    )
-                  }
-                />
+                <FormLayout.Group>
+                  <Select
+                    label="Barcode Format"
+                    options={[
+                      {
+                        label: "Code 128",
+                        value: "CODE128",
+                      },
+                      {
+                        label: "Code 39",
+                        value: "CODE39",
+                      },
+                      {
+                        label: "UPC-A",
+                        value: "UPCA",
+                      },
+                      {
+                        label: "EAN 8",
+                        value: "EAN8",
+                      },
+                      {
+                        label: "EAN 13",
+                        value: "EAN13",
+                      },
+                      {
+                        label: "ITF-14",
+                        value: "ITF14",
+                      },
+                    ]}
+                    value={
+                      design.symbol_barcode_format ||
+                      "CODE128"
+                    }
+                    onChange={(value) =>
+                      handleUpdate(
+                        "symbol_barcode_format",
+                        value
+                      )
+                    }
+                  />
 
-                <TextField
-                  label="Symbol Font Size"
-                  type="number"
-                  value={String(
-                    design.symbol_font_size || 12
-                  )}
-                  onChange={(value) =>
-                    handleUpdate(
-                      "symbol_font_size",
-                      Number(value)
-                    )
-                  }
-                  autoComplete="off"
-                />
+                  <TextField
+                    label="Symbol Font Size"
+                    type="number"
+                    value={String(
+                      design.symbol_font_size || 12
+                    )}
+                    onChange={(value) =>
+                      handleUpdate(
+                        "symbol_font_size",
+                        Number(value)
+                      )
+                    }
+                    autoComplete="off"
+                  />
                 </FormLayout.Group>
                 <FormLayout.Group>
-                <TextField
-                  label="Symbol Bar Width"
-                  type="number"
-                  value={String(
-                    design.symbol_bar_width || 2
-                  )}
-                  onChange={(value) =>
-                    handleUpdate(
-                      "symbol_bar_width",
-                      Number(value)
-                    )
-                  }
-                  autoComplete="off"
-                />
+                  <TextField
+                    label="Symbol Bar Width"
+                    type="number"
+                    value={String(
+                      design.symbol_bar_width || 2
+                    )}
+                    onChange={(value) =>
+                      handleUpdate(
+                        "symbol_bar_width",
+                        Number(value)
+                      )
+                    }
+                    autoComplete="off"
+                  />
 
-                <TextField
-                  label="Symbol Bar Height"
-                  type="number"
-                  value={String(
-                    design.symbol_bar_height || 35
-                  )}
-                  onChange={(value) =>
-                    handleUpdate(
-                      "symbol_bar_height",
-                      Number(value)
-                    )
-                  }
-                  autoComplete="off"
-                />
+                  <TextField
+                    label="Symbol Bar Height"
+                    type="number"
+                    value={String(
+                      design.symbol_bar_height || 35
+                    )}
+                    onChange={(value) =>
+                      handleUpdate(
+                        "symbol_bar_height",
+                        Number(value)
+                      )
+                    }
+                    autoComplete="off"
+                  />
                 </FormLayout.Group>
               </BlockStack>
-              
+
             ) : (
               <BlockStack gap="300">
                 <FormLayout.Group>
-                {/* <Select
+                  {/* <Select
                   label="Dot Type"
                   options={[
                     {
@@ -269,7 +329,7 @@ export default function SymbolControls({ design, handleUpdate }) {
                   }
                 /> */}
 
-                {/* <Select
+                  {/* <Select
                   label="Corner Dot Type"
                   options={[
                     {

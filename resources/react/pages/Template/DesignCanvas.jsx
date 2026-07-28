@@ -49,9 +49,20 @@ export default function DesignCanvas() {
     }, [id]);
 
     const getSymbolTargetValue = useCallback(() => {
+
+        console.log("Selected Field :", design.symbol_field_source);
+        console.log("Preview Item =", previewItem);
+        console.log("Preview Item Keys =", Object.keys(previewItem));
+
         switch (design.symbol_field_source) {
             case "product_name":
-                return previewItem.title;
+                return (
+                    previewItem.product_title ||
+                    previewItem.title ||
+                    previewItem.name ||
+                    previewItem.product?.title ||
+                    ""
+                );
 
             case "product_price":
                 return previewItem.price;
@@ -73,7 +84,7 @@ export default function DesignCanvas() {
                 return previewItem.sku || "";
         }
 
-    }, [design.symbol_field_source, , previewItem]);
+    }, [design.symbol_field_source, previewItem]);
 
     const formatPrice = useCallback(
         (price) => {
@@ -344,6 +355,10 @@ ${labels}
     };
 
     if (pageLoading) return <Box padding="1200" align="center"><Spinner size="large" /></Box>;
+    console.log("GLOBAL BARCODE SETTINGS");
+    console.log(barcodeSettings);
+    console.log("TEMPLATE SETTINGS");
+    console.log(design);
     return (
         <Frame>
             <SaveBar id="designer-bar" open={isDirty}>
@@ -399,7 +414,7 @@ ${labels}
                             <BlockStack gap="400">
                                 {errorBanner && <Banner tone="critical"><p>{errorBanner}</p></Banner>}
                                 <LineControls design={design} handleUpdate={handleUpdate} />
-                                <SymbolControls design={design} handleUpdate={handleUpdate} />
+                                <SymbolControls design={design} handleUpdate={handleUpdate} barcodeSettings={barcodeSettings} />
                             </BlockStack>
                         </Grid.Cell>
                         <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 5, lg: 5 }}>
@@ -484,6 +499,7 @@ ${labels}
                                                     design.symbol_type === "BARCODE" ? (
                                                         <BarcodeRenderer
                                                             value={getSymbolTargetValue()}
+                                                            field={design.symbol_field_source}
                                                             settings={design}
                                                             barcodeSettings={
                                                                 barcodeSettings.data ??

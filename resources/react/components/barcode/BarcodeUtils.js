@@ -117,37 +117,230 @@ export function generateBarcode(item, barcodeSettings) {
     );
 
 }
-export function detectBarcodeFormat(
-    barcode,
-    barcodeSettings
-) {
+export function detectBarcodeFormat(barcode, barcodeSettings) {
 
     if (!barcodeSettings) {
         return "CODE128";
     }
+
     let format =
         barcodeSettings.barcode_format || "CODE128";
 
     if (barcodeSettings.auto_detect_gtin_format) {
 
-        switch (barcode.length) {
+        const digits = String(barcode).replace(/\D/g, "");
+
+        switch (digits.length) {
 
             case 8:
                 return "EAN8";
 
             case 12:
-               return "UPCA";
-              
+                return "UPC";
+
             case 13:
                 return "EAN13";
 
             case 14:
-               return "ITF14";
-
-            default:
-                return format;
-                
+                return "ITF14";
         }
     }
-    return format;
+
+    switch (format) {
+
+        case "Code39":
+            return "CODE39";
+
+        case "UPCA":
+            return "UPC";
+
+        case "EAN8":
+            return "EAN8";
+
+        case "EAN13":
+            return "EAN13";
+
+        case "ITF14":
+            return "ITF14";
+
+        case "CODE128":
+            return "CODE128";
+
+        default:
+            return "CODE128";
+    }
+}
+function calculateEAN8(data) {
+
+    data = data.replace(/\D/g, "").padStart(7, "0").slice(-7);
+
+    let sum = 0;
+
+    for (let i = data.length - 1, pos = 1; i >= 0; i--, pos++) {
+        sum += Number(data[i]) * (pos % 2 === 1 ? 3 : 1);
+    }
+
+    const checkDigit = (10 - (sum % 10)) % 10;
+
+    return data + checkDigit;
+}
+
+function calculateEAN13(data) {
+
+    data = data.replace(/\D/g, "").padStart(12, "0").slice(0, 12);
+
+    let sum = 0;
+
+    for (let i = 0; i < 12; i++) {
+        sum += Number(data[i]) * (i % 2 === 0 ? 1 : 3);
+    }
+
+    const checkDigit = (10 - (sum % 10)) % 10;
+
+    return data + checkDigit;
+}
+
+function calculateUPCA(data) {
+
+    data = data.replace(/\D/g, "").padStart(11, "0").slice(0, 11);
+
+    let sum = 0;
+
+    for (let i = 0; i < 11; i++) {
+        sum += Number(data[i]) * (i % 2 === 0 ? 3 : 1);
+    }
+
+    const checkDigit = (10 - (sum % 10)) % 10;
+
+    return data + checkDigit;
+}
+
+function calculateITF14(data) {
+
+    data = data.replace(/\D/g, "").padStart(13, "0").slice(0, 13);
+
+    let sum = 0;
+
+    for (let i = 0; i < 13; i++) {
+        sum += Number(data[i]) * (i % 2 === 0 ? 3 : 1);
+    }
+
+    const checkDigit = (10 - (sum % 10)) % 10;
+
+    return data + checkDigit;
+}
+
+function calculateEANChecksum(number) {
+    let sum = 0;
+
+    for (let i = 0; i < number.length; i++) {
+        const digit = Number(number[i]);
+
+        if ((number.length - i) % 2 === 0) {
+            sum += digit * 3;
+        } else {
+            sum += digit;
+        }
+    }
+
+    return (10 - (sum % 10)) % 10;
+}
+function calculateEAN8Checksum(digits) {
+
+    if (digits.length !== 7) {
+        throw new Error("EAN8 requires exactly 7 digits.");
+    }
+
+    let sum = 0;
+
+    for (let i = 0; i < 7; i++) {
+
+        const digit = parseInt(digits[i], 10);
+
+        // EAN-8 weights:
+        // positions 1,3,5,7 => ×3
+        // positions 2,4,6   => ×1
+        if ((i + 1) % 2 === 1) {
+            sum += digit * 3;
+        } else {
+            sum += digit;
+        }
+    }
+
+    return (10 - (sum % 10)) % 10;
+}
+function generateEAN8(value) {
+
+    let digits = String(value).replace(/\D/g, "");
+
+    // EAN-8 requires 7 data digits
+    digits = digits.padStart(7, "0").slice(-7);
+
+    const checksum = calculateEAN8Checksum(digits);
+
+    return digits + checksum;
+}
+function generateEAN13(value) {
+    let digits = String(value).replace(/\D/g, "");
+
+    digits = digits.padStart(12, "0").slice(-12);
+
+    const checksum = calculateEANChecksum(digits);
+
+    return digits + checksum;
+}
+function generateUPCA(value) {
+    let digits = String(value).replace(/\D/g, "");
+
+    digits = digits.padStart(11, "0").slice(-11);
+
+    const checksum = calculateEANChecksum(digits);
+
+    return digits + checksum;
+}
+function generateITF14(value) {
+    let digits = String(value).replace(/\D/g, "");
+
+    digits = digits.padStart(13, "0").slice(-13);
+
+    const checksum = calculateEANChecksum(digits);
+
+    return digits + checksum;
+}
+export function getBarcodeValue(value, barcodeSettings = {}) {
+
+    if (!value) return "";
+
+    const format =
+        barcodeSettings.barcode_format || "CODE128";
+
+    if (format === "CODE128") {
+        return String(value);
+    }
+
+    if (format === "Code39") {
+
+        return String(value)
+            .toUpperCase()
+            .replace(/[^0-9A-Z \-.$/+%]/g, "");
+
+    }
+
+    switch (format) {
+
+        case "EAN8":
+            return generateEAN8(value);
+
+        case "EAN13":
+            return generateEAN13(value);
+
+        case "UPCA":
+            return generateUPCA(value);
+
+        case "ITF14":
+            return generateITF14(value);
+
+        default:
+            return String(value);
+    }
 }

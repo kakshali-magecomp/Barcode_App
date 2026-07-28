@@ -1,8 +1,14 @@
-[2026-07-27 12:57:23] local.INFO: CREATE TEMPLATE   
-[2026-07-27 12:57:23] local.INFO: array (
-  'template_name' => 'BARCODE_NAME',
-  'description' => 'BARCODE_NAME',
-  'note' => 'BARCODE_NAME',
+[2026-07-28 12:02:03] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
+[2026-07-28 12:13:54] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
+[2026-07-28 12:15:38] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
+[2026-07-28 12:29:11] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
+[2026-07-28 12:33:42] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
+[2026-07-28 12:34:36] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
+[2026-07-28 12:35:18] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:35:18] local.INFO: array (
+  'template_name' => 'code39_product-name',
+  'description' => 'code39_product-name',
+  'note' => 'code39_product-name',
   'paper_brand' => 'zebra',
   'paper_model' => '4000d-2x1',
   'layout_settings' => 
@@ -24,13 +30,13 @@
     'gapY' => 0,
   ),
 )  
-[2026-07-27 12:57:23] local.INFO: Template Created {"id":72} 
-[2026-07-27 12:57:24] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":16,"requested_template_id":"72"} 
-[2026-07-27 12:58:45] local.INFO: CREATE TEMPLATE   
-[2026-07-27 12:58:45] local.INFO: array (
-  'template_name' => 'QR_NAME',
-  'description' => 'QR_NAME',
-  'note' => 'QR_NAME',
+[2026-07-28 12:35:18] local.INFO: Template Created {"id":108} 
+[2026-07-28 12:35:19] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"108"} 
+[2026-07-28 12:36:36] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:36:36] local.INFO: array (
+  'template_name' => 'code39_product-price',
+  'description' => 'code39_product-price',
+  'note' => 'code39_product-price',
   'paper_brand' => 'zebra',
   'paper_model' => '4000d-2x1',
   'layout_settings' => 
@@ -52,13 +58,14 @@
     'gapY' => 0,
   ),
 )  
-[2026-07-27 12:58:46] local.INFO: Template Created {"id":73} 
-[2026-07-27 12:58:46] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":16,"requested_template_id":"73"} 
-[2026-07-27 13:00:12] local.INFO: CREATE TEMPLATE   
-[2026-07-27 13:00:12] local.INFO: array (
-  'template_name' => 'BARCODE_URL',
-  'description' => 'BARCODE_URL',
-  'note' => 'BARCODE_URL',
+[2026-07-28 12:36:36] local.INFO: Template Created {"id":109} 
+[2026-07-28 12:36:36] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"109"} 
+[2026-07-28 12:36:55] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"109"} 
+[2026-07-28 12:37:27] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:37:27] local.INFO: array (
+  'template_name' => 'code_product-barcode',
+  'description' => 'code_product-barcode',
+  'note' => 'code_product-barcode',
   'paper_brand' => 'zebra',
   'paper_model' => '4000d-2x1',
   'layout_settings' => 
@@ -80,5 +87,151 @@
     'gapY' => 0,
   ),
 )  
-[2026-07-27 13:00:12] local.INFO: Template Created {"id":74} 
-[2026-07-27 13:00:13] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":16,"requested_template_id":"74"} 
+[2026-07-28 12:37:27] local.INFO: Template Created {"id":110} 
+[2026-07-28 12:37:27] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"110"} 
+[2026-07-28 12:38:08] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"110"} 
+[2026-07-28 12:39:06] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:39:06] local.INFO: array (
+  'template_name' => 'code128_product-url',
+  'description' => 'code128_product-url',
+  'note' => 'code128_product-url',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30334',
+  'layout_settings' => 
+  array (
+    'name' => 'Jewelry Label',
+    'paper' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'label' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-28 12:39:06] local.INFO: Template Created {"id":111} 
+[2026-07-28 12:39:06] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"111"} 
+[2026-07-28 12:39:43] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"111"} 
+[2026-07-28 12:41:48] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:41:48] local.INFO: array (
+  'template_name' => 'code128_product-price',
+  'description' => 'code128_product-price',
+  'note' => 'code128_product-price',
+  'paper_brand' => 'dymo',
+  'paper_model' => '30334',
+  'layout_settings' => 
+  array (
+    'name' => 'Jewelry Label',
+    'paper' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'label' => 
+    array (
+      'width' => 54,
+      'height' => 25,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+    'marginTop' => 0,
+    'marginLeft' => 0,
+  ),
+)  
+[2026-07-28 12:41:48] local.INFO: Template Created {"id":112} 
+[2026-07-28 12:41:48] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"112"} 
+[2026-07-28 12:42:59] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:42:59] local.INFO: array (
+  'template_name' => 'code128_product-name',
+  'description' => 'code128_product-name',
+  'note' => 'code128_product-name',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-4x6',
+  'layout_settings' => 
+  array (
+    'name' => 'Shipping Label',
+    'paper' => 
+    array (
+      'width' => 101.6,
+      'height' => 152.4,
+    ),
+    'label' => 
+    array (
+      'width' => 101.6,
+      'height' => 152.4,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+  ),
+)  
+[2026-07-28 12:42:59] local.INFO: Template Created {"id":113} 
+[2026-07-28 12:42:59] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"113"} 
+[2026-07-28 12:55:23] local.INFO: CREATE TEMPLATE   
+[2026-07-28 12:55:23] local.INFO: array (
+  'template_name' => 'code128_product-SKU',
+  'description' => 'code128_product-SKU',
+  'note' => 'code128_product-SKU',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-2x1',
+  'layout_settings' => 
+  array (
+    'name' => 'Small Label',
+    'paper' => 
+    array (
+      'width' => 50.8,
+      'height' => 25.4,
+    ),
+    'label' => 
+    array (
+      'width' => 50.8,
+      'height' => 25.4,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+  ),
+)  
+[2026-07-28 12:55:23] local.INFO: Template Created {"id":114} 
+[2026-07-28 12:55:25] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"114"} 
+[2026-07-28 13:01:10] local.INFO: CREATE TEMPLATE   
+[2026-07-28 13:01:10] local.INFO: array (
+  'template_name' => 'code128_product-barcode',
+  'description' => 'code128_product-barcode',
+  'note' => 'code128_product-barcode',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-2x1',
+  'layout_settings' => 
+  array (
+    'name' => 'Small Label',
+    'paper' => 
+    array (
+      'width' => 50.8,
+      'height' => 25.4,
+    ),
+    'label' => 
+    array (
+      'width' => 50.8,
+      'height' => 25.4,
+    ),
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
+  ),
+)  
+[2026-07-28 13:01:10] local.INFO: Template Created {"id":115} 
+[2026-07-28 13:01:10] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"115"} 

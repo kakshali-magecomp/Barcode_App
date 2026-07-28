@@ -1,42 +1,62 @@
 import React, { useEffect, useRef } from "react";
 import JsBarcode from "jsbarcode";
-import { detectBarcodeFormat } from "./barcode/BarcodeUtils";
+import { detectBarcodeFormat, getBarcodeValue, } from "./barcode/BarcodeUtils";
 
 export default function BarcodeRenderer({
     value,
+    field,
     settings = {},
     barcodeSettings = {},
 }) {
 
     const barcodeRef = useRef(null);
-
     useEffect(() => {
         console.log("BarcodeRenderer Loaded");
         console.log("value =", value);
         console.log("settings =", settings);
         console.log("barcodeSettings =", barcodeSettings);
-
+        console.log("Selected Field =", field);
+        
         if (!barcodeRef.current || !value) return;
 
-        const format = detectBarcodeFormat(
+        let format = detectBarcodeFormat(
             value,
             barcodeSettings
+        );
+
+
+        if (
+            ["EAN8", "EAN13", "UPCA", "ITF14"].includes(format)
+        ) {
+            const digits = String(value).replace(/\D/g, "");
+
+            if (!digits.length) {
+                format = "CODE128";
+            }
+        }
+
+        const barcodeValue = getBarcodeValue(
+            value,
+            barcodeSettings,
+            field
         );
 
         console.log("Barcode Format:", format);
         console.log("Barcode Value:", value);
         console.log("Barcode Settings:", barcodeSettings);
-
+        console.log("Barcode value:", barcodeValue);
+        console.log("Selected Format:", barcodeSettings.barcode_format);
         try {
 
-            JsBarcode(barcodeRef.current, value, {
+            JsBarcode(barcodeRef.current, barcodeValue, {
                 format: format,
-                width: Number(settings.symbol_bar_width) || 2,
-                height: Number(settings.symbol_bar_height) || 40,
+                width: 4,
+                height: 80,
                 displayValue: !settings.hide_barcode_value,
-                fontSize: Number(settings.symbol_font_size) || 12,
-                lineColor: settings.symbol_color || "#000000",
-                margin: 0,
+                fontSize: 18,
+                lineColor: "#000000",
+                background: "#FFFFFF",
+                margin: 20,
             });
 
         } catch (err) {
@@ -46,25 +66,25 @@ export default function BarcodeRenderer({
             console.log("Format:", format);
             console.log("Barcode Settings:", barcodeSettings);
         }
-
     }, [value, settings, barcodeSettings]);
 
     return (
-    <div
-        style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            overflow: "hidden",
-        }}
-    >
-        <img
-            ref={barcodeRef}
+        <div
             style={{
-                maxWidth: "100%",
-                height: "auto",
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                overflow: "hidden",
             }}
-        />
-    </div>
-);
+        >
+            <img
+                ref={barcodeRef}
+                style={{
+                    width: "320px",
+                    height: "120px",
+                    imageRendering: "pixelated",
+                }}
+            />
+        </div>
+    );
 }
