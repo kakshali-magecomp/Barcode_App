@@ -4,18 +4,23 @@ import { useAppBridge } from '@shopify/app-bridge-react';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal.jsx';
 import { EditIcon, DeleteIcon } from "@shopify/polaris-icons";
 import { useNavigate } from "react-router-dom";
+import { Pagination } from "@shopify/polaris";
+
 
 export default function TemplateList() {
     const appBridge = useAppBridge();
     const fetch = appBridge.fetch || window.fetch;
 
     const [templates, setTemplates] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     // Modal Registry State Pointers
     const [activeModal, setActiveModal] = useState(false);
     const [templateToDelete, setTemplateToDelete] = useState(null);
+    const [deleteAllModal, setDeleteAllModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -55,7 +60,13 @@ export default function TemplateList() {
         setTemplateToDelete(null);
         setActiveModal(false);
     };
+    const openDeleteAllConfirmation = () => {
+        setDeleteAllModal(true);
+    };
 
+    const closeDeleteAllConfirmation = () => {
+        setDeleteAllModal(false);
+    };
     const handleDeleteExecute = async () => {
         if (!templateToDelete) return;
 
@@ -88,8 +99,46 @@ export default function TemplateList() {
         }
     };
 
+    const handleDeleteAll = async () => {
+        try {
+            setDeleteLoading(true);
+
+            const response = await fetch("/api/templates/delete-all", {
+                method: "DELETE",
+                headers: {
+                    Accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setTemplates([]);
+                closeDeleteAllConfirmation();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     const resourceName = { singular: 'template', plural: 'templates' };
-    const rowMarkup = templates.map(
+
+    //pagination
+    const totalPages = Math.ceil(templates.length / itemsPerPage);
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    const currentTemplates = templates.slice(
+        startIndex,
+        endIndex
+    );
+    const rowMarkup = currentTemplates.map(
         ({ id, template_name, paper_brand, paper_model, created_at }, index) => (
             <IndexTable.Row id={String(id)} key={id} position={index}>
                 <IndexTable.Cell>
@@ -147,6 +196,14 @@ export default function TemplateList() {
                 onConfirm={handleDeleteExecute}
                 onClose={closeDeleteModal}
             />
+            <DeleteConfirmationModal
+                open={deleteAllModal}
+                loading={deleteLoading}
+                title="Delete All Templates?"
+                message="This action will permanently delete ALL templates. This cannot be undone."
+                onConfirm={handleDeleteAll}
+                onClose={closeDeleteAllConfirmation}
+            />
 
             <Page
                 title="Label Templates"
@@ -155,6 +212,13 @@ export default function TemplateList() {
                     content: 'Create Template',
                     url: '/TamplateCreate',
                 }}
+                secondaryActions={[
+                    {
+                        content: "Delete All Templates",
+                        destructive: true,
+                        onAction: openDeleteAllConfirmation,
+                    },
+                ]}
             >
                 {error && (
                     <Box paddingBlockEnd="400">
@@ -176,7 +240,7 @@ export default function TemplateList() {
                     <Card padding="0">
                         <IndexTable
                             resourceName={resourceName}
-                            itemCount={templates.length}
+                            itemCount={currentTemplates.length}
                             selectable={false}
                             headings={[
                                 { title: 'Template Name' },
@@ -188,8 +252,38 @@ export default function TemplateList() {
                         >
                             {rowMarkup}
                         </IndexTable>
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginTop: "20px",
+                                marginBottom: "20px",
+                                width: "100%",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "16px",
+                                }}
+                            >
+                                {/* <Text as="p">
+      Page {currentPage} of {totalPages}
+    </Text> */}
+
+                                <Pagination
+                                    hasPrevious={currentPage > 1}
+                                    hasNext={currentPage < totalPages}
+                                    onPrevious={() => setCurrentPage((prev) => prev - 1)}
+                                    onNext={() => setCurrentPage((prev) => prev + 1)}
+                                />
+                            </div>
+                        </div>
                     </Card>
                 )}
+
             </Page>
         </Frame>
     );

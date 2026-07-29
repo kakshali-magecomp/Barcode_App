@@ -241,4 +241,26 @@ class BarcodeTemplateController extends Controller
 
     ]);
 }
+public function deleteAll()
+{
+    try {
+
+        $user = auth()->user();
+
+        $user->barcodeTemplates()->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'All templates deleted successfully.'
+        ]);
+
+    } catch (\Exception $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ],500);
+
+    }
+}
 }

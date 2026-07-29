@@ -164,10 +164,12 @@ export default function DesignCanvas() {
                     if (r.success) {
                         const designData = {
                             ...r.data,
+                            barcode_format: r.data.barcode_format || "CODE128",
                             print_qty: defaultPrintQty,
                         };
+                        console.log("Template barcode_format =", r.data.barcode_format);
+                        console.log("Full template data =", r.data);
 
-                        console.log("Loaded Design:", designData);
                         setDesign(designData);
                         setOriginalDesign(structuredClone(designData));
                         setOriginalVariantId(savedVariantId);
@@ -213,14 +215,19 @@ export default function DesignCanvas() {
 
 
     const handleUpdate = (key, value) => { setIsDirty(true); setDesign(prev => ({ ...prev, [key]: value })); };
+
     const handleSave = useCallback(async () => {
         setLoading(true); setErrorBanner(null);
+
         try {
+            console.log("Saving Design =", design);
+            console.log("Barcode Format =", design.barcode_format);
             const res = await fetch(`/api/templates/design/${id}`,
                 {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         ...design,
+                        barcode_format: design.barcode_format,
                         selected_variant_id: selectedVariantId,
                     })
                 });
@@ -501,10 +508,10 @@ ${labels}
                                                             value={getSymbolTargetValue()}
                                                             field={design.symbol_field_source}
                                                             settings={design}
-                                                            barcodeSettings={
-                                                                barcodeSettings.data ??
-                                                                barcodeSettings
-                                                            }
+                                                            barcodeSettings={{
+                                                                ...(barcodeSettings.data ?? barcodeSettings),
+                                                                ...design,
+                                                            }}
                                                         />
                                                     ) : (
                                                         <QrCodeRenderer

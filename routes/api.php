@@ -25,6 +25,7 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::post('/templates', [BarcodeTemplateController::class, 'store']);
     Route::get('/templates/{id}', [BarcodeTemplateController::class, 'show']);
     Route::put('/templates/{id}', [BarcodeTemplateController::class, 'update']);
+    Route::delete('/templates/delete-all', [BarcodeTemplateController::class, 'deleteAll']);
     Route::delete('/templates/{id}', [BarcodeTemplateController::class, 'destroy']);
     Route::get('/templates/design/{id}', [BarcodeTemplateController::class, 'getTemplateDesign']);
 

@@ -51,7 +51,6 @@ const allowedFields = {
         "sku_value",
         "product_name",
         "product_price",
-        "product_online_url",
     ],
 
     EAN8: [

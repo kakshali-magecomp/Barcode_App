@@ -117,24 +117,25 @@ export function generateBarcode(item, barcodeSettings) {
     );
 
 }
-export function detectBarcodeFormat(barcode, barcodeSettings) {
+export function detectBarcodeFormat(barcode, barcodeSettings = {}) {
 
-    if (!barcodeSettings) {
-        return "CODE128";
-    }
+    // Default
+    let format = barcodeSettings.barcode_format || "CODE128";
 
-    let format =
-        barcodeSettings.barcode_format || "CODE128";
+    // Convert to string
+    const value = String(barcode || "").trim();
 
-    if (barcodeSettings.auto_detect_gtin_format) {
+    // Only auto-detect when the ENTIRE value is numeric
+    const isNumeric = /^\d+$/.test(value);
 
-        const digits = String(barcode).replace(/\D/g, "");
+    if (barcodeSettings.auto_detect_gtin_format && format === "CODE128") {
 
-        switch (digits.length) {
+        switch (value.length) {
 
             case 8:
                 return "EAN8";
 
+            case 11:
             case 12:
                 return "UPC";
 
@@ -143,15 +144,21 @@ export function detectBarcodeFormat(barcode, barcodeSettings) {
 
             case 14:
                 return "ITF14";
+
+            default:
+                break;
         }
     }
 
+    // Manual selection
     switch (format) {
 
         case "Code39":
+        case "CODE39":
             return "CODE39";
 
         case "UPCA":
+        case "UPC":
             return "UPC";
 
         case "EAN8":
@@ -164,8 +171,6 @@ export function detectBarcodeFormat(barcode, barcodeSettings) {
             return "ITF14";
 
         case "CODE128":
-            return "CODE128";
-
         default:
             return "CODE128";
     }
@@ -315,7 +320,11 @@ export function getBarcodeValue(value, barcodeSettings = {}) {
         barcodeSettings.barcode_format || "CODE128";
 
     if (format === "CODE128") {
-        return String(value);
+
+        return String(value)
+            .trim()
+            .replace(/[\r\n\t]/g, "");
+
     }
 
     if (format === "Code39") {

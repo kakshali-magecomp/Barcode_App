@@ -155,8 +155,14 @@ export default function GenerateBarcode() {
                 `/api/templates/design/${value}`
             );
             const json = await response.json();
+            console.log("Selected Template Data");
+            console.log(json.data);
+            console.log("barcode_format =", json.data.barcode_format);
+
             if (json.success) {
                 setTemplateDesign(json.data);
+                console.log("Template Design Saved");
+                console.log(json.data);
             }
         } catch (err) {
             console.error(err);
@@ -405,6 +411,9 @@ ${labels}
         }
 
     };
+   
+console.log(templateDesign);
+console.log("barcode_format =", templateDesign?.barcode_format);
 
     return (
         <Page title="Generate Barcode"
@@ -685,7 +694,7 @@ ${labels}
                                             )
                                         }</div>
                                     )}
-
+                                    
                                     {templateDesign.symbol_type === "BARCODE" ? (
                                         <BarcodeRenderer
                                             value={getSymbolValue(product)}

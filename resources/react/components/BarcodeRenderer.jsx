@@ -1,6 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import JsBarcode from "jsbarcode";
-import { detectBarcodeFormat, getBarcodeValue, } from "./barcode/BarcodeUtils";
+import {
+    detectBarcodeFormat,
+    getBarcodeValue,
+} from "./barcode/BarcodeUtils";
 
 export default function BarcodeRenderer({
     value,
@@ -8,65 +11,121 @@ export default function BarcodeRenderer({
     settings = {},
     barcodeSettings = {},
 }) {
-
     const barcodeRef = useRef(null);
+
     useEffect(() => {
-        console.log("BarcodeRenderer Loaded");
-        console.log("value =", value);
-        console.log("settings =", settings);
-        console.log("barcodeSettings =", barcodeSettings);
-        console.log("Selected Field =", field);
-        
-        if (!barcodeRef.current || !value) return;
-
-        let format = detectBarcodeFormat(
-            value,
-            barcodeSettings
-        );
-
-
-        if (
-            ["EAN8", "EAN13", "UPCA", "ITF14"].includes(format)
-        ) {
-            const digits = String(value).replace(/\D/g, "");
-
-            if (!digits.length) {
-                format = "CODE128";
-            }
+        if (!barcodeRef.current || value == null || value === "") {
+            return;
         }
 
-        const barcodeValue = getBarcodeValue(
+        console.log("================================");
+        console.log("Barcode Renderer");
+        console.log("Raw Value :", value);
+        console.log("Field :", field);
+        console.log("Template Settings :", barcodeSettings);
+
+        // Detect barcode format from template settings
+        let format = detectBarcodeFormat(value, barcodeSettings);
+
+        // Normalize format names for JsBarcode
+        switch (format) {
+            case "Code39":
+            case "CODE39":
+                format = "CODE39";
+                break;
+
+            case "UPCA":
+            case "UPC":
+                format = "UPC";
+                break;
+
+            case "EAN8":
+                format = "EAN8";
+                break;
+
+            case "EAN13":
+                format = "EAN13";
+                break;
+
+            case "ITF14":
+                format = "ITF14";
+                break;
+
+            default:
+                format = "CODE128";
+        }
+
+        // Generate barcode value
+        let barcodeValue = getBarcodeValue(
             value,
             barcodeSettings,
             field
         );
 
-        console.log("Barcode Format:", format);
-        console.log("Barcode Value:", value);
-        console.log("Barcode Settings:", barcodeSettings);
-        console.log("Barcode value:", barcodeValue);
-        console.log("Selected Format:", barcodeSettings.barcode_format);
-        try {
+        console.log("Generated Value :", barcodeValue);
 
+        // Numeric barcode validation
+        if (
+            ["EAN8", "EAN13", "UPC", "ITF14"].includes(format)
+        ) {
+            if (!/^\d+$/.test(barcodeValue)) {
+                console.warn(
+                    `${format} only supports numeric values. Falling back to CODE128`
+                );
+
+                format = "CODE128";
+                barcodeValue = String(value);
+            }
+        }
+
+        console.log("Final Format :", format);
+        console.log("Final Barcode :", barcodeValue);
+
+        try {
             JsBarcode(barcodeRef.current, barcodeValue, {
-                format: format,
-                width: 4,
-                height: 80,
+                format,
+                width: Number(settings.symbol_bar_width) || 2,
+                height: Number(settings.symbol_bar_height) || 50,
+                margin: Number(settings.symbol_margin_px) || 2,
+
                 displayValue: !settings.hide_barcode_value,
-                fontSize: 18,
-                lineColor: "#000000",
+
+                fontSize: Number(settings.symbol_font_size) || 16,
+
+                lineColor:
+                    settings.symbol_color || "#000000",
+
                 background: "#FFFFFF",
-                margin: 20,
+            });
+        } catch (err) {
+            console.error("Barcode Error");
+            console.error(err);
+
+            console.log({
+                value,
+                barcodeValue,
+                format,
+                barcodeSettings,
             });
 
-        } catch (err) {
-            console.error("BARCODE ERROR");
-            console.error(err);
-            console.log("Value:", value);
-            console.log("Format:", format);
-            console.log("Barcode Settings:", barcodeSettings);
+            // Last fallback
+            try {
+                JsBarcode(barcodeRef.current, String(value), {
+                    format: "CODE128",
+                    width: Number(settings.symbol_bar_width) || 2,
+                    height: Number(settings.symbol_bar_height) || 50,
+                    margin: Number(settings.symbol_margin_px) || 2,
+                    displayValue: !settings.hide_barcode_value,
+                    fontSize: Number(settings.symbol_font_size) || 16,
+                    lineColor:
+                        settings.symbol_color || "#000000",
+                    background: "#FFFFFF",
+                });
+            } catch (e) {
+                console.error("Fallback failed", e);
+            }
         }
-    }, [value, settings, barcodeSettings]);
+    }, [value, field, settings, barcodeSettings]);
 
     return (
         <div

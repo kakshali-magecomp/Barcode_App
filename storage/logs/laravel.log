@@ -1,14 +1,8 @@
-[2026-07-28 12:02:03] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
-[2026-07-28 12:13:54] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
-[2026-07-28 12:15:38] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
-[2026-07-28 12:29:11] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
-[2026-07-28 12:33:42] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
-[2026-07-28 12:34:36] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"107"} 
-[2026-07-28 12:35:18] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:35:18] local.INFO: array (
-  'template_name' => 'code39_product-name',
-  'description' => 'code39_product-name',
-  'note' => 'code39_product-name',
+[2026-07-29 13:09:32] local.INFO: CREATE TEMPLATE   
+[2026-07-29 13:09:32] local.INFO: array (
+  'template_name' => 'test',
+  'description' => 'test',
+  'note' => 'test',
   'paper_brand' => 'zebra',
   'paper_model' => '4000d-2x1',
   'layout_settings' => 
@@ -30,13 +24,16 @@
     'gapY' => 0,
   ),
 )  
-[2026-07-28 12:35:18] local.INFO: Template Created {"id":108} 
-[2026-07-28 12:35:19] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"108"} 
-[2026-07-28 12:36:36] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:36:36] local.INFO: array (
-  'template_name' => 'code39_product-price',
-  'description' => 'code39_product-price',
-  'note' => 'code39_product-price',
+[2026-07-29 13:09:32] local.INFO: Template Created {"id":151} 
+[2026-07-29 13:09:33] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":18,"requested_template_id":"151"} 
+[2026-07-29 13:09:33] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:09:33] local.INFO: TEMPLATE DESIGN {"barcode_template_id":151,"barcode_format":"CODE128","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#000000","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"updated_at":"2026-07-29T13:09:33.000000Z","created_at":"2026-07-29T13:09:33.000000Z","id":151} 
+[2026-07-29 13:09:33] local.INFO: FINAL RESPONSE {"id":151,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T13:09:33.000000Z","updated_at":"2026-07-29T13:09:33.000000Z","barcode_template_id":151,"margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#000000","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"test"} 
+[2026-07-29 13:18:09] local.INFO: CREATE TEMPLATE   
+[2026-07-29 13:18:09] local.INFO: array (
+  'template_name' => 'UPCA',
+  'description' => 'UPCA',
+  'note' => 'UPCA',
   'paper_brand' => 'zebra',
   'paper_model' => '4000d-2x1',
   'layout_settings' => 
@@ -58,180 +55,41 @@
     'gapY' => 0,
   ),
 )  
-[2026-07-28 12:36:36] local.INFO: Template Created {"id":109} 
-[2026-07-28 12:36:36] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"109"} 
-[2026-07-28 12:36:55] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"109"} 
-[2026-07-28 12:37:27] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:37:27] local.INFO: array (
-  'template_name' => 'code_product-barcode',
-  'description' => 'code_product-barcode',
-  'note' => 'code_product-barcode',
-  'paper_brand' => 'zebra',
-  'paper_model' => '4000d-2x1',
-  'layout_settings' => 
-  array (
-    'name' => 'Small Label',
-    'paper' => 
-    array (
-      'width' => 50.8,
-      'height' => 25.4,
-    ),
-    'label' => 
-    array (
-      'width' => 50.8,
-      'height' => 25.4,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-  ),
-)  
-[2026-07-28 12:37:27] local.INFO: Template Created {"id":110} 
-[2026-07-28 12:37:27] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"110"} 
-[2026-07-28 12:38:08] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"110"} 
-[2026-07-28 12:39:06] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:39:06] local.INFO: array (
-  'template_name' => 'code128_product-url',
-  'description' => 'code128_product-url',
-  'note' => 'code128_product-url',
-  'paper_brand' => 'dymo',
-  'paper_model' => '30334',
-  'layout_settings' => 
-  array (
-    'name' => 'Jewelry Label',
-    'paper' => 
-    array (
-      'width' => 54,
-      'height' => 25,
-    ),
-    'label' => 
-    array (
-      'width' => 54,
-      'height' => 25,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-    'marginTop' => 0,
-    'marginLeft' => 0,
-  ),
-)  
-[2026-07-28 12:39:06] local.INFO: Template Created {"id":111} 
-[2026-07-28 12:39:06] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"111"} 
-[2026-07-28 12:39:43] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"111"} 
-[2026-07-28 12:41:48] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:41:48] local.INFO: array (
-  'template_name' => 'code128_product-price',
-  'description' => 'code128_product-price',
-  'note' => 'code128_product-price',
-  'paper_brand' => 'dymo',
-  'paper_model' => '30334',
-  'layout_settings' => 
-  array (
-    'name' => 'Jewelry Label',
-    'paper' => 
-    array (
-      'width' => 54,
-      'height' => 25,
-    ),
-    'label' => 
-    array (
-      'width' => 54,
-      'height' => 25,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-    'marginTop' => 0,
-    'marginLeft' => 0,
-  ),
-)  
-[2026-07-28 12:41:48] local.INFO: Template Created {"id":112} 
-[2026-07-28 12:41:48] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"112"} 
-[2026-07-28 12:42:59] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:42:59] local.INFO: array (
-  'template_name' => 'code128_product-name',
-  'description' => 'code128_product-name',
-  'note' => 'code128_product-name',
-  'paper_brand' => 'zebra',
-  'paper_model' => '4000d-4x6',
-  'layout_settings' => 
-  array (
-    'name' => 'Shipping Label',
-    'paper' => 
-    array (
-      'width' => 101.6,
-      'height' => 152.4,
-    ),
-    'label' => 
-    array (
-      'width' => 101.6,
-      'height' => 152.4,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-  ),
-)  
-[2026-07-28 12:42:59] local.INFO: Template Created {"id":113} 
-[2026-07-28 12:42:59] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"113"} 
-[2026-07-28 12:55:23] local.INFO: CREATE TEMPLATE   
-[2026-07-28 12:55:23] local.INFO: array (
-  'template_name' => 'code128_product-SKU',
-  'description' => 'code128_product-SKU',
-  'note' => 'code128_product-SKU',
-  'paper_brand' => 'zebra',
-  'paper_model' => '4000d-2x1',
-  'layout_settings' => 
-  array (
-    'name' => 'Small Label',
-    'paper' => 
-    array (
-      'width' => 50.8,
-      'height' => 25.4,
-    ),
-    'label' => 
-    array (
-      'width' => 50.8,
-      'height' => 25.4,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-  ),
-)  
-[2026-07-28 12:55:23] local.INFO: Template Created {"id":114} 
-[2026-07-28 12:55:25] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"114"} 
-[2026-07-28 13:01:10] local.INFO: CREATE TEMPLATE   
-[2026-07-28 13:01:10] local.INFO: array (
-  'template_name' => 'code128_product-barcode',
-  'description' => 'code128_product-barcode',
-  'note' => 'code128_product-barcode',
-  'paper_brand' => 'zebra',
-  'paper_model' => '4000d-2x1',
-  'layout_settings' => 
-  array (
-    'name' => 'Small Label',
-    'paper' => 
-    array (
-      'width' => 50.8,
-      'height' => 25.4,
-    ),
-    'label' => 
-    array (
-      'width' => 50.8,
-      'height' => 25.4,
-    ),
-    'rows' => 1,
-    'columns' => 1,
-    'gapX' => 0,
-    'gapY' => 0,
-  ),
-)  
-[2026-07-28 13:01:10] local.INFO: Template Created {"id":115} 
-[2026-07-28 13:01:10] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":17,"requested_template_id":"115"} 
+[2026-07-29 13:18:09] local.INFO: Template Created {"id":152} 
+[2026-07-29 13:18:09] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":18,"requested_template_id":"152"} 
+[2026-07-29 13:18:09] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:18:09] local.INFO: TEMPLATE DESIGN {"barcode_template_id":152,"barcode_format":"UPCA","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#000000","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"updated_at":"2026-07-29T13:18:09.000000Z","created_at":"2026-07-29T13:18:09.000000Z","id":153} 
+[2026-07-29 13:18:09] local.INFO: FINAL RESPONSE {"id":153,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T13:18:09.000000Z","updated_at":"2026-07-29T13:18:09.000000Z","barcode_template_id":152,"margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#000000","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"UPCA"} 
+[2026-07-29 13:18:53] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:18:53] local.INFO: TEMPLATE DESIGN {"id":153,"barcode_template_id":152,"selected_variant_id":"gid://shopify/ProductVariant/53974119809342","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"UPCA","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T13:18:09.000000Z","updated_at":"2026-07-29T13:18:45.000000Z"} 
+[2026-07-29 13:18:53] local.INFO: FINAL RESPONSE {"id":153,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T13:18:09.000000Z","updated_at":"2026-07-29T13:18:45.000000Z","barcode_template_id":152,"selected_variant_id":"gid://shopify/ProductVariant/53974119809342","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"UPCA"} 
+[2026-07-29 13:22:15] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:15] local.INFO: TEMPLATE DESIGN {"id":139,"barcode_template_id":139,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:27:40.000000Z","updated_at":"2026-07-29T08:29:37.000000Z"} 
+[2026-07-29 13:22:15] local.INFO: FINAL RESPONSE {"id":139,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:27:40.000000Z","updated_at":"2026-07-29T08:29:37.000000Z","barcode_template_id":139,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_name"} 
+[2026-07-29 13:22:19] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:19] local.INFO: TEMPLATE DESIGN {"id":138,"barcode_template_id":138,"selected_variant_id":"gid://shopify/ProductVariant/53904975429950","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:22:32.000000Z","updated_at":"2026-07-29T08:27:18.000000Z"} 
+[2026-07-29 13:22:19] local.INFO: FINAL RESPONSE {"id":138,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:22:32.000000Z","updated_at":"2026-07-29T08:27:18.000000Z","barcode_template_id":138,"selected_variant_id":"gid://shopify/ProductVariant/53904975429950","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_URL"} 
+[2026-07-29 13:22:22] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:22] local.INFO: TEMPLATE DESIGN {"id":147,"barcode_template_id":147,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T12:51:02.000000Z","updated_at":"2026-07-29T12:51:45.000000Z"} 
+[2026-07-29 13:22:22] local.INFO: FINAL RESPONSE {"id":147,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T12:51:02.000000Z","updated_at":"2026-07-29T12:51:45.000000Z","barcode_template_id":147,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code39_name"} 
+[2026-07-29 13:22:25] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:25] local.INFO: TEMPLATE DESIGN {"id":153,"barcode_template_id":152,"selected_variant_id":"gid://shopify/ProductVariant/53974119809342","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"UPCA","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T13:18:09.000000Z","updated_at":"2026-07-29T13:18:45.000000Z"} 
+[2026-07-29 13:22:25] local.INFO: FINAL RESPONSE {"id":153,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T13:18:09.000000Z","updated_at":"2026-07-29T13:18:45.000000Z","barcode_template_id":152,"selected_variant_id":"gid://shopify/ProductVariant/53974119809342","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"UPCA"} 
+[2026-07-29 13:22:27] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:27] local.INFO: TEMPLATE DESIGN {"id":139,"barcode_template_id":139,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:27:40.000000Z","updated_at":"2026-07-29T08:29:37.000000Z"} 
+[2026-07-29 13:22:27] local.INFO: FINAL RESPONSE {"id":139,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:27:40.000000Z","updated_at":"2026-07-29T08:29:37.000000Z","barcode_template_id":139,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_name"} 
+[2026-07-29 13:22:29] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:29] local.INFO: TEMPLATE DESIGN {"id":138,"barcode_template_id":138,"selected_variant_id":"gid://shopify/ProductVariant/53904975429950","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:22:32.000000Z","updated_at":"2026-07-29T08:27:18.000000Z"} 
+[2026-07-29 13:22:29] local.INFO: FINAL RESPONSE {"id":138,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:22:32.000000Z","updated_at":"2026-07-29T08:27:18.000000Z","barcode_template_id":138,"selected_variant_id":"gid://shopify/ProductVariant/53904975429950","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_URL"} 
+[2026-07-29 13:22:31] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:31] local.INFO: TEMPLATE DESIGN {"id":141,"barcode_template_id":141,"selected_variant_id":"gid://shopify/ProductVariant/53918470308158","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"sku_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:31:10.000000Z","updated_at":"2026-07-29T08:52:19.000000Z"} 
+[2026-07-29 13:22:31] local.INFO: FINAL RESPONSE {"id":141,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:31:10.000000Z","updated_at":"2026-07-29T08:52:19.000000Z","barcode_template_id":141,"selected_variant_id":"gid://shopify/ProductVariant/53918470308158","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"sku_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_SKU"} 
+[2026-07-29 13:22:34] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:34] local.INFO: TEMPLATE DESIGN {"id":147,"barcode_template_id":147,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T12:51:02.000000Z","updated_at":"2026-07-29T12:51:45.000000Z"} 
+[2026-07-29 13:22:34] local.INFO: FINAL RESPONSE {"id":147,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T12:51:02.000000Z","updated_at":"2026-07-29T12:51:45.000000Z","barcode_template_id":147,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_name","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code39_name"} 
+[2026-07-29 13:22:35] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:35] local.INFO: TEMPLATE DESIGN {"id":141,"barcode_template_id":141,"selected_variant_id":"gid://shopify/ProductVariant/53918470308158","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"sku_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:31:10.000000Z","updated_at":"2026-07-29T08:52:19.000000Z"} 
+[2026-07-29 13:22:35] local.INFO: FINAL RESPONSE {"id":141,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:31:10.000000Z","updated_at":"2026-07-29T08:52:19.000000Z","barcode_template_id":141,"selected_variant_id":"gid://shopify/ProductVariant/53918470308158","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"sku_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_SKU"} 
+[2026-07-29 13:22:37] local.INFO: BARCODE SETTINGS {"id":12,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T04:11:14.000000Z","updated_at":"2026-07-29T12:55:31.000000Z"} 
+[2026-07-29 13:22:37] local.INFO: TEMPLATE DESIGN {"id":140,"barcode_template_id":140,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"CODE128","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_price","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"created_at":"2026-07-29T08:30:04.000000Z","updated_at":"2026-07-29T08:30:40.000000Z"} 
+[2026-07-29 13:22:37] local.INFO: FINAL RESPONSE {"id":140,"user_id":18,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.12]","contextual_pricing_value":null,"created_at":"2026-07-29T08:30:04.000000Z","updated_at":"2026-07-29T08:30:40.000000Z","barcode_template_id":140,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"product_price","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":3,"template_name":"code128_price"} 
