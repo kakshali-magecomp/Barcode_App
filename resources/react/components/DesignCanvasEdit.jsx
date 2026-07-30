@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { Card, BlockStack, Banner, Spinner, Box, Select, TextField, FormLayout, Grid, Button,} from "@shopify/polaris";
+import { Card, BlockStack, Banner, Spinner, Box, Select, TextField, FormLayout, Grid, Button, } from "@shopify/polaris";
 import LineControls from "../components/LineControls";
 import SymbolControls from "../components/SymbolControls";
 import BarcodeRenderer from "../components/BarcodeRenderer";
@@ -39,6 +39,7 @@ export default function DesignCanvasEdit({
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState("");
     const [printSettings, setPrintSettings] = useState({});
+    const [barcodeSettings, setBarcodeSettings] = useState({});
     useEffect(() => {
         loadDesign();
     }, [templateId, discardSignal]);
@@ -47,16 +48,21 @@ export default function DesignCanvasEdit({
         try {
             setLoading(true);
 
-            const [templateRes, productRes, settingRes] = await Promise.all([
+            const [templateRes, productRes, settingRes, barcodeRes,] = await Promise.all([
                 fetch(`/api/templates/design/${templateId}`),
                 fetch(`/api/products`),
                 fetch(`/api/print-settings`),
+                fetch(`/api/barcode-settings`),
             ]);
             const template = await templateRes.json();
             console.log("Template:", template.data);
             console.log("Template print_qty:", template.data.print_qty);
             const products = await productRes.json();
             const settings = await settingRes.json();
+            const barcode = await barcodeRes.json();
+            if (barcode.success) {
+                setBarcodeSettings(barcode.settings || barcode.data || barcode);
+            }
             console.log("PRINT SETTINGS:", settings);
             let defaultQty = 1;
 
@@ -70,6 +76,7 @@ export default function DesignCanvasEdit({
             if (template.success) {
                 const loadedDesign = {
                     ...defaultDesign,
+                    ...(barcode.settings || barcode.data || {}),
                     ...template.data,
                     print_qty: defaultQty,
                 };
@@ -176,213 +183,217 @@ ${labels}
         );
     }
     const getSymbolTargetValue = () => {
-    switch (design.symbol_field_source) {
-        case "product_name":
-            return previewItem.title || "";
-        case "product_price":
-            return previewItem.price || "";
-        case "product_online_url":
-            return previewItem.online_url || "";
-        case "barcode_value":
-            return previewItem.barcode || "";
-        case "sku_value":
-            return previewItem.sku || "";
-        case "barcode":
-            return previewItem.barcode || "";
-        default:
-            return previewItem.sku || "";
-    }
-};
-const formatPrice = (price) => {
-    const amount = Number(price || 0).toFixed(2);
-    let format = design.line2_currency_format || "${amount}";
-    return format.replace("{amount}", amount);
-};
+        switch (design.symbol_field_source) {
+            case "product_name":
+                return previewItem.title || "";
+            case "product_price":
+                return previewItem.price || "";
+            case "product_online_url":
+                return previewItem.online_url || "";
+            case "barcode_value":
+                return previewItem.barcode || "";
+            case "sku_value":
+                return previewItem.sku || "";
+            case "barcode":
+                return previewItem.barcode || "";
+            default:
+                return previewItem.sku || "";
+        }
+    };
+    const formatPrice = (price) => {
+        const amount = Number(price || 0).toFixed(2);
+        let format = design.line2_currency_format || "${amount}";
+        return format.replace("{amount}", amount);
+    };
 
-  return (
-    <Grid>
-        {/* LEFT SIDE */}
-        <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 8, lg: 8 }}>
-            <BlockStack gap="500">
-                {error && (
-                    <Banner tone="critical">
-                        <p>{error}</p>
-                    </Banner>
-                )}
-                <Card padding="400">
-                    <Select
-                        label="Preview Product"
-                        options={storeVariants.map(item => ({
-                            label: `${item.product_title} (${item.current_sku || "No SKU"})`,
-                            value: item.variant_id,
-                        }))}
-                        value={selectedVariantId}
-                        onChange={(value) => {
-                            setSelectedVariantId(value);
-                            const selected = storeVariants.find(
-                                item => item.variant_id === value
-                            );
-                            if (!selected) return;
-                            setPreviewItem({
-                                title: selected.product_title,
-                                sku: selected.current_sku || "NO SKU",
-                                barcode: selected.barcode || "",
-                                price: selected.price,
-                                vendor: selected.vendor,
-                                option_1:
-                                    selected.variant_title !== "Default Title"
-                                        ? selected.variant_title
-                                        : "",
-                                online_url: selected.online_url || "",
-                            });
-                            updateField("selected_variant_id", value);
+    return (
+        <Grid>
+            {/* LEFT SIDE */}
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 8, lg: 8 }}>
+                <BlockStack gap="500">
+                    {error && (
+                        <Banner tone="critical">
+                            <p>{error}</p>
+                        </Banner>
+                    )}
+                    <Card padding="400">
+                        <Select
+                            label="Preview Product"
+                            options={storeVariants.map(item => ({
+                                label: `${item.product_title} (${item.current_sku || "No SKU"})`,
+                                value: item.variant_id,
+                            }))}
+                            value={selectedVariantId}
+                            onChange={(value) => {
+                                setSelectedVariantId(value);
+                                const selected = storeVariants.find(
+                                    item => item.variant_id === value
+                                );
+                                if (!selected) return;
+                                setPreviewItem({
+                                    title: selected.product_title,
+                                    sku: selected.current_sku || "NO SKU",
+                                    barcode: selected.barcode || "",
+                                    price: selected.price,
+                                    vendor: selected.vendor,
+                                    option_1:
+                                        selected.variant_title !== "Default Title"
+                                            ? selected.variant_title
+                                            : "",
+                                    online_url: selected.online_url || "",
+                                });
+                                updateField("selected_variant_id", value);
 
-                        }}
+                            }}
+                        />
+                    </Card>
+                    <LineControls
+                        design={design}
+                        handleUpdate={updateField}
                     />
-                </Card>
-                <LineControls
-                    design={design}
-                    handleUpdate={updateField}
-                />
-                <SymbolControls
-                    design={design}
-                    handleUpdate={updateField}
-                />
-            </BlockStack>
-        </Grid.Cell>
+                    <SymbolControls
+                        design={design}
+                        handleUpdate={updateField}
+                    />
+                </BlockStack>
+            </Grid.Cell>
 
-        {/* RIGHT SIDE */}
-        <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
-            <div
-                style={{
-                    position: "sticky",
-                    top: "20px",
-                }}
-            >
-                {/* Preview */}
-                <Card padding="400">
-                    <div
-                        ref={printRef}
-                        style={{
-                            border: "1px solid #dfe3e8",
-                            borderRadius: 8,
-                            background: "#fff",
-                            minHeight: 220,
-                            padding: 20,
-                            textAlign: "center",
-                        }}
-                    >
-                        {design.line1_sku && (
-                            <div
-                                style={{
-                                    fontFamily: "monospace",
-                                    fontSize: 12,
-                                    marginBottom: 8,
-                                }}
-                            >
-                                {previewItem.sku}
-                            </div>
-                        )}
+            {/* RIGHT SIDE */}
+            <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
+                <div
+                    style={{
+                        position: "sticky",
+                        top: "20px",
+                    }}
+                >
+                    {/* Preview */}
+                    <Card padding="400">
                         <div
+                            ref={printRef}
                             style={{
-                                marginBottom: 15,
+                                border: "1px solid #dfe3e8",
+                                borderRadius: 8,
+                                background: "#fff",
+                                minHeight: 220,
+                                padding: 20,
+                                textAlign: "center",
                             }}
                         >
-                            {design.line2_name && (
-                                <span
+                            {design.line1_sku && (
+                                <div
                                     style={{
-                                        fontWeight: 700,
-                                        fontSize: 18,
+                                        fontFamily: "monospace",
+                                        fontSize: 12,
+                                        marginBottom: 8,
                                     }}
                                 >
-                                    {previewItem.title}
-                                </span>
+                                    {previewItem.sku}
+                                </div>
                             )}
-                            {design.line2_variant_option1 &&
-                                previewItem.option_1 && (
-                                    <span
-                                        style={{
-                                            marginLeft: 5,
-                                            color: "#666",
-                                        }}
-                                    >
-                                        {previewItem.option_1}
-                                    </span>
-                                )}
-                            {design.line2_price && (
-                                <span
-                                    style={{
-                                        marginLeft: 8,
-                                        color: "#008060",
-                                        fontWeight: 700,
-                                    }}
-                                >
-                                    {formatPrice(previewItem.price)}
-                                </span>
-                            )}
-
-                        </div>
-                        {design.line3_vendor && (
                             <div
                                 style={{
                                     marginBottom: 15,
-                                    color: "#777",
                                 }}
                             >
-                                {previewItem.vendor}
+                                {design.line2_name && (
+                                    <span
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 18,
+                                        }}
+                                    >
+                                        {previewItem.title}
+                                    </span>
+                                )}
+                                {design.line2_variant_option1 &&
+                                    previewItem.option_1 && (
+                                        <span
+                                            style={{
+                                                marginLeft: 5,
+                                                color: "#666",
+                                            }}
+                                        >
+                                            {previewItem.option_1}
+                                        </span>
+                                    )}
+                                {design.line2_price && (
+                                    <span
+                                        style={{
+                                            marginLeft: 8,
+                                            color: "#008060",
+                                            fontWeight: 700,
+                                        }}
+                                    >
+                                        {formatPrice(previewItem.price)}
+                                    </span>
+                                )}
+
                             </div>
-                        )}
-                        {design.symbol_enabled && (
-                            design.symbol_type === "BARCODE" ?
-                                <BarcodeRenderer
-                                    value={getSymbolTargetValue()}
-                                    settings={design}
-                                />
-                                :
-                                <QrCodeRenderer
-                                    value={getSymbolTargetValue()}
-                                    settings={design}
-                                />
-                        )}
-                        {design.barcode && (
-                            <div
-                                style={{
-                                    marginTop: 12,
-                                    fontWeight: 600,
-                                }}
+                            {design.line3_vendor && (
+                                <div
+                                    style={{
+                                        marginBottom: 15,
+                                        color: "#777",
+                                    }}
+                                >
+                                    {previewItem.vendor}
+                                </div>
+                            )}
+                            {design.symbol_enabled && (
+                                design.symbol_type === "BARCODE" ?
+                                    <BarcodeRenderer
+                                        value={getSymbolTargetValue()}
+                                        settings={design}
+                                        barcodeSettings={{
+                                            ...barcodeSettings,
+                                            ...design,
+                                        }}
+                                    />
+                                    :
+                                    <QrCodeRenderer
+                                        value={getSymbolTargetValue()}
+                                        settings={design}
+                                    />
+                            )}
+                            {design.barcode && (
+                                <div
+                                    style={{
+                                        marginTop: 12,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {previewItem.barcode}
+                                </div>
+                            )}
+                        </div>
+                    </Card>
+                    <div style={{ height: 15 }} />
+                    {/* Print */}
+                    <Card padding="400">
+                        <BlockStack gap="300">
+                            <TextField
+                                label="Print Quantity"
+                                type="number"
+                                value={String(design.print_qty || 1)}
+                                onChange={(value) =>
+                                    updateField(
+                                        "print_qty",
+                                        Math.max(1, parseInt(value) || 1)
+                                    )
+                                }
+                                autoComplete="off"
+                            />
+                            <Button
+                                variant="primary"
+                                fullWidth
+                                onClick={handlePrint}
                             >
-                                {previewItem.barcode}
-                            </div>
-                        )}
-                    </div>
-                </Card>
-                <div style={{ height: 15 }} />
-                {/* Print */}
-                <Card padding="400">
-                    <BlockStack gap="300">
-                        <TextField
-                            label="Print Quantity"
-                            type="number"
-                            value={String(design.print_qty || 1)}
-                            onChange={(value) =>
-                                updateField(
-                                    "print_qty",
-                                    Math.max(1, parseInt(value) || 1)
-                                )
-                            }
-                            autoComplete="off"
-                        />
-                        <Button
-                            variant="primary"
-                            fullWidth
-                            onClick={handlePrint}
-                        >
-                            🖨 Print Label
-                        </Button>
-                    </BlockStack>
-                </Card>
-            </div>
-        </Grid.Cell>
-    </Grid>
-);
+                                🖨 Print Label
+                            </Button>
+                        </BlockStack>
+                    </Card>
+                </div>
+            </Grid.Cell>
+        </Grid>
+    );
 }

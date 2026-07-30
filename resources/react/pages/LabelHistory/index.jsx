@@ -16,7 +16,7 @@ export default function LabelHistory() {
   const [error, setError] = useState("");
   const [toastActive, setToastActive] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-  // const [deleteModal, setDeleteModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
   const [viewModal, setViewModal] = useState(false);
   const [historyDetails, setHistoryDetails] = useState(null);
@@ -60,7 +60,7 @@ export default function LabelHistory() {
     }
     const result = histories.filter(item =>
       String(item.id).includes(search) ||
-      (item.template_name || "")
+      (item.template?.template_name|| "")
         .toLowerCase()
         .includes(search.toLowerCase()) ||
       (item.client_ip || "")
@@ -92,30 +92,30 @@ export default function LabelHistory() {
     }
   };
 
-  // const deleteHistory = async () => {
-  //   if (!selectedHistory) return;
-  //   try {
-  //     const res = await fetch(
-  //       `/api/print-history/${selectedHistory.id}`,
-  //       {
-  //         method: "DELETE",
-  //       }
-  //     );
-  //     const json = await res.json();
-  //     if (json.success) {
-  //       setToastMessage("History deleted.");
-  //       setToastActive(true);
-  //       loadHistory();
-  //     } else {
-  //       setError(json.message);
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     setError("Delete failed.");
-  //   }
-  //   setDeleteModal(false);
-  //   setSelectedHistory(null);
-  // };
+  const deleteHistory = async () => {
+    if (!selectedHistory) return;
+    try {
+      const res = await fetch(
+        `/api/print-history/${selectedHistory.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      const json = await res.json();
+      if (json.success) {
+        setToastMessage("History deleted.");
+        setToastActive(true);
+        loadHistory();
+      } else {
+        setError(json.message);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Delete failed.");
+    }
+    setDeleteModal(false);
+    setSelectedHistory(null);
+  };
 
 
   if (loading) {
@@ -186,7 +186,7 @@ tbody tr:nth-child(even){
 <body>
 <h2>Print Job #${historyDetails.id}</h2>
 <div class="info">
-Template : ${historyDetails.template_id}
+Template : ${historyDetails.template?.template_name}
 </div>
 <table>
 <thead>
@@ -213,12 +213,13 @@ window.close();
 
     printWindow.document.close();
   };
+  
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
     const rows = histories.map((item, index) => `
 <tr>
 <td>${item.id}</td>
-<td>${item.template_id}</td>
+<td>${item.template?.template_name || "-"}</td>
 <td>${item.print_qty}</td>
 <td>${item.client_ip}</td>
 <td>${new Date(item.printed_at).toLocaleString()}</td>
@@ -373,11 +374,11 @@ window.close();
               selectable={false}
               headings={[
                 { title: "Print ID" },
-                { title: "Template_id" },
+                { title: "Template_Name" },
                 { title: "Total Labels" },
                 { title: "Client IP" },
                 { title: "Printed At" },
-                // { title: "Actions" },
+                { title: "Actions" },
               ]}
             >
               {paginatedHistory.map((item, index) => (
@@ -397,7 +398,7 @@ window.close();
                   </IndexTable.Cell>
                   <IndexTable.Cell>
                     <Text fontWeight="semibold">
-                      {item.template_id}
+                      {item.template?.template_name ?? "-"}
                     </Text>
                   </IndexTable.Cell>
                   <IndexTable.Cell>
@@ -412,16 +413,16 @@ window.close();
                     {new Date(item.created_at).toLocaleString()}
                   </IndexTable.Cell>
 
-                  {/* <IndexTable.Cell>
+                  <IndexTable.Cell>
 
                     <InlineStack gap="200">
 
-                      <Button
+                      {/* <Button
                         size="slim"
                         onClick={() => openHistory(item.id)}
                       >
                         View
-                      </Button>
+                      </Button> */}
 
                       <Button
                         icon={DeleteIcon}
@@ -435,7 +436,7 @@ window.close();
 
                     </InlineStack>
 
-                  </IndexTable.Cell> */}
+                  </IndexTable.Cell>
                 </IndexTable.Row>
               ))}
             </IndexTable>
@@ -462,7 +463,7 @@ window.close();
           />
         )}
       </Page>
-      {/* <Modal
+      <Modal
         open={deleteModal}
         onClose={() => setDeleteModal(false)}
         title="Delete History"
@@ -483,7 +484,7 @@ window.close();
             Are you sure you want to delete this print history?
           </Text>
         </Modal.Section>
-      </Modal> */}
+      </Modal>
       <Modal
         open={viewModal}
         onClose={() => setViewModal(false)}

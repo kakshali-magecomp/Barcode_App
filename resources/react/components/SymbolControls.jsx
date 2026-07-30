@@ -1,14 +1,5 @@
 import React, {useEffect,} from "react";
-import {
-  Card,
-  FormLayout,
-  TextField,
-  Select,
-  Checkbox,
-  Box,
-  Text,
-  BlockStack,
-} from "@shopify/polaris";
+import {Card, FormLayout, TextField, Select, Checkbox, Box, Text, BlockStack,} from "@shopify/polaris";
 
 export default function SymbolControls({ design, handleUpdate, barcodeSettings, }) {
   const barcodeFormat =
@@ -38,56 +29,24 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
 ];
 
 const allowedFields = {
-    CODE128: [
-        "barcode_value",
-        "sku_value",
-        "product_name",
-        "product_price",
-        "product_online_url",
-    ],
-
-    Code39: [
-        "barcode_value",
-        "sku_value",
-        "product_name",
-        "product_price",
-    ],
-
-    EAN8: [
-        "barcode_value",
-        "sku_value",
-    ],
-
-    EAN13: [
-        "barcode_value",
-        "sku_value",
-    ],
-
-    UPCA: [
-        "barcode_value",
-        "sku_value",
-    ],
-
-    ITF14: [
-        "barcode_value",
-    ],
+    CODE128: ["barcode_value", "sku_value", "product_name", "product_price", "product_online_url",],
+    Code39: ["barcode_value", "sku_value", "product_name", "product_price",],
+    EAN8: ["barcode_value",],
+    EAN13: ["barcode_value",],
+    UPCA: [ "barcode_value",],
+    ITF14: ["barcode_value",],
 };
 useEffect(() => {
-
     const validFields = allowedFields[barcodeFormat];
-
     if (!validFields) return;
-
     if (
         !validFields.includes(design.symbol_field_source)
     ) {
-
         handleUpdate(
             "symbol_field_source",
             validFields[0]
         );
     }
-
 }, [
     barcodeFormat,
     design.symbol_field_source

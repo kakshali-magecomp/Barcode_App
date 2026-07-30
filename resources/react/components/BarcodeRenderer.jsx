@@ -18,11 +18,6 @@ export default function BarcodeRenderer({
             return;
         }
 
-        console.log("================================");
-        console.log("Barcode Renderer");
-        console.log("Raw Value :", value);
-        console.log("Field :", field);
-        console.log("Template Settings :", barcodeSettings);
 
         // Detect barcode format from template settings
         let format = detectBarcodeFormat(value, barcodeSettings);
@@ -61,12 +56,14 @@ export default function BarcodeRenderer({
             barcodeSettings,
             field
         );
+        console.log("FORMAT =", format);
+        console.log("VALUE =", barcodeValue);
+        console.log("SETTINGS =", barcodeSettings);
 
-        console.log("Generated Value :", barcodeValue);
 
         // Numeric barcode validation
         if (
-            ["EAN8", "EAN13", "UPC", "ITF14"].includes(format)
+            ["EAN8", "EAN13", "UPCA", "ITF14"].includes(format)
         ) {
             if (!/^\d+$/.test(barcodeValue)) {
                 console.warn(
@@ -137,13 +134,16 @@ export default function BarcodeRenderer({
             }}
         >
             <img
-                ref={barcodeRef}
-                style={{
-                    width: "320px",
-                    height: "120px",
-                    imageRendering: "pixelated",
-                }}
-            />
+    ref={barcodeRef}
+    alt="Barcode"
+    style={{
+        maxWidth: "100%",
+        width: "auto",
+        height: "auto",
+        display: "block",
+        objectFit: "contain",
+    }}
+/>
         </div>
     );
 }

@@ -5,9 +5,9 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
     const formatOptions = [
         { label: 'Code 128 (Recommended)', value: 'CODE128' },
         { label: 'Code 39', value: 'Code39' },
-        { label: 'UPC-A', value: 'UPCA' },
         { label: 'EAN 8', value: 'EAN8' },
-        { label: 'EAN 13', value: 'EAN13' },
+        { label: 'EAN 13', value: 'EAN13' }, 
+        { label: 'UPC-A', value: 'UPCA' },
         { label: 'ITF-14', value: 'ITF14' }
     ];
 
@@ -78,11 +78,12 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
                             value={settings.barcode_format}
                             onChange={(val) => onChange('barcode_format', val)}
                         />
-                        <text>
-                            [N.8]</text>
                            <text> Used to generate barcodes. For example:</text>
                             <text>[A.8] - 8 alpha characters</text>
-                            <text>[N.4] - 4 numeric characters</text>
+                            <text>[EAN8] - 7 numeric characters</text>
+                            <text>[EAN13] - 12 numeric characters</text>
+                            <text>[UPC-A] - 11 numeric characters</text>
+                            <text>[ITF14] - 13 numeric characters</text>
                         
                         <TextField
                             label="Barcode Pattern Layout"

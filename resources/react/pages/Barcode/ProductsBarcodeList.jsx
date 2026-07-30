@@ -424,7 +424,7 @@ console.log("barcode_format =", templateDesign?.barcode_format);
                         variant="primary"
                         onClick={() => navigate("/LabelHistory")}
                     >
-                        Print History
+                        Go to Label History
                     </Button>
                     {/* <Button
                         onClick={() => navigate("/LabelHistory")}
@@ -624,7 +624,7 @@ console.log("barcode_format =", templateDesign?.barcode_format);
                                 id={`label-${product.variant_id}`}
                                 key={product.variant_id}
                                 style={{
-                                    width: "230px",
+                                    width: "300px",
                                     border: "1px solid #ddd",
                                     borderRadius: "8px",
                                     padding: "15px",
