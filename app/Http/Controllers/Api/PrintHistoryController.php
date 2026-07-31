@@ -47,6 +47,7 @@ class PrintHistoryController extends Controller
                 'product_title' => $product['product_title'],
                 'sku' => $product['current_sku'] ?? $product['sku'] ?? null,
                 'barcode' => $product['barcode'] ?? null,
+                'barcode_format' => $product['barcode_format'] ?? 'CODE128',
                 'online_url' => $product['online_url'] ?? null,
                 'price' => $product['price'] ?? null,
                 'vendor' => $product['vendor'] ?? null,
@@ -81,7 +82,7 @@ class PrintHistoryController extends Controller
     //single history detail
     public function show($id)
     {
-        $history = PrintHistory::with('items')
+        $history = PrintHistory::with('items','template')
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 

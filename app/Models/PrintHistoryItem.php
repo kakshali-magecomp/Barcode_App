@@ -16,6 +16,7 @@ class PrintHistoryItem extends Model
         'product_title',
         'sku',
         'barcode',
+        'barcode_format',
         'price',
         'online_url',
         'qty',

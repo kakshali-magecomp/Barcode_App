@@ -126,93 +126,149 @@ export default function LabelHistory() {
     );
   }
 
-  const handlePrintHistory = () => {
+const handlePrintHistory = () => {
     if (!historyDetails) return;
 
     const printWindow = window.open("", "_blank");
 
-    const rows = historyDetails.items
-      .filter((_, index) => selectedItems.includes(index))
-      .map(
-        (item) => `
-      <tr>
-        <td>${item.product_title}</td>
-        <td>${item.sku}</td>
-        <td>${item.barcode}</td>
-        <td style="text-align:center">${item.qty}</td>
-      </tr>
-    `
-      )
-      .join("");
+    const labels = historyDetails.items
+        .filter((_, index) => selectedItems.includes(index))
+        .map((item) => {
+            let html = "";
+
+            for (let i = 0; i < item.qty; i++) {
+                html += `
+                    <div class="label">
+                        <div class="title">
+                            ${item.product_title}
+                        </div>
+
+                        <div class="sku">
+                            ${item.sku ?? ""}
+                        </div>
+
+                        <svg
+                            class="barcode"
+                            jsbarcode-format="${item.barcode_format || 'CODE128'}"
+                            jsbarcode-value="${String(item.barcode ?? "").trim()}"
+                            jsbarcode-width="2"
+                            jsbarcode-height="45"
+                            jsbarcode-displayValue="true">
+                        </svg>
+                    </div>
+                `;
+            }
+
+            return html;
+        })
+        .join("");
 
     printWindow.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
-<title>Print Job #${historyDetails.id}</title>
+
+<title>Print History</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
 <style>
+
+@page{
+    margin:5mm;
+}
+
 body{
+
+    margin:10px;
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fill,250px);
+
+    gap:10px;
+
     font-family:Arial,sans-serif;
-    margin:25px;
-    color:#222;
+
 }
-h2{
-    margin-bottom:5px;
-}
-.info{
-    margin-bottom:20px;
-    color:#666;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-th{
-    background:#f3f3f3;
+
+.label{
+
+    width:250px;
+
     border:1px solid #ddd;
-    padding:12px;
-    text-align:left;
+
+    padding:10px;
+
+    box-sizing:border-box;
+
+    text-align:center;
+
+    page-break-inside:avoid;
+
+    break-inside:avoid;
+
+}
+
+.title{
+
+    font-size:15px;
+
     font-weight:bold;
+
+    margin-bottom:5px;
+
 }
-td{
-    border:1px solid #ddd;
-    padding:12px;
+
+.sku{
+
+    font-size:13px;
+
+    margin-bottom:10px;
+
 }
-tbody tr:nth-child(even){
-    background:#fafafa;
+
+.barcode{
+
+    width:100%;
+
+    height:auto;
+
 }
+
 </style>
+
 </head>
+
 <body>
-<h2>Print Job #${historyDetails.id}</h2>
-<div class="info">
-Template : ${historyDetails.template?.template_name}
-</div>
-<table>
-<thead>
-<tr>
-<th>Product</th>
-<th>SKU</th>
-<th>Barcode</th>
-<th>Qty</th>
-</tr>
-</thead>
-<tbody>
-${rows}
-</tbody>
-</table>
+
+${labels}
+
 <script>
-window.onload=function(){
-window.print();
-window.close();
+
+window.onload = function(){
+
+    JsBarcode(".barcode").init();
+
+    setTimeout(function(){
+
+        window.print();
+
+        window.close();
+
+    },300);
+
 }
+
 </script>
+
 </body>
+
 </html>
-`);
+    `);
 
     printWindow.document.close();
-  };
+};
   
   const handlePrintAll = () => {
     const win = window.open("", "_blank");

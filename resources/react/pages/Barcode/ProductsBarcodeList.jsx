@@ -36,6 +36,7 @@ export default function GenerateBarcode() {
             variant_id: item.variant_id,
             product_title: item.product_title,
             barcode: item.barcode,
+            barcode_format: item.barcode_format,
             online_url: item.online_url,
             current_sku: item.current_sku ?? item.sku,
             price: item.price,
@@ -205,6 +206,7 @@ export default function GenerateBarcode() {
                         product_title: product.product_title,
                         current_sku: product.current_sku,
                         barcode: product.barcode,
+                        barcode_format: product.barcode_format,
                         online_url: product.online_url,
                         price: product.price,
                         vendor: product.vendor,
@@ -338,6 +340,7 @@ export default function GenerateBarcode() {
             setPreviewItem(null);
         }
     };
+
     const handlePrint = () => {
         let labels = "";
         selectedProducts.forEach((product) => {
@@ -348,9 +351,11 @@ export default function GenerateBarcode() {
             for (let i = 0; i < product.quantity; i++) {
                 labels += `
                 <div class="label">
+                <div class="label-content">
                     ${label.innerHTML}
                 </div>
-            `;
+                </div>
+                `;
             }
         });
         const printWindow = window.open("", "", "width=900,height=700");
@@ -358,19 +363,38 @@ export default function GenerateBarcode() {
 <html>
 <head>
 <style>
+@page{
+    size:auto;
+    margin:5mm;
+}
 body{
-display:flex;
-flex-wrap:wrap;
-gap:15px;
-padding:20px;
-font-family:Arial;
+    margin:0;
+    padding:10px;
+    font-family:Arial,sans-serif;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,250px);
+    gap:10px;
+    justify-content:start;
+    align-content:start;
 }
 .label{
-padding:15px;
-page-break-inside:avoid;
+    width:250px;
+    min-height:140px;
+    padding:10px;
+    box-sizing:border-box;
+    border:1px solid #ddd;
+    overflow:hidden;
+    page-break-inside:avoid;
+    break-inside:avoid;
 }
-svg,img{
-max-width:100%;
+.label svg,
+.label img{
+    width:100% !important;
+    height:auto !important;
+    display:block;
+}
+.label-content{
+    width:100%;
 }
 </style>
 </head>
@@ -411,9 +435,9 @@ ${labels}
         }
 
     };
-   
-console.log(templateDesign);
-console.log("barcode_format =", templateDesign?.barcode_format);
+
+    console.log(templateDesign);
+    console.log("barcode_format =", templateDesign?.barcode_format);
 
     return (
         <Page title="Generate Barcode"
@@ -694,7 +718,7 @@ console.log("barcode_format =", templateDesign?.barcode_format);
                                             )
                                         }</div>
                                     )}
-                                    
+
                                     {templateDesign.symbol_type === "BARCODE" ? (
                                         <BarcodeRenderer
                                             value={getSymbolValue(product)}

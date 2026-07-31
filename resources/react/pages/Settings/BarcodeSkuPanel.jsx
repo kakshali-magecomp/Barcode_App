@@ -80,6 +80,7 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
                         />
                            <text> Used to generate barcodes. For example:</text>
                             <text>[A.8] - 8 alpha characters</text>
+                            <text>[N.8] - 8 numeric characters</text>
                             <text>[EAN8] - 7 numeric characters</text>
                             <text>[EAN13] - 12 numeric characters</text>
                             <text>[UPC-A] - 11 numeric characters</text>

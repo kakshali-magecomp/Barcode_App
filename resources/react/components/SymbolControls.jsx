@@ -1,56 +1,97 @@
-import React, {useEffect,} from "react";
-import {Card, FormLayout, TextField, Select, Checkbox, Box, Text, BlockStack,} from "@shopify/polaris";
+import React, { useEffect, } from "react";
+import { Card, FormLayout, TextField, Select, Checkbox, Box, Text, BlockStack, } from "@shopify/polaris";
 
 export default function SymbolControls({ design, handleUpdate, barcodeSettings, }) {
   const barcodeFormat =
     barcodeSettings?.barcode_format || "CODE128";
 
   const fieldOptions = [
-  {
-    label: "Barcode Value",
-    value: "barcode_value",
-  },
-  {
-    label: "SKU",
-    value: "sku_value",
-  },
-  {
-    label: "Product Name",
-    value: "product_name",
-  },
-  {
-    label: "Product Price",
-    value: "product_price",
-  },
-  {
-    label: "Product Page URL",
-    value: "product_online_url",
-  },
-];
+    {
+      label: "Barcode Value",
+      value: "barcode_value",
+    },
+    {
+      label: "SKU",
+      value: "sku_value",
+    },
+    {
+      label: "Product Name",
+      value: "product_name",
+    },
+    {
+      label: "Product Price",
+      value: "product_price",
+    },
+    {
+      label: "Product Page URL",
+      value: "product_online_url",
+    },
+  ];
 
-const allowedFields = {
+  const allowedFields = {
     CODE128: ["barcode_value", "sku_value", "product_name", "product_price", "product_online_url",],
     Code39: ["barcode_value", "sku_value", "product_name", "product_price",],
     EAN8: ["barcode_value",],
     EAN13: ["barcode_value",],
-    UPCA: [ "barcode_value",],
+    UPCA: ["barcode_value",],
     ITF14: ["barcode_value",],
-};
-useEffect(() => {
+  };
+  useEffect(() => {
     const validFields = allowedFields[barcodeFormat];
     if (!validFields) return;
     if (
-        !validFields.includes(design.symbol_field_source)
+      !validFields.includes(design.symbol_field_source)
     ) {
-        handleUpdate(
-            "symbol_field_source",
-            validFields[0]
-        );
+      handleUpdate(
+        "symbol_field_source",
+        validFields[0]
+      );
     }
-}, [
-    barcodeFormat,
-    design.symbol_field_source
-]);
+  }, [barcodeFormat, design.symbol_field_source]);
+  useEffect(() => {
+    switch (barcodeFormat) {
+      case "EAN8":
+        handleUpdate("symbol_bar_width", 1.5);
+        handleUpdate("symbol_bar_height", 40);
+        handleUpdate("symbol_font_size", 12);
+        handleUpdate("symbol_margin_px", 8);
+        break;
+
+      case "EAN13":
+        handleUpdate("symbol_bar_width", 2);
+        handleUpdate("symbol_bar_height", 55);
+        handleUpdate("symbol_font_size", 14);
+        handleUpdate("symbol_margin_px", 10);
+        break;
+
+      case "UPCA":
+        handleUpdate("symbol_bar_width", 2);
+        handleUpdate("symbol_bar_height", 55);
+        handleUpdate("symbol_font_size", 14);
+        handleUpdate("symbol_margin_px", 10);
+        break;
+
+      case "ITF14":
+        handleUpdate("symbol_bar_width", 2.5);
+        handleUpdate("symbol_bar_height", 70);
+        handleUpdate("symbol_font_size", 16);
+        handleUpdate("symbol_margin_px", 10);
+        break;
+
+      case "CODE39":
+        handleUpdate("symbol_bar_width", 2);
+        handleUpdate("symbol_bar_height", 50);
+        handleUpdate("symbol_font_size", 14);
+        handleUpdate("symbol_margin_px", 5);
+        break;
+
+      default:
+        handleUpdate("symbol_bar_width", 2);
+        handleUpdate("symbol_bar_height", 35);
+        handleUpdate("symbol_font_size", 12);
+        handleUpdate("symbol_margin_px", 5);
+    }
+  }, [barcodeFormat]);
   return (
     <Card padding="400">
       <Box
@@ -153,9 +194,20 @@ useEffect(() => {
                   allowedFields[barcodeFormat]?.includes(option.value)
                 )}
                 value={design.symbol_field_source}
-                onChange={(value) =>
-                  handleUpdate("symbol_field_source", value)
-                }
+                onChange={(value) => {
+
+                  handleUpdate("symbol_field_source", value);
+
+                  // If user changes to a text field,
+                  // automatically switch barcode format to CODE128
+                  if (
+                    value !== "barcode_value" &&
+                    ["EAN8", "EAN13", "UPCA", "ITF14"].includes(design.barcode_format)
+                  ) {
+                    handleUpdate("barcode_format", "CODE128");
+                  }
+
+                }}
               />
             </FormLayout.Group>
             {/* Barcode */}
@@ -177,39 +229,27 @@ useEffect(() => {
                 <FormLayout.Group>
                   <Select
                     label="Barcode Format"
-                    options={[
-                      {
-                        label: "Code 128",
-                        value: "CODE128",
-                      },
-                      {
-                        label: "Code 39",
-                        value: "CODE39",
-                      },
-                      {
-                        label: "UPC-A",
-                        value: "UPCA",
-                      },
-                      {
-                        label: "EAN 8",
-                        value: "EAN8",
-                      },
-                      {
-                        label: "EAN 13",
-                        value: "EAN13",
-                      },
-                      {
-                        label: "ITF-14",
-                        value: "ITF14",
-                      },
-                    ]}
+                    options={
+                      design.symbol_field_source === "barcode_value"
+                        ? [
+                          { label: "Code 128", value: "CODE128" },
+                          { label: "Code 39", value: "CODE39" },
+                          { label: "UPC-A", value: "UPCA" },
+                          { label: "EAN 8", value: "EAN8" },
+                          { label: "EAN 13", value: "EAN13" },
+                          { label: "ITF-14", value: "ITF14" },
+                        ]
+                        : [
+                          { label: "Code 128", value: "CODE128" },
+                        ]
+                    }
                     value={
-                      design.symbol_barcode_format ||
+                      design.barcode_format ||
                       "CODE128"
                     }
                     onChange={(value) =>
                       handleUpdate(
-                        "symbol_barcode_format",
+                        "barcode_format",
                         value
                       )
                     }

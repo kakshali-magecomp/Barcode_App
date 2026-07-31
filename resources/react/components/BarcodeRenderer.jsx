@@ -81,8 +81,29 @@ export default function BarcodeRenderer({
         try {
             JsBarcode(barcodeRef.current, barcodeValue, {
                 format,
-                width: Number(settings.symbol_bar_width) || 2,
-                height: Number(settings.symbol_bar_height) || 50,
+                width:
+                    Number(settings.symbol_bar_width) ||
+                    (format === "EAN8"
+                        ? 1.5
+                        : format === "EAN13"
+                            ? 2
+                            : format === "UPCA"
+                                ? 2
+                                : format === "ITF14"
+                                    ? 2.5
+                                    : 2),
+
+                height:
+                    Number(settings.symbol_bar_height) ||
+                    (format === "EAN8"
+                        ? 40
+                        : format === "EAN13"
+                            ? 55
+                            : format === "UPCA"
+                                ? 55
+                                : format === "ITF14"
+                                    ? 70
+                                    : 50),
                 margin: Number(settings.symbol_margin_px) || 2,
 
                 displayValue: !settings.hide_barcode_value,
@@ -109,8 +130,8 @@ export default function BarcodeRenderer({
             try {
                 JsBarcode(barcodeRef.current, String(value), {
                     format: "CODE128",
-                    width: Number(settings.symbol_bar_width) || 2,
-                    height: Number(settings.symbol_bar_height) || 50,
+                    width: Number(settings.symbol_bar_width) || 3,
+                    height: Number(settings.symbol_bar_height) || 80,
                     margin: Number(settings.symbol_margin_px) || 2,
                     displayValue: !settings.hide_barcode_value,
                     fontSize: Number(settings.symbol_font_size) || 16,
@@ -134,16 +155,24 @@ export default function BarcodeRenderer({
             }}
         >
             <img
-    ref={barcodeRef}
-    alt="Barcode"
-    style={{
-        maxWidth: "100%",
-        width: "auto",
-        height: "auto",
-        display: "block",
-        objectFit: "contain",
-    }}
-/>
+                ref={barcodeRef}
+                style={{
+                    width: "100%",
+                    maxWidth:
+                        barcodeSettings?.barcode_format === "EAN8"
+                            ? "180px"
+                            : barcodeSettings?.barcode_format === "EAN13"
+                                ? "260px"
+                                : barcodeSettings?.barcode_format === "UPCA"
+                                    ? "260px"
+                                    : barcodeSettings?.barcode_format === "ITF14"
+                                        ? "320px"
+                                        : "280px",
+                    height: "auto",
+                    objectFit: "contain",
+                    imageRendering: "pixelated",
+                }}
+            />
         </div>
     );
 }
