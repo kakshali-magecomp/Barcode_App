@@ -121,36 +121,37 @@ export function generateBarcode(item, barcodeSettings) {
 // Detect Barcode Format
 export function detectBarcodeFormat(barcode, barcodeSettings = {}) {
     const format = (
-        barcodeSettings.barcode_format || "CODE128"
+        barcodeSettings.barcode_format ||
+        "CODE128"
     ).toUpperCase();
 
     const value = String(barcode || "").trim();
     const isNumeric = /^\d+$/.test(value);
 
     // Auto detect only when CODE128 is selected
-    if (
-        barcodeSettings.auto_detect_gtin_format &&
-        format === "CODE128" &&
-        isNumeric
-    ) {
-        switch (value.length) {
-            case 8:
-                return "EAN8";
+    const shouldAutoDetect =
+    barcodeSettings.auto_detect_gtin_format &&
+    !barcodeSettings.barcode_format;
 
-            case 11:
-            case 12:
-                return "UPCA";
+if (shouldAutoDetect && isNumeric) {
+    switch (value.length) {
+        case 8:
+            return "EAN8";
 
-            case 13:
-                return "EAN13";
+        case 11:
+        case 12:
+            return "UPCA";
 
-            case 14:
-                return "ITF14";
+        case 13:
+            return "EAN13";
 
-            default:
-                return "CODE128";
-        }
+        case 14:
+            return "ITF14";
+
+        default:
+            return "CODE128";
     }
+}
 
     switch (format) {
         case "CODE39":

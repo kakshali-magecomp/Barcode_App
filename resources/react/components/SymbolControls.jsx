@@ -1,9 +1,11 @@
-import React, { useEffect, } from "react";
+import React, { useEffect, useRef } from "react";
 import { Card, FormLayout, TextField, Select, Checkbox, Box, Text, BlockStack, } from "@shopify/polaris";
 
 export default function SymbolControls({ design, handleUpdate, barcodeSettings, }) {
-  const barcodeFormat =
-    barcodeSettings?.barcode_format || "CODE128";
+  const barcodeFormat = design.barcode_format ||
+    barcodeSettings?.barcode_format ||
+    "CODE128";
+  const firstLoad = useRef(true);
 
   const fieldOptions = [
     {
@@ -37,8 +39,13 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
     ITF14: ["barcode_value",],
   };
   useEffect(() => {
+
+    if (firstLoad.current) return;
+
     const validFields = allowedFields[barcodeFormat];
+
     if (!validFields) return;
+
     if (
       !validFields.includes(design.symbol_field_source)
     ) {
@@ -47,9 +54,21 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
         validFields[0]
       );
     }
+
   }, [barcodeFormat, design.symbol_field_source]);
+
   useEffect(() => {
+
+    if (firstLoad.current) {
+
+      firstLoad.current = false;
+
+      return;
+
+    }
+
     switch (barcodeFormat) {
+
       case "EAN8":
         handleUpdate("symbol_bar_width", 1.5);
         handleUpdate("symbol_bar_height", 40);
@@ -91,6 +110,7 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
         handleUpdate("symbol_font_size", 12);
         handleUpdate("symbol_margin_px", 5);
     }
+
   }, [barcodeFormat]);
   return (
     <Card padding="400">
@@ -247,12 +267,10 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                       design.barcode_format ||
                       "CODE128"
                     }
-                    onChange={(value) =>
-                      handleUpdate(
-                        "barcode_format",
-                        value
-                      )
-                    }
+                    onChange={(value) => {
+                      console.log("Selected Format =", value);
+                      handleUpdate("barcode_format", value);
+                    }}
                   />
 
                   <TextField

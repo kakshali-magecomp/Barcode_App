@@ -60,7 +60,7 @@ export default function LabelHistory() {
     }
     const result = histories.filter(item =>
       String(item.id).includes(search) ||
-      (item.template?.template_name|| "")
+      (item.template?.template_name || "")
         .toLowerCase()
         .includes(search.toLowerCase()) ||
       (item.client_ip || "")
@@ -126,27 +126,31 @@ export default function LabelHistory() {
     );
   }
 
-const handlePrintHistory = () => {
+  const handlePrintHistory = () => {
     if (!historyDetails) return;
-
     const printWindow = window.open("", "_blank");
-
+    console.log("History Items:", historyDetails.items);
+    console.log("PRINT ITEMS");
+    console.table(
+      historyDetails.items.map(item => ({
+        product: item.product_title,
+        barcode: item.barcode,
+        barcode_format: item.barcode_format,
+      }))
+    );
     const labels = historyDetails.items
-        .filter((_, index) => selectedItems.includes(index))
-        .map((item) => {
-            let html = "";
-
-            for (let i = 0; i < item.qty; i++) {
-                html += `
+      .filter((_, index) => selectedItems.includes(index))
+      .map((item) => {
+        let html = "";
+        for (let i = 0; i < item.qty; i++) {
+          html += `
                     <div class="label">
                         <div class="title">
                             ${item.product_title}
                         </div>
-
                         <div class="sku">
                             ${item.sku ?? ""}
                         </div>
-
                         <svg
                             class="barcode"
                             jsbarcode-format="${item.barcode_format || 'CODE128'}"
@@ -157,119 +161,70 @@ const handlePrintHistory = () => {
                         </svg>
                     </div>
                 `;
-            }
-
-            return html;
-        })
-        .join("");
-
+        }
+        return html;
+      })
+      .join("");
     printWindow.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
-
 <title>Print History</title>
-
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-
 <style>
-
 @page{
     margin:5mm;
 }
-
 body{
-
     margin:10px;
-
     display:grid;
-
     grid-template-columns:repeat(auto-fill,250px);
-
     gap:10px;
-
     font-family:Arial,sans-serif;
-
 }
-
 .label{
-
     width:250px;
-
     border:1px solid #ddd;
-
     padding:10px;
-
     box-sizing:border-box;
-
     text-align:center;
-
     page-break-inside:avoid;
-
     break-inside:avoid;
-
 }
-
 .title{
-
     font-size:15px;
-
     font-weight:bold;
-
     margin-bottom:5px;
-
 }
-
 .sku{
-
     font-size:13px;
-
     margin-bottom:10px;
-
 }
-
 .barcode{
-
     width:100%;
-
     height:auto;
-
 }
-
 </style>
-
 </head>
-
 <body>
-
 ${labels}
-
 <script>
-
 window.onload = function(){
-
     JsBarcode(".barcode").init();
-
     setTimeout(function(){
-
         window.print();
-
         window.close();
-
     },300);
-
 }
-
 </script>
-
 </body>
-
 </html>
     `);
 
     printWindow.document.close();
-};
-  
+  };
+
+
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
     const rows = histories.map((item, index) => `

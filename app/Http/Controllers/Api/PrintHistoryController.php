@@ -40,6 +40,7 @@ class PrintHistoryController extends Controller
         ]);
         
         foreach ($request->products as $product) {
+            \Log::info('PRINT PRODUCT DATA', $product);
             PrintHistoryItem::create([
                 'print_history_id' => $history->id,
                 'product_id' => $product['product_id'] ?? null,

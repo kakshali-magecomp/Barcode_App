@@ -40,6 +40,7 @@ export default function DesignCanvasEdit({
     const [selectedVariantId, setSelectedVariantId] = useState("");
     const [printSettings, setPrintSettings] = useState({});
     const [barcodeSettings, setBarcodeSettings] = useState({});
+    const initialLoadCompleted = useRef(false);
     useEffect(() => {
         loadDesign();
     }, [templateId, discardSignal]);
@@ -81,8 +82,7 @@ export default function DesignCanvasEdit({
                     print_qty: defaultQty,
                 };
                 setDesign(loadedDesign);
-                // IMPORTANT
-                onChange?.(loadedDesign);
+                initialLoadCompleted.current = true;
             }
 
             if (products.status === 1 && products.variants?.length) {
@@ -118,15 +118,28 @@ export default function DesignCanvasEdit({
     }
 
     function updateField(key, value) {
+
         setDesign(prev => {
+
+            if (prev[key] === value) {
+                return prev;
+            }
+
             const updated = {
                 ...prev,
                 [key]: value,
             };
-            onChange?.(updated);
-            onDirty?.();
+
+            // Only notify parent after initial loading
+            if (initialLoadCompleted.current) {
+                onChange?.(updated);
+                onDirty?.();
+            }
+
             return updated;
+
         });
+
     }
     const handlePrint = () => {
         const qty = Number(design.print_qty) || 1;
@@ -346,6 +359,12 @@ ${labels}
                                         settings={design}
                                         barcodeSettings={{
                                             ...barcodeSettings,
+
+                                            // Override settings with the Design Canvas value
+                                            barcode_format:
+                                                design.barcode_format ||
+                                                barcodeSettings.barcode_format,
+
                                             ...design,
                                         }}
                                     />

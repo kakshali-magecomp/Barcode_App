@@ -293,6 +293,8 @@ export default function GenerateBarcode() {
             );
 
             const updatedProducts = json.updated_products || [];
+            console.log(updatedProducts);
+            console.log(updatedProducts[0]);
             console.log("UPDATED PRODUCTS", updatedProducts);
             setGeneratedProducts(updatedProducts);
             setSelectedProducts(prev =>
@@ -303,9 +305,20 @@ export default function GenerateBarcode() {
                     if (!updated) return product;
                     return {
                         ...product,
+
                         barcode: updated.generated_barcode ?? updated.barcode,
-                        generated_barcode: updated.generated_barcode ?? updated.barcode,
-                        online_url: updated.online_url ?? product.online_url,
+
+                        generated_barcode:
+                            updated.generated_barcode ??
+                            updated.barcode,
+
+                        online_url:
+                            updated.online_url ??
+                            product.online_url,
+
+                        barcode_format:
+                            updated.barcode_format ??
+                            product.barcode_format,
                     };
                 })
             );
