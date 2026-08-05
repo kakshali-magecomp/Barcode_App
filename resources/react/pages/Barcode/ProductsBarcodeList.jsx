@@ -1,16 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Page, Card, RadioButton, Button, Text, BlockStack, Banner, Divider, InlineStack, Select, Box, } from "@shopify/polaris";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import ProductPickerModal from "../../components/ProductPickerModal";
 import BarcodeRenderer from "../../components/BarcodeRenderer";
 import QrCodeRenderer from "../../components/QrCodeRenderer";
 import { useNavigate, useLocation } from "react-router-dom";
-import { DeleteIcon } from "@shopify/polaris-icons";
-import QRCode from "react-qr-code";
+
+const PREVIEW_PAGE_SIZE = 4;
+const REMOVE_PRODUCT_MODAL_ID = "remove-product-modal";
 
 export default function GenerateBarcode() {
-    const appBridge = useAppBridge();
-    const fetch = appBridge.fetch || window.fetch;
+    const shopify = useAppBridge();
     const location = useLocation();
     const {
         fromHistory = false,
@@ -25,12 +24,13 @@ export default function GenerateBarcode() {
 
     const [method, setMethod] = useState("");
     const [previewItem, setPreviewItem] = useState(null);
+    const [previewPage, setPreviewPage] = useState(1);
+    const [productToRemove, setProductToRemove] = useState(null);
 
     useEffect(() => {
         if (!fromHistory) return;
         setMethod("print");
         setOriginalProducts(originalHistoryProducts);
-        console.log(historySelectedProducts);
         const products = historySelectedProducts.map(item => ({
             product_id: item.product_id,
             variant_id: item.variant_id,
@@ -51,28 +51,22 @@ export default function GenerateBarcode() {
                 printSettings?.default_print_label_quantity ??
                 1,
         }));
-        console.log("History Products:", products);
         let list = [...products];
 
         if (printSettings?.sort_by_sku) {
             list.sort((a, b) =>
-                (a.current_sku || "").localeCompare(
-                    b.current_sku || ""
-                )
+                (a.current_sku || "").localeCompare(b.current_sku || "")
             );
         }
 
         setSelectedProducts(list);
-    }, [fromHistory, historySelectedProducts, originalHistoryProducts,]);
+    }, [fromHistory, historySelectedProducts, originalHistoryProducts]);
 
     const updateProductQuantity = (variantId, qty) => {
         setSelectedProducts((prev) =>
             prev.map((item) =>
                 item.variant_id === variantId
-                    ? {
-                        ...item,
-                        quantity: Math.max(1, Number(qty)),
-                    }
+                    ? { ...item, quantity: Math.max(1, Number(qty)) }
                     : item
             )
         );
@@ -83,11 +77,6 @@ export default function GenerateBarcode() {
     const printRef = useRef();
     const [templates, setTemplates] = useState([]);
     const [templateDesign, setTemplateDesign] = useState(null);
-    const [barcodeSettings, setBarcodeSettings] = useState({});
-    useEffect(() => {
-        console.log("Template Design");
-        console.log(templateDesign);
-    }, [templateDesign]);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -95,12 +84,12 @@ export default function GenerateBarcode() {
     const navigate = useNavigate();
     const [printSettings, setPrintSettings] = useState(null);
 
+
     useEffect(() => {
         async function loadTemplates() {
             try {
                 const res = await fetch("/api/templates");
                 const json = await res.json();
-                console.log(json);
                 if (json.success) {
                     setTemplates(json.data || []);
                 }
@@ -123,18 +112,14 @@ export default function GenerateBarcode() {
                 console.log(err);
             }
         }
-
         loadPrintSettings();
     }, []);
-    useEffect(() => {
 
+    useEffect(() => {
         if (!printSettings) return;
         if (!fromHistory) {
-            setMethod(
-                printSettings.default_generate_option || "missing"
-            );
+            setMethod(printSettings.default_generate_option || "missing");
         }
-
     }, [printSettings, fromHistory]);
 
     useEffect(() => {
@@ -144,6 +129,11 @@ export default function GenerateBarcode() {
         handleTemplateChange(templateId);
     }, [templates, templateId, fromHistory]);
 
+    useEffect(() => {
+        const totalPreviewPages = Math.max(1, Math.ceil(selectedProducts.length / PREVIEW_PAGE_SIZE));
+        if (previewPage > totalPreviewPages) setPreviewPage(totalPreviewPages);
+    }, [selectedProducts.length, previewPage]);
+
     const handleTemplateChange = async (value) => {
         setSelectedTemplate(String(value));
         if (!value) {
@@ -152,18 +142,10 @@ export default function GenerateBarcode() {
         }
         try {
             setLoadingTemplate(true);
-            const response = await fetch(
-                `/api/templates/design/${value}`
-            );
+            const response = await fetch(`/api/templates/design/${value}`);
             const json = await response.json();
-            console.log("Selected Template Data");
-            console.log(json.data);
-            console.log("barcode_format =", json.data.barcode_format);
-
             if (json.success) {
                 setTemplateDesign(json.data);
-                console.log("Template Design Saved");
-                console.log(json.data);
             }
         } catch (err) {
             console.error(err);
@@ -172,32 +154,11 @@ export default function GenerateBarcode() {
         }
     };
 
-    const updatedHistoryProducts = originalProducts.map(original => {
-        const edited = selectedProducts.find(
-            p => p.variant_id === original.variant_id
-        );
-        if (!edited) {
-            return original;
-        }
-        return {
-            ...original,
-            qty: edited.quantity,
-            barcode: edited.barcode,
-            current_sku: edited.current_sku,
-        };
-    });
-
     const savePrintHistory = async () => {
         try {
-            console.log(
-                JSON.stringify(selectedProducts, null, 2)
-            );
             const response = await fetch("/api/print-history", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     template_id: Number(selectedTemplate),
                     products: selectedProducts.map(product => ({
@@ -206,7 +167,8 @@ export default function GenerateBarcode() {
                         product_title: product.product_title,
                         current_sku: product.current_sku,
                         barcode: product.barcode,
-                        barcode_format: product.barcode_format,
+                        barcode_format: templateDesign?.barcode_format ?? product.barcode_format ?? "CODE128",
+                        template_settings: templateDesign,
                         online_url: product.online_url,
                         price: product.price,
                         vendor: product.vendor,
@@ -218,20 +180,15 @@ export default function GenerateBarcode() {
                     }))
                 }),
             });
-            const json = await response.json();
-            console.log("History Response:", json);
-
+            await response.json();
         } catch (err) {
             console.error(err);
         }
     };
 
     const generateBarcode = async () => {
-        // Validation
         if (method !== "missing" && selectedProducts.length === 0) {
-            appBridge.toast.show(
-                "Please select at least one product."
-            );
+            shopify.toast.show("Please select at least one product.");
             return;
         }
         try {
@@ -260,98 +217,66 @@ export default function GenerateBarcode() {
                             metafields: item.metafields,
                         })),
             };
-            console.log("Generate Barcode Payload", requestData);
-            const response = await fetch(
-                "/api/products/generate-barcode",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                    },
-                    body: JSON.stringify(requestData),
-                }
-            );
+            const response = await fetch("/api/products/generate-barcode", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify(requestData),
+            });
             const json = await response.json();
-            console.log("Generate Barcode Response", json);
             if (!response.ok) {
-                throw new Error(
-                    json.error ||
-                    json.message ||
-                    "Unable to generate barcode."
-                );
+                throw new Error(json.error || json.message || "Unable to generate barcode.");
             }
             if (json.status !== 1) {
-                throw new Error(
-                    json.error ||
-                    json.message ||
-                    "Barcode generation failed."
-                );
+                throw new Error(json.error || json.message || "Barcode generation failed.");
             }
-            appBridge.toast.show(
-                json.message || "Barcode generated successfully."
-            );
+            if (json.generated_count === 0) {
+                shopify.toast.show("All products already have barcodes.");
+            } else {
+                shopify.toast.show(json.message || "Barcode generated successfully.");
+            }
 
             const updatedProducts = json.updated_products || [];
-            console.log(updatedProducts);
-            console.log(updatedProducts[0]);
-            console.log("UPDATED PRODUCTS", updatedProducts);
             setGeneratedProducts(updatedProducts);
             setSelectedProducts(prev =>
                 prev.map(product => {
-                    const updated = updatedProducts.find(
-                        p => p.variant_id === product.variant_id
-                    );
+                    const updated = updatedProducts.find(p => p.variant_id === product.variant_id);
                     if (!updated) return product;
                     return {
                         ...product,
-
                         barcode: updated.generated_barcode ?? updated.barcode,
-
-                        generated_barcode:
-                            updated.generated_barcode ??
-                            updated.barcode,
-
-                        online_url:
-                            updated.online_url ??
-                            product.online_url,
-
-                        barcode_format:
-                            updated.barcode_format ??
-                            product.barcode_format,
+                        generated_barcode: updated.generated_barcode ?? updated.barcode,
+                        online_url: updated.online_url ?? product.online_url,
+                        barcode_format: updated.barcode_format ?? product.barcode_format,
                     };
                 })
             );
 
             setMethod("print");
             setPickerOpen(false);
-
-            // Close picker only
-            setPickerOpen(false);
         } catch (err) {
             console.error("Generate Barcode Error:", err);
-            setError(
-                err.message ||
-                "Something went wrong while generating barcode."
-            );
-            appBridge.toast.show(
-                err.message || "Server Error"
-            );
+            setError(err.message || "Something went wrong while generating barcode.");
+            shopify.toast.show(err.message || "Server Error");
         } finally {
             setLoading(false);
         }
     };
-    const removeProduct = (variantId) => {
-        setSelectedProducts((prevProducts) =>
-            prevProducts.filter(
-                (product) => product.variant_id !== variantId
-            )
-        );
 
-        // If all products are removed, hide the preview
+    const requestRemoveProduct = (variantId) => {
+        setProductToRemove(variantId);
+        shopify.modal.show(REMOVE_PRODUCT_MODAL_ID);
+    };
+
+    const confirmRemoveProduct = () => {
+        if (!productToRemove) return;
+        setSelectedProducts((prevProducts) =>
+            prevProducts.filter((product) => product.variant_id !== productToRemove)
+        );
         if (selectedProducts.length === 1) {
             setPreviewItem(null);
         }
+        setProductToRemove(null);
+        shopify.modal.hide(REMOVE_PRODUCT_MODAL_ID);
     };
 
     const handlePrint = () => {
@@ -376,39 +301,11 @@ export default function GenerateBarcode() {
 <html>
 <head>
 <style>
-@page{
-    size:auto;
-    margin:5mm;
-}
-body{
-    margin:0;
-    padding:10px;
-    font-family:Arial,sans-serif;
-    display:grid;
-    grid-template-columns:repeat(auto-fill,250px);
-    gap:10px;
-    justify-content:start;
-    align-content:start;
-}
-.label{
-    width:250px;
-    min-height:140px;
-    padding:10px;
-    box-sizing:border-box;
-    border:1px solid #ddd;
-    overflow:hidden;
-    page-break-inside:avoid;
-    break-inside:avoid;
-}
-.label svg,
-.label img{
-    width:100% !important;
-    height:auto !important;
-    display:block;
-}
-.label-content{
-    width:100%;
-}
+@page{size:auto;margin:5mm;}
+body{margin:0;padding:10px;font-family:Arial,sans-serif;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;justify-content:start;align-content:start;}
+.label{width:250px;min-height:140px;padding:10px;box-sizing:border-box;border:1px solid #ddd;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
+.label svg,.label img{width:100% !important;height:auto !important;display:block;}
+.label-content{width:100%;}
 </style>
 </head>
 <body>
@@ -423,344 +320,312 @@ ${labels}
             printWindow.close();
         }, 500);
     };
+
     const getSymbolValue = (product) => {
-
         switch (templateDesign.symbol_field_source) {
-
             case "barcode_value":
                 return product.barcode || "";
-
             case "sku_value":
                 return product.current_sku || "";
-
             case "product_name":
                 return product.product_title || "";
-
             case "product_price":
-                console.log("PRICE =", product.price);
                 return String(product.price || "");
-
             case "product_online_url":
                 return product.online_url || "";
-
             default:
                 return product.barcode || "";
         }
-
     };
 
-    console.log(templateDesign);
-    console.log("barcode_format =", templateDesign?.barcode_format);
+    const totalPreviewPages = Math.max(1, Math.ceil(selectedProducts.length / PREVIEW_PAGE_SIZE));
+    const previewStart = (previewPage - 1) * PREVIEW_PAGE_SIZE;
+    const previewEnd = previewStart + PREVIEW_PAGE_SIZE;
 
     return (
-        <Page title="Generate Barcode"
-            subtitle="Manage and edit your customized Barcode">
-            <Box paddingBlockEnd="400">
-                <InlineStack gap="100">
-                    <Button
-                        variant="primary"
-                        onClick={() => navigate("/LabelHistory")}
-                    >
+        <>
+            <s-page heading="Generate Barcode" subheading="Manage and edit your customized Barcode">
+                <s-section>
+                    <s-button variant="primary" onClick={() => navigate("/LabelHistory")}>
                         Go to Label History
-                    </Button>
-                    {/* <Button
-                        onClick={() => navigate("/LabelHistory")}
-                    >
-                        Generate History
-                    </Button> */}
-                </InlineStack>
-            </Box>
-            {error && (
-                <Banner tone="critical" onDismiss={() => setError("")}>
-                    {error}
-                </Banner>
-            )}
-            <Card>
-                <BlockStack gap="500">
-                    <Text variant="headingMd" as="h2">
-                        SKU Generation Method
-                    </Text>
-                    <RadioButton
-                        label="Only generate barcode for selected products or variants that don't have barcode value yet"
-                        checked={method === "missing"}
-                        id="missing"
-                        name="method"
-                        onChange={() => setMethod("missing")}
-                    />
-                    <RadioButton
-                        label="Generate barcode for all selected products or variants. If products or variants don't have barcode value, generate new barcode data. 
-                        If products or variants already have barcode value, replace the old value with new one"
-                        checked={method === "replace"}
-                        id="replace"
-                        name="method"
-                        onChange={() => setMethod("replace")}
-                    />
-                    {method === "replace" && (
-                        <Banner tone="warning">
-                            <strong>Warning</strong>
-                            <br />
-                            Be careful with this option, your old barcode will be replaced, old printed labels will not be scanned. This option should be selected only when you want to change the barcode on your system                        </Banner>
-                    )}
-                    <RadioButton
-                        label="Generate barcode from SKU"
-                        checked={method === "sku"}
-                        id="SKU"
-                        name="method"
-                        onChange={() => setMethod("sku")}
-                    />
-                    <RadioButton
-                        label="Only Print Labels for selected products or variants already have barcode"
-                        checked={method === "print"}
-                        id="print"
-                        name="method"
-                        onChange={() => setMethod("print")}
-                    />
-                    {method === "print" && (
-                        <Box maxWidth="350px">
-                            <Select
-                                label="Choose a template to print"
-                                options={[
-                                    {
-                                        label: "Select Template",
-                                        value: "",
-                                    },
-                                    ...templates.map((template) => ({
-                                        label: template.template_name,
-                                        value: String(template.id),
-                                    })),
-                                ]}
-                                value={selectedTemplate ? String(selectedTemplate) : ""}
-                                onChange={(value) => {
-                                    setSelectedTemplate(value);
-                                    handleTemplateChange(value);
-                                }}
-                            />
-                        </Box>
-                    )}
-                    <Divider />
-                    <InlineStack
-                        align="space-between"
-                        blockAlign="center"
-                        gap="400"
-                    >
-                        <Text variant="headingMd" as="h2">
-                            Selected Products
-                        </Text>
-                        {method === "missing" ? (
-                            <Text as="p" tone="subdued">
-                                All products without Barcode will be processed automatically.
-                            </Text>
-                        ) : (
-                            <Text as="p" tone="subdued">
-                                {selectedProducts.length} product
-                                {selectedProducts.length !== 1 ? "s" : ""} selected
-                            </Text>
-                        )}
-                        {method !== "missing" && (
-                            <Button onClick={() => setPickerOpen(true)}>
-                                Choose Products
-                            </Button>
-                        )}
-                        <Button
-                            variant="primary"
-                            loading={loading}
-                            onClick={generateBarcode}
+                    </s-button>
+                </s-section>
+
+                {error && (
+                    <s-section>
+                        <s-banner tone="critical" onDismiss={() => setError("")}>
+                            {error}
+                        </s-banner>
+                    </s-section>
+                )}
+
+                <s-section>
+                    <s-stack direction="block" gap="base">
+                        <s-heading>Barcode Generation Method</s-heading>
+
+                        <s-choice-list
+                            name="method"
+                            label="Barcode generation method"
+                            labelAccessibilityVisibility="exclusive"
+                            onChange={(event) => {
+                                const selected = event.currentTarget.values?.[0];
+                                if (selected) setMethod(selected);
+                            }}
                         >
-                            Generate Barcode
-                        </Button>
-                    </InlineStack>
-                </BlockStack>
-            </Card>
-            {generatedProducts.length > 0 && (
-                <Card>
-                    <BlockStack gap="400">
-                        <Text variant="headingMd" as="h2">
-                            Generated Barcode Summary
-                        </Text>
-                        {generatedProducts.map((item, index) => (
-                            <Card key={index} roundedAbove="sm">
-                                <BlockStack gap="200">
-                                    <Text fontWeight="bold">
-                                        {item.product_title}
-                                    </Text>
-                                    {item.variant_title !== "Default Title" && (
-                                        <Text tone="subdued">
-                                            {item.variant_title}
-                                        </Text>
-                                    )}
-                                    <Text>
-                                        Old Barcode :
-                                        <strong> {item.old_barcode || "-"}</strong>
-                                    </Text>
-                                    <Text tone="success">
-                                        New Barcode :
-                                        <strong> {item.new_barcode}</strong>
-                                    </Text>
-                                </BlockStack>
-                            </Card>
-                        ))}
-                    </BlockStack>
-                </Card>
-            )}
-            <ProductPickerModal
-                open={pickerOpen}
-                onClose={() => setPickerOpen(false)}
-                onSelect={(products) => {
+                            <s-choice value="missing" selected={method === "missing"}>
+                                Only generate barcode for selected products or variants that don't have barcode value yet
+                            </s-choice>
+                            <s-choice value="replace" selected={method === "replace"}>
+                                Generate barcode for all selected products or variants. If products or variants don't have barcode value, generate new barcode data. If products or variants already have barcode value, replace the old value with new one
+                            </s-choice>
+                            <s-choice value="sku" selected={method === "sku"}>
+                                Generate barcode from SKU
+                            </s-choice>
+                            <s-choice value="print" selected={method === "print"}>
+                                Only Print Labels for selected products or variants already have barcode
+                            </s-choice>
+                        </s-choice-list>
 
-                    const productsWithQty = products.map(product => ({
-                        ...product,
-                        quantity: product.quantity ?? 1,
-                    }));
+                        {method === "replace" && (
+                            <s-banner tone="warning">
+                                <strong>Warning</strong>
+                                <br />
+                                Be careful with this option, your old barcode will be replaced, old printed labels will not be scanned. This option should be selected only when you want to change the barcode on your system
+                            </s-banner>
+                        )}
 
-                    setSelectedProducts(prev => {
-
-                        const merged = [...prev];
-
-                        productsWithQty.forEach(product => {
-
-                            const exist = merged.find(
-                                p => p.variant_id === product.variant_id
-                            );
-
-                            if (!exist) {
-                                merged.push(product);
-                            }
-
-                        });
-
-                        return merged;
-
-                    });
-
-                    setPreviewItem(prev =>
-                        prev || productsWithQty[0] || null
-                    );
-
-                    setPickerOpen(false);
-
-                }}
-            />
-
-            {method === "print" && templateDesign && selectedProducts.length > 0 && (
-                <Card padding="400">
-                    <Text variant="headingMd" as="h2">
-                        Preview
-                    </Text>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "20px",
-                            marginTop: "20px",
-                        }}
-                        ref={printRef}
-                        className="label"
-                    >
-                        {selectedProducts.map((product) => (
-                            <div
-                                id={`label-${product.variant_id}`}
-                                key={product.variant_id}
-                                style={{
-                                    width: "300px",
-                                    border: "1px solid #ddd",
-                                    borderRadius: "8px",
-                                    padding: "15px",
-                                    background: "#fff",
-                                }}
-                            >
-                                {/* THIS IS ONLY FOR UI - NOT PRINT */}
-                                <div
-                                    className="no-print"
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "flex-start",
-                                        marginBottom: "12px",
+                        {method === "print" && (
+                            <s-box maxInlineSize="350px">
+                                <s-select
+                                    label="Choose a template to print"
+                                    value={selectedTemplate ? String(selectedTemplate) : ""}
+                                    onChange={(event) => {
+                                        const value = event.currentTarget.value;
+                                        setSelectedTemplate(value);
+                                        handleTemplateChange(value);
                                     }}
                                 >
-                                    <s-button
-                                        icon="delete"
-                                        variant="tertiary"
-                                        tone="critical"
-                                        onClick={() => removeProduct(product.variant_id)}
-                                    >
-                                    </s-button>
-                                    <strong>{product.product_title}</strong>
-                                    <div style={{ display: "flex", gap: "6px" }}>
-                                        <Button
-                                            size="slim"
-                                            onClick={() =>
-                                                updateProductQuantity(
-                                                    product.variant_id,
-                                                    product.quantity - 1
-                                                )
-                                            }
-                                        >
-                                            -
-                                        </Button>
-                                        <Text>{product.quantity}</Text>
-                                        <Button
-                                            size="slim"
-                                            onClick={() =>
-                                                updateProductQuantity(
-                                                    product.variant_id,
-                                                    product.quantity + 1
-                                                )
-                                            }
-                                        >
-                                            +
-                                        </Button>
-                                    </div>
-                                </div>
+                                    <s-option value="">Select Template</s-option>
+                                    {templates.map((template) => (
+                                        <s-option key={template.id} value={String(template.id)}>
+                                            {template.template_name}
+                                        </s-option>
+                                    ))}
+                                </s-select>
+                            </s-box>
+                        )}
 
-                                {/* THIS IS THE PRINTABLE LABEL */}
-                                <div className="print-label">
+                        <s-divider />
 
-                                    {templateDesign?.line1_sku && (
-                                        <div>{product.current_sku}</div>
-                                    )}
+                        <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+                            <s-heading>Selected Products</s-heading>
 
-                                    {templateDesign?.line2_name && (
-                                        <div>{product.product_title}</div>
-                                    )}
+                            {method === "missing" ? (
+                                <s-text tone="subdued">
+                                    All products without Barcode will be processed automatically.
+                                </s-text>
+                            ) : (
+                                <s-text tone="subdued">
+                                    {selectedProducts.length} product{selectedProducts.length !== 1 ? "s" : ""} selected
+                                </s-text>
+                            )}
 
-                                    {templateDesign?.line2_price && (
-                                        <div>{
-                                            Number(product.price || 0).toFixed(
-                                                Number(printSettings?.price_decimal_number ?? 2)
-                                            )
-                                        }</div>
-                                    )}
+                            {method !== "missing" && (
+                                <s-button onClick={() => setPickerOpen(true)}>
+                                    Choose Products
+                                </s-button>
+                            )}
 
-                                    {templateDesign.symbol_type === "BARCODE" ? (
-                                        <BarcodeRenderer
-                                            value={getSymbolValue(product)}
-                                            settings={templateDesign}
-                                            barcodeSettings={templateDesign}
-                                        />
-                                    ) : (
-                                        <QrCodeRenderer
-                                            value={getSymbolValue(product)}
-                                            settings={templateDesign}
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <Box paddingBlockStart="400">
-                        <InlineStack align="end">
-                            <Button
-                                variant="primary"
-                                size="medium"
-                                onClick={handlePrint}
+                            <s-button variant="primary" loading={loading || undefined} onClick={generateBarcode}>
+                                Generate Barcode
+                            </s-button>
+                        </s-stack>
+                    </s-stack>
+                </s-section>
+
+                {generatedProducts.length > 0 && (
+                    <s-section>
+                        <s-stack direction="block" gap="base">
+                            <s-heading>Generated Barcode Summary</s-heading>
+
+                            {generatedProducts.map((item, index) => (
+                                <s-box key={index} padding="base" borderWidth="base" borderRadius="base">
+                                    <s-stack direction="block" gap="tight">
+                                        <s-text fontWeight="bold">{item.product_title}</s-text>
+                                        {item.variant_title !== "Default Title" && (
+                                            <s-text tone="subdued">{item.variant_title}</s-text>
+                                        )}
+                                        <s-text>
+                                            Old Barcode: <s-text fontWeight="bold">{item.old_barcode || "-"}</s-text>
+                                        </s-text>
+                                        <s-text tone="success">
+                                            New Barcode: <s-text fontWeight="bold">{item.new_barcode}</s-text>
+                                        </s-text>
+                                    </s-stack>
+                                </s-box>
+                            ))}
+                        </s-stack>
+                    </s-section>
+                )}
+
+                <ProductPickerModal
+                    open={pickerOpen}
+                    onClose={() => setPickerOpen(false)}
+                    onSelect={(products) => {
+                        const productsWithQty = products.map(product => ({
+                            ...product,
+                            quantity: product.quantity ?? 1,
+                        }));
+
+                        setSelectedProducts(prev => {
+                            const merged = [...prev];
+                            productsWithQty.forEach(product => {
+                                const exist = merged.find(p => p.variant_id === product.variant_id);
+                                if (!exist) merged.push(product);
+                            });
+                            return merged;
+                        });
+
+                        setPreviewItem(prev => prev || productsWithQty[0] || null);
+                        setPickerOpen(false);
+                    }}
+                />
+
+                {method === "print" && templateDesign && selectedProducts.length > 0 && (
+                    <s-section>
+                        <s-stack direction="block" gap="base">
+                            <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+                                <s-heading>Preview</s-heading>
+                                {selectedProducts.length > PREVIEW_PAGE_SIZE && (
+                                    <s-text tone="subdued">
+                                        Page {previewPage} of {totalPreviewPages} ({selectedProducts.length} products)
+                                    </s-text>
+                                )}
+                            </s-stack>
+
+                            <div
+                                style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}
+                                ref={printRef}
+                                className="label"
                             >
-                                Print Label
-                            </Button>
-                        </InlineStack>
-                    </Box>
-                </Card>
-            )}
-        </Page>
+
+                                {selectedProducts.map((product, index) => (
+                                    <div
+                                        id={`label-${product.variant_id}`}
+                                        key={product.variant_id}
+                                        style={{
+                                            display: index >= previewStart && index < previewEnd ? undefined : "none",
+                                            width: "300px",
+                                            border: "1px solid #ddd",
+                                            borderRadius: "8px",
+                                            padding: "15px",
+                                            background: "#fff",
+                                        }}
+                                    >
+                                        <div
+                                            className="no-print"
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "flex-start",
+                                                marginBottom: "12px",
+                                            }}
+                                        >
+                                            <s-button
+                                                icon="delete"
+                                                variant="tertiary"
+                                                tone="critical"
+                                                accessibilityLabel="Remove product"
+                                                onClick={() => requestRemoveProduct(product.variant_id)}
+                                            />
+                                            <strong>{product.product_title}</strong>
+                                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                                <s-button
+                                                    variant="tertiary"
+                                                    onClick={() =>
+                                                        updateProductQuantity(product.variant_id, product.quantity - 1)
+                                                    }
+                                                >
+                                                    -
+                                                </s-button>
+                                                <s-text>{product.quantity}</s-text>
+                                                <s-button
+                                                    variant="tertiary"
+                                                    onClick={() =>
+                                                        updateProductQuantity(product.variant_id, product.quantity + 1)
+                                                    }
+                                                >
+                                                    +
+                                                </s-button>
+                                            </div>
+                                        </div>
+
+                                        <div className="print-label">
+                                            {templateDesign?.line1_sku && <div>{product.current_sku}</div>}
+                                            {templateDesign?.line2_name && <div>{product.product_title}</div>}
+                                            {templateDesign?.line2_price && (
+                                                <div>
+                                                    {Number(product.price || 0).toFixed(
+                                                        Number(printSettings?.price_decimal_number ?? 2)
+                                                    )}
+                                                </div>
+                                            )}
+                                            {templateDesign.symbol_type === "BARCODE" ? (
+                                                <BarcodeRenderer
+                                                    value={getSymbolValue(product)}
+                                                    settings={templateDesign}
+                                                    barcodeSettings={templateDesign}
+                                                />
+                                            ) : (
+                                                <QrCodeRenderer value={getSymbolValue(product)} settings={templateDesign} />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {selectedProducts.length > PREVIEW_PAGE_SIZE && (
+                                <s-stack direction="inline" gap="tight" alignItems="center">
+                                    <s-button
+                                        variant="tertiary"
+                                        disabled={previewPage <= 1 || undefined}
+                                        onClick={() => setPreviewPage((p) => Math.max(1, p - 1))}
+                                    >
+                                        Previous
+                                    </s-button>
+                                    <s-button
+                                        variant="tertiary"
+                                        disabled={previewPage >= totalPreviewPages || undefined}
+                                        onClick={() => setPreviewPage((p) => Math.min(totalPreviewPages, p + 1))}
+                                    >
+                                        Next
+                                    </s-button>
+                                </s-stack>
+                            )}
+
+                            <s-stack direction="inline" justifyContent="end">
+                                <s-button variant="primary" onClick={handlePrint}>
+                                    Print Label
+                                </s-button>
+                            </s-stack>
+                        </s-stack>
+                    </s-section>
+                )}
+            </s-page>
+
+            <Modal id={REMOVE_PRODUCT_MODAL_ID}>
+                <p style={{ padding: '1rem' }}>
+                    Are you sure you want to remove this product from the preview? You'll need to add it again from "Choose Products" if you change your mind.
+                </p>
+                <TitleBar title="Remove product">
+                    <button variant="primary" tone="critical" onClick={confirmRemoveProduct}>
+                        Remove
+                    </button>
+                    <button onClick={() => shopify.modal.hide(REMOVE_PRODUCT_MODAL_ID)}>
+                        Cancel
+                    </button>
+                </TitleBar>
+            </Modal>
+        </>
     );
-} 
+}

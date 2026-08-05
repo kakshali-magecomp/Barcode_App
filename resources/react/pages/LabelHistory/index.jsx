@@ -1,34 +1,29 @@
-import React, { useEffect, useState, useCallback, useRef, } from "react";
-import { DeleteIcon } from "@shopify/polaris-icons";
-import { Page, Card, InlineStack, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Modal, Toast, Frame, InlineGrid, TextField, } from "@shopify/polaris";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useNavigate } from "react-router-dom";
-import { Pagination } from "@shopify/polaris";
+
+const DELETE_MODAL_ID = "delete-history-modal";
+const VIEW_MODAL_ID = "view-history-modal";
 
 export default function LabelHistory() {
-  const appBridge = useAppBridge();
-  const fetch = appBridge.fetch || window.fetch;
+  const shopify = useAppBridge();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [histories, setHistories] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
-  const [toastActive, setToastActive] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const [deleteModal, setDeleteModal] = useState(false);
   const [selectedHistory, setSelectedHistory] = useState(null);
-  const [viewModal, setViewModal] = useState(false);
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const printRef = useRef(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
-
 
   const loadHistory = useCallback(async () => {
     try {
@@ -47,7 +42,7 @@ export default function LabelHistory() {
     } finally {
       setLoading(false);
     }
-  }, [fetch]);
+  }, []);
 
   useEffect(() => {
     loadHistory();
@@ -58,14 +53,24 @@ export default function LabelHistory() {
       setFilteredHistory(histories);
       return;
     }
-    const result = histories.filter(item =>
-      String(item.id).includes(search) ||
-      (item.template?.template_name || "")
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-      (item.client_ip || "")
-        .includes(search)
-    );
+    const result = histories.filter((item) => {
+      const searchText = search.toLowerCase();
+
+      const formattedDate = new Date(item.created_at)
+        .toLocaleString()
+        .toLowerCase();
+
+      return (
+        String(item.id).includes(searchText) ||
+        (item.template?.template_name || "")
+          .toLowerCase()
+          .includes(searchText) ||
+        (item.client_ip || "")
+          .toLowerCase()
+          .includes(searchText) ||
+        formattedDate.includes(searchText)
+      );
+    });
     setFilteredHistory(result);
   }, [search, histories]);
 
@@ -80,11 +85,8 @@ export default function LabelHistory() {
       }
       const history = json.data;
       setHistoryDetails(history);
-      // Select all items by default
-      setSelectedItems(
-        (history.items || []).map((_, index) => index)
-      );
-      setViewModal(true);
+      setSelectedItems((history.items || []).map((_, index) => index));
+      shopify.modal.show(VIEW_MODAL_ID);
     } catch (err) {
       console.error("Failed to load history:", err);
     } finally {
@@ -95,16 +97,12 @@ export default function LabelHistory() {
   const deleteHistory = async () => {
     if (!selectedHistory) return;
     try {
-      const res = await fetch(
-        `/api/print-history/${selectedHistory.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const res = await fetch(`/api/print-history/${selectedHistory.id}`, {
+        method: "DELETE",
+      });
       const json = await res.json();
       if (json.success) {
-        setToastMessage("History deleted.");
-        setToastActive(true);
+        shopify.toast.show("History deleted.");
         loadHistory();
       } else {
         setError(json.message);
@@ -113,121 +111,144 @@ export default function LabelHistory() {
       console.error(err);
       setError("Delete failed.");
     }
-    setDeleteModal(false);
+    shopify.modal.hide(DELETE_MODAL_ID);
     setSelectedHistory(null);
   };
 
-
-  if (loading) {
-    return (
-      <Box padding="1200" align="center">
-        <Spinner size="large" />
-      </Box>
-    );
-  }
-
   const handlePrintHistory = () => {
     if (!historyDetails) return;
+
     const printWindow = window.open("", "_blank");
-    console.log("History Items:", historyDetails.items);
-    console.log("PRINT ITEMS");
-    console.table(
-      historyDetails.items.map(item => ({
-        product: item.product_title,
-        barcode: item.barcode,
-        barcode_format: item.barcode_format,
-      }))
-    );
+
     const labels = historyDetails.items
       .filter((_, index) => selectedItems.includes(index))
       .map((item) => {
+        const settings = item.template_settings || {};
+
+        let symbolValue = "";
+
+        switch (settings.symbol_field_source) {
+          case "sku_value":
+            symbolValue = item.sku;
+            break;
+          case "barcode_value":
+            symbolValue = item.barcode;
+            break;
+          case "product_name":
+            symbolValue = item.product_title;
+            break;
+          case "product_price":
+            symbolValue = item.price;
+            break;
+          case "product_online_url":
+            symbolValue = item.online_url;
+            break;
+          default:
+            symbolValue = item.barcode;
+        }
+
         let html = "";
+
         for (let i = 0; i < item.qty; i++) {
           html += `
-                    <div class="label">
-                        <div class="title">
-                            ${item.product_title}
-                        </div>
-                        <div class="sku">
-                            ${item.sku ?? ""}
-                        </div>
-                        <svg
-                            class="barcode"
-                            jsbarcode-format="${item.barcode_format || 'CODE128'}"
-                            jsbarcode-value="${String(item.barcode ?? "").trim()}"
-                            jsbarcode-width="2"
-                            jsbarcode-height="45"
-                            jsbarcode-displayValue="true">
-                        </svg>
-                    </div>
-                `;
+        <div class="label">
+            ${settings.line2_name ? `<div class="title">${item.product_title ?? ""}</div>` : ""}
+            ${settings.line1_sku ? `<div class="sku">${item.sku ?? ""}</div>` : ""}
+            ${settings.symbol_enabled
+              ? settings.symbol_type === "QR"
+                ? `
+                <img
+                    class="qr"
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140}x${settings.symbol_width_px || 140}&data=${encodeURIComponent(symbolValue || "")}"
+                />
+                `
+                : `
+                <svg
+                    class="barcode"
+                    data-format="${settings.barcode_format || "CODE128"}"
+                    data-value="${String(symbolValue || "").trim()}"
+                    data-width="${settings.symbol_bar_width || 2}"
+                    data-height="${settings.symbol_bar_height || 45}"
+                    data-font="${settings.symbol_font_size || 16}"
+                    data-display="${settings.hide_barcode_value ? "false" : "true"}"
+                    data-color="${settings.symbol_color || "#000000"}">
+                </svg>
+                `
+              : ""
+            }
+        </div>
+        `;
         }
+
         return html;
       })
       .join("");
+
     printWindow.document.write(`
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <title>Print History</title>
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 <style>
-@page{
-    margin:5mm;
-}
-body{
-    margin:10px;
-    display:grid;
-    grid-template-columns:repeat(auto-fill,250px);
-    gap:10px;
-    font-family:Arial,sans-serif;
-}
-.label{
-    width:250px;
-    border:1px solid #ddd;
-    padding:10px;
-    box-sizing:border-box;
-    text-align:center;
-    page-break-inside:avoid;
-    break-inside:avoid;
-}
-.title{
-    font-size:15px;
-    font-weight:bold;
-    margin-bottom:5px;
-}
-.sku{
-    font-size:13px;
-    margin-bottom:10px;
-}
-.barcode{
-    width:100%;
-    height:auto;
-}
+@page{margin:5mm;}
+body{margin:10px;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;font-family:Arial,sans-serif;}
+.label{width:250px;border:1px solid #ddd;padding:10px;box-sizing:border-box;text-align:center;page-break-inside:avoid;break-inside:avoid;}
+.title{font-size:15px;font-weight:bold;margin-bottom:5px;}
+.sku{font-size:13px;margin-bottom:10px;}
+.barcode{width:100%;}
+.qr{display:block;margin:auto;}
 </style>
 </head>
 <body>
 ${labels}
 <script>
-window.onload = function(){
-    JsBarcode(".barcode").init();
-    setTimeout(function(){
-        window.print();
-        window.close();
-    },300);
+window.onload=function(){
+document.querySelectorAll(".barcode").forEach(function(el){
+    let value=String(el.dataset.value||"").trim();
+    let format=String(el.dataset.format||"CODE128").toUpperCase();
+    if(format==="UPCA"){format="UPC";}
+    if(format==="UPC"){
+        value=value.replace(/\\D/g,"");
+        if(value.length===11){
+            let sum=0;
+            for(let i=0;i<11;i++){
+                if(i%2===0){sum+=parseInt(value[i])*3;}else{sum+=parseInt(value[i]);}
+            }
+            const check=(10-(sum%10))%10;
+            value=value+check;
+        }
+    }
+    try{
+        JsBarcode(el,value,{
+            format:format,
+            width:Number(el.dataset.width)||2,
+            height:Number(el.dataset.height)||45,
+            fontSize:Number(el.dataset.font)||16,
+            displayValue:el.dataset.display==="true",
+            lineColor:el.dataset.color||"#000000",
+            background:"#ffffff",
+            margin:2
+        });
+    }catch(e){
+        console.error(e);
+        el.outerHTML='<div style="color:red">Invalid Barcode</div>';
+    }
+});
+setTimeout(function(){window.print();window.close();},500);
 }
 </script>
 </body>
 </html>
-    `);
+`);
 
     printWindow.document.close();
   };
 
-
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
-    const rows = histories.map((item, index) => `
+    const rows = histories.map((item) => `
 <tr>
 <td>${item.id}</td>
 <td>${item.template?.template_name || "-"}</td>
@@ -241,276 +262,182 @@ window.onload = function(){
 <head>
 <title>Print History</title>
 <style>
-body{
-font-family:Arial;
-padding:30px;
-}
-table{
-width:100%;
-border-collapse:collapse;
-}
-th,td{
-border:1px solid #ccc;
-padding:10px;
-}
-th{
-background:#f5f5f5;
-}
+body{font-family:Arial;padding:30px;}
+table{width:100%;border-collapse:collapse;}
+th,td{border:1px solid #ccc;padding:10px;}
+th{background:#f5f5f5;}
 </style>
 </head>
 <body>
 <h2>Barcode Print History</h2>
 <table>
 <thead>
-<tr>
-<th>ID</th>
-<th>Template</th>
-<th>Total Qty</th>
-<th>Client IP</th>
-<th>Printed At</th>
-</tr>
+<tr><th>ID</th><th>Template</th><th>Total Qty</th><th>Client IP</th><th>Printed At</th></tr>
 </thead>
-<tbody>
-${rows}
-</tbody>
+<tbody>${rows}</tbody>
 </table>
-<script>
-window.onload=function(){
-window.print();
-window.close();
-}
-</script>
+<script>window.onload=function(){window.print();window.close();}</script>
 </body>
 </html>
 `);
     win.document.close();
   };
+
   const summary = {
     totalPrints: filteredHistory.length,
-
-    totalLabels: filteredHistory.reduce(
-      (total, item) => total + Number(item.print_qty || 0),
-      0
-    ),
-
+    totalLabels: filteredHistory.reduce((total, item) => total + Number(item.print_qty || 0), 0),
     todayPrints: filteredHistory.filter((item) => {
       const today = new Date().toDateString();
       return new Date(item.created_at || item.printed_at).toDateString() === today;
     }).length,
-
     lastPrint:
       filteredHistory.length > 0
-        ? new Date(
-          filteredHistory[0].created_at ||
-          filteredHistory[0].printed_at
-        ).toLocaleDateString()
+        ? new Date(filteredHistory[0].created_at || filteredHistory[0].printed_at).toLocaleDateString()
         : "-",
   };
+
   const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedHistory = filteredHistory.slice(
-    startIndex,
-    endIndex
-  );
+  const paginatedHistory = filteredHistory.slice(startIndex, endIndex);
 
+  if (loading) {
+    return (
+      <s-page heading="Print History">
+        <s-box padding="loose" alignContent="center">
+          <s-spinner accessibilityLabel="Loading print history" size="large" />
+        </s-box>
+      </s-page>
+    );
+  }
 
   return (
-    <Frame>
-      <Page title="Print History"
-        primaryAction={{
-          content: "Print All History",
-          onAction: handlePrintAll,
-        }}
-      >
+    <>
+      <s-page heading="Print History">
+        <s-section>
+          <s-button variant="primary" onClick={handlePrintAll}>
+            Print All History
+          </s-button>
+        </s-section>
+
         {error && (
-          <Box paddingBlockEnd="400">
-            <Banner tone="critical">
-              <p>{error}</p>
-            </Banner>
-          </Box>
+          <s-section>
+            <s-banner tone="critical" onDismiss={() => setError("")}>
+              {error}
+            </s-banner>
+          </s-section>
         )}
-        <Box paddingBlockEnd="400">
-          <InlineGrid columns={4} gap="400">
-            <Card>
-              <Box padding="400">
-                <Text variant="headingLg">{summary.totalPrints}</Text>
-                <Text>Total Prints</Text>
-              </Box>
-            </Card>
-            <Card>
-              <Box padding="400">
-                <Text variant="headingLg">{summary.totalLabels}</Text>
-                <Text>Total Labels</Text>
-              </Box>
-            </Card>
-            <Card>
-              <Box padding="400">
-                <Text variant="headingLg">{summary.todayPrints}</Text>
-                <Text>Today's Prints</Text>
-              </Box>
-            </Card>
-            <Card>
-              <Box padding="400">
-                <Text variant="headingLg">{summary.lastPrint}</Text>
-                <Text>Last Print</Text>
-              </Box>
-            </Card>
-          </InlineGrid>
-        </Box>
-        <Card>
-          <Box padding="400">
-            <TextField
-              labelHidden
+
+        <div style={{ margin: 10 }}>
+          <s-grid gridTemplateColumns="1fr 1fr 1fr 1fr" gap="base" >
+            <s-section>
+              <s-heading>{summary.totalPrints}</s-heading>
+              <s-text>Total Prints</s-text>
+            </s-section>
+            <s-section>
+              <s-heading>{summary.totalLabels}</s-heading>
+              <s-text>Total Labels</s-text>
+            </s-section>
+            <s-section>
+              <s-heading>{summary.todayPrints}</s-heading>
+              <s-text>Today's Prints</s-text>
+            </s-section>
+            <s-section>
+              <s-heading>{summary.lastPrint}</s-heading>
+              <s-text>Last Print</s-text>
+            </s-section>
+          </s-grid>
+        </div>
+        <s-section padding="none">
+          <s-box padding="base">
+            <s-text-field
+              label="Search"
+              labelAccessibilityVisibility="exclusive"
               placeholder="Search by Print ID, Template or Client IP..."
               value={search}
-              onChange={setSearch}
-              autoComplete="off"
+              onInput={(event) => setSearch(event.currentTarget.value)}
             />
-          </Box>
+          </s-box>
+
           {filteredHistory.length === 0 ? (
-            <EmptyState
+            <s-empty-state
               heading="No print history found"
               image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
             >
-              <p>No barcode labels have been printed yet.</p>
-            </EmptyState>
+              <s-paragraph>No barcode labels have been printed yet.</s-paragraph>
+            </s-empty-state>
           ) : (
-            <IndexTable
-              resourceName={{
-                singular: "Print History",
-                plural: "Print Histories",
-              }}
-              itemCount={paginatedHistory.length}
-              selectable={false}
-              headings={[
-                { title: "Print ID" },
-                { title: "Template_Name" },
-                { title: "Total Labels" },
-                { title: "Client IP" },
-                { title: "Printed At" },
-                { title: "Actions" },
-              ]}
+            <s-table
+              paginate
+              hasPreviousPage={currentPage > 1 || undefined}
+              hasNextPage={currentPage < totalPages || undefined}
+              onPreviousPage={() => setCurrentPage((prev) => prev - 1)}
+              onNextPage={() => setCurrentPage((prev) => prev + 1)}
             >
-              {paginatedHistory.map((item, index) => (
-                <IndexTable.Row
-                  id={String(item.id)}
-                  key={item.id}
-                  position={index}
-                  onClick={() => openHistory(item.id)}
-                >
-                  <IndexTable.Cell>
-                    <Button
-                      variant="plain"
-                      onClick={() => openHistory(item.id)}
-                    >
-                      #{item.id}
-                    </Button>
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    <Text fontWeight="semibold">
-                      {item.template?.template_name ?? "-"}
-                    </Text>
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    <Badge tone="success">
-                      {item.print_qty}
-                    </Badge>
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    {item.client_ip}
-                  </IndexTable.Cell>
-                  <IndexTable.Cell>
-                    {new Date(item.created_at).toLocaleString()}
-                  </IndexTable.Cell>
-
-                  <IndexTable.Cell>
-
-                    <InlineStack gap="200">
-
-                      {/* <Button
-                        size="slim"
-                        onClick={() => openHistory(item.id)}
-                      >
-                        View
-                      </Button> */}
-
-                      <Button
-                        icon={DeleteIcon}
+              <s-table-header-row>
+                <s-table-header>Print ID</s-table-header>
+                <s-table-header>Template Name</s-table-header>
+                <s-table-header>Total Labels</s-table-header>
+                <s-table-header>Client IP</s-table-header>
+                <s-table-header>Printed At</s-table-header>
+                <s-table-header>Actions</s-table-header>
+              </s-table-header-row>
+              <s-table-body>
+                {paginatedHistory.map((item) => (
+                  <s-table-row key={item.id}>
+                    <s-table-cell>
+                      <s-button variant="tertiary" onClick={() => openHistory(item.id)}>
+                        #{item.id}
+                      </s-button>
+                    </s-table-cell>
+                    <s-table-cell>
+                      <s-text fontWeight="semibold">{item.template?.template_name ?? "-"}</s-text>
+                    </s-table-cell>
+                    <s-table-cell>
+                      <s-badge tone="success">{item.print_qty}</s-badge>
+                    </s-table-cell>
+                    <s-table-cell>{item.client_ip}</s-table-cell>
+                    <s-table-cell>{new Date(item.created_at).toLocaleString()}</s-table-cell>
+                    <s-table-cell>
+                      <s-button
+                        icon="delete"
                         tone="critical"
-                        variant="plain"
+                        variant="tertiary"
+                        accessibilityLabel="Delete history entry"
                         onClick={() => {
                           setSelectedHistory(item);
-                          setDeleteModal(true);
+                          shopify.modal.show(DELETE_MODAL_ID);
                         }}
                       />
-
-                    </InlineStack>
-
-                  </IndexTable.Cell>
-                </IndexTable.Row>
-              ))}
-            </IndexTable>
+                    </s-table-cell>
+                  </s-table-row>
+                ))}
+              </s-table-body>
+            </s-table>
           )}
-          <Box padding="400">
-            <InlineStack align="center">
-              <Pagination
-                hasPrevious={currentPage > 1}
-                onPrevious={() =>
-                  setCurrentPage((prev) => prev - 1)
-                }
-                hasNext={currentPage < totalPages}
-                onNext={() =>
-                  setCurrentPage((prev) => prev + 1)
-                }
-              />
-            </InlineStack>
-          </Box>
-        </Card>
-        {toastActive && (
-          <Toast
-            content={toastMessage}
-            onDismiss={() => setToastActive(false)}
-          />
-        )}
-      </Page>
-      <Modal
-        open={deleteModal}
-        onClose={() => setDeleteModal(false)}
-        title="Delete History"
-        primaryAction={{
-          content: "Delete",
-          destructive: true,
-          onAction: deleteHistory,
-        }}
-        secondaryActions={[
-          {
-            content: "Cancel",
-            onAction: () => setDeleteModal(false),
-          },
-        ]}
-      >
-        <Modal.Section>
-          <Text as="p">
-            Are you sure you want to delete this print history?
-          </Text>
-        </Modal.Section>
+        </s-section>
+      </s-page>
+
+      <Modal id={DELETE_MODAL_ID}>
+        <p style={{ padding: '1rem' }}>
+          Are you sure you want to delete this print history?
+        </p>
+        <TitleBar title="Delete History">
+          <button variant="primary" tone="critical" onClick={deleteHistory}>
+            Delete
+          </button>
+          <button onClick={() => shopify.modal.hide(DELETE_MODAL_ID)}>
+            Cancel
+          </button>
+        </TitleBar>
       </Modal>
-      <Modal
-        open={viewModal}
-        onClose={() => setViewModal(false)}
-        title={`Print Job #${historyDetails?.id || ""}`}
-        large
-        primaryAction={{
-          content: "Print",
-          onAction: handlePrintHistory,
-        }}
-      >
-        <Modal.Section>
+
+      <Modal id={VIEW_MODAL_ID} variant="large">
+        <div style={{ padding: '1rem' }}>
           {loadingDetails ? (
-            <Box padding="400" alignment="center">
-              <Spinner />
-            </Box>
+            <s-box padding="base" alignContent="center">
+              <s-spinner />
+            </s-box>
           ) : (
             historyDetails && (
               <div
@@ -521,9 +448,7 @@ window.close();
                   overflow: "hidden",
                 }}
               >
-                {/* Header */}
                 <div
-                  className="no-print"
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -533,17 +458,15 @@ window.close();
                     borderBottom: "1px solid #dfe3e8",
                   }}
                 >
-                  <Text fontWeight="semibold">
+                  <s-text fontWeight="semibold">
                     {historyDetails.items.length} selected
-                  </Text>
-                  <Button
+                  </s-text>
+                  <s-button
                     variant="primary"
                     onClick={() => {
                       const selectedProducts = historyDetails.items.filter((_, index) =>
                         selectedItems.includes(index)
                       );
-                      console.log("Selected Products:");
-                      console.log(selectedProducts);
                       navigate("/ProductsBarcodeList", {
                         state: {
                           fromHistory: true,
@@ -555,13 +478,13 @@ window.close();
                           historyProducts: historyDetails.items,
                         },
                       });
-                      setViewModal(false);
+                      shopify.modal.hide(VIEW_MODAL_ID);
                     }}
                   >
                     Generate Barcode
-                  </Button>
+                  </s-button>
                 </div>
-                {/* Rows */}
+
                 {historyDetails.items.map((item, index) => (
                   <div
                     key={index}
@@ -571,59 +494,44 @@ window.close();
                       alignItems: "center",
                       padding: "12px 18px",
                       borderBottom:
-                        index !== historyDetails.items.length - 1
-                          ? "1px solid #ececec"
-                          : "none",
+                        index !== historyDetails.items.length - 1 ? "1px solid #ececec" : "none",
                     }}
                   >
-                    {/* Checkbox */}
                     <input
                       type="checkbox"
                       checked={selectedItems.includes(index)}
                       onChange={() => {
                         if (selectedItems.includes(index)) {
-                          setSelectedItems(
-                            selectedItems.filter(i => i !== index)
-                          );
+                          setSelectedItems(selectedItems.filter(i => i !== index));
                         } else {
-                          setSelectedItems([
-                            ...selectedItems,
-                            index,
-                          ]);
+                          setSelectedItems([...selectedItems, index]);
                         }
                       }}
                     />
-                    {/* Product */}
                     <div>
-                      <Text fontWeight="semibold">
-                        {item.product_title}
-                      </Text>
+                      <s-text fontWeight="semibold">{item.product_title}</s-text>
                     </div>
-                    {/* SKU */}
                     <div>
-                      <Text tone="subdued">
-                        {item.sku}
-                      </Text>
+                      <s-text tone="subdued">{item.sku}</s-text>
                     </div>
-                    {/* Barcode */}
                     <div>
-                      <Badge tone="info">
-                        {item.barcode}
-                      </Badge>
+                      <s-badge tone="info">{item.barcode}</s-badge>
                     </div>
-                    {/* Qty */}
                     <div style={{ textAlign: "center" }}>
-                      <Badge tone="success">
-                        {item.qty}
-                      </Badge>
+                      <s-badge tone="success">{item.qty}</s-badge>
                     </div>
                   </div>
                 ))}
               </div>
             )
           )}
-        </Modal.Section>
+        </div>
+        <TitleBar title={`Print Job #${historyDetails?.id || ""}`}>
+          <button variant="primary" onClick={handlePrintHistory}>
+            Print
+          </button>
+        </TitleBar>
       </Modal>
-    </Frame>
+    </>
   );
 }

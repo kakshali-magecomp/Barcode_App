@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
-use App\Models\LabelHistory;
+use App\Models\PrintHistory;
+use App\Models\PrintHistoryItem;
 use App\Helpers\ShopifyQueryHelper;
 use Carbon\Carbon;
 
@@ -15,32 +16,39 @@ class DashboardController extends Controller
 
         $templatesCount = $user->barcodeTemplates()->count();
 
-        $totalPrints = LabelHistory::where('user_id', $user->id)
-            ->sum('quantity');
+        $totalPrints = PrintHistoryItem::whereHas('history', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })->sum('qty');
 
-        $todayPrints = LabelHistory::where('user_id', $user->id)
-            ->whereDate('printed_at', Carbon::today())
-            ->sum('quantity');
+        $todayPrints = PrintHistoryItem::whereHas('history', function ($q) use ($user) {
 
-        $monthPrints = LabelHistory::where('user_id', $user->id)
-            ->whereMonth('printed_at', Carbon::now()->month)
-            ->whereYear('printed_at', Carbon::now()->year)
-            ->sum('quantity');
+            $q->where('user_id', $user->id)
+                ->whereDate('printed_at', Carbon::today());
 
-        $recentPrints = LabelHistory::with('template')
+        })->sum('qty');
+
+        $monthPrints = PrintHistoryItem::whereHas('history', function ($q) use ($user) {
+
+            $q->where('user_id', $user->id)
+                ->whereMonth('printed_at', Carbon::now()->month)
+                ->whereYear('printed_at', Carbon::now()->year);
+
+        })->sum('qty');
+
+        $recentPrints = PrintHistory::with('template')
             ->where('user_id', $user->id)
             ->latest('printed_at')
             ->take(5)
             ->get();
 
-        $topTemplate = LabelHistory::selectRaw('barcode_template_id, COUNT(*) as total')
+        $topTemplate = PrintHistory::selectRaw('template_id, COUNT(*) as total')
             ->where('user_id', $user->id)
-            ->groupBy('barcode_template_id')
+            ->groupBy('template_id')
             ->orderByDesc('total')
             ->with('template')
             ->first();
 
-       
+
 
         $productsCount = 0;
 

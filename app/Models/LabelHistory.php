@@ -16,6 +16,7 @@ class LabelHistory extends Model
         'sku',
         'barcode_value',
         'barcode_format',
+        'template_settings',
         'symbol_type',
         'print_type',
         'price',
@@ -26,6 +27,7 @@ class LabelHistory extends Model
 
     protected $casts = [
         'printed_at' => 'datetime',
+        'template_settings' => 'array',
     ];
     public function template()
     {

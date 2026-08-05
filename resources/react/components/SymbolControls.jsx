@@ -31,12 +31,44 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
   ];
 
   const allowedFields = {
-    CODE128: ["barcode_value", "sku_value", "product_name", "product_price", "product_online_url",],
-    Code39: ["barcode_value", "sku_value", "product_name", "product_price",],
-    EAN8: ["barcode_value",],
-    EAN13: ["barcode_value",],
-    UPCA: ["barcode_value",],
-    ITF14: ["barcode_value",],
+    CODE128: [
+      "barcode_value",
+      "sku_value",
+      "product_name",
+      "product_price",
+      "product_online_url",
+    ],
+
+    Code39: [
+      "barcode_value",
+      "sku_value",
+      "product_name",
+      "product_price",
+    ],
+
+    QR: [
+      "barcode_value",
+      "sku_value",
+      "product_name",
+      "product_price",
+      "product_online_url",
+    ],
+
+    EAN8: [
+      "barcode_value",
+    ],
+
+    EAN13: [
+      "barcode_value",
+    ],
+
+    UPCA: [
+      "barcode_value",
+    ],
+
+    ITF14: [
+      "barcode_value",
+    ],
   };
   useEffect(() => {
 
@@ -125,7 +157,7 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
           Barcode Line: 1 limited
         </Text>
 
-        <div style={{ color: "#6d7175" }}>⇅</div>
+        <div style={{ color: "#6d7175" }}></div>
       </Box>
 
       <BlockStack gap="300" paddingTop="300">
@@ -210,9 +242,13 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
 
               <Select
                 label="Field"
-                options={fieldOptions.filter(option =>
-                  allowedFields[barcodeFormat]?.includes(option.value)
-                )}
+                options={
+                  design.symbol_type === "QR"
+                    ? fieldOptions
+                    : fieldOptions.filter(option =>
+                      allowedFields[barcodeFormat]?.includes(option.value)
+                    )
+                }
                 value={design.symbol_field_source}
                 onChange={(value) => {
 
@@ -396,28 +432,20 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                 <FormLayout.Group>
                   <TextField
                     label="Width (px)"
-                    value={String(
-                      design.symbol_width_px || 140
-                    )}
+                    type="number"
+                    value={String(design.symbol_width_px || 140)}
                     onChange={(value) =>
-                      handleUpdate(
-                        "symbol_width_px",
-                        Number(value)
-                      )
+                      handleUpdate("symbol_width_px", Number(value))
                     }
                     autoComplete="off"
                   />
 
                   <TextField
                     label="Margin (px)"
-                    value={String(
-                      design.symbol_margin_px || 1
-                    )}
+                    type="number"
+                    value={String(design.symbol_margin_px || 1)}
                     onChange={(value) =>
-                      handleUpdate(
-                        "symbol_margin_px",
-                        Number(value)
-                      )
+                      handleUpdate("symbol_margin_px", Number(value))
                     }
                     autoComplete="off"
                   />

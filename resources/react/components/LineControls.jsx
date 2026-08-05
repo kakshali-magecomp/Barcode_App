@@ -1,42 +1,69 @@
 import React from 'react';
-import { Card, FormLayout, TextField, Checkbox, Box, Text, BlockStack } from '@shopify/polaris';
 
 export default function LineControls({ design, handleUpdate }) {
-    
+
     return (
-        <BlockStack gap="400">
-            <Card padding="400">
-                <Box display="flex" justifyContent="space-between" alignItems="center" paddingBlockEnd="300" style={{ borderBottom: '1px solid #bbc3c9' }}>
-                    <Text variant="headingSm" as="h3">Line 1: 1 limited</Text>
-                    <div style={{ color: '#6d7175' }}>⚙️</div>
-                </Box>
-                <Box paddingTop="300"><Checkbox label="Sku" checked={!!design.line1_sku} onChange={(v) => handleUpdate('line1_sku', v)} /></Box>
-            </Card>
+        <s-stack direction="block" gap="base">
+            <s-section>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9' }}>
+                    <s-heading>Line 1: 1 limited</s-heading>
+                    <s-icon type="settings" tone="subdued"></s-icon>
+                </div>
+                <div style={{ paddingTop: '12px' }}>
+                    <s-checkbox
+                        label="Sku"
+                        checked={!!design.line1_sku || undefined}
+                        onChange={(e) => handleUpdate('line1_sku', e.currentTarget.checked)}
+                    />
+                </div>
+            </s-section>
 
-            <Card padding="400">
-                <Box display="flex" justifyContent="space-between" alignItems="center" paddingBlockEnd="300" style={{ borderBottom: '1px solid #bbc3c9' }}>
-                    <Text variant="headingSm" as="h3">Line 2: 4 limited</Text>
-                    <div style={{ color: '#6d7175' }}>⚙️</div>
-                </Box>
-                <BlockStack gap="200" paddingTop="300">
-                    <Checkbox label="Name" checked={!!design.line2_name} onChange={(v) => handleUpdate('line2_name', v)} />
-                    <Checkbox label="Price" checked={!!design.line2_price} onChange={(v) => handleUpdate('line2_price', v)} />
+            <s-section>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9' }}>
+                    <s-heading>Line 2: 4 limited</s-heading>
+                    <s-icon type="settings" tone="subdued"></s-icon>
+                </div>
+                <s-stack direction="block" gap="tight" style={{ paddingTop: '12px' }}>
+                    <s-checkbox
+                        label="Name"
+                        checked={!!design.line2_name || undefined}
+                        onChange={(e) => handleUpdate('line2_name', e.currentTarget.checked)}
+                    />
+                    <s-checkbox
+                        label="Price"
+                        checked={!!design.line2_price || undefined}
+                        onChange={(e) => handleUpdate('line2_price', e.currentTarget.checked)}
+                    />
                     {design.line2_price && (
-                        <Box padding="300" style={{ backgroundColor: '#f1f2f4', borderRadius: '4px' }}>
-                            <FormLayout><TextField label="Currency Format" value={design.line2_currency_format} onChange={(v) => handleUpdate('line2_currency_format', v)} autoComplete="off" /></FormLayout>
-                        </Box>
+                        <div style={{ padding: '12px', backgroundColor: '#f1f2f4', borderRadius: '4px' }}>
+                            <s-text-field
+                                label="Currency Format"
+                                value={design.line2_currency_format}
+                                onInput={(e) => handleUpdate('line2_currency_format', e.currentTarget.value)}
+                            />
+                        </div>
                     )}
-                    <Checkbox label="Variant option 1" checked={!!design.line2_variant_option1} onChange={(v) => handleUpdate('line2_variant_option1', v)} />
-                </BlockStack>
-            </Card>
+                    <s-checkbox
+                        label="Variant option 1"
+                        checked={!!design.line2_variant_option1 || undefined}
+                        onChange={(e) => handleUpdate('line2_variant_option1', e.currentTarget.checked)}
+                    />
+                </s-stack>
+            </s-section>
 
-            <Card padding="400">
-                <Box display="flex" justifyContent="space-between" alignItems="center" paddingBlockEnd="300" style={{ borderBottom: '1px solid #bbc3c9' }}>
-                    <Text variant="headingSm" as="h3">Line 3: 4 limited</Text>
-                    <div style={{ color: '#6d7175' }}>⚙️</div>
-                </Box>
-                <Box paddingTop="300"><Checkbox label="Vendor" checked={!!design.line3_vendor} onChange={(v) => handleUpdate('line3_vendor', v)} /></Box>
-            </Card>
-        </BlockStack>
+            <s-section>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9' }}>
+                    <s-heading>Line 3: 4 limited</s-heading>
+                    <s-icon type="settings" tone="subdued"></s-icon>
+                </div>
+                <div style={{ paddingTop: '12px' }}>
+                    <s-checkbox
+                        label="Vendor"
+                        checked={!!design.line3_vendor || undefined}
+                        onChange={(e) => handleUpdate('line3_vendor', e.currentTarget.checked)}
+                    />
+                </div>
+            </s-section>
+        </s-stack>
     );
 }

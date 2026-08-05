@@ -9,7 +9,7 @@ class ShopifyQueryHelper
     {
         return <<<'GRAPHQL'
     {
-        products(first: 50) {
+        products(first: 100) {
             edges {
                 node {
                     id
@@ -19,12 +19,16 @@ class ShopifyQueryHelper
                     handle         # ADDED: Essential for building safe fallback URLs
                     onlineStoreUrl # ADDED: The authentic, live store page link
 
-                    metafields(first: 20){
+                    metafields(first: 100){
                         edges{
                             node{
                                 namespace
                                 key
                                 value
+                                definition {
+                                    id
+                                    name
+                                }
                             }
                         }
                     }
@@ -80,8 +84,8 @@ class ShopifyQueryHelper
     GRAPHQL;
     }
     public static function updateBarcode(): string
-{
-    return <<<'GRAPHQL'
+    {
+        return <<<'GRAPHQL'
     mutation updateProductVariantBarcode(
         $productId: ID!,
         $variants: [ProductVariantsBulkInput!]!
@@ -101,6 +105,23 @@ class ShopifyQueryHelper
         }
     }
     GRAPHQL;
-}
+    }
+    public static function metafieldDefinitions(): string
+    {
+        return <<<'GRAPHQL'
+    {
+        metafieldDefinitions(first: 250, ownerType: PRODUCT) {
+            edges {
+                node {
+                    id
+                    name
+                    namespace
+                    key
+                }
+            }
+        }
+    }
+    GRAPHQL;
+    }
 
 }

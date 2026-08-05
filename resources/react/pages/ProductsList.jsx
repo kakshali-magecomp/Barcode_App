@@ -1,33 +1,23 @@
 import React, { useState } from "react";
-import {
-    Page,
-    Card,
-    RadioButton,
-    Button,
-    Text,
-    BlockStack,
-    Banner,
-    Divider,
-    InlineStack,
-} from "@shopify/polaris";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import ProductPickerModal from "../components/ProductPickerModal";
 
 export default function GenerateSku() {
-    const appBridge = useAppBridge();
-    const fetch = appBridge.fetch || window.fetch;
+    const shopify = useAppBridge();
     const [updatedProducts, setUpdatedProducts] = useState([]);
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [method, setMethod] = useState("missing");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
     const generateSku = async () => {
-        if (
-            method !== "missing" &&
-            selectedProducts.length === 0
-        ) {
-            appBridge.toast.show("Please select at least one product.");
+        if (!method) {
+            setError("Please choose an SKU generation method.");
+            return;
+        }
+        if (method !== "missing" && selectedProducts.length === 0) {
+            shopify.toast.show("Please select at least one product.");
             return;
         }
         try {
@@ -54,7 +44,7 @@ export default function GenerateSku() {
                             metafields: item.metafields,
                         })),
             };
-            console.log(payload);
+
             const response = await fetch("/api/products/generate-sku", {
                 method: "POST",
                 headers: {
@@ -63,12 +53,26 @@ export default function GenerateSku() {
                 },
                 body: JSON.stringify(payload),
             });
-            if (!response.ok) {
-                throw new Error("Server Error");
-            }
             const json = await response.json();
+
+            if (!response.ok) {
+
+                if (response.status === 422) {
+                    const fieldErrors = json.errors
+                        ? Object.values(json.errors).flat().join(' ')
+                        : '';
+                    throw new Error(json.message || fieldErrors || "Validation failed.");
+                }
+                throw new Error(json.message || `Server Error (${response.status})`);
+            }
             if (json.status === 1) {
-                appBridge.toast.show(json.message || "SKU generated successfully.");
+                if (json.generated_count === 0) {
+                    shopify.toast.show("All products already have SKU.");
+                } else {
+                    shopify.toast.show(
+                        json.message || "SKU generated successfully."
+                    );
+                }
                 setUpdatedProducts(json.updated_products || []);
                 setSelectedProducts([]);
                 setPickerOpen(false);
@@ -84,103 +88,90 @@ export default function GenerateSku() {
     };
 
     return (
-        <Page title="Generate SKU" subtitle="Manage and edit your customized SKU">
+        <s-page heading="Generate SKU" subheading="Manage and edit your customized SKU">
             {error && (
-                <Banner tone="critical" onDismiss={() => setError("")}>
-                    {error}
-                </Banner>
+                <s-section>
+                    <s-banner tone="critical" onDismiss={() => setError("")}>
+                        {error}
+                    </s-banner>
+                </s-section>
             )}
-            <Card>
-                <BlockStack gap="500">
-                    <Text variant="headingMd" as="h2">
-                        SKU Generation Method
-                    </Text>
-                    <RadioButton
-                        label="Only generate SKU for selected products or variants that don't have SKU"
-                        checked={method === "missing"}
-                        id="missing"
+
+            <s-section>
+                <s-stack direction="block" gap="base">
+                    <s-heading>SKU Generation Method</s-heading>
+                    <s-choice-list
                         name="method"
-                        onChange={() => setMethod("missing")}
-                    />
-                    <RadioButton
-                        label="Generate SKU for all selected products or variants. Replace existing SKU if already available."
-                        checked={method === "replace"}
-                        id="replace"
-                        name="method"
-                        onChange={() => setMethod("replace")}
-                    />
-                    <RadioButton
-                        label="Generate SKU from barcode number"
-                        checked={method === "barcode"}
-                        id="barcode"
-                        name="method"
-                        onChange={() => setMethod("barcode")}
-                    />
-                    <Divider />
-                    <InlineStack
-                        align="space-between"
-                        blockAlign="center"
-                        gap="400"
+                        label="SKU generation method"
+                        labelAccessibilityVisibility="exclusive"
+                        onChange={(event) => {
+                            const selected = event.currentTarget.values?.[0];
+                            if (selected) setMethod(selected);
+                        }}
                     >
-                        <Text variant="headingMd" as="h2">
-                            Selected Products
-                        </Text>
+                        <s-choice value="missing" selected={method === "missing"}>
+                            Only generate SKU for selected products or variants that don't have SKU
+                        </s-choice>
+                        <s-choice value="replace" selected={method === "replace"}>
+                            Generate SKU for all selected products or variants. Replace existing SKU if already available.
+                        </s-choice>
+                        <s-choice value="barcode" selected={method === "barcode"}>
+                            Generate SKU from barcode number
+                        </s-choice>
+                    </s-choice-list>
+
+                    <s-divider />
+
+                    <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+                        <s-heading>Selected Products</s-heading>
+
                         {method === "missing" ? (
-                            <Text as="p" tone="subdued">
+                            <s-text tone="subdued">
                                 All products without SKU will be processed automatically.
-                            </Text>
+                            </s-text>
                         ) : (
-                            <Text as="p" tone="subdued">
-                                {selectedProducts.length} product
-                                {selectedProducts.length !== 1 ? "s" : ""} selected
-                            </Text>
+                            <s-text tone="subdued">
+                                {selectedProducts.length} product{selectedProducts.length !== 1 ? "s" : ""} selected
+                            </s-text>
                         )}
+
                         {method !== "missing" && (
-                            <Button onClick={() => setPickerOpen(true)}>
+                            <s-button onClick={() => setPickerOpen(true)}>
                                 Choose Products
-                            </Button>
+                            </s-button>
                         )}
-                        <Button
-                            variant="primary"
-                            loading={loading}
-                            onClick={generateSku}
-                        >
+
+                        <s-button variant="primary" loading={loading || undefined} onClick={generateSku}>
                             Generate SKU
-                        </Button>
-                    </InlineStack>
-                </BlockStack>
-            </Card>
+                        </s-button>
+                    </s-stack>
+                </s-stack>
+            </s-section>
+
             {updatedProducts.length > 0 && (
-                <Card>
-                    <BlockStack gap="400">
-                        <Text variant="headingMd" as="h2">
-                            Generated SKU Summary
-                        </Text>
+                <s-section>
+                    <s-stack direction="block" gap="base">
+                        <s-heading>Generated SKU Summary</s-heading>
                         {updatedProducts.map((item, index) => (
-                            <Card key={index} roundedAbove="sm">
-                                <BlockStack gap="200">
-                                    <Text fontWeight="bold">
-                                        {item.product_title}
-                                    </Text>
+                            <s-box key={index} padding="base" borderWidth="base" borderRadius="base">
+                                <s-stack direction="block" gap="tight">
+                                    <s-text fontWeight="bold">{item.product_title}</s-text>
                                     {item.variant_title !== "Default Title" && (
-                                        <Text tone="subdued">
-                                            {item.variant_title}
-                                        </Text>
+                                        <s-text tone="subdued">{item.variant_title}</s-text>
                                     )}
-                                    <Text>
-                                        Old SKU :
-                                        <strong> {item.old_sku || "-"}</strong>
-                                    </Text>
-                                    <Text tone="success">
-                                        New SKU :
-                                        <strong> {item.new_sku}</strong>
-                                    </Text>
-                                </BlockStack>
-                            </Card>
+                                    <s-text>
+                                        Old SKU: <s-text fontWeight="bold">{item.old_sku || "-"}</s-text>
+                                    </s-text>
+                                    <s-text tone="success">
+                                        New SKU: <s-text fontWeight="bold">{item.new_sku}</s-text>
+                                    </s-text>
+                                </s-stack>
+                            </s-box>
                         ))}
-                    </BlockStack>
-                </Card>
+                    </s-stack>
+                </s-section>
             )}
+
             <ProductPickerModal
                 open={pickerOpen}
                 onClose={() => setPickerOpen(false)}
@@ -189,6 +180,6 @@ export default function GenerateSku() {
                     setPickerOpen(false);
                 }}
             />
-        </Page>
+        </s-page>
     );
 }

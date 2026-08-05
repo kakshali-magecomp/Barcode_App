@@ -24,6 +24,30 @@ class ShopifyProductController extends Controller
             $query = ShopifyQueryHelper::showproduct();
             $rawResponse = $shop->api()->graph($query);
             $responseArray = json_decode(json_encode($rawResponse), true);
+            // Load all PRODUCT metafield definitions
+            $definitionsQuery = ShopifyQueryHelper::metafieldDefinitions();
+            $definitionsRaw = $shop->api()->graph($definitionsQuery);
+            $definitionsResponse = json_decode(json_encode($definitionsRaw), true);
+
+            $definitionEdges =
+                $definitionsResponse['body']['container']['data']['metafieldDefinitions']['edges']
+                ??
+                $definitionsResponse['body']['data']['metafieldDefinitions']['edges']
+                ??
+                [];
+
+            $metafieldOptions = [];
+
+            foreach ($definitionEdges as $edge) {
+                $definition = $edge['node'];
+
+                $fieldKey = $definition['namespace'] . "." . $definition['key'];
+
+                $metafieldOptions[] = [
+                    "label" => $definition['name'] . " ({$fieldKey})",
+                    "value" => $fieldKey,
+                ];
+            }
 
             $skuSettings = $shop->skuSetting()->firstOrCreate([]);
 
@@ -36,11 +60,10 @@ class ShopifyProductController extends Controller
                 if (isset($productEdge['node'])) {
                     $product = $productEdge['node'];
                     $metafields = [];
-
                     foreach ($product['metafields']['edges'] ?? [] as $edge) {
                         $node = $edge['node'];
-                        $metafields[$node['namespace'] . "." . $node['key']] = $node['value'];
-
+                        $fieldKey = $node['namespace'] . "." . $node['key'];
+                        $metafields[$fieldKey] = $node['value'];
                     }
 
                     foreach ($product['variants']['edges'] as $variantEdge) {
@@ -85,14 +108,14 @@ class ShopifyProductController extends Controller
             return response()->json([
                 "status" => 1,
                 "variants" => $flattenedVariants,
-                "sku_rules" => $skuSettings
+                "sku_rules" => $skuSettings,
+                "metafield_options" => $metafieldOptions,
             ]);
 
         } catch (\Exception $e) {
             return response()->json(["status" => 0, "error" => $e->getMessage()], 500);
         }
     }
-
 
     public function bulkUpdate(Request $request)
     {
@@ -430,8 +453,20 @@ class ShopifyProductController extends Controller
                 $skuSetting->save();
             }
 
+            if (count($updatedProducts) === 0) {
+
+                return response()->json([
+                    "status" => 1,
+                    "generated_count" => 0,
+                    "message" => "All products already have SKU.",
+                    "updated_products" => [],
+                ]);
+
+            }
+
             return response()->json([
                 "status" => 1,
+                "generated_count" => count($updatedProducts),
                 "message" => count($updatedProducts) . " SKU generated successfully.",
                 "updated_products" => $updatedProducts,
             ]);
@@ -466,7 +501,7 @@ class ShopifyProductController extends Controller
 
             $barcodeSetting = $shop->barcodeSetting()->firstOrCreate([]);
 
-           //loard variant
+            //loard variant
             if ($request->input('method') == "missing") {
                 $query = ShopifyQueryHelper::showproduct();
                 $rawResponse = $shop->api()->graph($query);
@@ -476,8 +511,8 @@ class ShopifyProductController extends Controller
                 );
 
                 $productsEdges =
-                    $responseArray['body']['container']['data']['products']['edges']??
-                    $responseArray['body']['data']['products']['edges']??[];
+                    $responseArray['body']['container']['data']['products']['edges'] ??
+                    $responseArray['body']['data']['products']['edges'] ?? [];
 
                 $variants = [];
                 foreach ($productsEdges as $productEdge) {
@@ -516,14 +551,14 @@ class ShopifyProductController extends Controller
                 $variants = $request->variants ?? [];
             }
 
-           //generate barcode
+            //generate barcode
             $groupedProducts = [];
             $updatedProducts = [];
             foreach ($variants as $variant) {
-                $oldBarcode =$variant["barcode"]??
-                    $variant["current_barcode"]??"";
+                $oldBarcode = $variant["barcode"] ??
+                    $variant["current_barcode"] ?? "";
 
-               //barcode fro SKU
+                //barcode fro SKU
                 if ($request->input('method') == "sku") {
                     $newBarcode = trim(
                         $variant["current_sku"] ?? ""
@@ -532,13 +567,13 @@ class ShopifyProductController extends Controller
                         continue;
                     }
                 } else {
-                    $newBarcode = BarcodeGeneratorHelper::generate($variant,$barcodeSetting);
+                    $newBarcode = BarcodeGeneratorHelper::generate($variant, $barcodeSetting);
                     if (empty($newBarcode)) {
                         continue;
                     }
                 }
 
-               //gropu by product
+                //gropu by product
                 $groupedProducts[$variant["product_id"]][] = [
                     "id" => $variant["variant_id"],
                     "barcode" => $newBarcode,
@@ -565,10 +600,19 @@ class ShopifyProductController extends Controller
                     Log::error($errors);
                 }
             }
+            if (count($updatedProducts) === 0) {
+                return response()->json([
+                    "status" => 1,
+                    "generated_count" => 0,
+                    "message" => "All products already have barcodes.",
+                    "updated_products" => [],
+                ]);
+            }
 
             return response()->json([
                 "status" => 1,
                 "message" => count($updatedProducts) . " barcode generated successfully.",
+                "generated_count" => count($updatedProducts),
                 "updated_products" => $updatedProducts,
 
             ]);
@@ -584,5 +628,5 @@ class ShopifyProductController extends Controller
             ], 500);
         }
     }
-    
+
 }

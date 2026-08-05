@@ -40,7 +40,7 @@ class PrintHistoryController extends Controller
         ]);
         
         foreach ($request->products as $product) {
-            \Log::info('PRINT PRODUCT DATA', $product);
+            \Log::info("SAVE HISTORY PRODUCT", $product);
             PrintHistoryItem::create([
                 'print_history_id' => $history->id,
                 'product_id' => $product['product_id'] ?? null,
@@ -49,6 +49,7 @@ class PrintHistoryController extends Controller
                 'sku' => $product['current_sku'] ?? $product['sku'] ?? null,
                 'barcode' => $product['barcode'] ?? null,
                 'barcode_format' => $product['barcode_format'] ?? 'CODE128',
+                'template_settings' => $product['template_settings'] ?? null,
                 'online_url' => $product['online_url'] ?? null,
                 'price' => $product['price'] ?? null,
                 'vendor' => $product['vendor'] ?? null,

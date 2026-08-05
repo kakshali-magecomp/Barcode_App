@@ -17,9 +17,13 @@ class PrintHistoryItem extends Model
         'sku',
         'barcode',
         'barcode_format',
+        'template_settings',
         'price',
         'online_url',
         'qty',
+    ];
+    protected $casts = [
+        'template_settings' => 'array',
     ];
 
     /**

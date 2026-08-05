@@ -211,56 +211,56 @@ class BarcodeTemplateController extends Controller
         }
     }
     public function getTemplateDesign($id)
-{
-    $template = BarcodeTemplate::find($id);
+    {
+        $template = BarcodeTemplate::find($id);
 
-    if (!$template) {
+        if (!$template) {
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Template not found',
+            ]);
+
+        }
 
         return response()->json([
-            'status' => false,
-            'message' => 'Template not found',
+
+            'status' => true,
+
+            'design' => json_decode(
+                $template->design_settings,
+                true
+            ),
+
+            'layout' => json_decode(
+                $template->layout_settings,
+                true
+            ),
+
+            'template' => $template,
+
         ]);
-
     }
+    public function deleteAll()
+    {
+        try {
 
-    return response()->json([
+            $user = auth()->user();
 
-        'status' => true,
+            $user->barcodeTemplates()->delete();
 
-        'design' => json_decode(
-            $template->design_settings,
-            true
-        ),
+            return response()->json([
+                'success' => true,
+                'message' => 'All templates deleted successfully.'
+            ]);
 
-        'layout' => json_decode(
-            $template->layout_settings,
-            true
-        ),
+        } catch (\Exception $e) {
 
-        'template' => $template,
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
 
-    ]);
-}
-public function deleteAll()
-{
-    try {
-
-        $user = auth()->user();
-
-        $user->barcodeTemplates()->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'All templates deleted successfully.'
-        ]);
-
-    } catch (\Exception $e) {
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ],500);
-
+        }
     }
-}
 }

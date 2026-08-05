@@ -36,6 +36,7 @@ class BarcodePrintController extends Controller
         ]);
         $design = $request->input('design');
         $qty = (int) $request->input('print_qty');
+        $barcodeFormat = strtoupper($design['barcode_format'] ?? 'CODE128');
         $fieldSource = $design['symbol_field_source'] ?? 'sku_value';
 
         switch ($fieldSource) {
@@ -63,6 +64,29 @@ class BarcodePrintController extends Controller
         }
 
         $symbolValue = trim((string) $symbolValue);
+        if ($barcodeFormat === 'UPCA') {
+
+    $digits = preg_replace('/\D/', '', $symbolValue);
+
+    if (strlen($digits) == 11) {
+
+        $sum = 0;
+
+        for ($i = 0; $i < 11; $i++) {
+
+            if ($i % 2 == 0) {
+                $sum += intval($digits[$i]) * 3;
+            } else {
+                $sum += intval($digits[$i]);
+            }
+
+        }
+
+        $checkDigit = (10 - ($sum % 10)) % 10;
+
+        $symbolValue = $digits . $checkDigit;
+    }
+}
 
         if ($symbolValue === '') {
             $symbolValue = 'EMPTY';
@@ -75,13 +99,53 @@ class BarcodePrintController extends Controller
             if (($design['symbol_type'] ?? 'QR') === 'BARCODE') {
 
                 $generator = new BarcodeGeneratorPNG();
-                $widthMultiplier = isset($design['symbol_bar_width']) ? (int) $design['symbol_bar_width'] : 2;
-                $heightMm = isset($design['symbol_bar_height']) ? (int) $design['symbol_bar_height'] : 30;
 
-                $barcodeBase64 = base64_encode(
-                    $generator->getBarcode($symbolValue, $generator::TYPE_CODE_128, $widthMultiplier, $heightMm, [$r, $g, $b])
-                );
-                $renderedSymbolHtml = '<img src="data:image/png;base64,' . $barcodeBase64 . '" style="width: 140px; height: auto; display: block; margin: 0 auto;" />';
+$widthMultiplier = (int)($design['symbol_bar_width'] ?? 2);
+$heightMm = (int)($design['symbol_bar_height'] ?? 45);
+
+$barcodeFormat = strtoupper($design['barcode_format'] ?? 'CODE128');
+
+switch ($barcodeFormat) {
+
+    case 'UPCA':
+        $barcodeType = $generator::TYPE_UPC_A;
+        break;
+
+    case 'EAN13':
+        $barcodeType = $generator::TYPE_EAN_13;
+        break;
+
+    case 'EAN8':
+        $barcodeType = $generator::TYPE_EAN_8;
+        break;
+
+    case 'CODE39':
+        $barcodeType = $generator::TYPE_CODE_39;
+        break;
+
+    case 'CODE128':
+        $barcodeType = $generator::TYPE_CODE_128;
+        break;
+
+    default:
+        $barcodeType = $generator::TYPE_CODE_128;
+        break;
+}
+
+$barcodeBase64 = base64_encode(
+    $generator->getBarcode(
+        $symbolValue,
+        $barcodeType,
+        $widthMultiplier,
+        $heightMm,
+        [$r, $g, $b]
+    )
+);
+
+$renderedSymbolHtml =
+    '<img src="data:image/png;base64,' .
+    $barcodeBase64 .
+    '" style="width:140px;height:auto;display:block;margin:0 auto;">';
             } else {
                 $qrWidth = isset($design['symbol_width_px']) && !empty($design['symbol_width_px']) ? (int) $design['symbol_width_px'] : 120;
 
@@ -176,7 +240,7 @@ class BarcodePrintController extends Controller
         $barcodeSetting = $user->barcodeSetting;
         $barcodeFormat = "QR";
         if (($design['symbol_type'] ?? "QR") === "BARCODE") {
-            $barcodeFormat = $barcodeSetting?->barcode_format ?? "CODE128";
+            $barcodeFormat = $design['barcode_format'] ?? 'CODE128';
         }
         LabelHistory::create([
             'user_id' => $user->id,
@@ -187,6 +251,7 @@ class BarcodePrintController extends Controller
             'sku' => $request->sku,
             'barcode_value' => $symbolValue,
             'barcode_format' => $barcodeFormat,
+            'template_settings' => $design,
             'symbol_type' => $design['symbol_type'] ?? 'QR',
             'print_type' => 'product',
             'price' => $request->price,

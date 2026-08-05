@@ -1,56 +1,48 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Page, Layout, Card, FormLayout, TextField, Select, Banner, Toast, Frame, ContextualSaveBar, Box, Spinner } from '@shopify/polaris';
-import { useAppBridge, SaveBar } from '@shopify/app-bridge-react';
+import { useAppBridge } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 
+const SAVE_BAR_ID = 'edit-template-savebar';
+
 export default function EditTemplate() {
+    
     const shopify = useAppBridge();
-    const app = useAppBridge();
-    const fetch = app.fetch || window.fetch;
     const navigate = useNavigate();
-    const { id } = useParams(); // Extracts the template ID from the route path parameter
-    // Page Rendering 
+    const { id } = useParams();
+
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
-    // Form State
+
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
-    // UI Feedback State
-    const [toastActive, setToastActive] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
+
     const [errorBanner, setErrorBanner] = useState(null);
     const [originalTemplate, setOriginalTemplate] = useState(null);
     const [design, setDesign] = useState({});
     const [discardSignal, setDiscardSignal] = useState(0);
 
-
-    // Dropdown Configuration Data
     const brandOptions = [
-        { label: 'Select Brand...', value: '' },
         { label: 'Dymo', value: 'dymo' },
         { label: 'Zebra', value: 'zebra' },
         { label: 'Avery', value: 'avery' }
     ];
 
     const modelOptionsMap = {
-        '': [{ label: 'Select Brand First', value: '' }],
+        '': [],
         'dymo': [
-            { label: 'Select Model...', value: '' },
             { label: '30334 (Jewelry Label)', value: '30334' },
             { label: '30252 (Address Label)', value: '30252' }
         ],
         'zebra': [
-            { label: 'Select Model...', value: '' },
             { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
             { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
         ],
         'avery': [
-            { label: 'Select Model...', value: '' },
             { label: '5160 (Address 30-per-sheet)', value: '5160' },
             { label: '5167 (Return Address)', value: '5167' }
         ]
@@ -58,143 +50,28 @@ export default function EditTemplate() {
 
     const PAPER_TEMPLATES = {
         dymo: {
-            "30334": {
-                name: "Jewelry Label",
-
-                paper: {
-                    width: 54,
-                    height: 25
-                },
-
-                label: {
-                    width: 54,
-                    height: 25
-                },
-
-                rows: 1,
-                columns: 1,
-
-                gapX: 0,
-                gapY: 0,
-
-                marginTop: 0,
-                marginLeft: 0
-            },
-
-            "30252": {
-                name: "Address Label",
-
-                paper: {
-                    width: 89,
-                    height: 36
-                },
-
-                label: {
-                    width: 89,
-                    height: 36
-                },
-
-                rows: 1,
-                columns: 1,
-
-                gapX: 0,
-                gapY: 0,
-
-                marginTop: 0,
-                marginLeft: 0
-            }
+            "30334": { name: "Jewelry Label", paper: { width: 54, height: 25 }, label: { width: 54, height: 25 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
+            "30252": { name: "Address Label", paper: { width: 89, height: 36 }, label: { width: 89, height: 36 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
         },
-
         zebra: {
-            "4000d-4x6": {
-                name: "Shipping Label",
-
-                paper: {
-                    width: 101.6,
-                    height: 152.4
-                },
-
-                label: {
-                    width: 101.6,
-                    height: 152.4
-                },
-
-                rows: 1,
-                columns: 1,
-
-                gapX: 0,
-                gapY: 0
-            },
-            "4000d-2x1": {
-                name: "Small Label",
-
-                paper: {
-                    width: 50.8,
-                    height: 25.4
-                },
-
-                label: {
-                    width: 50.8,
-                    height: 25.4
-                },
-
-                rows: 1,
-                columns: 1,
-
-                gapX: 0,
-                gapY: 0
-            }
+            "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
+            "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
         },
-
         avery: {
-            "5160": {
-                name: "Address",
-
-                paper: {
-                    width: 215.9,
-                    height: 279.4
-                },
-
-                label: {
-                    width: 66.7,
-                    height: 25.4
-                },
-
-                rows: 10,
-                columns: 3,
-
-                gapX: 3.2,
-                gapY: 0,
-
-                marginTop: 12.7,
-                marginLeft: 4.8
-            },
-            "5167": {
-                name: "ReturnAddress",
-
-                paper: {
-                    width: 215.9,
-                    height: 279.4
-                },
-
-                label: {
-                    width: 66.7,
-                    height: 279.6
-                },
-
-                rows: 10,
-                columns: 3,
-
-                gapx: 3.2,
-                gapy: 0,
-
-                marginTop: 12.7,
-                marginLeft: 4.8,
-            }
+            "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
+            "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 279.6 }, rows: 10, columns: 3, gapx: 3.2, gapy: 0, marginTop: 12.7, marginLeft: 4.8 }
         }
     };
 
-    // Load existing values from backend database on mount
+
+    useEffect(() => {
+        if (isDirty) {
+            shopify.saveBar.show(SAVE_BAR_ID);
+        } else {
+            shopify.saveBar.hide(SAVE_BAR_ID);
+        }
+    }, [isDirty, shopify]);
+
     useEffect(() => {
         async function fetchTemplateData() {
             try {
@@ -206,13 +83,11 @@ export default function EditTemplate() {
                     const t = result.data;
 
                     setOriginalTemplate(t);
-
                     setName(t.template_name || "");
                     setDescription(t.description || "");
                     setNote(t.note || "");
                     setBrand(t.paper_brand || "");
                     setModel(t.paper_model || "");
-
                     setIsDirty(false);
                 } else {
                     setErrorBanner(result.message || "Failed to load template profile details.");
@@ -224,16 +99,15 @@ export default function EditTemplate() {
             }
         }
         fetchTemplateData();
-    }, [id, fetch]);
+    }, [id]);
 
-    // State Mutators with Dirty Checks
-    const handleFieldChange = (setter) => (value) => {
-        setter(value);
+    const handleFieldChange = (setter) => (event) => {
+        setter(event.currentTarget.value);
         setIsDirty(true);
     };
 
-    const handleBrandChange = (value) => {
-        setBrand(value);
+    const handleBrandChange = (event) => {
+        setBrand(event.currentTarget.value);
         setModel(''); // Reset model selection when brand shifts
         setIsDirty(true);
     };
@@ -258,7 +132,6 @@ export default function EditTemplate() {
         setErrorBanner(null);
     };
 
-    // Form Update Submission Handler
     const handleSubmit = useCallback(async () => {
         if (!name) {
             setErrorBanner('Template Name is required.');
@@ -291,11 +164,9 @@ export default function EditTemplate() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                setToastMessage('Template updated successfully!');
-                setToastActive(true);
+                shopify.toast.show('Template updated successfully!');
                 setIsDirty(false);
 
-                //Redirect to template list
                 setTimeout(() => {
                     navigate('/TemplateList');
                 }, 1500);
@@ -307,97 +178,87 @@ export default function EditTemplate() {
         } finally {
             setLoading(false);
         }
-    }, [id, name, description, note, brand, model, design, fetch, navigate]);
+    }, [id, name, description, note, brand, model, design, navigate, shopify]);
 
     if (pageLoading) {
         return (
-            <Box padding="1200" align="center">
-                <Spinner accessibilityLabel="Syncing template profile details" size="large" />
-            </Box>
+            <s-page heading="Edit Template">
+                <s-box padding="loose" alignContent="center">
+                    <s-spinner accessibilityLabel="Syncing template profile details" size="large" />
+                </s-box>
+            </s-page>
         );
     }
 
     return (
-        <Frame>
-            <SaveBar id="edit-template-savebar" open={isDirty}>
-                <button
-                    variant="primary"
-                    loading={loading ? "true" : undefined}
-                    onClick={handleSubmit}
-                >
+        <>
+            <ui-save-bar id={SAVE_BAR_ID}>
+                <button variant="primary" loading={loading || undefined} onClick={handleSubmit}>
                     Save
                 </button>
-                <button onClick={handleDiscard}>
-                    Discard
-                </button>
-            </SaveBar>
+                <button onClick={handleDiscard}>Discard</button>
+            </ui-save-bar>
 
-            <Page
-                title={`Edit Template: ${name}`}
-                backAction={{ content: 'Templates', url: '/TemplateList' }}
-            >
-                <Layout>
-                    <Layout.Section>
-                        {errorBanner && (
-                            <Banner tone="critical" onDismiss={() => setErrorBanner(null)}>
-                                <p>{errorBanner}</p>
-                            </Banner>
-                        )}
+            <s-page heading={`Edit Template: ${name}`}>
+                <s-section>
+                    <s-link href="/TemplateList">← Back to Templates</s-link>
+                </s-section>
 
-                        <Card padding="500">
-                            <FormLayout>
-                                <TextField
-                                    label="Template Name"
-                                    value={name}
-                                    onChange={handleFieldChange(setName)}
-                                    autoComplete="off"
-                                />
+                <s-section>
+                    {errorBanner && (
+                        <s-banner tone="critical" onDismiss={() => setErrorBanner(null)}>
+                            {errorBanner}
+                        </s-banner>
+                    )}
 
-                                <TextField
-                                    label="Description"
-                                    value={description}
-                                    onChange={handleFieldChange(setDescription)}
-                                    multiline={3}
-                                    autoComplete="off"
-                                />
+                    <s-stack direction="block" gap="base">
+                        <s-text-field
+                            label="Template Name"
+                            value={name}
+                            onInput={handleFieldChange(setName)}
+                        />
 
-                                <FormLayout.Group>
-                                    <Select
-                                        label="Paper Brand"
-                                        options={brandOptions}
-                                        onChange={handleBrandChange}
-                                        value={brand}
-                                    />
-                                    <Select
-                                        label="Paper Model"
-                                        options={modelOptionsMap[brand] || modelOptionsMap['']}
-                                        onChange={handleFieldChange(setModel)}
-                                        value={model}
-                                        disabled={!brand}
-                                    />
-                                </FormLayout.Group>
+                        <s-text-area
+                            label="Description"
+                            value={description}
+                            onInput={handleFieldChange(setDescription)}
+                            rows={3}
+                        />
 
-                                <TextField
-                                    label="Internal Note"
-                                    value={note}
-                                    onChange={handleFieldChange(setNote)}
-                                    multiline={2}
-                                    autoComplete="off"
-                                />
-                            </FormLayout>
-                            <Box paddingBlockStart="600">
-                                <DesignCanvasEdit
-                                    templateId={id}
-                                    discardSignal={discardSignal}
-                                    onChange={handleDesignChange}
-                                    onDirty={() => { }}
-                                />
-                            </Box>
-                        </Card>
-                    </Layout.Section>
-                </Layout>
-                {toastActive && <Toast content={toastMessage} onDismiss={() => setToastActive(false)} />}
-            </Page>
-        </Frame>
+                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                            <s-select label="Paper Brand" value={brand} onChange={handleBrandChange}>
+                                <s-option value="">Select Brand...</s-option>
+                                {brandOptions.map((opt) => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
+
+                            <s-select label="Paper Model" value={model} onChange={handleFieldChange(setModel)} disabled={!brand || undefined}>
+                                <s-option value="">{brand ? 'Select Model...' : 'Select Brand First'}</s-option>
+                                {(modelOptionsMap[brand] || []).map((opt) => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
+                        </s-grid>
+
+                        <s-text-area
+                            label="Internal Note"
+                            value={note}
+                            onInput={handleFieldChange(setNote)}
+                            rows={2}
+                        />
+                    </s-stack>
+
+                    <s-box paddingBlockStart="loose">
+                        <DesignCanvasEdit
+                            templateId={id}
+                            discardSignal={discardSignal}
+                            onChange={handleDesignChange}
+                            onDirty={() => { }}
+                        />
+                    </s-box>
+                </s-section>
+            </s-page>
+        </>
     );
 }

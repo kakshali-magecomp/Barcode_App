@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Page, Card, IndexTable, Text, Badge, Spinner, Box, Button, EmptyState, Banner, Frame } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal.jsx';
-import { EditIcon, DeleteIcon } from "@shopify/polaris-icons";
 import { useNavigate } from "react-router-dom";
-import { Pagination } from "@shopify/polaris";
-
 
 export default function TemplateList() {
-    const appBridge = useAppBridge();
-    const fetch = appBridge.fetch || window.fetch;
+    // Single source of the `shopify` global object.
+    const shopify = useAppBridge();
 
     const [templates, setTemplates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,10 +13,8 @@ export default function TemplateList() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Modal Registry State Pointers
-    const [activeModal, setActiveModal] = useState(false);
-    const [templateToDelete, setTemplateToDelete] = useState(null);
-    const [deleteAllModal, setDeleteAllModal] = useState(false);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [deleteSelectedModal, setDeleteSelectedModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -51,240 +45,186 @@ export default function TemplateList() {
         loadTemplates();
     }, []);
 
-    const openDeleteConfirmation = (id) => {
-        setTemplateToDelete(id);
-        setActiveModal(true);
+    const openDeleteSelectedConfirmation = () => {
+        if (selectedIds.length === 0) return;
+        setDeleteSelectedModal(true);
     };
 
-    const closeDeleteModal = () => {
-        setTemplateToDelete(null);
-        setActiveModal(false);
-    };
-    const openDeleteAllConfirmation = () => {
-        setDeleteAllModal(true);
+    const closeDeleteSelectedConfirmation = () => {
+        setDeleteSelectedModal(false);
     };
 
-    const closeDeleteAllConfirmation = () => {
-        setDeleteAllModal(false);
-    };
-    const handleDeleteExecute = async () => {
-        if (!templateToDelete) return;
-
+    const handleDeleteSelected = async () => {
         try {
             setDeleteLoading(true);
-            setError("");
-
-            const response = await fetch(`/api/templates/${templateToDelete}`, {
-                method: 'DELETE',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setTemplates((prev) => prev.filter((t) => t.id !== templateToDelete));
-                closeDeleteModal();
-                shopify.toast.show("Template removed successfully");
-            } else {
-                throw new Error(result.message || "Failed to complete deletion task.");
-            }
+            await Promise.all(
+                selectedIds.map((id) =>
+                    fetch(`/api/templates/${id}`, {
+                        method: 'DELETE',
+                        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+                    })
+                )
+            );
+            setTemplates((prev) => prev.filter((t) => !selectedIds.includes(t.id)));
+            setSelectedIds([]);
+            closeDeleteSelectedConfirmation();
+            shopify.toast.show("Selected templates deleted");
         } catch (err) {
-            setError(err.message || "An exception occurred during deletion processing.");
-            closeDeleteModal();
+            setError("Failed to delete selected templates.");
         } finally {
             setDeleteLoading(false);
         }
     };
 
-    const handleDeleteAll = async () => {
-        try {
-            setDeleteLoading(true);
-
-            const response = await fetch("/api/templates/delete-all", {
-                method: "DELETE",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setTemplates([]);
-                closeDeleteAllConfirmation();
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setDeleteLoading(false);
-        }
-    };
-
-    const resourceName = { singular: 'template', plural: 'templates' };
-
-    //pagination
+    // pagination
     const totalPages = Math.ceil(templates.length / itemsPerPage);
-
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
+    const currentTemplates = templates.slice(startIndex, endIndex);
 
-    const currentTemplates = templates.slice(
-        startIndex,
-        endIndex
-    );
-    const rowMarkup = currentTemplates.map(
-        ({ id, template_name, paper_brand, paper_model, created_at }, index) => (
-            <IndexTable.Row id={String(id)} key={id} position={index}>
-                <IndexTable.Cell>
-                    <Text fontWeight="bold" as="span">{template_name}</Text>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <Badge tone="info">{paper_brand || 'Custom Brand'}</Badge>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <Text as="span" tone="subdued">{paper_model || 'Generic Layout'}</Text>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    {new Date(created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <Box display="flex" gap="200">
-                        <Box display="flex" gap="200">
-                            <Button
-                                icon={EditIcon}
-                                variant="tertiary"
-                                accessibilityLabel="Edit Template"
-                                url={`/templates/edit/${id}`}
-                            />
+    const toggleSelectOne = (id) => {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+        );
+    };
 
-                            <Button
-                                icon={DeleteIcon}
-                                variant="tertiary"
-                                tone="critical"
-                                accessibilityLabel="Delete Template"
-                                onClick={() => openDeleteConfirmation(id)}
-                            />
-                        </Box>
-                    </Box>
-                </IndexTable.Cell>
-            </IndexTable.Row>
-        )
-    );
+    const toggleSelectAll = () => {
+        const currentIds = currentTemplates.map((t) => t.id);
+        const allSelected = currentIds.length > 0 && currentIds.every((id) => selectedIds.includes(id));
+        setSelectedIds((prev) =>
+            allSelected
+                ? prev.filter((id) => !currentIds.includes(id))
+                : [...new Set([...prev, ...currentIds])]
+        );
+    };
 
     if (loading) {
         return (
-            <Box padding="1200" align="center">
-                <Spinner accessibilityLabel="Syncing template profiles" size="large" />
-            </Box>
+            <s-page heading="Label Templates">
+                <s-box padding="loose" alignContent="center">
+                    <s-spinner accessibilityLabel="Syncing template profiles" size="large" />
+                </s-box>
+            </s-page>
         );
     }
 
     return (
-        <Frame>
-            {/*MOUNT THE SEPARATED CUSTOM COMPONENTS BLOCK CLEANLY HERE */}
+        <>
             <DeleteConfirmationModal
-                open={activeModal}
+                open={deleteSelectedModal}
                 loading={deleteLoading}
-                title="Delete template configuration?"
-                message="Are you sure you want to delete this template configuration? This structural setup cannot be restored or re-mapped back once deleted."
-                onConfirm={handleDeleteExecute}
-                onClose={closeDeleteModal}
-            />
-            <DeleteConfirmationModal
-                open={deleteAllModal}
-                loading={deleteLoading}
-                title="Delete All Templates?"
-                message="This action will permanently delete ALL templates. This cannot be undone."
-                onConfirm={handleDeleteAll}
-                onClose={closeDeleteAllConfirmation}
+                title={`Delete ${selectedIds.length} selected template${selectedIds.length !== 1 ? 's' : ''}?`}
+                message="This will permanently delete the templates you've selected. This cannot be undone."
+                onConfirm={handleDeleteSelected}
+                onClose={closeDeleteSelectedConfirmation}
             />
 
-            <Page
-                title="Label Templates"
-                subtitle="Manage and edit your customized sticker layout dimensions."
-                primaryAction={{
-                    content: 'Create Template',
-                    url: '/TamplateCreate',
-                }}
-                secondaryActions={[
-                    {
-                        content: "Delete All Templates",
-                        destructive: true,
-                        onAction: openDeleteAllConfirmation,
-                    },
-                ]}
-            >
+            <s-page heading="Label Templates" subheading="Manage and edit your customized sticker layout dimensions.">
+                <s-section>
+                    <s-stack direction="inline" gap="base">
+                        <s-button variant="primary" href="/TamplateCreate">
+                            Create Template
+                        </s-button>
+
+                        {selectedIds.length > 0 && (
+                            <s-button tone="critical" onClick={openDeleteSelectedConfirmation}>
+                                Delete Selected ({selectedIds.length})
+                            </s-button>
+                        )}
+                    </s-stack>
+                </s-section>
+
                 {error && (
-                    <Box paddingBlockEnd="400">
-                        <Banner tone="critical" onDismiss={() => setError("")}><p>{error}</p></Banner>
-                    </Box>
+                    <s-section>
+                        <s-banner tone="critical" onDismiss={() => setError("")}>
+                            {error}
+                        </s-banner>
+                    </s-section>
                 )}
 
                 {templates.length === 0 ? (
-                    <Card padding="1200">
-                        <EmptyState
+                    <s-section>
+                        <s-empty-state
                             heading="Design your first barcode template layout"
-                            action={{ content: 'Create Template', url: '/TamplateCreate' }}
                             image="https://shopify.com"
                         >
-                            <p>Configure paper sizes, padding parameters, and item data positions to align accurately with your hardware label rolls.</p>
-                        </EmptyState>
-                    </Card>
+                            <s-paragraph>
+                                Configure paper sizes, padding parameters, and item data positions to align accurately with your hardware label rolls.
+                            </s-paragraph>
+                            <s-button variant="primary" href="/TamplateCreate">
+                                Create Template
+                            </s-button>
+                        </s-empty-state>
+                    </s-section>
                 ) : (
-                    <Card padding="0">
-                        <IndexTable
-                            resourceName={resourceName}
-                            itemCount={currentTemplates.length}
-                            selectable={false}
-                            headings={[
-                                { title: 'Template Name' },
-                                { title: 'Paper Brand' },
-                                { title: 'Paper Model' },
-                                { title: 'Created Date' },
-                                { title: 'Actions' },
-                            ]}
+                    <s-section padding="none">
+                        <s-table
+                            paginate
+                            hasPreviousPage={currentPage > 1 || undefined}
+                            hasNextPage={currentPage < totalPages || undefined}
+                            onPreviousPage={() => setCurrentPage((prev) => prev - 1)}
+                            onNextPage={() => setCurrentPage((prev) => prev + 1)}
                         >
-                            {rowMarkup}
-                        </IndexTable>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                marginTop: "20px",
-                                marginBottom: "20px",
-                                width: "100%",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "16px",
-                                }}
-                            >
-                                {/* <Text as="p">
-      Page {currentPage} of {totalPages}
-    </Text> */}
-
-                                <Pagination
-                                    hasPrevious={currentPage > 1}
-                                    hasNext={currentPage < totalPages}
-                                    onPrevious={() => setCurrentPage((prev) => prev - 1)}
-                                    onNext={() => setCurrentPage((prev) => prev + 1)}
-                                />
-                            </div>
-                        </div>
-                    </Card>
+                            <s-table-header-row>
+                                <s-table-header>
+                                    <s-checkbox
+                                        label="Select all"
+                                        labelAccessibilityVisibility="exclusive"
+                                        checked={
+                                            currentTemplates.length > 0 && currentTemplates.every((t) => selectedIds.includes(t.id))
+                                                ? true
+                                                : undefined
+                                        }
+                                        onChange={toggleSelectAll}
+                                    />
+                                </s-table-header>
+                                <s-table-header>Template Name</s-table-header>
+                                <s-table-header>Paper Brand</s-table-header>
+                                <s-table-header>Paper Model</s-table-header>
+                                <s-table-header>Created Date</s-table-header>
+                                <s-table-header>Actions</s-table-header>
+                            </s-table-header-row>
+                            <s-table-body>
+                                {currentTemplates.map(({ id, template_name, paper_brand, paper_model, created_at }) => (
+                                    <s-table-row key={id}>
+                                        <s-table-cell>
+                                            <s-checkbox
+                                                label={`Select ${template_name}`}
+                                                labelAccessibilityVisibility="exclusive"
+                                                checked={selectedIds.includes(id) || undefined}
+                                                onChange={() => toggleSelectOne(id)}
+                                            />
+                                        </s-table-cell>
+                                        <s-table-cell>
+                                            <s-text fontWeight="bold">{template_name}</s-text>
+                                        </s-table-cell>
+                                        <s-table-cell>
+                                            <s-badge tone="info">{paper_brand || 'Custom Brand'}</s-badge>
+                                        </s-table-cell>
+                                        <s-table-cell>
+                                            <s-text tone="subdued">{paper_model || 'Generic Layout'}</s-text>
+                                        </s-table-cell>
+                                        <s-table-cell>
+                                            {new Date(created_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                                        </s-table-cell>
+                                        <s-table-cell>
+                                            <s-stack direction="inline" gap="tight">
+                                                <s-button
+                                                    icon="edit"
+                                                    variant="tertiary"
+                                                    accessibilityLabel="Edit Template"
+                                                    href={`/templates/edit/${id}`}
+                                                />
+                                           
+                                            </s-stack>
+                                        </s-table-cell>
+                                    </s-table-row>
+                                ))}
+                            </s-table-body>
+                        </s-table>
+                    </s-section>
                 )}
-
-            </Page>
-        </Frame>
+            </s-page>
+        </>
     );
 }

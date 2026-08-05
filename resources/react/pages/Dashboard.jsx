@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Page, Layout, Card, Text, Button, BlockStack, InlineGrid, Box, Icon, List, Badge, Spinner } from '@shopify/polaris';
-import { useAppBridge } from '@shopify/app-bridge-react';
-import { PrintIcon,PageAddIcon,SettingsIcon,IconsIcon } from '@shopify/polaris-icons';
 
 export default function Dashboard() {
-    const appBridge = useAppBridge();
-    const fetch = appBridge.fetch || window.fetch;
-
     const [stats, setStats] = useState({ templates_count: 0, products_count: 0 });
     const [loading, setLoading] = useState(true);
 
-    // Load baseline dashboard counters out of our backend on mount
     useEffect(() => {
         async function loadDashboardStats() {
             try {
@@ -26,98 +19,91 @@ export default function Dashboard() {
             }
         }
         loadDashboardStats();
-    }, [fetch]);
+    }, []);
 
     if (loading) {
         return (
-            <Box padding="1200" align="center">
-                <Spinner accessibilityLabel="Loading Dashboard Parameters" size="large" />
-            </Box>
+            <s-page heading="Dashboard">
+                <s-box padding="loose" alignContent="center">
+                    <s-spinner accessibilityLabel="Loading dashboard" size="large" />
+                </s-box>
+            </s-page>
         );
     }
 
     return (
-        <Page title="Dashboard" subtitle="Welcome to your Barcode Labels & SKU Automation hub.">
-            <Layout>
-                
-                {/* TOP ROW: Core Metrics Highlights Grid */}
-                <Layout.Section>
-                    <InlineGrid columns={3} gap="400">
-                        <Card roundedTop={true}>
-                            <BlockStack gap="100">
-                                <Text as="h3" variant="headingSm" tone="subdued">Custom Layout Templates</Text>
-                                <Text as="p" variant="headingXl">{stats.templates_count}</Text>
-                                <Box marginTop="200">
-                                    <Badge tone="success">Active Layouts</Badge>
-                                </Box>
-                            </BlockStack>
-                        </Card>
-                        
-                        <Card>
-                            <BlockStack gap="100">
-                                <Text as="h3" variant="headingSm" tone="subdued">Total Sync Products</Text>
-                                <Text as="p" variant="headingXl">{stats.products_count}</Text>
-                                <Box marginTop="200">
-                                    <Badge tone="info">Live Catalog Feed</Badge>
-                                </Box>
-                            </BlockStack>
-                        </Card>
+        <s-page heading="Dashboard" subheading="Welcome to your Barcode Labels & SKU Automation hub.">
 
-                        <Card>
-                            <BlockStack gap="100">
-                                <Text as="h3" variant="headingSm" tone="subdued">App Plan Tier</Text>
-                                <Text as="p" variant="headingLg">Free Tier Mode</Text>
-                                <Box marginTop="200">
-                                    <Badge tone="attention">Basic Standard</Badge>
-                                </Box>
-                            </BlockStack>
-                        </Card>
-                    </InlineGrid>
-                </Layout.Section>
+            <s-section>
+                <s-grid gridTemplateColumns="1fr 1fr 1fr" gap="base">
+                    <s-box padding="base" borderWidth="base" borderRadius="base">
+                        <s-stack direction="block" gap="tight">
+                            <s-text tone="subdued" fontWeight="medium">Custom Layout Templates</s-text>
+                            <s-heading>{stats.templates_count}</s-heading>
+                            <s-badge tone="success">Active Layouts</s-badge>
+                        </s-stack>
+                    </s-box>
 
-                {/* LOWER ROW - LEFT SIDE: Fast Action Launchpads */}
-                <Layout.Section variant="oneThird">
-                    <BlockStack gap="400">
-                        <Card>
-                            <BlockStack gap="300">
-                                <Text as="h3" variant="headingMd" fontWeight="semibold">Quick Actions</Text>
-                                <Button fullWidth variant="primary" icon={PrintIcon} url="/ProductsList">
-                                    Product List
-                                </Button>
-                                <Button fullWidth icon={PageAddIcon} url="/TamplateCreate">
-                                    Create Custom Template
-                                </Button>
-                                <Button fullWidth icon={SettingsIcon} url="/Settingindex">
-                                    Adjust App Settings
-                                </Button>
-                            </BlockStack>
-                        </Card>
-                    </BlockStack>
-                </Layout.Section>
+                    <s-box padding="base" borderWidth="base" borderRadius="base">
+                        <s-stack direction="block" gap="tight">
+                            <s-text tone="subdued" fontWeight="medium">Total Sync Products</s-text>
+                            <s-heading>{stats.products_count}</s-heading>
+                            <s-badge tone="info">Live Catalog Feed</s-badge>
+                        </s-stack>
+                    </s-box>
 
-                {/* LOWER ROW - RIGHT SIDE: Setup Instructions Onboarding Checklist */}
-                <Layout.Section>
-                    <Card>
-                        <BlockStack gap="300">
-                            <Text as="h3" variant="headingMd" fontWeight="semibold">Application Getting Started Guide</Text>
-                            <Text as="p" tone="subdued">Follow these steps to configure high-resolution printing automation profiles across your warehouse:</Text>
-                            <Box paddingInlineStart="200">
-                                <List type="number">
-                                    <List.Item>
-                                        Go to the <strong>SKU Generation</strong> sub-panel settings page to set up automated numbering schemas sequences for incoming variants.
-                                    </List.Item>
-                                    <List.Item>
-                                        Build custom print sizes layout parameters blueprints matching your sticky labels rolls inside the <strong>Templates Manager</strong>.
-                                    </List.Item>
-                                    <List.Item>
-                                        Head over to the <strong>Products Catalog Grid</strong>, select your target lines via checkboxes, and initiate batch printing operations directly.
-                                    </List.Item>
-                                </List>
-                            </Box>
-                        </BlockStack>
-                    </Card>
-                </Layout.Section>
-            </Layout>
-        </Page>
+                    <s-box padding="base" borderWidth="base" borderRadius="base">
+                        <s-stack direction="block" gap="tight">
+                            <s-text tone="subdued" fontWeight="medium">App Plan Tier</s-text>
+                            <s-heading>Free Tier Mode</s-heading>
+                            <s-badge tone="attention">Basic Standard</s-badge>
+                        </s-stack>
+                    </s-box>
+                </s-grid>
+            </s-section>
+
+            <s-section>
+                <s-grid gridTemplateColumns="1fr 2fr" gap="base">
+
+                    <s-box padding="base" borderWidth="base" borderRadius="base">
+                        <s-stack direction="block" gap="base">
+                            <s-heading>Quick Actions</s-heading>
+                            <s-button variant="primary" href="/ProductsList">
+                                SKU Generate
+                            </s-button>
+                            <s-button variant="primary" href="/ProductsBarcodeList">
+                                Barcode Generate
+                            </s-button>
+                            <s-button href="/TamplateCreate">
+                                Create Custom Template
+                            </s-button>
+                            <s-button href="/Settingindex">
+                                Adjust App Settings
+                            </s-button>
+                        </s-stack>
+                    </s-box>
+
+                    <s-box padding="base" borderWidth="base" borderRadius="base">
+                        <s-stack direction="block" gap="base">
+                            <s-heading>Application Getting Started Guide</s-heading>
+                            <s-paragraph tone="subdued">
+                                Follow these steps to configure high-resolution printing automation profiles across your warehouse:
+                            </s-paragraph>
+                            <s-ordered-list>
+                                <s-list-item>
+                                    Go to the <s-text fontWeight="bold">SKU Generation</s-text> sub-panel settings page to set up automated numbering schema sequences for incoming variants.
+                                </s-list-item>
+                                <s-list-item>
+                                    Build custom print size layout blueprints matching your sticky label rolls inside the <s-text fontWeight="bold">Templates Manager</s-text>.
+                                </s-list-item>
+                                <s-list-item>
+                                    Head over to the <s-text fontWeight="bold">Products Catalog Grid</s-text>, select your target lines via checkboxes, and initiate batch printing operations directly.
+                                </s-list-item>
+                            </s-ordered-list>
+                        </s-stack>
+                    </s-box>
+                </s-grid>
+            </s-section>
+        </s-page>
     );
 }

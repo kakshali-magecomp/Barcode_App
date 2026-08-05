@@ -1,13 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Page, Layout, Card, FormLayout, TextField, Select, Checkbox, BlockStack, Frame, Toast, Banner, Box, Text } from '@shopify/polaris';
-import { useAppBridge, SaveBar } from '@shopify/app-bridge-react';
+import { useAppBridge } from '@shopify/app-bridge-react';
+
+const SAVE_BAR_ID = 'sku-save-bar';
 
 export default function SkuSettingsIndex() {
-    const appBridge = useAppBridge();
-    // CRUCIAL: Enforce App Bridge authenticated client fetch to authorize session transmissions
-    const fetch = appBridge.fetch || window.fetch;
+    const shopify = useAppBridge();
 
-    // Isolated State Engine mapping to SKU database columns
     const [skuSettings, setSkuSettings] = useState({
         sku_prefix: '',
         sku_auto_number_start: '1001',
@@ -28,34 +26,19 @@ export default function SkuSettingsIndex() {
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
     const [metafieldOptions, setMetafieldOptions] = useState([]);
+    const [errorBanner, setErrorBanner] = useState(null);
+
     const loadMetafields = useCallback(async () => {
         try {
             const response = await fetch("/api/products");
             const json = await response.json();
-
-            const used = new Set();
-            const options = [];
-
-            (json.variants || []).forEach((product) => {
-                Object.keys(product.metafields || {}).forEach((key) => {
-                    if (!used.has(key)) {
-                        used.add(key);
-
-                        options.push({
-                            label: key,
-                            value: key,
-                        });
-                    }
-                });
-            });
-
-            setMetafieldOptions(options);
+            setMetafieldOptions(
+                json.metafield_options || []
+            );
         } catch (error) {
             console.error(error);
         }
-    }, [fetch]);
-    const [toastActive, setToastActive] = useState(false);
-    const [errorBanner, setErrorBanner] = useState(null);
+    }, []);
 
     const positionOptions = [
         { label: 'Choose an option', value: 'none' },
@@ -67,7 +50,6 @@ export default function SkuSettingsIndex() {
         { label: 'Full value', value: 'full' }
     ];
 
-    // Real-Time Generated SKU Output Preview Engine
     const generateSkuPreview = () => {
         const delimiter = skuSettings.sku_delimiter || '-';
         let segments = [];
@@ -88,17 +70,12 @@ export default function SkuSettingsIndex() {
             title: 'Product Name Example',
             vendor: 'Example Vendor',
             type: 'Example Type',
-            metafields: {
-                "shopify.allergen-information": "Milk",
-                "shopify.food-product-form": "Liquid",
-                "custom.dietary_flags": "VEGAN",
-                "custom.tasting_notes": "CREAMY",
-                "shopify.flavor": "MANGO"
-            },
+            metafields:
+                skuSettings.preview_metafields || {},
+
             option1: 'example_option1',
             option2: 'example_option2',
             option3: 'example_option3',
-
         };
 
         const titlePart = extractSubstring(mockProduct.title, skuSettings.segment_product_title);
@@ -110,16 +87,9 @@ export default function SkuSettingsIndex() {
         const typePart = extractSubstring(mockProduct.type, skuSettings.segment_product_type);
         if (typePart) segments.push(typePart);
 
-        const metafieldValue =
-            mockProduct.metafields[skuSettings.segment_metafield] || "";
-        const metafieldPart = extractSubstring(
-            metafieldValue,
-            skuSettings.segment_metafield_rule
-        );
-
-        if (metafieldPart) {
-            segments.push(metafieldPart);
-        }
+        const metafieldValue = mockProduct.metafields[skuSettings.segment_metafield] || "";
+        const metafieldPart = extractSubstring(metafieldValue, skuSettings.segment_metafield_rule);
+        if (metafieldPart) segments.push(metafieldPart);
 
         if (!skuSettings.hide_options_1_2_3) {
             const opt1Part = extractSubstring(mockProduct.option1, skuSettings.segment_option1);
@@ -131,14 +101,12 @@ export default function SkuSettingsIndex() {
         }
 
         segments.push(skuSettings.sku_auto_number_start || '1001');
-
         if (skuSettings.sku_suffix) segments.push(skuSettings.sku_suffix);
 
         let finalPreview = segments.join(delimiter).replace(/\s+/g, '');
         return skuSettings.force_uppercase_fields ? finalPreview.toUpperCase() : finalPreview;
     };
 
-    // Fetch values on mount
     const loadSkuSettings = useCallback(async () => {
         try {
             const res = await fetch('/api/sku-settings');
@@ -160,23 +128,30 @@ export default function SkuSettingsIndex() {
                     hide_options_1_2_3: !!data.hide_options_1_2_3,
                     force_uppercase_fields: !!data.force_uppercase_fields
                 });
-                setIsDirty(false); // Clean on initial sync complete
+                setIsDirty(false);
             }
         } catch (err) {
             setErrorBanner("Could not load backend configurations profile.");
         }
-    }, [fetch]);
+    }, []);
 
     useEffect(() => {
         loadSkuSettings();
         loadMetafields();
-    }, [loadSkuSettings]);
+    }, [loadSkuSettings, loadMetafields]);
+
+    useEffect(() => {
+        if (isDirty) {
+            shopify.saveBar.show(SAVE_BAR_ID);
+        } else {
+            shopify.saveBar.hide(SAVE_BAR_ID);
+        }
+    }, [isDirty, shopify]);
 
     const handleFieldChange = (key, value) => {
         setSkuSettings(prev => ({ ...prev, [key]: value }));
         setIsDirty(true);
     };
-
 
     const handleSave = useCallback(async () => {
         setLoading(true);
@@ -188,17 +163,23 @@ export default function SkuSettingsIndex() {
                 body: JSON.stringify(skuSettings)
             });
             if (res.ok) {
-                setToastActive(true);
-                setIsDirty(false); // Hides the native save bar cleanly
+                shopify.toast.show("SKU configuration parameters updated successfully!");
+                setIsDirty(false);
             } else {
-                setErrorBanner("Failed to save custom SKU configurations.");
+                let message = "Failed to save custom SKU configurations.";
+                try {
+                    const errJson = await res.json();
+                    if (errJson?.message) message = errJson.message;
+                    else if (errJson?.errors) message = Object.values(errJson.errors).flat().join(' ');
+                } catch { /* response wasn't JSON, keep the generic message */ }
+                setErrorBanner(message);
             }
         } catch (err) {
             setErrorBanner("Server processing error occurred.");
         } finally {
             setLoading(false);
         }
-    }, [skuSettings, fetch]);
+    }, [skuSettings, shopify]);
 
     const handleDiscard = useCallback(async () => {
         setIsDirty(false);
@@ -206,118 +187,128 @@ export default function SkuSettingsIndex() {
     }, [loadSkuSettings]);
 
     return (
-        <Frame>
-            {/* NEW: App Bridge Native Save Bar Component Hooked up to State Controls */}
-            <SaveBar id="sku-save-bar" open={isDirty}>
-                <button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save</button>
+        <>
+            <ui-save-bar id={SAVE_BAR_ID}>
+                <button variant="primary" loading={loading || undefined} onClick={handleSave}>Save</button>
                 <button onClick={handleDiscard}>Discard</button>
-            </SaveBar>
+            </ui-save-bar>
 
-            <Page
-                title="SKU Settings"
-                subtitle="Manage automated structuring parameters and formatting rules for your store inventory variants."
-                backAction={{ content: 'Dashboard', url: '/' }}
-            >
-                <div style={{ marginTop: '20px' }}>
-                    {errorBanner && (
-                        <Banner tone="critical" onDismiss={() => setErrorBanner(null)}>
-                            <p>{errorBanner}</p>
-                        </Banner>
-                    )}
+            <s-page heading="SKU Generation Settings">
+                {errorBanner && (
+                    <s-section>
+                        <s-banner tone="critical" onDismiss={() => setErrorBanner(null)}>
+                            {errorBanner}
+                        </s-banner>
+                    </s-section>
+                )}
 
-                    <Layout>
-                        <Layout.Section>
-                            <Banner title="Live SKU Generation Structure Preview" tone="info">
-                                <p style={{ fontSize: '18px', fontFamily: 'monospace', fontWeight: 'bold', margin: '4px 0' }}>
-                                    {generateSkuPreview()}
-                                </p>
-                            </Banner>
-                        </Layout.Section>
+                <s-section>
+                    <s-banner heading="Live SKU Generation Structure Preview" tone="info">
+                        <p style={{ fontSize: '18px', fontFamily: 'monospace', fontWeight: 'bold', margin: '4px 0' }}>
+                            {generateSkuPreview()}
+                        </p>
+                    </s-banner>
+                </s-section>
 
-                        <Layout.Section>
-                            <Card padding="500">
-                                <FormLayout>
-                                    <Text variant="headingMd" as="h3">Pattern Base Parameters</Text>
-                                    <FormLayout.Group>
-                                        <TextField label="SKU Prefix" value={skuSettings.sku_prefix} onChange={(val) => handleFieldChange('sku_prefix', val)} autoComplete="off" />
-                                        <TextField label="Auto-Number Start" value={skuSettings.sku_auto_number_start} onChange={(val) => handleFieldChange('sku_auto_number_start', val)} autoComplete="off" />
-                                    </FormLayout.Group>
-                                    <FormLayout.Group>
-                                        <TextField label="SKU Suffix" value={skuSettings.sku_suffix} onChange={(val) => handleFieldChange('sku_suffix', val)} autoComplete="off" />
-                                        <TextField label="Delimiter Symbol" value={skuSettings.sku_delimiter} onChange={(val) => handleFieldChange('sku_delimiter', val)} autoComplete="off" />
-                                    </FormLayout.Group>
-                                </FormLayout>
-                            </Card>
-                        </Layout.Section>
+                <s-section>
+                    <s-stack direction="block" gap="base">
+                        <s-heading>Pattern Base Parameters</s-heading>
+                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                            <s-text-field
+                                label="SKU Prefix"
+                                value={skuSettings.sku_prefix}
+                                onInput={(e) => handleFieldChange('sku_prefix', e.currentTarget.value)}
+                            />
+                            <s-text-field
+                                label="Auto-Number Start"
+                                value={skuSettings.sku_auto_number_start}
+                                onInput={(e) => handleFieldChange('sku_auto_number_start', e.currentTarget.value)}
+                            />
+                        </s-grid>
+                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                            <s-text-field
+                                label="SKU Suffix"
+                                value={skuSettings.sku_suffix}
+                                onInput={(e) => handleFieldChange('sku_suffix', e.currentTarget.value)}
+                            />
+                            <s-text-field
+                                label="Delimiter Symbol"
+                                value={skuSettings.sku_delimiter}
+                                onInput={(e) => handleFieldChange('sku_delimiter', e.currentTarget.value)}
+                            />
+                        </s-grid>
+                    </s-stack>
+                </s-section>
 
-                        <Layout.Section>
-                            <Card padding="500">
-                                <FormLayout>
-                                    <Text variant="headingMd" as="h3">Segment Selections Formula</Text>
-                                    <FormLayout.Group>
-                                        <Select label="Product Title" options={positionOptions} value={skuSettings.segment_product_title} onChange={(val) => handleFieldChange('segment_product_title', val)} />
-                                        <Select label="Vendor" options={positionOptions} value={skuSettings.segment_product_vendor} onChange={(val) => handleFieldChange('segment_product_vendor', val)} />
-                                    </FormLayout.Group>
-                                    <FormLayout.Group>
-                                        <Select
-                                            label="Product Type"
-                                            options={positionOptions}
-                                            value={skuSettings.segment_product_type}
-                                            onChange={(val) =>
-                                                handleFieldChange("segment_product_type", val)
-                                            }
-                                        />
-                                        <Select
-                                            label="Metafield"
-                                            options={metafieldOptions}
-                                            value={skuSettings.segment_metafield}
-                                            onChange={(val) =>
-                                                handleFieldChange("segment_metafield", val)
-                                            }
-                                        />
-                                    </FormLayout.Group>
-                                    <FormLayout.Group>
-                                        <Select
-                                            label="Metafield Rule"
-                                            options={positionOptions}
-                                            value={skuSettings.segment_metafield_rule}
-                                            onChange={(val) =>
-                                                handleFieldChange("segment_metafield_rule", val)
-                                            }
-                                        />
-                                    </FormLayout.Group>
-                                    {/* <FormLayout.Group>
-                                        <Select label="Option 1" options={positionOptions} value={skuSettings.segment_option1} onChange={(val) => handleFieldChange('segment_option1', val)} />
-                                        <Select label="Option 2" options={positionOptions} value={skuSettings.segment_option2} onChange={(val) => handleFieldChange('segment_option2', val)} />
-                                        <Select label="Option 3" options={positionOptions} value={skuSettings.segment_option3} onChange={(val) => handleFieldChange('segment_option3', val)} />
-                                    </FormLayout.Group> */}
-                                </FormLayout>
-                            </Card>
-                        </Layout.Section>
+                <s-section>
+                    <s-stack direction="block" gap="base">
+                        <s-heading>Segment Selections Formula</s-heading>
 
-                        {/* Formatting Options Card */}
-                        <Layout.Section>
-                            <Card padding="500">
-                                <FormLayout>
-                                    <Text variant="headingMd" as="h3">Formatting Options</Text>
-                                    {/* <Checkbox
-                                        label="Hide variations options 1, 2, 3 segments"
-                                        checked={skuSettings.hide_options_1_2_3}
-                                        onChange={(val) => handleFieldChange('hide_options_1_2_3', val)}
-                                    /> */}
-                                    <Checkbox
-                                        label="Force generated codes text characters to Uppercase"
-                                        checked={skuSettings.force_uppercase_fields}
-                                        onChange={(val) => handleFieldChange('force_uppercase_fields', val)}
-                                    />
-                                </FormLayout>
-                            </Card>
-                        </Layout.Section>
-                    </Layout>
-                </div>
-                {toastActive && <Toast content="SKU configuration parameters updated successfully!" onDismiss={() => setToastActive(false)} />}
-            </Page>
-        </Frame>
+                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                            <s-select
+                                label="Product Title"
+                                value={skuSettings.segment_product_title}
+                                onChange={(e) => handleFieldChange('segment_product_title', e.currentTarget.value)}
+                            >
+                                {positionOptions.map(opt => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
+                            <s-select
+                                label="Vendor"
+                                value={skuSettings.segment_product_vendor}
+                                onChange={(e) => handleFieldChange('segment_product_vendor', e.currentTarget.value)}
+                            >
+                                {positionOptions.map(opt => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
+                        </s-grid>
+
+                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                            <s-select
+                                label="Product Type"
+                                value={skuSettings.segment_product_type}
+                                onChange={(e) => handleFieldChange('segment_product_type', e.currentTarget.value)}
+                            >
+                                {positionOptions.map(opt => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
+                            <s-select
+                                label="Metafield"
+                                value={skuSettings.segment_metafield}
+                                onChange={(e) => handleFieldChange('segment_metafield', e.currentTarget.value)}
+                            >
+                                {metafieldOptions.map(opt => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
+                        </s-grid>
+
+                        <s-select
+                            label="Metafield Rule"
+                            value={skuSettings.segment_metafield_rule}
+                            onChange={(e) => handleFieldChange('segment_metafield_rule', e.currentTarget.value)}
+                        >
+                            {positionOptions.map(opt => (
+                                <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                            ))}
+                        </s-select>
+                    </s-stack>
+                </s-section>
+
+                <s-section>
+                    <s-stack direction="block" gap="base">
+                        <s-heading>Formatting Options</s-heading>
+                        <s-checkbox
+                            label="Force generated codes text characters to Uppercase"
+                            checked={skuSettings.force_uppercase_fields || undefined}
+                            onChange={(e) => handleFieldChange('force_uppercase_fields', e.currentTarget.checked)}
+                        />
+                    </s-stack>
+                </s-section>
+            </s-page>
+        </>
     );
 }
-

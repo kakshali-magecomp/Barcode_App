@@ -1,31 +1,26 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Page, Tabs, Frame, Toast, Banner } from '@shopify/polaris';
 import { useAppBridge } from '@shopify/app-bridge-react';
-import { SaveBar } from '@shopify/app-bridge-react';
-
 
 import BarcodeSkuPanel from './BarcodeSkuPanel';
-import SkuSettingsIndex from './SkuSettingsIndex.jsx'; 
-import PrintPanel from './PrintPanel'; 
+import SkuSettingsIndex from './SkuSettingsIndex.jsx';
+import PrintPanel from './PrintPanel';
+
+const SAVE_BAR_ID = 'app-save-bar';
 
 export default function SettingsIndex() {
-    const appBridge = useAppBridge();
-    const fetch = appBridge.fetch || window.fetch; 
+    const shopify = useAppBridge();
 
     const [selectedTab, setSelectedTab] = useState(0);
     const tabs = [
-        { id: 'barcode', content: 'Barcode', panelID: 'barcode-panel' },
-        { id: 'sku', content: 'SKU Generation', panelID: 'sku-panel' }, 
-        { id: 'printing-tab', content: 'Printing Configurations', panelID: 'printing-panel' }, 
+        { id: 'barcode', content: 'Barcode' },
+        { id: 'sku', content: 'SKU Generation' },
+        { id: 'printing-tab', content: 'Printing Configurations' },
     ];
 
-    // Form Tracking States
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [toastActive, setToastActive] = useState(false);
     const [errorBanner, setErrorBanner] = useState(null);
 
-    // Barcode Parameters State
     const [barcodeSettings, setBarcodeSettings] = useState({
         auto_generate_on_create: false,
         auto_detect_gtin_format: true,
@@ -35,7 +30,6 @@ export default function SettingsIndex() {
         contextual_pricing_value: ''
     });
 
-    // SKU Parameters State
     const [skuSettings, setSkuSettings] = useState({
         sku_prefix: '',
         sku_auto_number_start: '1001',
@@ -52,7 +46,6 @@ export default function SettingsIndex() {
         force_uppercase_fields: true
     });
 
-    // Print Parameters State
     const [printSettings, setPrintSettings] = useState({
         print_mode: 'dialog',
         rotate_180: false,
@@ -74,7 +67,16 @@ export default function SettingsIndex() {
 
     const [dbTemplates, setDbTemplates] = useState([]);
 
-    // Fetch initial database records on mount
+    
+    useEffect(() => {
+        if (isDirty) {
+            shopify.saveBar.show(SAVE_BAR_ID);
+        } else {
+            shopify.saveBar.hide(SAVE_BAR_ID);
+        }
+    }, [isDirty, shopify]);
+
+    
     const loadAllSettings = useCallback(async () => {
         try {
             setErrorBanner(null);
@@ -99,21 +101,19 @@ export default function SettingsIndex() {
                     setDbTemplates(jsonResult.templates || []);
                 }
             }
-            setIsDirty(false); // Clear baseline dirty flag state mapping references
+            setIsDirty(false);
         } catch (err) {
             setErrorBanner("Could not sync backend application config records.");
         }
-    }, [fetch]);
+    }, []);
 
     useEffect(() => {
         loadAllSettings();
     }, [loadAllSettings]);
 
-
-    // Handle incoming input edits and trigger dirty status instantly
     const handleSettingChange = (key, value) => {
-        setIsDirty(true); 
-        
+        setIsDirty(true);
+
         if (selectedTab === 0) {
             setBarcodeSettings(prev => ({ ...prev, [key]: value }));
         } else if (selectedTab === 1) {
@@ -144,19 +144,27 @@ export default function SettingsIndex() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            
+
             if (res.ok) {
-                setToastActive(true);
-                setIsDirty(false); // Successfully clears dirty state to hide the Save Bar smoothly
+                
+                shopify.toast.show("Settings profile updated successfully!");
+                setIsDirty(false);
             } else {
-                setErrorBanner("Failed to save changes profile settings configuration.");
+                
+                let message = "Failed to save changes profile settings configuration.";
+                try {
+                    const errJson = await res.json();
+                    if (errJson?.message) message = errJson.message;
+                    else if (errJson?.errors) message = Object.values(errJson.errors).flat().join(' ');
+                } catch { /* response wasn't JSON, keep the generic message */ }
+                setErrorBanner(message);
             }
         } catch (err) {
             setErrorBanner("Network transmission tracking error encountered.");
         } finally {
             setLoading(false);
         }
-    }, [selectedTab, barcodeSettings, skuSettings, printSettings, fetch]);
+    }, [selectedTab, barcodeSettings, skuSettings, printSettings, shopify]);
 
     const handleDiscard = useCallback(async () => {
         setIsDirty(false);
@@ -164,44 +172,50 @@ export default function SettingsIndex() {
     }, [loadAllSettings]);
 
     return (
-        <Frame>
-            {/*  MOUNT THE COMPONENT DIRECTLY. Shopify opens it automatically whenever isDirty={true} */}
-            <SaveBar id="app-save-bar" open={isDirty}>
-                <button variant="primary" loading={loading ? "true" : undefined} onClick={handleSave}>Save</button>
+        <>
+            <ui-save-bar id={SAVE_BAR_ID}>
+                <button variant="primary" loading={loading || undefined} onClick={handleSave}>Save</button>
                 <button onClick={handleDiscard}>Discard</button>
-            </SaveBar>
+            </ui-save-bar>
+            <s-page heading="App Settings">  
+                <s-section>   
+                    <s-stack direction="inline" gap="base">
+                        {tabs.map((tab, index) => (
+                            <s-button
+                                key={tab.id}
+                                variant={selectedTab === index ? 'primary' : 'secondary'}
+                                onClick={() => {
+                                    setSelectedTab(index);
+                                    setIsDirty(false); 
+                                }}
+                            >
+                                {tab.content}
+                            </s-button>
+                        ))}
+                    </s-stack>
+                </s-section>
 
-            <Page title="App Settings">
-                <Tabs 
-                    tabs={tabs} 
-                    selected={selectedTab} 
-                    onSelect={(index) => { 
-                        setSelectedTab(index); 
-                        setIsDirty(false); // Resets smoothly when swapping tabs panel space views
-                    }}
-                >
-                    <div style={{ marginTop: '20px' }}>
-                        {errorBanner && (
-                            <Banner tone="critical" onDismiss={() => setErrorBanner(null)}>
-                                <p>{errorBanner}</p>
-                            </Banner>
-                        )}
-                        
-                        {selectedTab === 0 && (
-                            <BarcodeSkuPanel settings={barcodeSettings} onChange={handleSettingChange} />
-                        )}
+                {errorBanner && (
+                    <s-section>
+                        <s-banner tone="critical" onDismiss={() => setErrorBanner(null)}>
+                            {errorBanner}
+                        </s-banner>
+                    </s-section>
+                )}
 
-                        {selectedTab === 1 && (
-                            <SkuSettingsIndex settings={skuSettings} onChange={handleSettingChange} />
-                        )}
+               
+                {selectedTab === 0 && (
+                    <BarcodeSkuPanel settings={barcodeSettings} onChange={handleSettingChange} />
+                )}
 
-                        {selectedTab === 2 && (
-                            <PrintPanel settings={printSettings} templates={dbTemplates} onChange={handleSettingChange} />
-                        )}
-                    </div>
-                </Tabs>
-                {toastActive && <Toast content="Settings profile updated successfully!" onDismiss={() => setToastActive(false)} />}
-            </Page>
-        </Frame>
+                {selectedTab === 1 && (
+                    <SkuSettingsIndex settings={skuSettings} onChange={handleSettingChange} />
+                )}
+
+                {selectedTab === 2 && (
+                    <PrintPanel settings={printSettings} templates={dbTemplates} onChange={handleSettingChange} />
+                )}
+            </s-page>
+        </>
     );
 }
