@@ -12,6 +12,8 @@ export default function TemplateList() {
     const itemsPerPage = 10;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [searchValue, setSearchValue] = useState("");
+    const [searchDate, setSearchDate] = useState("");
 
     const [selectedIds, setSelectedIds] = useState([]);
     const [deleteSelectedModal, setDeleteSelectedModal] = useState(false);
@@ -75,12 +77,26 @@ export default function TemplateList() {
             setDeleteLoading(false);
         }
     };
+    const filteredTemplates = templates.filter((template) => {
+        const search = searchValue.toLowerCase();
+
+        const matchesSearch =
+            (template.template_name || "").toLowerCase().includes(search) ||
+            (template.paper_brand || "").toLowerCase().includes(search) ||
+            (template.paper_model || "").toLowerCase().includes(search);
+
+        const matchesDate =
+            !searchDate ||
+            new Date(template.created_at).toISOString().slice(0, 10) === searchDate;
+
+        return matchesSearch && matchesDate;
+    });
 
     // pagination
-    const totalPages = Math.ceil(templates.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredTemplates.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentTemplates = templates.slice(startIndex, endIndex);
+    const currentTemplates = filteredTemplates.slice(startIndex, endIndex);
 
     const toggleSelectOne = (id) => {
         setSelectedIds((prev) =>
@@ -133,6 +149,26 @@ export default function TemplateList() {
                         )}
                     </s-stack>
                 </s-section>
+                <s-section>
+                    <s-grid gridTemplateColumns="3fr 1fr" gap="base">
+                        <s-search-field
+                            label="Search Templates"
+                            labelAccessibilityVisibility="exclusive"
+                            placeholder="Search Template Name, Brand or Model..."
+                            value={searchValue}
+                            onInput={(event) =>
+                                setSearchValue(event.currentTarget.value)
+                            }
+                        />
+                        <s-date-field
+                            label="Created Date"
+                            labelAccessibilityVisibility="exclusive"
+                            value={searchDate}
+                            defaultView={searchDate || undefined}
+                            onChange={(event) => setSearchDate(event.currentTarget.value)}
+                        ></s-date-field>
+                    </s-grid>
+                </s-section>
 
                 {error && (
                     <s-section>
@@ -142,7 +178,7 @@ export default function TemplateList() {
                     </s-section>
                 )}
 
-                {templates.length === 0 ? (
+                {filteredTemplates.length === 0 ? (
                     <s-section>
                         <s-empty-state
                             heading="Design your first barcode template layout"
@@ -215,7 +251,7 @@ export default function TemplateList() {
                                                     accessibilityLabel="Edit Template"
                                                     href={`/templates/edit/${id}`}
                                                 />
-                                           
+
                                             </s-stack>
                                         </s-table-cell>
                                     </s-table-row>

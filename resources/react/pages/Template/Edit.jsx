@@ -6,7 +6,7 @@ import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 const SAVE_BAR_ID = 'edit-template-savebar';
 
 export default function EditTemplate() {
-    
+
     const shopify = useAppBridge();
     const navigate = useNavigate();
     const { id } = useParams();
@@ -155,11 +155,13 @@ export default function EditTemplate() {
                 }),
             });
 
-            await fetch(`/api/templates/design/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(design),
-            });
+            if (Object.keys(design).length > 0) {
+                await fetch(`/api/templates/design/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(design),
+                });
+            }
 
             const result = await response.json();
 
@@ -212,41 +214,44 @@ export default function EditTemplate() {
                     )}
 
                     <s-stack direction="block" gap="base">
-                        <s-text-field
-                            label="Template Name"
-                            value={name}
-                            onInput={handleFieldChange(setName)}
-                        />
+                        <div style={{ paddingRight: "340px" }}>
+                            <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                                <s-text-field
+                                    label="Template Name"
+                                    value={name}
+                                    onInput={handleFieldChange(setName)}
+                                />
+                                <s-text-area
+                                    label="Internal Note"
+                                    value={note}
+                                    onInput={handleFieldChange(setNote)}
+                                    rows={2}
+                                />
+                            </s-grid>
+                            <s-text-area
+                                label="Description"
+                                value={description}
+                                onInput={handleFieldChange(setDescription)}
+                                rows={3}
+                            />
 
-                        <s-text-area
-                            label="Description"
-                            value={description}
-                            onInput={handleFieldChange(setDescription)}
-                            rows={3}
-                        />
+                            <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                                <s-select label="Paper Brand" value={brand} onChange={handleBrandChange}>
+                                    <s-option value="">Select Brand...</s-option>
+                                    {brandOptions.map((opt) => (
+                                        <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                    ))}
+                                </s-select>
 
-                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-                            <s-select label="Paper Brand" value={brand} onChange={handleBrandChange}>
-                                <s-option value="">Select Brand...</s-option>
-                                {brandOptions.map((opt) => (
-                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                                ))}
-                            </s-select>
+                                <s-select label="Paper Model" value={model} onChange={handleFieldChange(setModel)} disabled={!brand || undefined}>
+                                    <s-option value="">{brand ? 'Select Model...' : 'Select Brand First'}</s-option>
+                                    {(modelOptionsMap[brand] || []).map((opt) => (
+                                        <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                    ))}
+                                </s-select>
+                            </s-grid>
 
-                            <s-select label="Paper Model" value={model} onChange={handleFieldChange(setModel)} disabled={!brand || undefined}>
-                                <s-option value="">{brand ? 'Select Model...' : 'Select Brand First'}</s-option>
-                                {(modelOptionsMap[brand] || []).map((opt) => (
-                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                                ))}
-                            </s-select>
-                        </s-grid>
-
-                        <s-text-area
-                            label="Internal Note"
-                            value={note}
-                            onInput={handleFieldChange(setNote)}
-                            rows={2}
-                        />
+                        </div>
                     </s-stack>
 
                     <s-box paddingBlockStart="loose">

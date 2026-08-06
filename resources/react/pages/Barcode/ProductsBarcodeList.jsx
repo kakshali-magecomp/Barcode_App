@@ -303,9 +303,11 @@ export default function GenerateBarcode() {
 <style>
 @page{size:auto;margin:5mm;}
 body{margin:0;padding:10px;font-family:Arial,sans-serif;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;justify-content:start;align-content:start;}
-.label{width:250px;min-height:140px;padding:10px;box-sizing:border-box;border:1px solid #ddd;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
-.label svg,.label img{width:100% !important;height:auto !important;display:block;}
+.label{width:250px;min-height:140px;padding:10px;box-sizing:border-box;border:1px solid #ddd;overflow:hidden;page-break-inside:avoid;break-inside:avoid;text-align:center;}
+.label svg,.label img{max-width:100%;height:auto !important;display:block;margin:0 auto;}
 .label-content{width:100%;}
+.label-content > div{font-size:12px;line-height:1.4;word-break:break-word;overflow-wrap:anywhere;white-space:normal;margin-bottom:4px;}
+.label-content > div:first-child{font-weight:bold;font-size:13px;}
 </style>
 </head>
 <body>

@@ -315,7 +315,7 @@ ${labels}
                         >
                             {storeVariants.map(v => (
                                 <s-option key={v.variant_id} value={v.variant_id}>
-                                    {`${v.product_title} (${v.current_sku || 'No SKU'})`}
+                                    {`${v.product_title} (${v.barcode || 'No Barcode'})`}
                                 </s-option>
                             ))}
                         </s-select>

@@ -13,11 +13,13 @@ export default function LabelHistory() {
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
+
   const [selectedHistory, setSelectedHistory] = useState(null);
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const printRef = useRef(null);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedRows, setSelectedRows] = useState([]);
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -95,24 +97,24 @@ export default function LabelHistory() {
   };
 
   const deleteHistory = async () => {
-    if (!selectedHistory) return;
     try {
-      const res = await fetch(`/api/print-history/${selectedHistory.id}`, {
-        method: "DELETE",
-      });
-      const json = await res.json();
-      if (json.success) {
-        shopify.toast.show("History deleted.");
-        loadHistory();
-      } else {
-        setError(json.message);
-      }
+      await Promise.all(
+        selectedRows.map(id =>
+          fetch(`/api/print-history/${id}`, {
+            method: "DELETE",
+          })
+        )
+      );
+
+      shopify.toast.show("History deleted.");
+
+      setSelectedRows([]);
+      loadHistory();
     } catch (err) {
-      console.error(err);
       setError("Delete failed.");
     }
+
     shopify.modal.hide(DELETE_MODAL_ID);
-    setSelectedHistory(null);
   };
 
   const handlePrintHistory = () => {
@@ -194,11 +196,11 @@ export default function LabelHistory() {
 <style>
 @page{margin:5mm;}
 body{margin:10px;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;font-family:Arial,sans-serif;}
-.label{width:250px;border:1px solid #ddd;padding:10px;box-sizing:border-box;text-align:center;page-break-inside:avoid;break-inside:avoid;}
-.title{font-size:15px;font-weight:bold;margin-bottom:5px;}
-.sku{font-size:13px;margin-bottom:10px;}
-.barcode{width:100%;}
-.qr{display:block;margin:auto;}
+.label{width:250px;min-height:140px;border:1px solid #ddd;padding:10px;box-sizing:border-box;text-align:center;page-break-inside:avoid;break-inside:avoid;overflow:hidden;}
+.title{font-size:13px;font-weight:bold;margin-bottom:5px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
+.sku{font-size:12px;margin-bottom:10px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
+.barcode{max-width:100%;height:auto;}
+.qr{display:block;margin:auto;max-width:100%;}
 </style>
 </head>
 <body>
@@ -350,7 +352,7 @@ th{background:#f5f5f5;}
         </div>
         <s-section padding="none">
           <s-box padding="base">
-            <s-text-field
+            <s-search-field
               label="Search"
               labelAccessibilityVisibility="exclusive"
               placeholder="Search by Print ID, Template or Client IP..."
@@ -367,53 +369,85 @@ th{background:#f5f5f5;}
               <s-paragraph>No barcode labels have been printed yet.</s-paragraph>
             </s-empty-state>
           ) : (
-            <s-table
-              paginate
-              hasPreviousPage={currentPage > 1 || undefined}
-              hasNextPage={currentPage < totalPages || undefined}
-              onPreviousPage={() => setCurrentPage((prev) => prev - 1)}
-              onNextPage={() => setCurrentPage((prev) => prev + 1)}
-            >
-              <s-table-header-row>
-                <s-table-header>Print ID</s-table-header>
-                <s-table-header>Template Name</s-table-header>
-                <s-table-header>Total Labels</s-table-header>
-                <s-table-header>Client IP</s-table-header>
-                <s-table-header>Printed At</s-table-header>
-                <s-table-header>Actions</s-table-header>
-              </s-table-header-row>
-              <s-table-body>
-                {paginatedHistory.map((item) => (
-                  <s-table-row key={item.id}>
-                    <s-table-cell>
-                      <s-button variant="tertiary" onClick={() => openHistory(item.id)}>
-                        #{item.id}
-                      </s-button>
-                    </s-table-cell>
-                    <s-table-cell>
-                      <s-text fontWeight="semibold">{item.template?.template_name ?? "-"}</s-text>
-                    </s-table-cell>
-                    <s-table-cell>
-                      <s-badge tone="success">{item.print_qty}</s-badge>
-                    </s-table-cell>
-                    <s-table-cell>{item.client_ip}</s-table-cell>
-                    <s-table-cell>{new Date(item.created_at).toLocaleString()}</s-table-cell>
-                    <s-table-cell>
-                      <s-button
-                        icon="delete"
-                        tone="critical"
-                        variant="tertiary"
-                        accessibilityLabel="Delete history entry"
-                        onClick={() => {
-                          setSelectedHistory(item);
-                          shopify.modal.show(DELETE_MODAL_ID);
-                        }}
-                      />
-                    </s-table-cell>
-                  </s-table-row>
-                ))}
-              </s-table-body>
-            </s-table>
+            <>
+              {/* Add here */}
+              {selectedRows.length > 0 && (
+                <s-box padding="base">
+                  <s-button
+                    tone="critical"
+                    onClick={() => shopify.modal.show(DELETE_MODAL_ID)}
+                  >
+                    Delete ({selectedRows.length})
+                  </s-button>
+                </s-box>
+              )}
+              <s-table
+                paginate
+                hasPreviousPage={currentPage > 1 || undefined}
+                hasNextPage={currentPage < totalPages || undefined}
+                onPreviousPage={() => setCurrentPage((prev) => prev - 1)}
+                onNextPage={() => setCurrentPage((prev) => prev + 1)}
+              >
+                <s-table-header-row>
+                  <s-table-header>
+                    <input
+                      type="checkbox"
+                      checked={
+                        paginatedHistory.length > 0 &&
+                        selectedRows.length === paginatedHistory.length
+                      }
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedRows(paginatedHistory.map(item => item.id));
+                        } else {
+                          setSelectedRows([]);
+                        }
+                      }}
+                    />
+                  </s-table-header>
+                  <s-table-header>Print ID</s-table-header>
+                  <s-table-header>Template Name</s-table-header>
+                  <s-table-header>Total Labels</s-table-header>
+                  <s-table-header>Client IP</s-table-header>
+                  <s-table-header>Printed At</s-table-header>
+
+                </s-table-header-row>
+                <s-table-body>
+                  {paginatedHistory.map((item) => (
+                    <s-table-row key={item.id}>
+                      <s-table-cell>
+                        <input
+                          type="checkbox"
+                          checked={selectedRows.includes(item.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedRows([...selectedRows, item.id]);
+                            } else {
+                              setSelectedRows(
+                                selectedRows.filter(id => id !== item.id)
+                              );
+                            }
+                          }}
+                        />
+                      </s-table-cell>
+                      <s-table-cell>
+                        <s-button variant="tertiary" onClick={() => openHistory(item.id)}>
+                          #{item.id}
+                        </s-button>
+                      </s-table-cell>
+                      <s-table-cell>
+                        <s-text fontWeight="semibold">{item.template?.template_name ?? "-"}</s-text>
+                      </s-table-cell>
+                      <s-table-cell>
+                        <s-badge tone="success">{item.print_qty}</s-badge>
+                      </s-table-cell>
+                      <s-table-cell>{item.client_ip}</s-table-cell>
+                      <s-table-cell>{new Date(item.created_at).toLocaleString()}</s-table-cell>
+                    </s-table-row>
+                  ))}
+                </s-table-body>
+              </s-table>
+            </>
           )}
         </s-section>
       </s-page>

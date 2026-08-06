@@ -5,7 +5,7 @@ export default function LineControls({ design, handleUpdate }) {
     return (
         <s-stack direction="block" gap="base">
             <s-section>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9' , paddingTop: '12px'}}>
                     <s-heading>Line 1: 1 limited</s-heading>
                     <s-icon type="settings" tone="subdued"></s-icon>
                 </div>
