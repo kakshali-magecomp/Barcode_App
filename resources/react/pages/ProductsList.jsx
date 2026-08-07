@@ -10,6 +10,9 @@ export default function GenerateSku() {
     const [method, setMethod] = useState("missing");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [progress, setProgress] = useState(null); // { processed, total }
+    const SUMMARY_PAGE_SIZE = 5;
+    const [summaryPage, setSummaryPage] = useState(1);
 
     const generateSku = async () => {
         if (!method) {
@@ -65,27 +68,74 @@ export default function GenerateSku() {
                 }
                 throw new Error(json.message || `Server Error (${response.status})`);
             }
-            if (json.status === 1) {
-                if (json.generated_count === 0) {
-                    shopify.toast.show("All products already have SKU.");
-                } else {
-                    shopify.toast.show(
-                        json.message || "SKU generated successfully."
-                    );
-                }
-                setUpdatedProducts(json.updated_products || []);
-                setSelectedProducts([]);
-                setPickerOpen(false);
-            } else {
-                setError(json.error || "Something went wrong.");
+            if (json.generated_count === 0) {
+                shopify.toast.show(json.message || "All products already have SKU.");
+                setLoading(false);
+                return;
             }
+
+            // Large batches are queued — poll for progress instead of
+            // blocking the request open.
+            if (json.queued) {
+                setProgress({ processed: 0, total: json.total });
+                pollBulkOperation(json.operation_id);
+                return; // setLoading(false) happens once polling completes
+            }
+
+            // Fallback for any non-queued/legacy synchronous response
+            setUpdatedProducts(json.updated_products || []);
+            setSelectedProducts([]);
+            setPickerOpen(false);
+            setLoading(false);
         } catch (err) {
             console.error(err);
             setError(err.message || "Server Error");
-        } finally {
             setLoading(false);
         }
     };
+
+    // Polls the backend every 2s until the queued job finishes.
+    const pollBulkOperation = (operationId) => {
+        const interval = setInterval(async () => {
+            try {
+                const token = await shopify.idToken();
+                const res = await fetch(`/api/bulk-operations/${operationId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const json = await res.json();
+
+                if (!json.status) {
+                    console.error("Bulk operation poll failed:", json);
+                    clearInterval(interval);
+                    setError(json.error || "Lost track of the generation job. Check the console for details.");
+                    setLoading(false);
+                    setProgress(null);
+                    return;
+                }
+
+                const op = json.operation;
+                setProgress({ processed: op.processed, total: op.total });
+
+                if (op.status === "completed") {
+                    clearInterval(interval);
+                    setUpdatedProducts(op.updated_products || []);
+                    setSelectedProducts([]);
+                    setPickerOpen(false);
+                    setLoading(false);
+                    setProgress(null);
+                    shopify.toast.show(
+                        `${op.processed - op.failed} SKU generated successfully${op.failed ? `, ${op.failed} failed` : ""}.`
+                    );
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
+        }, 2000);
+    };
+    const totalSummaryPages = Math.max(1, Math.ceil(updatedProducts.length / SUMMARY_PAGE_SIZE));
+    const summaryStart = (summaryPage - 1) * SUMMARY_PAGE_SIZE;
+    const summaryEnd = summaryStart + SUMMARY_PAGE_SIZE;
+    const paginatedSummary = updatedProducts.slice(summaryStart, summaryEnd);
 
     return (
         <s-page heading="Generate SKU" subheading="Manage and edit your customized SKU">
@@ -145,36 +195,78 @@ export default function GenerateSku() {
                             Generate SKU
                         </s-button>
                     </s-stack>
+                    {loading && progress && progress.total > 0 && (
+                        <s-stack direction="block" gap="small-200">
+                            <s-text>Generating SKUs</s-text>
+                            <s-progress
+                                value={progress.processed}
+                                max={progress.total}
+                                accessibilityLabel={`${progress.processed} of ${progress.total} products processed`}
+                            ></s-progress>
+                            <s-text tone="subdued">
+                                {progress.processed} of {progress.total} products processed
+                                {progress.processed >= progress.total ? '' : '...'}
+                            </s-text>
+                        </s-stack>
+                    )}
                 </s-stack>
             </s-section>
 
             {updatedProducts.length > 0 && (
-                <s-section>
-                    <s-stack direction="block" gap="base">
-                        <s-heading>Generated SKU Summary</s-heading>
-                        {updatedProducts.map((item, index) => (
-                            <s-box key={index} padding="base" borderWidth="base" borderRadius="base">
-                                <s-stack direction="block" gap="tight">
-                                    <s-text fontWeight="bold">{item.product_title}</s-text>
-                                    {item.variant_title !== "Default Title" && (
-                                        <s-text tone="subdued">{item.variant_title}</s-text>
-                                    )}
-                                    <s-text>
-                                        Old SKU: <s-text fontWeight="bold">{item.old_sku || "-"}</s-text>
-                                    </s-text>
-                                    <s-text tone="success">
-                                        New SKU: <s-text fontWeight="bold">{item.new_sku}</s-text>
-                                    </s-text>
-                                </s-stack>
-                            </s-box>
-                        ))}
+    <s-section>
+        <s-stack direction="block" gap="base">
+            <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+                <s-heading>Generated SKU Summary</s-heading>
+                {updatedProducts.length > SUMMARY_PAGE_SIZE && (
+                    <s-text tone="subdued">
+                        Page {summaryPage} of {totalSummaryPages} ({updatedProducts.length} products)
+                    </s-text>
+                )}
+            </s-stack>
+
+            {paginatedSummary.map((item, index) => (
+                <s-box key={summaryStart + index} padding="base" borderWidth="base" borderRadius="base">
+                    <s-stack direction="block" gap="tight">
+                        <s-text fontWeight="bold">{item.product_title}</s-text>
+                        {item.variant_title !== "Default Title" && (
+                            <s-text tone="subdued">{item.variant_title}</s-text>
+                        )}
+                        <s-text>
+                            Old SKU: <s-text fontWeight="bold">{item.old_sku || "-"}</s-text>
+                        </s-text>
+                        <s-text tone="success">
+                            New SKU: <s-text fontWeight="bold">{item.new_sku}</s-text>
+                        </s-text>
                     </s-stack>
-                </s-section>
+                </s-box>
+            ))}
+
+            {updatedProducts.length > SUMMARY_PAGE_SIZE && (
+                <s-stack direction="inline" gap="tight" alignItems="center">
+                    <s-button
+                        variant="tertiary"
+                        disabled={summaryPage <= 1 || undefined}
+                        onClick={() => setSummaryPage((p) => Math.max(1, p - 1))}
+                    >
+                        Previous
+                    </s-button>
+                    <s-button
+                        variant="tertiary"
+                        disabled={summaryPage >= totalSummaryPages || undefined}
+                        onClick={() => setSummaryPage((p) => Math.min(totalSummaryPages, p + 1))}
+                    >
+                        Next
+                    </s-button>
+                </s-stack>
             )}
+        </s-stack>
+    </s-section>
+)}
 
             <ProductPickerModal
                 open={pickerOpen}
                 onClose={() => setPickerOpen(false)}
+                alreadySelectedIds={selectedProducts.map((p) => String(p.variant_id))}
                 onSelect={(products) => {
                     setSelectedProducts(products);
                     setPickerOpen(false);

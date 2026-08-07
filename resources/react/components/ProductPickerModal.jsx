@@ -4,7 +4,7 @@ import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 const MODAL_ID = "product-picker-modal";
 const PLACEHOLDER_IMAGE = "https://cdn.shopify.com/static/images/admin/placeholder.png";
 
-export default function ProductPickerModal({ open, onClose, onSelect }) {
+export default function ProductPickerModal({ open, onClose, onSelect,  alreadySelectedIds = []}) {
   const shopify = useAppBridge();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
@@ -40,16 +40,17 @@ export default function ProductPickerModal({ open, onClose, onSelect }) {
     loadProducts();
   }, [open, printSettings]);
 
-  useEffect(() => {
+ useEffect(() => {
     if (open) {
       shopify.modal.show(MODAL_ID);
+      setSelectedIds(alreadySelectedIds.map(String));
     } else {
       shopify.modal.hide(MODAL_ID);
       setSearch("");
       setSelectedIds([]);
       setSelectAll(false);
     }
-  }, [open, shopify]);
+  }, [open, shopify, alreadySelectedIds]);
 
   async function loadProducts() {
     setLoading(true);

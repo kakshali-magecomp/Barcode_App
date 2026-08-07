@@ -12,6 +12,7 @@ export default function LabelHistory() {
   const [histories, setHistories] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [error, setError] = useState("");
 
   const [selectedHistory, setSelectedHistory] = useState(null);
@@ -50,14 +51,12 @@ export default function LabelHistory() {
     loadHistory();
   }, [loadHistory]);
 
-  useEffect(() => {
-    if (!search) {
-      setFilteredHistory(histories);
-      return;
-    }
-    const result = histories.filter((item) => {
-      const searchText = search.toLowerCase();
+useEffect(() => {
+  let result = histories;
 
+  if (search) {
+    const searchText = search.toLowerCase();
+    result = result.filter((item) => {
       const formattedDate = new Date(item.created_at)
         .toLocaleString()
         .toLowerCase();
@@ -73,8 +72,17 @@ export default function LabelHistory() {
         formattedDate.includes(searchText)
       );
     });
-    setFilteredHistory(result);
-  }, [search, histories]);
+  }
+
+  if (dateFilter) {
+    result = result.filter((item) => {
+      const itemDate = new Date(item.created_at).toISOString().slice(0, 10); // YYYY-MM-DD
+      return itemDate === dateFilter;
+    });
+  }
+
+  setFilteredHistory(result);
+}, [search, dateFilter, histories]);
 
   const openHistory = async (id) => {
     try {
@@ -161,8 +169,8 @@ export default function LabelHistory() {
                 ? `
                 <img
                     class="qr"
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140}x${settings.symbol_width_px || 140}&data=${encodeURIComponent(symbolValue || "")}"
-                />
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140}x${settings.symbol_width_px || 140}
+                    &color=${(settings.symbol_color || "#000000").replace("#","")}&data=${encodeURIComponent(symbolValue || "")}"/>
                 `
                 : `
                 <svg
@@ -222,20 +230,26 @@ document.querySelectorAll(".barcode").forEach(function(el){
             value=value+check;
         }
     }
+    const barcodeOptions={
+        width:Number(el.dataset.width)||2,
+        height:Number(el.dataset.height)||45,
+        fontSize:Number(el.dataset.font)||16,
+        displayValue:el.dataset.display==="true",
+        lineColor: String(el.dataset.color || "#000000"),
+        background:"#ffffff",
+        margin:2
+    };
     try{
-        JsBarcode(el,value,{
-            format:format,
-            width:Number(el.dataset.width)||2,
-            height:Number(el.dataset.height)||45,
-            fontSize:Number(el.dataset.font)||16,
-            displayValue:el.dataset.display==="true",
-            lineColor:el.dataset.color||"#000000",
-            background:"#ffffff",
-            margin:2
-        });
+        JsBarcode(el,value,{...barcodeOptions,format:format});
     }catch(e){
-        console.error(e);
-        el.outerHTML='<div style="color:red">Invalid Barcode</div>';
+        // Fall back to CODE128 instead of showing "Invalid Barcode" — it
+        // accepts virtually any value/length, so whatever was actually
+        // saved in label history still prints as a scannable barcode.
+        try{
+            JsBarcode(el,value,{...barcodeOptions,format:"CODE128"});
+        }catch(e2){
+            console.error(e2);
+        }
     }
 });
 setTimeout(function(){window.print();window.close();},500);
@@ -352,13 +366,33 @@ th{background:#f5f5f5;}
         </div>
         <s-section padding="none">
           <s-box padding="base">
-            <s-search-field
-              label="Search"
-              labelAccessibilityVisibility="exclusive"
-              placeholder="Search by Print ID, Template or Client IP..."
-              value={search}
-              onInput={(event) => setSearch(event.currentTarget.value)}
-            />
+            <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    background: "#f4f4f5",
+    padding: "12px",
+    borderRadius: "12px",
+  }}
+>
+  <div style={{ flex: 1 }}>
+    <s-search-field
+      label="Search"
+      labelAccessibilityVisibility="exclusive"
+      placeholder="Search by Print ID, Template or Client IP..."
+      value={search}
+      onInput={(event) => setSearch(event.currentTarget.value)}
+    />
+  </div>
+
+  <s-date-field
+  label="Date"
+  labelAccessibilityVisibility="exclusive"
+  value={dateFilter}
+  onChange={(event) => setDateFilter(event.currentTarget.value)}
+/>
+</div>
           </s-box>
 
           {filteredHistory.length === 0 ? (

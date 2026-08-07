@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const PREVIEW_PAGE_SIZE = 4;
 const REMOVE_PRODUCT_MODAL_ID = "remove-product-modal";
+const REMOVE_ALL_MODAL_ID = "remove-all-products-modal";
 
 export default function GenerateBarcode() {
     const shopify = useAppBridge();
@@ -21,7 +22,7 @@ export default function GenerateBarcode() {
     } = location.state || {};
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [originalProducts, setOriginalProducts] = useState([]);
-
+    const [progress, setProgress] = useState(null); // { processed, total }
     const [method, setMethod] = useState("");
     const [previewItem, setPreviewItem] = useState(null);
     const [previewPage, setPreviewPage] = useState(1);
@@ -229,12 +230,22 @@ export default function GenerateBarcode() {
             if (json.status !== 1) {
                 throw new Error(json.error || json.message || "Barcode generation failed.");
             }
+
             if (json.generated_count === 0) {
-                shopify.toast.show("All products already have barcodes.");
-            } else {
-                shopify.toast.show(json.message || "Barcode generated successfully.");
+                shopify.toast.show(json.message || "Nothing to generate.");
+                setLoading(false);
+                return;
             }
 
+            // Large batches are queued — poll for progress instead of
+            // blocking the request open.
+            if (json.queued) {
+                setProgress({ processed: 0, total: json.total });
+                pollBarcodeBulkOperation(json.operation_id);
+                return; // setLoading(false) happens once polling completes
+            }
+
+            // Fallback for any non-queued/legacy synchronous response
             const updatedProducts = json.updated_products || [];
             setGeneratedProducts(updatedProducts);
             setSelectedProducts(prev =>
@@ -251,15 +262,53 @@ export default function GenerateBarcode() {
                 })
             );
 
-            setMethod("print");
             setPickerOpen(false);
+            setLoading(false);
         } catch (err) {
             console.error("Generate Barcode Error:", err);
             setError(err.message || "Something went wrong while generating barcode.");
             shopify.toast.show(err.message || "Server Error");
-        } finally {
             setLoading(false);
         }
+    };
+    const pollBarcodeBulkOperation = (operationId) => {
+        const interval = setInterval(async () => {
+            try {
+                const res = await fetch(`/api/bulk-operations/${operationId}`);
+                const json = await res.json();
+
+                if (!json.status) {
+                    console.error("Bulk operation poll failed:", json);
+                    clearInterval(interval);
+                    setError(json.error || "Lost track of the generation job. Check the console for details.");
+                    setLoading(false);
+                    setProgress(null);
+                    return;
+                }
+
+                const op = json.operation;
+                setProgress({ processed: op.processed, total: op.total });
+
+                if (op.status === "completed") {
+                    clearInterval(interval);
+                    setGeneratedProducts(op.updated_products || []);
+                    setSelectedProducts(prev =>
+                        prev.map(product => {
+                            const updated = (op.updated_products || []).find(p => p.variant_title === product.variant_title && p.product_title === product.product_title);
+                            return updated ? { ...product, barcode: updated.new_barcode } : product;
+                        })
+                    );
+                    setPickerOpen(false);
+                    setLoading(false);
+                    setProgress(null);
+                    shopify.toast.show(
+                        `${op.processed - op.failed} barcode generated successfully${op.failed ? `, ${op.failed} failed` : ""}.`
+                    );
+                }
+            } catch (err) {
+                console.error("Polling error:", err);
+            }
+        }, 2000);
     };
 
     const requestRemoveProduct = (variantId) => {
@@ -277,6 +326,17 @@ export default function GenerateBarcode() {
         }
         setProductToRemove(null);
         shopify.modal.hide(REMOVE_PRODUCT_MODAL_ID);
+    };
+
+    const requestRemoveAllProducts = () => {
+        shopify.modal.show(REMOVE_ALL_MODAL_ID);
+    };
+
+    const confirmRemoveAllProducts = () => {
+        setSelectedProducts([]);
+        setGeneratedProducts([]);
+        setPreviewPage(1);
+        shopify.modal.hide(REMOVE_ALL_MODAL_ID);
     };
 
     const handlePrint = () => {
@@ -438,14 +498,24 @@ ${labels}
                                 </s-button>
                             )}
 
-                            <s-button variant="primary" loading={loading || undefined} onClick={generateBarcode}>
+                            <s-button
+                                variant="primary"
+                                loading={loading || undefined}
+                                disabled={method === "print" || undefined}
+                                onClick={generateBarcode}
+                            >
                                 Generate Barcode
                             </s-button>
+                            {loading && progress && progress.total > 0 && (
+                                <s-text tone="subdued">
+                                    Processing {progress.processed} of {progress.total}...
+                                </s-text>
+                            )}
                         </s-stack>
                     </s-stack>
                 </s-section>
 
-                {generatedProducts.length > 0 && (
+                {generatedProducts.length > 0 && method !== "print" && (
                     <s-section>
                         <s-stack direction="block" gap="base">
                             <s-heading>Generated Barcode Summary</s-heading>
@@ -473,20 +543,17 @@ ${labels}
                 <ProductPickerModal
                     open={pickerOpen}
                     onClose={() => setPickerOpen(false)}
+                    alreadySelectedIds={selectedProducts.map((p) => String(p.variant_id))}
                     onSelect={(products) => {
                         const productsWithQty = products.map(product => ({
                             ...product,
-                            quantity: product.quantity ?? 1,
+                            quantity:
+                                selectedProducts.find(p => p.variant_id === product.variant_id)?.quantity ??
+                                product.quantity ??
+                                1,
                         }));
 
-                        setSelectedProducts(prev => {
-                            const merged = [...prev];
-                            productsWithQty.forEach(product => {
-                                const exist = merged.find(p => p.variant_id === product.variant_id);
-                                if (!exist) merged.push(product);
-                            });
-                            return merged;
-                        });
+                        setSelectedProducts(productsWithQty);
 
                         setPreviewItem(prev => prev || productsWithQty[0] || null);
                         setPickerOpen(false);
@@ -498,11 +565,16 @@ ${labels}
                         <s-stack direction="block" gap="base">
                             <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
                                 <s-heading>Preview</s-heading>
-                                {selectedProducts.length > PREVIEW_PAGE_SIZE && (
-                                    <s-text tone="subdued">
-                                        Page {previewPage} of {totalPreviewPages} ({selectedProducts.length} products)
-                                    </s-text>
-                                )}
+                                <s-stack direction="inline" gap="base" alignItems="center">
+                                    {selectedProducts.length > PREVIEW_PAGE_SIZE && (
+                                        <s-text tone="subdued">
+                                            Page {previewPage} of {totalPreviewPages} ({selectedProducts.length} products)
+                                        </s-text>
+                                    )}
+                                    <s-button tone="critical" variant="tertiary" onClick={requestRemoveAllProducts}>
+                                        Delete All
+                                    </s-button>
+                                </s-stack>
                             </s-stack>
 
                             <div
@@ -624,6 +696,19 @@ ${labels}
                         Remove
                     </button>
                     <button onClick={() => shopify.modal.hide(REMOVE_PRODUCT_MODAL_ID)}>
+                        Cancel
+                    </button>
+                </TitleBar>
+            </Modal>
+            <Modal id={REMOVE_ALL_MODAL_ID}>
+                <p style={{ padding: '1rem' }}>
+                    Are you sure you want to remove all {selectedProducts.length} products from the preview? You'll need to choose products again from "Choose Products" if you change your mind.
+                </p>
+                <TitleBar title="Delete all products">
+                    <button variant="primary" tone="critical" onClick={confirmRemoveAllProducts}>
+                        Delete All
+                    </button>
+                    <button onClick={() => shopify.modal.hide(REMOVE_ALL_MODAL_ID)}>
                         Cancel
                     </button>
                 </TitleBar>

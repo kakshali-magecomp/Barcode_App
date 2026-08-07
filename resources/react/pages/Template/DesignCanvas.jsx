@@ -237,7 +237,8 @@ export default function DesignCanvas() {
 <title>Print Barcode</title>
 <style>
 body{margin:15px;display:flex;flex-wrap:wrap;gap:12px;font-family:Arial,sans-serif;justify-content:flex-start;}
-.label{width:250px;border:1px solid #ddd;border-radius:8px;padding:15px;text-align:center;page-break-inside:avoid;}
+.label{width:250px;border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center;page-break-inside:avoid;}
+.label > div{min-height:auto !important;padding:0 !important;justify-content:center !important;}
 img{max-width:100%;}
 svg{max-width:100%;}
 @media print{body{margin:0;gap:10px;}.label{border:none;page-break-inside:avoid;}}
