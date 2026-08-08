@@ -6,6 +6,7 @@ import QrCodeRenderer from "../../components/QrCodeRenderer";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const PREVIEW_PAGE_SIZE = 4;
+const SUMMARY_PAGE_SIZE = 5;
 const REMOVE_PRODUCT_MODAL_ID = "remove-product-modal";
 const REMOVE_ALL_MODAL_ID = "remove-all-products-modal";
 
@@ -23,6 +24,7 @@ export default function GenerateBarcode() {
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [originalProducts, setOriginalProducts] = useState([]);
     const [progress, setProgress] = useState(null); // { processed, total }
+    const [summaryPage, setSummaryPage] = useState(1);
     const [method, setMethod] = useState("");
     const [previewItem, setPreviewItem] = useState(null);
     const [previewPage, setPreviewPage] = useState(1);
@@ -291,6 +293,8 @@ export default function GenerateBarcode() {
 
                 if (op.status === "completed") {
                     clearInterval(interval);
+                    setProgress({ processed: op.total, total: op.total });
+                    await new Promise((resolve) => setTimeout(resolve, 600));
                     setGeneratedProducts(op.updated_products || []);
                     setSelectedProducts(prev =>
                         prev.map(product => {
@@ -400,6 +404,11 @@ ${labels}
         }
     };
 
+    const totalSummaryPages = Math.max(1, Math.ceil(generatedProducts.length / SUMMARY_PAGE_SIZE));
+    const summaryStart = (summaryPage - 1) * SUMMARY_PAGE_SIZE;
+    const summaryEnd = summaryStart + SUMMARY_PAGE_SIZE;
+    const paginatedSummary = generatedProducts.slice(summaryStart, summaryEnd);
+
     const totalPreviewPages = Math.max(1, Math.ceil(selectedProducts.length / PREVIEW_PAGE_SIZE));
     const previewStart = (previewPage - 1) * PREVIEW_PAGE_SIZE;
     const previewEnd = previewStart + PREVIEW_PAGE_SIZE;
@@ -507,9 +516,37 @@ ${labels}
                                 Generate Barcode
                             </s-button>
                             {loading && progress && progress.total > 0 && (
-                                <s-text tone="subdued">
-                                    Processing {progress.processed} of {progress.total}...
-                                </s-text>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    <s-text>Generating barcodes</s-text>
+                                    <div
+                                        role="progressbar"
+                                        aria-valuenow={progress.processed}
+                                        aria-valuemin={0}
+                                        aria-valuemax={progress.total}
+                                        aria-label={`${progress.processed} of ${progress.total} products processed`}
+                                        style={{
+                                            width: '100%',
+                                            height: '8px',
+                                            borderRadius: '999px',
+                                            background: '#e1e3e5',
+                                            overflow: 'hidden',
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                width: `${Math.min(100, (progress.processed / progress.total) * 100)}%`,
+                                                height: '100%',
+                                                background: '#008060',
+                                                borderRadius: '999px',
+                                                transition: 'width 0.3s ease',
+                                            }}
+                                        />
+                                    </div>
+                                    <s-text color="subdued">
+                                        {progress.processed} of {progress.total} products processed
+                                        {progress.processed >= progress.total ? '' : '...'}
+                                    </s-text>
+                                </div>
                             )}
                         </s-stack>
                     </s-stack>
@@ -518,10 +555,17 @@ ${labels}
                 {generatedProducts.length > 0 && method !== "print" && (
                     <s-section>
                         <s-stack direction="block" gap="base">
-                            <s-heading>Generated Barcode Summary</s-heading>
+                            <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+                                <s-heading>Generated Barcode Summary</s-heading>
+                                {generatedProducts.length > SUMMARY_PAGE_SIZE && (
+                                    <s-text tone="subdued">
+                                        Page {summaryPage} of {totalSummaryPages} ({generatedProducts.length} products)
+                                    </s-text>
+                                )}
+                            </s-stack>
 
-                            {generatedProducts.map((item, index) => (
-                                <s-box key={index} padding="base" borderWidth="base" borderRadius="base">
+                            {paginatedSummary.map((item, index) => (
+                                <s-box key={summaryStart + index} padding="base" borderWidth="base" borderRadius="base">
                                     <s-stack direction="block" gap="tight">
                                         <s-text fontWeight="bold">{item.product_title}</s-text>
                                         {item.variant_title !== "Default Title" && (
@@ -536,6 +580,25 @@ ${labels}
                                     </s-stack>
                                 </s-box>
                             ))}
+
+                            {generatedProducts.length > SUMMARY_PAGE_SIZE && (
+                                <s-stack direction="inline" gap="tight" alignItems="center">
+                                    <s-button
+                                        variant="tertiary"
+                                        disabled={summaryPage <= 1 || undefined}
+                                        onClick={() => setSummaryPage((p) => Math.max(1, p - 1))}
+                                    >
+                                        Previous
+                                    </s-button>
+                                    <s-button
+                                        variant="tertiary"
+                                        disabled={summaryPage >= totalSummaryPages || undefined}
+                                        onClick={() => setSummaryPage((p) => Math.min(totalSummaryPages, p + 1))}
+                                    >
+                                        Next
+                                    </s-button>
+                                </s-stack>
+                            )}
                         </s-stack>
                     </s-section>
                 )}

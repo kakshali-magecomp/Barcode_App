@@ -39,11 +39,8 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
       "product_online_url",
     ],
 
-    Code39: [
+    CODE39: [
       "barcode_value",
-      "sku_value",
-      "product_name",
-      "product_price",
     ],
 
     QR: [
@@ -70,6 +67,7 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
       "barcode_value",
     ],
   };
+
   useEffect(() => {
 
     if (firstLoad.current) return;

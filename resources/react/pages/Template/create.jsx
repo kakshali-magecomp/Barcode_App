@@ -300,7 +300,7 @@ ${labels}
     return (
         <>
             <ui-save-bar id={SAVE_BAR_ID}>
-                <button variant="primary" loading={loading || undefined} onClick={handleSubmit}>
+                <button variant="primary" loading={loading ? "" : undefined} onClick={handleSubmit}>
                     Save template
                 </button>
                 <button onClick={handleDiscard}>Discard</button>

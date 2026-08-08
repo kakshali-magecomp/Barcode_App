@@ -203,7 +203,7 @@ export default function GenerateSku() {
                                 max={progress.total}
                                 accessibilityLabel={`${progress.processed} of ${progress.total} products processed`}
                             ></s-progress>
-                            <s-text tone="subdued">
+                            <s-text color="subdued">
                                 {progress.processed} of {progress.total} products processed
                                 {progress.processed >= progress.total ? '' : '...'}
                             </s-text>
@@ -213,55 +213,55 @@ export default function GenerateSku() {
             </s-section>
 
             {updatedProducts.length > 0 && (
-    <s-section>
-        <s-stack direction="block" gap="base">
-            <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
-                <s-heading>Generated SKU Summary</s-heading>
-                {updatedProducts.length > SUMMARY_PAGE_SIZE && (
-                    <s-text tone="subdued">
-                        Page {summaryPage} of {totalSummaryPages} ({updatedProducts.length} products)
-                    </s-text>
-                )}
-            </s-stack>
+                <s-section>
+                    <s-stack direction="block" gap="base">
+                        <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
+                            <s-heading>Generated SKU Summary</s-heading>
+                            {updatedProducts.length > SUMMARY_PAGE_SIZE && (
+                                <s-text tone="subdued">
+                                    Page {summaryPage} of {totalSummaryPages} ({updatedProducts.length} products)
+                                </s-text>
+                            )}
+                        </s-stack>
 
-            {paginatedSummary.map((item, index) => (
-                <s-box key={summaryStart + index} padding="base" borderWidth="base" borderRadius="base">
-                    <s-stack direction="block" gap="tight">
-                        <s-text fontWeight="bold">{item.product_title}</s-text>
-                        {item.variant_title !== "Default Title" && (
-                            <s-text tone="subdued">{item.variant_title}</s-text>
+                        {paginatedSummary.map((item, index) => (
+                            <s-box key={summaryStart + index} padding="base" borderWidth="base" borderRadius="base">
+                                <s-stack direction="block" gap="tight">
+                                    <s-text fontWeight="bold">{item.product_title}</s-text>
+                                    {item.variant_title !== "Default Title" && (
+                                        <s-text tone="subdued">{item.variant_title}</s-text>
+                                    )}
+                                    <s-text>
+                                        Old SKU: <s-text fontWeight="bold">{item.old_sku || "-"}</s-text>
+                                    </s-text>
+                                    <s-text tone="success">
+                                        New SKU: <s-text fontWeight="bold">{item.new_sku}</s-text>
+                                    </s-text>
+                                </s-stack>
+                            </s-box>
+                        ))}
+
+                        {updatedProducts.length > SUMMARY_PAGE_SIZE && (
+                            <s-stack direction="inline" gap="tight" alignItems="center">
+                                <s-button
+                                    variant="tertiary"
+                                    disabled={summaryPage <= 1 || undefined}
+                                    onClick={() => setSummaryPage((p) => Math.max(1, p - 1))}
+                                >
+                                    Previous
+                                </s-button>
+                                <s-button
+                                    variant="tertiary"
+                                    disabled={summaryPage >= totalSummaryPages || undefined}
+                                    onClick={() => setSummaryPage((p) => Math.min(totalSummaryPages, p + 1))}
+                                >
+                                    Next
+                                </s-button>
+                            </s-stack>
                         )}
-                        <s-text>
-                            Old SKU: <s-text fontWeight="bold">{item.old_sku || "-"}</s-text>
-                        </s-text>
-                        <s-text tone="success">
-                            New SKU: <s-text fontWeight="bold">{item.new_sku}</s-text>
-                        </s-text>
                     </s-stack>
-                </s-box>
-            ))}
-
-            {updatedProducts.length > SUMMARY_PAGE_SIZE && (
-                <s-stack direction="inline" gap="tight" alignItems="center">
-                    <s-button
-                        variant="tertiary"
-                        disabled={summaryPage <= 1 || undefined}
-                        onClick={() => setSummaryPage((p) => Math.max(1, p - 1))}
-                    >
-                        Previous
-                    </s-button>
-                    <s-button
-                        variant="tertiary"
-                        disabled={summaryPage >= totalSummaryPages || undefined}
-                        onClick={() => setSummaryPage((p) => Math.min(totalSummaryPages, p + 1))}
-                    >
-                        Next
-                    </s-button>
-                </s-stack>
+                </s-section>
             )}
-        </s-stack>
-    </s-section>
-)}
 
             <ProductPickerModal
                 open={pickerOpen}

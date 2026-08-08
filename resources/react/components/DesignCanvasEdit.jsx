@@ -45,8 +45,6 @@ export default function DesignCanvasEdit({
         loadDesign();
     }, [templateId, discardSignal]);
 
-    // Plain fetch — App Bridge's script tag auto-authenticates it,
-    // no need for appBridge.fetch / window.fetch fallback.
     async function loadDesign() {
         try {
             setLoading(true);
@@ -128,40 +126,175 @@ export default function DesignCanvasEdit({
         });
     }
 
-    const handlePrint = () => {
-        const qty = Number(design.print_qty) || 1;
-        let labels = "";
-        for (let i = 0; i < qty; i++) {
-            labels += `
+   const handlePrint = () => {
+    if (!printRef.current) return;
+
+    const qty = Number(design.print_qty) || 1;
+
+    let labels = "";
+
+    for (let i = 0; i < qty; i++) {
+        labels += `
             <div class="label">
                 ${printRef.current.innerHTML}
             </div>
         `;
-        }
+    }
 
-        const printWindow = window.open("", "", "width=900,height=700");
-        printWindow.document.write(`
-<html>
-<head>
-<title>Print Label</title>
-<style>
-body{margin:20px;display:flex;flex-wrap:wrap;gap:12px;font-family:Arial,sans-serif;}
-.label{width:250px;border:1px solid #ddd;padding:20px;page-break-inside:avoid;}
-svg{max-width:100%;}
-</style>
-</head>
-<body>
-${labels}
-</body>
-</html>
-`);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => {
-            printWindow.print();
-            printWindow.close();
-        }, 500);
-    };
+    const printWindow = window.open(
+        "",
+        "_blank",
+        "width=900,height=700"
+    );
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Print Labels</title>
+
+            <style>
+                @page {
+                    margin: 5mm;
+                }
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                body {
+                    margin: 10px;
+                    padding: 0;
+                    font-family: Arial, sans-serif;
+
+                    display: grid;
+                    grid-template-columns: repeat(
+                        auto-fill,
+                        250px
+                    );
+
+                    gap: 10px;
+
+                    align-items: start;
+                }
+
+                .label {
+                    width: 250px;
+                    min-height: 140px;
+
+                    border: 1px solid #ddd;
+
+                    padding: 10px;
+
+                    box-sizing: border-box;
+
+                    text-align: center;
+
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+
+                    overflow: hidden;
+
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                }
+
+                .title {
+                    width: 100%;
+
+                    font-size: 13px;
+                    font-weight: bold;
+
+                    margin-bottom: 5px;
+
+                    word-break: break-word;
+                    overflow-wrap: anywhere;
+
+                    white-space: normal;
+                }
+
+                .sku {
+                    width: 100%;
+
+                    font-size: 12px;
+
+                    margin-bottom: 10px;
+
+                    word-break: break-word;
+                    overflow-wrap: anywhere;
+
+                    white-space: normal;
+                }
+
+                .barcode {
+                    display: block;
+
+                    max-width: 100%;
+
+                    height: auto;
+
+                    margin: 0 auto;
+                }
+
+                .qr {
+                    display: block;
+
+                    margin: 0 auto;
+
+                    max-width: 100%;
+
+                    height: auto;
+                }
+
+                .label svg {
+                    max-width: 100%;
+                    height: auto;
+                }
+
+                .label img {
+                    max-width: 100%;
+                    height: auto;
+                }
+
+                /* Prevent preview containers from adding large height */
+                .label > div {
+                    height: auto !important;
+                    min-height: 0 !important;
+                }
+
+                @media print {
+                    body {
+                        margin: 5mm;
+                    }
+
+                    .label {
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+                }
+            </style>
+        </head>
+
+        <body>
+
+            ${labels}
+
+            <script>
+                window.onload = function () {
+                    setTimeout(function () {
+                        window.print();
+                    }, 300);
+                };
+            </script>
+
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+};
 
     if (loading) {
         return (

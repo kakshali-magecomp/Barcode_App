@@ -1,716 +1,80 @@
-[2026-08-07 11:32:18] local.ERROR: BulkGenerateSkuJob: missing user or bulk operation {"user_id":24,"bulk_operation_id":1} 
-[2026-08-07 11:32:18] local.ERROR: BulkGenerateSkuJob: missing user or bulk operation {"user_id":24,"bulk_operation_id":2} 
-[2026-08-07 11:32:18] local.ERROR: BulkGenerateSkuJob: missing user or bulk operation {"user_id":24,"bulk_operation_id":3} 
-[2026-08-07 11:32:19] local.ERROR: BulkGenerateSkuJob: missing user or bulk operation {"user_id":24,"bulk_operation_id":4} 
-[2026-08-07 11:32:19] local.ERROR: BulkGenerateSkuJob: missing user or bulk operation {"user_id":24,"bulk_operation_id":5} 
-[2026-08-07 11:35:07] local.INFO: array (
-  'sku_prefix' => 'PJ',
-  'sku_auto_number_start' => '1111',
-  'sku_suffix' => '2020',
-  'sku_delimiter' => '-',
-  'segment_product_title' => 'char_3',
-  'segment_product_vendor' => 'char_3',
-  'segment_product_type' => 'char_3',
-  'segment_option1' => 'none',
-  'segment_option2' => 'none',
-  'segment_option3' => 'none',
-  'segment_metafield' => 'custom.dietary_flags',
-  'segment_metafield_rule' => 'char_4',
-  'hide_options_1_2_3' => false,
-  'force_uppercase_fields' => true,
-)  
-[2026-08-07 11:35:07] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 25  
-[2026-08-07 12:38:25] local.INFO: CREATE TEMPLATE   
-[2026-08-07 12:38:25] local.INFO: array (
-  'template_name' => 'CODE128_PRICE',
-  'description' => 'CODE128_PRICE',
-  'note' => 'CODE128_PRICE',
-  'paper_brand' => 'dymo',
-  'paper_model' => '30252',
+[2026-08-08 07:59:29] local.INFO: CREATE TEMPLATE   
+[2026-08-08 07:59:29] local.INFO: array (
+  'template_name' => 'ITF14- COLOR',
+  'description' => 'ITF14- COLOR',
+  'note' => 'ITF14- COLOR',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-2x1',
   'layout_settings' => 
   array (
-    'name' => 'Address Label',
+    'name' => 'Small Label',
     'paper' => 
     array (
-      'width' => 89,
-      'height' => 36,
+      'width' => 50.8,
+      'height' => 25.4,
     ),
     'label' => 
     array (
-      'width' => 89,
-      'height' => 36,
+      'width' => 50.8,
+      'height' => 25.4,
     ),
     'rows' => 1,
     'columns' => 1,
     'gapX' => 0,
     'gapY' => 0,
-    'marginTop' => 0,
-    'marginLeft' => 0,
   ),
 )  
-[2026-08-07 12:38:25] local.INFO: Template Created {"id":247} 
-[2026-08-07 12:45:58] local.INFO: ProductWebhookController call  
-[2026-08-07 12:45:58] local.INFO: generateBarcode job is called  
-[2026-08-07 12:45:58] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-07 12:45:58] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12555129225534',
-  'body_html' => '<p>new</p>',
-  'created_at' => '2026-08-07T08:45:56-04:00',
-  'handle' => 'new',
-  'id' => 12555129225534,
-  'product_type' => 'fast food',
-  'published_at' => '2026-08-07T08:45:57-04:00',
-  'template_suffix' => NULL,
-  'title' => 'new',
-  'updated_at' => '2026-08-07T08:45:57-04:00',
-  'vendor' => 'Dumplings',
-  'status' => 'active',
-  'published_scope' => 'global',
-  'tags' => 'most_favorite',
-  'variants' => 
+[2026-08-08 07:59:29] local.INFO: Template Created {"id":253} 
+[2026-08-08 07:59:37] local.INFO: BARCODE SETTINGS {"id":19,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"EAN8","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T03:46:53.000000Z","updated_at":"2026-08-08T07:58:10.000000Z"} 
+[2026-08-08 07:59:37] local.INFO: TEMPLATE DESIGN {"id":254,"barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"ITF14","symbol_color":"#c70092","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z"} 
+[2026-08-08 07:59:37] local.INFO: FINAL RESPONSE {"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"} 
+[2026-08-08 07:59:46] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12521407349054","variant_id":"gid://shopify/ProductVariant/53918468505918","product_title":"cake","current_sku":"SKU-CAK-SHF-FAS-SWE-21-20","barcode":"4049721350539","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/cake","price":"250.30","vendor":"shfb","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 07:59:46] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12546849308990","variant_id":"gid://shopify/ProductVariant/53997471269182","product_title":"Cold Coffe","current_sku":"SKU-COL-COF-DRI-STR-22-20","barcode":"7636842600013","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/cold-coffe","price":"20.30","vendor":"Coffe","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 07:59:47] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12521408135486","variant_id":"gid://shopify/ProductVariant/53919880020286","product_title":"Donuts","current_sku":"SKU-DON-MAG-FAS-SWE-23-20","barcode":"5521700364084","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/donuts","price":"56.20","vendor":"magecomp","variant_title":"Medium","option_1":"Medium","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 07:59:47] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12448390775102","variant_id":"gid://shopify/ProductVariant/53710409335102","product_title":"Dumplings","current_sku":"SKU-DUM-DUM-FAS-SPI-24-20","barcode":"5881370582143","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/dumplings","price":"190.30","vendor":"Dumplings","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:00:13] local.INFO: BARCODE SETTINGS {"id":19,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"EAN8","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T03:46:53.000000Z","updated_at":"2026-08-08T07:58:10.000000Z"} 
+[2026-08-08 08:00:13] local.INFO: TEMPLATE DESIGN {"id":254,"barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"ITF14","symbol_color":"#c70092","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z"} 
+[2026-08-08 08:00:13] local.INFO: FINAL RESPONSE {"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"} 
+[2026-08-08 08:00:25] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12521407349054","variant_id":"gid://shopify/ProductVariant/53918468505918","product_title":"cake","current_sku":"SKU-CAK-SHF-FAS-SWE-21-20","barcode":"4049721350539","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/cake","price":"250.30","vendor":null,"variant_title":null,"option_1":null,"option_2":null,"option_3":null,"qty":2} 
+[2026-08-08 08:00:25] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12546849308990","variant_id":"gid://shopify/ProductVariant/53997471269182","product_title":"Cold Coffe","current_sku":"SKU-COL-COF-DRI-STR-22-20","barcode":"7636842600013","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/cold-coffe","price":"20.30","vendor":null,"variant_title":null,"option_1":null,"option_2":null,"option_3":null,"qty":2} 
+[2026-08-08 08:00:25] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12521408135486","variant_id":"gid://shopify/ProductVariant/53919880020286","product_title":"Donuts","current_sku":"SKU-DON-MAG-FAS-SWE-23-20","barcode":"5521700364084","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/donuts","price":"56.20","vendor":null,"variant_title":null,"option_1":null,"option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:00:26] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12448390775102","variant_id":"gid://shopify/ProductVariant/53710409335102","product_title":"Dumplings","current_sku":"SKU-DUM-DUM-FAS-SPI-24-20","barcode":"5881370582143","barcode_format":"ITF14","template_settings":{"id":254,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"ITF14","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T07:59:29.000000Z","updated_at":"2026-08-08T07:59:29.000000Z","barcode_template_id":253,"selected_variant_id":"gid://shopify/ProductVariant/53919880020286","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#c70092","symbol_logo_filename":null,"symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":16,"symbol_bar_width":2,"symbol_bar_height":70,"symbol_width_px":"140","symbol_margin_px":"10","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"ITF14- COLOR"},"online_url":"https://kakshalijani.myshopify.com/products/dumplings","price":"190.30","vendor":null,"variant_title":null,"option_1":null,"option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:06:42] local.INFO: CREATE TEMPLATE   
+[2026-08-08 08:06:42] local.INFO: array (
+  'template_name' => 'QR_URL',
+  'description' => 'QR_URL',
+  'note' => 'QR_URL',
+  'paper_brand' => 'zebra',
+  'paper_model' => '4000d-2x1',
+  'layout_settings' => 
   array (
-    0 => 
+    'name' => 'Small Label',
+    'paper' => 
     array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045853909310',
-      'barcode' => NULL,
-      'compare_at_price' => NULL,
-      'created_at' => '2026-08-07T08:45:56-04:00',
-      'id' => 54045853909310,
-      'inventory_policy' => 'deny',
-      'position' => 1,
-      'price' => '120.30',
-      'product_id' => 12555129225534,
-      'sku' => NULL,
-      'taxable' => true,
-      'title' => 'Default Title',
-      'updated_at' => '2026-08-07T08:45:56-04:00',
-      'option1' => 'Default Title',
-      'option2' => NULL,
-      'option3' => NULL,
-      'image_id' => NULL,
-      'inventory_item_id' => 56063806505278,
-      'inventory_quantity' => 120,
-      'old_inventory_quantity' => 120,
+      'width' => 50.8,
+      'height' => 25.4,
     ),
-  ),
-  'options' => 
-  array (
-    0 => 
+    'label' => 
     array (
-      'name' => 'Title',
-      'id' => 15138637644094,
-      'product_id' => 12555129225534,
-      'position' => 1,
-      'values' => 
-      array (
-        0 => 'Default Title',
-      ),
+      'width' => 50.8,
+      'height' => 25.4,
     ),
-  ),
-  'images' => 
-  array (
-    0 => 
-    array (
-      'id' => 54799515124030,
-      'product_id' => 12555129225534,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:44:32-04:00',
-      'updated_at' => '2026-08-07T08:45:56-04:00',
-      'alt' => NULL,
-      'width' => 675,
-      'height' => 1200,
-      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_54719d96-c2c6-43cf-8d0c-f1238d738303.jpg?v=1786106674',
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799515124030',
-    ),
-  ),
-  'image' => 
-  array (
-    'id' => 54799515124030,
-    'product_id' => 12555129225534,
-    'position' => 1,
-    'created_at' => '2026-08-07T08:44:32-04:00',
-    'updated_at' => '2026-08-07T08:45:56-04:00',
-    'alt' => NULL,
-    'width' => 675,
-    'height' => 1200,
-    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_54719d96-c2c6-43cf-8d0c-f1238d738303.jpg?v=1786106674',
-    'variant_ids' => 
-    array (
-    ),
-    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799515124030',
-  ),
-  'media' => 
-  array (
-    0 => 
-    array (
-      'id' => 45714714427710,
-      'product_id' => 12555129225534,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:44:32-04:00',
-      'updated_at' => '2026-08-07T08:45:56-04:00',
-      'alt' => NULL,
-      'status' => 'READY',
-      'media_content_type' => 'IMAGE',
-      'preview_image' => 
-      array (
-        'width' => 675,
-        'height' => 1200,
-        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_54719d96-c2c6-43cf-8d0c-f1238d738303.jpg?v=1786106674',
-        'status' => 'READY',
-      ),
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45714714427710',
-    ),
-  ),
-  'variant_gids' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045853909310',
-      'updated_at' => '2026-08-07T12:45:56.000Z',
-    ),
-  ),
-  'has_variants_that_requires_components' => false,
-  'category' => 
-  array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/na',
-    'name' => 'Uncategorized',
-    'full_name' => 'Uncategorized',
+    'rows' => 1,
+    'columns' => 1,
+    'gapX' => 0,
+    'gapY' => 0,
   ),
 )  
-[2026-08-07 12:45:59] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54045853909310","barcode":"2466311"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1786106758570308.0]}} 
-[2026-08-07 12:47:55] local.INFO: array (
-  'sku_prefix' => 'SKU',
-  'sku_auto_number_start' => '1111',
-  'sku_suffix' => '20',
-  'sku_delimiter' => '_',
-  'segment_product_title' => 'char_4',
-  'segment_product_vendor' => 'char_4',
-  'segment_product_type' => 'char_4',
-  'segment_option1' => 'none',
-  'segment_option2' => 'none',
-  'segment_option3' => 'none',
-  'segment_metafield' => 'custom.roast_level',
-  'segment_metafield_rule' => 'full',
-  'hide_options_1_2_3' => false,
-  'force_uppercase_fields' => true,
-)  
-[2026-08-07 12:47:55] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 25  
-[2026-08-07 12:52:17] local.INFO: ProductWebhookController call  
-[2026-08-07 12:52:18] local.INFO: generateBarcode job is called  
-[2026-08-07 12:52:18] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-07 12:52:18] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12555129684286',
-  'body_html' => '<h2>🌿 The Ultimate Vegetarian Burger Experience</h2><p>Sink your teeth into our <strong>Veggie Burger Deluxe</strong> — a hearty, satisfying burger that proves plant-based can be absolutely crave-worthy. Our thick, grilled veggie patty is packed with wholesome ingredients, topped with melted cheese, crisp lettuce, juicy tomato, and our signature special sauce, all nestled in a toasted sesame bun.</p><ul>
-<li>✅ 100% Vegetarian</li>
-<li>🧀 Melted cheese &amp; fresh veggies</li>
-<li>🍔 Toasted sesame bun</li>
-<li>🌶️ Signature special sauce</li>
-<li>🥗 No artificial preservatives</li>
-</ul><p>Perfect for a quick, delicious meal that doesn\'t compromise on taste or nutrition!</p>',
-  'created_at' => '2026-08-07T08:52:15-04:00',
-  'handle' => 'veggie-burger-deluxe',
-  'id' => 12555129684286,
-  'product_type' => 'Vegetarian Fast Food',
-  'published_at' => '2026-08-07T08:52:16-04:00',
-  'template_suffix' => NULL,
-  'title' => 'Veggie Burger Deluxe',
-  'updated_at' => '2026-08-07T08:52:16-04:00',
-  'vendor' => 'kakshalijani',
-  'status' => 'active',
-  'published_scope' => 'global',
-  'tags' => 'burger, fast-food, plant-based, veg, vegetarian',
-  'variants' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045855351102',
-      'barcode' => NULL,
-      'compare_at_price' => NULL,
-      'created_at' => '2026-08-07T08:52:15-04:00',
-      'id' => 54045855351102,
-      'inventory_policy' => 'deny',
-      'position' => 1,
-      'price' => '8.99',
-      'product_id' => 12555129684286,
-      'sku' => NULL,
-      'taxable' => true,
-      'title' => 'Default Title',
-      'updated_at' => '2026-08-07T08:52:15-04:00',
-      'option1' => 'Default Title',
-      'option2' => NULL,
-      'option3' => NULL,
-      'image_id' => NULL,
-      'inventory_item_id' => 56063807947070,
-      'inventory_quantity' => 0,
-      'old_inventory_quantity' => 0,
-    ),
-  ),
-  'options' => 
-  array (
-    0 => 
-    array (
-      'name' => 'Title',
-      'id' => 15138638364990,
-      'product_id' => 12555129684286,
-      'position' => 1,
-      'values' => 
-      array (
-        0 => 'Default Title',
-      ),
-    ),
-  ),
-  'images' => 
-  array (
-    0 => 
-    array (
-      'id' => 54799522988350,
-      'product_id' => 12555129684286,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:51:14-04:00',
-      'updated_at' => '2026-08-07T08:52:15-04:00',
-      'alt' => 'Veggie Burger Deluxe',
-      'width' => 1024,
-      'height' => 1024,
-      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image.png?v=1786107076',
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799522988350',
-    ),
-  ),
-  'image' => 
-  array (
-    'id' => 54799522988350,
-    'product_id' => 12555129684286,
-    'position' => 1,
-    'created_at' => '2026-08-07T08:51:14-04:00',
-    'updated_at' => '2026-08-07T08:52:15-04:00',
-    'alt' => 'Veggie Burger Deluxe',
-    'width' => 1024,
-    'height' => 1024,
-    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image.png?v=1786107076',
-    'variant_ids' => 
-    array (
-    ),
-    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799522988350',
-  ),
-  'media' => 
-  array (
-    0 => 
-    array (
-      'id' => 45714721407294,
-      'product_id' => 12555129684286,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:51:14-04:00',
-      'updated_at' => '2026-08-07T08:52:15-04:00',
-      'alt' => 'Veggie Burger Deluxe',
-      'status' => 'READY',
-      'media_content_type' => 'IMAGE',
-      'preview_image' => 
-      array (
-        'width' => 1024,
-        'height' => 1024,
-        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image.png?v=1786107076',
-        'status' => 'READY',
-      ),
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45714721407294',
-    ),
-  ),
-  'variant_gids' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045855351102',
-      'updated_at' => '2026-08-07T12:52:15.000Z',
-    ),
-  ),
-  'has_variants_that_requires_components' => false,
-  'category' => 
-  array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-15-2',
-    'name' => 'Prepared Meals & Entrées',
-    'full_name' => 'Food, Beverages & Tobacco > Food Items > Prepared Foods > Prepared Meals & Entrées',
-  ),
-)  
-[2026-08-07 12:52:19] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54045855351102","barcode":"6277246"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1786107138944745.0]}} 
-[2026-08-07 12:53:29] local.INFO: ProductWebhookController call  
-[2026-08-07 12:53:31] local.INFO: generateBarcode job is called  
-[2026-08-07 12:53:31] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-07 12:53:31] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12555129782590',
-  'body_html' => '<h2>🧀 The Ultimate Vegetarian Nacho Experience</h2><p>Get ready for a fiesta of flavours with our <strong>Loaded Veggie Nachos</strong>! Crispy golden tortilla chips piled high with melted cheese, seasoned black beans, pickled jalapeños, cool sour cream, chunky guacamole, and fresh tomato salsa. Every bite is a perfect crunch of indulgence!</p><ul>
-<li>✅ 100% Vegetarian</li>
-<li>🌽 Crispy golden tortilla chips</li>
-<li>🧀 Generous melted cheese</li>
-<li>🥑 Fresh house-made guacamole</li>
-<li>🌶️ Pickled jalapeños for a kick</li>
-<li>🍅 Fresh tomato salsa</li>
-</ul><p>Perfect for sharing — or not! A crowd-pleasing snack that\'s big on flavour and totally meat-free.</p>',
-  'created_at' => '2026-08-07T08:53:26-04:00',
-  'handle' => 'loaded-veggie-nachos',
-  'id' => 12555129782590,
-  'product_type' => 'Vegetarian Fast Food',
-  'published_at' => '2026-08-07T08:53:27-04:00',
-  'template_suffix' => NULL,
-  'title' => 'Loaded Veggie Nachos',
-  'updated_at' => '2026-08-07T08:53:27-04:00',
-  'vendor' => 'kakshalijani',
-  'status' => 'active',
-  'published_scope' => 'global',
-  'tags' => 'fast-food, nachos, snack, veg, vegetarian',
-  'variants' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045855678782',
-      'barcode' => NULL,
-      'compare_at_price' => NULL,
-      'created_at' => '2026-08-07T08:53:26-04:00',
-      'id' => 54045855678782,
-      'inventory_policy' => 'deny',
-      'position' => 1,
-      'price' => '9.49',
-      'product_id' => 12555129782590,
-      'sku' => NULL,
-      'taxable' => true,
-      'title' => 'Default Title',
-      'updated_at' => '2026-08-07T08:53:26-04:00',
-      'option1' => 'Default Title',
-      'option2' => NULL,
-      'option3' => NULL,
-      'image_id' => NULL,
-      'inventory_item_id' => 56063808274750,
-      'inventory_quantity' => 0,
-      'old_inventory_quantity' => 0,
-    ),
-  ),
-  'options' => 
-  array (
-    0 => 
-    array (
-      'name' => 'Title',
-      'id' => 15138638528830,
-      'product_id' => 12555129782590,
-      'position' => 1,
-      'values' => 
-      array (
-        0 => 'Default Title',
-      ),
-    ),
-  ),
-  'images' => 
-  array (
-  ),
-  'image' => NULL,
-  'media' => 
-  array (
-  ),
-  'variant_gids' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045855678782',
-      'updated_at' => '2026-08-07T12:53:26.000Z',
-    ),
-  ),
-  'has_variants_that_requires_components' => false,
-  'category' => 
-  array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-15-1',
-    'name' => 'Prepared Appetizers & Side Dishes',
-    'full_name' => 'Food, Beverages & Tobacco > Food Items > Prepared Foods > Prepared Appetizers & Side Dishes',
-  ),
-)  
-[2026-08-07 12:53:32] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54045855678782","barcode":"6240105"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1786107211897358.0]}} 
-[2026-08-07 12:54:24] local.INFO: ProductWebhookController call  
-[2026-08-07 12:54:26] local.INFO: generateBarcode job is called  
-[2026-08-07 12:54:26] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-07 12:54:26] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12555129880894',
-  'body_html' => '<h2>🌿 The Ultimate Vegetarian Burger Experience</h2><p>Sink your teeth into our <strong>Veggie Burger Deluxe</strong> — a hearty, satisfying burger that proves plant-based can be absolutely crave-worthy. Our thick, grilled veggie patty is packed with wholesome ingredients, topped with melted cheese, crisp lettuce, juicy tomato, and our signature special sauce, all nestled in a toasted sesame bun.</p><ul>
-<li>✅ 100% Vegetarian</li>
-<li>🧀 Melted cheese &amp; fresh veggies</li>
-<li>🍔 Toasted sesame bun</li>
-<li>🌶️ Signature special sauce</li>
-<li>🥗 No artificial preservatives</li>
-</ul><p>Perfect for a quick, delicious meal that doesn\'t compromise on taste or nutrition!</p>',
-  'created_at' => '2026-08-07T08:54:21-04:00',
-  'handle' => 'veggie-burger',
-  'id' => 12555129880894,
-  'product_type' => 'Vegetarian Fast Food',
-  'published_at' => '2026-08-07T08:54:22-04:00',
-  'template_suffix' => NULL,
-  'title' => 'Veggie Burger',
-  'updated_at' => '2026-08-07T08:54:23-04:00',
-  'vendor' => 'kakshalijani',
-  'status' => 'active',
-  'published_scope' => 'global',
-  'tags' => 'burger, fast-food, plant-based, veg, vegetarian',
-  'variants' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045855940926',
-      'barcode' => NULL,
-      'compare_at_price' => NULL,
-      'created_at' => '2026-08-07T08:54:22-04:00',
-      'id' => 54045855940926,
-      'inventory_policy' => 'deny',
-      'position' => 1,
-      'price' => '8.99',
-      'product_id' => 12555129880894,
-      'sku' => NULL,
-      'taxable' => true,
-      'title' => 'Default Title',
-      'updated_at' => '2026-08-07T08:54:22-04:00',
-      'option1' => 'Default Title',
-      'option2' => NULL,
-      'option3' => NULL,
-      'image_id' => NULL,
-      'inventory_item_id' => 56063808536894,
-      'inventory_quantity' => 0,
-      'old_inventory_quantity' => 0,
-    ),
-  ),
-  'options' => 
-  array (
-    0 => 
-    array (
-      'name' => 'Title',
-      'id' => 15138638692670,
-      'product_id' => 12555129880894,
-      'position' => 1,
-      'values' => 
-      array (
-        0 => 'Default Title',
-      ),
-    ),
-  ),
-  'images' => 
-  array (
-    0 => 
-    array (
-      'id' => 54799522988350,
-      'product_id' => 12555129880894,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:51:14-04:00',
-      'updated_at' => '2026-08-07T08:54:22-04:00',
-      'alt' => 'Veggie Burger Deluxe',
-      'width' => 1024,
-      'height' => 1024,
-      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image.png?v=1786107076',
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799522988350',
-    ),
-  ),
-  'image' => 
-  array (
-    'id' => 54799522988350,
-    'product_id' => 12555129880894,
-    'position' => 1,
-    'created_at' => '2026-08-07T08:51:14-04:00',
-    'updated_at' => '2026-08-07T08:54:22-04:00',
-    'alt' => 'Veggie Burger Deluxe',
-    'width' => 1024,
-    'height' => 1024,
-    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image.png?v=1786107076',
-    'variant_ids' => 
-    array (
-    ),
-    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799522988350',
-  ),
-  'media' => 
-  array (
-    0 => 
-    array (
-      'id' => 45714721407294,
-      'product_id' => 12555129880894,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:51:14-04:00',
-      'updated_at' => '2026-08-07T08:54:22-04:00',
-      'alt' => 'Veggie Burger Deluxe',
-      'status' => 'READY',
-      'media_content_type' => 'IMAGE',
-      'preview_image' => 
-      array (
-        'width' => 1024,
-        'height' => 1024,
-        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image.png?v=1786107076',
-        'status' => 'READY',
-      ),
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45714721407294',
-    ),
-  ),
-  'variant_gids' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045855940926',
-      'updated_at' => '2026-08-07T12:54:22.000Z',
-    ),
-  ),
-  'has_variants_that_requires_components' => false,
-  'category' => 
-  array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-15-2',
-    'name' => 'Prepared Meals & Entrées',
-    'full_name' => 'Food, Beverages & Tobacco > Food Items > Prepared Foods > Prepared Meals & Entrées',
-  ),
-)  
-[2026-08-07 12:54:27] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54045855940926","barcode":"4343006"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1786107266798858.0]}} 
-[2026-08-07 12:57:53] local.INFO: ProductWebhookController call  
-[2026-08-07 12:57:54] local.INFO: generateBarcode job is called  
-[2026-08-07 12:57:54] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-07 12:57:54] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12555130208574',
-  'body_html' => '<h2>🧀 The Ultimate Vegetarian Nacho Experience</h2><p>Get ready for a fiesta of flavours with our <strong>Loaded Veggie Nachos</strong>! Crispy golden tortilla chips piled high with melted cheese, seasoned black beans, pickled jalapeños, cool sour cream, chunky guacamole, and fresh tomato salsa. Every bite is a perfect crunch of indulgence!</p><ul>
-<li>✅ 100% Vegetarian</li>
-<li>🌽 Crispy golden tortilla chips</li>
-<li>🧀 Generous melted cheese</li>
-<li>🥑 Fresh house-made guacamole</li>
-<li>🌶️ Pickled jalapeños for a kick</li>
-<li>🍅 Fresh tomato salsa</li>
-</ul><p>Perfect for sharing — or not! A crowd-pleasing snack that\'s big on flavour and totally meat-free.</p>',
-  'created_at' => '2026-08-07T08:57:51-04:00',
-  'handle' => 'loaded-veggie-nachos-1',
-  'id' => 12555130208574,
-  'product_type' => 'Vegetarian Fast Food',
-  'published_at' => '2026-08-07T08:57:52-04:00',
-  'template_suffix' => NULL,
-  'title' => 'Loaded Veggie Nachos',
-  'updated_at' => '2026-08-07T08:57:52-04:00',
-  'vendor' => 'kakshalijani',
-  'status' => 'active',
-  'published_scope' => 'global',
-  'tags' => 'fast-food, nachos, snack, veg, vegetarian',
-  'variants' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045857120574',
-      'barcode' => NULL,
-      'compare_at_price' => NULL,
-      'created_at' => '2026-08-07T08:57:51-04:00',
-      'id' => 54045857120574,
-      'inventory_policy' => 'deny',
-      'position' => 1,
-      'price' => '9.49',
-      'product_id' => 12555130208574,
-      'sku' => NULL,
-      'taxable' => true,
-      'title' => 'Default Title',
-      'updated_at' => '2026-08-07T08:57:51-04:00',
-      'option1' => 'Default Title',
-      'option2' => NULL,
-      'option3' => NULL,
-      'image_id' => NULL,
-      'inventory_item_id' => 56063809716542,
-      'inventory_quantity' => 0,
-      'old_inventory_quantity' => 0,
-    ),
-  ),
-  'options' => 
-  array (
-    0 => 
-    array (
-      'name' => 'Title',
-      'id' => 15138639216958,
-      'product_id' => 12555130208574,
-      'position' => 1,
-      'values' => 
-      array (
-        0 => 'Default Title',
-      ),
-    ),
-  ),
-  'images' => 
-  array (
-    0 => 
-    array (
-      'id' => 54799525380414,
-      'product_id' => 12555130208574,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:53:24-04:00',
-      'updated_at' => '2026-08-07T08:57:51-04:00',
-      'alt' => 'Loaded Veggie Nachos',
-      'width' => 1024,
-      'height' => 1024,
-      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image_ce24ab3c-1915-4998-82a3-122b3d143e43.png?v=1786107206',
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799525380414',
-    ),
-  ),
-  'image' => 
-  array (
-    'id' => 54799525380414,
-    'product_id' => 12555130208574,
-    'position' => 1,
-    'created_at' => '2026-08-07T08:53:24-04:00',
-    'updated_at' => '2026-08-07T08:57:51-04:00',
-    'alt' => 'Loaded Veggie Nachos',
-    'width' => 1024,
-    'height' => 1024,
-    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image_ce24ab3c-1915-4998-82a3-122b3d143e43.png?v=1786107206',
-    'variant_ids' => 
-    array (
-    ),
-    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54799525380414',
-  ),
-  'media' => 
-  array (
-    0 => 
-    array (
-      'id' => 45714723799358,
-      'product_id' => 12555130208574,
-      'position' => 1,
-      'created_at' => '2026-08-07T08:53:24-04:00',
-      'updated_at' => '2026-08-07T08:57:51-04:00',
-      'alt' => 'Loaded Veggie Nachos',
-      'status' => 'READY',
-      'media_content_type' => 'IMAGE',
-      'preview_image' => 
-      array (
-        'width' => 1024,
-        'height' => 1024,
-        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/image_ce24ab3c-1915-4998-82a3-122b3d143e43.png?v=1786107206',
-        'status' => 'READY',
-      ),
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45714723799358',
-    ),
-  ),
-  'variant_gids' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54045857120574',
-      'updated_at' => '2026-08-07T12:57:51.000Z',
-    ),
-  ),
-  'has_variants_that_requires_components' => false,
-  'category' => 
-  array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-15-1',
-    'name' => 'Prepared Appetizers & Side Dishes',
-    'full_name' => 'Food, Beverages & Tobacco > Food Items > Prepared Foods > Prepared Appetizers & Side Dishes',
-  ),
-)  
-[2026-08-07 12:57:56] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54045857120574","barcode":"5682912"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1786107474903078.0]}} 
+[2026-08-08 08:06:42] local.INFO: Template Created {"id":254} 
+[2026-08-08 08:06:49] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":26,"requested_template_id":"254"} 
+[2026-08-08 08:06:49] local.INFO: BARCODE SETTINGS {"id":19,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"EAN8","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T03:46:53.000000Z","updated_at":"2026-08-08T07:58:10.000000Z"} 
+[2026-08-08 08:06:49] local.INFO: TEMPLATE DESIGN {"id":255,"barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","barcode_format":"CODE128","symbol_color":"#2c00cc","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z"} 
+[2026-08-08 08:06:49] local.INFO: FINAL RESPONSE {"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"} 
+[2026-08-08 08:07:09] local.INFO: BARCODE SETTINGS {"id":19,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"EAN8","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T03:46:53.000000Z","updated_at":"2026-08-08T07:58:10.000000Z"} 
+[2026-08-08 08:07:09] local.INFO: TEMPLATE DESIGN {"id":255,"barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","barcode_format":"CODE128","symbol_color":"#2c00cc","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z"} 
+[2026-08-08 08:07:09] local.INFO: FINAL RESPONSE {"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":"","symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"} 
+[2026-08-08 08:07:31] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12521407349054","variant_id":"gid://shopify/ProductVariant/53918468505918","product_title":"cake","current_sku":"SKU-CAK-SHF-FAS-SWE-21-20","barcode":"4049721350539","barcode_format":"CODE128","template_settings":{"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":null,"symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"},"online_url":"https://kakshalijani.myshopify.com/products/cake","price":"250.30","vendor":"shfb","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:07:31] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12546849308990","variant_id":"gid://shopify/ProductVariant/53997471269182","product_title":"Cold Coffe","current_sku":"SKU-COL-COF-DRI-STR-22-20","barcode":"7636842600013","barcode_format":"CODE128","template_settings":{"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":null,"symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"},"online_url":"https://kakshalijani.myshopify.com/products/cold-coffe","price":"20.30","vendor":"Coffe","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:07:31] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12521408135486","variant_id":"gid://shopify/ProductVariant/53919880020286","product_title":"Donuts","current_sku":"SKU-DON-MAG-FAS-SWE-23-20","barcode":"5521700364084","barcode_format":"CODE128","template_settings":{"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":null,"symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"},"online_url":"https://kakshalijani.myshopify.com/products/donuts","price":"56.20","vendor":"magecomp","variant_title":"Medium","option_1":"Medium","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:07:31] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12448390775102","variant_id":"gid://shopify/ProductVariant/53710409335102","product_title":"Dumplings","current_sku":"SKU-DUM-DUM-FAS-SPI-24-20","barcode":"5881370582143","barcode_format":"CODE128","template_settings":{"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":null,"symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"},"online_url":"https://kakshalijani.myshopify.com/products/dumplings","price":"190.30","vendor":"Dumplings","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 
+[2026-08-08 08:07:31] local.INFO: SAVE HISTORY PRODUCT {"product_id":"gid://shopify/Product/12518689571134","variant_id":"gid://shopify/ProductVariant/53904982769982","product_title":"ice cream","current_sku":"SKU-ICE-SHF-FAS-SWE-13-20","barcode":"3478385","barcode_format":"CODE128","template_settings":{"id":255,"user_id":26,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"CODE128","barcode_pattern":"[N.13]","contextual_pricing_value":"20","created_at":"2026-08-08T08:06:42.000000Z","updated_at":"2026-08-08T08:06:42.000000Z","barcode_template_id":254,"selected_variant_id":"gid://shopify/ProductVariant/53710409335102","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":false,"line2_currency_format":"${{amount}}","line2_show_price_per_unit":false,"line2_variant_option1":false,"line3_vendor":false,"symbol_enabled":true,"symbol_type":"QR","symbol_color":"#2c00cc","symbol_logo_filename":null,"symbol_field_source":"product_online_url","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":1,"template_name":"QR_URL"},"online_url":"https://kakshalijani.myshopify.com/products/ice-cream","price":"100.30","vendor":"shfb","variant_title":"Default Title","option_1":"Default Title","option_2":null,"option_3":null,"qty":1} 

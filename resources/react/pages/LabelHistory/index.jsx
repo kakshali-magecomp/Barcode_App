@@ -14,12 +14,13 @@ export default function LabelHistory() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [error, setError] = useState("");
-
+  
   const [selectedHistory, setSelectedHistory] = useState(null);
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const printRef = useRef(null);
   const [selectedItems, setSelectedItems] = useState([]);
+  const [printQuantities, setPrintQuantities] = useState({});
   const [selectedRows, setSelectedRows] = useState([]);
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -95,6 +96,13 @@ useEffect(() => {
       }
       const history = json.data;
       setHistoryDetails(history);
+      const quantities = {};
+
+json.data.items.forEach((item, index) => {
+    quantities[index] = Number(item.qty) || 1;
+});
+
+setPrintQuantities(quantities);
       setSelectedItems((history.items || []).map((_, index) => index));
       shopify.modal.show(VIEW_MODAL_ID);
     } catch (err) {
@@ -125,142 +133,279 @@ useEffect(() => {
     shopify.modal.hide(DELETE_MODAL_ID);
   };
 
-  const handlePrintHistory = () => {
+ const handlePrintHistory = () => {
     if (!historyDetails) return;
-
     const printWindow = window.open("", "_blank");
-
+    if (!printWindow) {
+        shopify.toast.show("Please allow pop-ups to print.");
+        return;
+    }
+    // Keep original index so printQuantities[index] works correctly
     const labels = historyDetails.items
-      .filter((_, index) => selectedItems.includes(index))
-      .map((item) => {
-        const settings = item.template_settings || {};
-
-        let symbolValue = "";
-
-        switch (settings.symbol_field_source) {
-          case "sku_value":
-            symbolValue = item.sku;
-            break;
-          case "barcode_value":
-            symbolValue = item.barcode;
-            break;
-          case "product_name":
-            symbolValue = item.product_title;
-            break;
-          case "product_price":
-            symbolValue = item.price;
-            break;
-          case "product_online_url":
-            symbolValue = item.online_url;
-            break;
-          default:
-            symbolValue = item.barcode;
-        }
-
-        let html = "";
-
-        for (let i = 0; i < item.qty; i++) {
-          html += `
-        <div class="label">
-            ${settings.line2_name ? `<div class="title">${item.product_title ?? ""}</div>` : ""}
-            ${settings.line1_sku ? `<div class="sku">${item.sku ?? ""}</div>` : ""}
-            ${settings.symbol_enabled
-              ? settings.symbol_type === "QR"
-                ? `
-                <img
-                    class="qr"
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140}x${settings.symbol_width_px || 140}
-                    &color=${(settings.symbol_color || "#000000").replace("#","")}&data=${encodeURIComponent(symbolValue || "")}"/>
-                `
-                : `
-                <svg
-                    class="barcode"
-                    data-format="${settings.barcode_format || "CODE128"}"
-                    data-value="${String(symbolValue || "").trim()}"
-                    data-width="${settings.symbol_bar_width || 2}"
-                    data-height="${settings.symbol_bar_height || 45}"
-                    data-font="${settings.symbol_font_size || 16}"
-                    data-display="${settings.hide_barcode_value ? "false" : "true"}"
-                    data-color="${settings.symbol_color || "#000000"}">
-                </svg>
-                `
-              : ""
+        .map((item, originalIndex) => ({
+            item,
+            originalIndex,
+        }))
+        .filter(({ originalIndex }) =>
+            selectedItems.includes(originalIndex)
+        )
+        .map(({ item, originalIndex }) => {
+            const settings = item.template_settings || {};
+            let symbolValue = "";
+            switch (settings.symbol_field_source) {
+                case "sku_value":
+                    symbolValue = item.sku || "";
+                    break;
+                case "barcode_value":
+                    symbolValue = item.barcode || "";
+                    break;
+                case "product_name":
+                    symbolValue = item.product_title || "";
+                    break;
+                case "product_price":
+                    symbolValue = item.price || "";
+                    break;
+                case "product_online_url":
+                    symbolValue = item.online_url || "";
+                    break;
+                default:
+                    symbolValue = item.barcode || "";
+                    break;
             }
-        </div>
-        `;
-        }
+            const quantity = Math.max(
+                1,
+                Number(printQuantities?.[originalIndex] || item.qty || 1)
+            );
 
-        return html;
-      })
-      .join("");
+            let html = "";
+            for (let i = 0; i < quantity; i++) {
+                let symbolHTML = "";
+                if (settings.symbol_enabled) {
+                    if (settings.symbol_type === "QR") {
+                        const qrSize = Number(
+                            settings.symbol_width_px || 140
+                        );
+                        const qrColor = (
+                            settings.symbol_color || "#000000"
+                        ).replace("#", "");
+                        const qrURL =
+                            `https://api.qrserver.com/v1/create-qr-code/` +
+                            `?size=${qrSize}x${qrSize}` +
+                            `&color=${qrColor}` +
+                            `&data=${encodeURIComponent(
+                                String(symbolValue || "")
+                            )}`;
+                        symbolHTML = `
+                            <img
+                                class="qr"
+                                src="${qrURL}"
+                                alt="QR Code"
+                            />
+                        `;
+                    }
+                    else {
+
+                        symbolHTML = `
+                            <svg
+                                class="barcode"
+                                data-format="${settings.barcode_format === "UPCA"? "UPC"
+                                : settings.barcode_format || "CODE128"
+                                }"
+                                data-value="${String(symbolValue || "").trim()}"
+                                data-width="${settings.symbol_bar_width || 2}"
+                                data-height="${settings.symbol_bar_height || 45}"
+                                data-font="${settings.symbol_font_size || 16}"
+                                data-display="${
+                                    settings.hide_barcode_value
+                                        ? "false"
+                                        : "true"
+                                }"
+                                data-color="${
+                                    settings.symbol_color || "#000000"
+                                }">
+                            </svg>
+                        `;
+                    }
+                }
+
+                html += `
+                    <div class="label">
+                        ${
+                            settings.line2_name
+                                ? `
+                                    <div class="title">
+                                        ${item.product_title || ""}
+                                    </div>
+                                  `
+                                : ""
+                        }
+                        ${
+                            settings.line1_sku
+                                ? `
+                                    <div class="sku">
+                                        ${item.sku || ""}
+                                    </div>
+                                  `
+                                : ""
+                        }
+                        ${symbolHTML}
+                    </div>
+                `;
+            }
+            return html;
+        })
+        .join("");
 
     printWindow.document.write(`
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Print History</title>
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-<style>
-@page{margin:5mm;}
-body{margin:10px;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;font-family:Arial,sans-serif;}
-.label{width:250px;min-height:140px;border:1px solid #ddd;padding:10px;box-sizing:border-box;text-align:center;page-break-inside:avoid;break-inside:avoid;overflow:hidden;}
-.title{font-size:13px;font-weight:bold;margin-bottom:5px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
-.sku{font-size:12px;margin-bottom:10px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
-.barcode{max-width:100%;height:auto;}
-.qr{display:block;margin:auto;max-width:100%;}
-</style>
-</head>
-<body>
-${labels}
-<script>
-window.onload=function(){
-document.querySelectorAll(".barcode").forEach(function(el){
-    let value=String(el.dataset.value||"").trim();
-    let format=String(el.dataset.format||"CODE128").toUpperCase();
-    if(format==="UPCA"){format="UPC";}
-    if(format==="UPC"){
-        value=value.replace(/\\D/g,"");
-        if(value.length===11){
-            let sum=0;
-            for(let i=0;i<11;i++){
-                if(i%2===0){sum+=parseInt(value[i])*3;}else{sum+=parseInt(value[i]);}
-            }
-            const check=(10-(sum%10))%10;
-            value=value+check;
-        }
-    }
-    const barcodeOptions={
-        width:Number(el.dataset.width)||2,
-        height:Number(el.dataset.height)||45,
-        fontSize:Number(el.dataset.font)||16,
-        displayValue:el.dataset.display==="true",
-        lineColor: String(el.dataset.color || "#000000"),
-        background:"#ffffff",
-        margin:2
-    };
-    try{
-        JsBarcode(el,value,{...barcodeOptions,format:format});
-    }catch(e){
-        // Fall back to CODE128 instead of showing "Invalid Barcode" — it
-        // accepts virtually any value/length, so whatever was actually
-        // saved in label history still prints as a scannable barcode.
-        try{
-            JsBarcode(el,value,{...barcodeOptions,format:"CODE128"});
-        }catch(e2){
-            console.error(e2);
-        }
-    }
-});
-setTimeout(function(){window.print();window.close();},500);
-}
-</script>
-</body>
-</html>
-`);
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>
+                Print Job #${historyDetails.id || ""}
+            </title>
+            <!-- JsBarcode -->
+            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+            <style>
+
+                @page {
+                    margin: 5mm;
+                }
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                html,
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background: #ffffff;
+                    font-family: Arial, sans-serif;
+                }
+
+                body {
+                    padding: 10px;
+                    display: grid;
+                    grid-template-columns:
+                        repeat(auto-fill, 250px);
+                    gap: 10px;
+                    align-items: start;
+                }
+                .label {
+                    width: 250px;
+                    min-height: 140px;
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: center;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
+                    align-items: center;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                    overflow: hidden;
+                }
+                .title {
+                    width: 100%;
+                    font-size: 13px;
+                    font-weight: 700;
+                    margin-bottom: 5px;
+                    word-break: break-word;
+                    overflow-wrap: anywhere;
+                    white-space: normal;
+                }
+                .sku {
+                    width: 100%;
+                    font-size: 12px;
+                    margin-bottom: 8px;
+                    word-break: break-word;
+                    overflow-wrap: anywhere;
+                    white-space: normal;
+                }
+                .barcode {
+                    max-width: 100%;
+                    height: auto;
+                    display: block;
+                    margin: 5px auto;
+                }
+                .qr {
+                    width: auto;
+                    height: auto;
+                    max-width: 100%;
+                    display: block;
+                    margin: 5px auto;
+                }
+                @media print {
+                    body {
+                        padding: 0;
+                    }
+                    .label {
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+
+                }
+            </style>
+        </head>
+        <body>
+            ${labels}
+            <script>
+                window.onload = function () {
+                    // Find all generated barcodes
+                    const barcodes =
+                        document.querySelectorAll(".barcode");
+                    barcodes.forEach(function (barcode) {
+                        const format =
+                            barcode.dataset.format || "CODE128";
+                        const value =
+                            barcode.dataset.value || "";
+                        const width =
+                            Number(barcode.dataset.width) || 2;
+                        const height =
+                            Number(barcode.dataset.height) || 45;
+                        const fontSize =
+                            Number(barcode.dataset.font) || 16;
+                        const displayValue =
+                            barcode.dataset.display !== "false";
+                        const color =
+                            barcode.dataset.color || "#000000";
+                        try {
+                            JsBarcode(
+                                barcode,
+                                value,
+                                {
+                                    format: format,
+                                    width: width,
+                                    height: height,
+                                    fontSize: fontSize,
+                                    displayValue: displayValue,
+                                    lineColor: color,
+                                    margin: 0
+                                }
+                            );
+                        } catch (error) {
+                            console.error(
+                                "Barcode generation failed:",
+                                error
+                            );
+                        }
+                    });
+
+                    // Give QR images time to load
+                    setTimeout(function () {
+                        window.focus();
+                        window.print();
+                    }, 500);
+
+                };
+            </script>
+        </body>
+        </html>
+    `);
 
     printWindow.document.close();
-  };
+};
 
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
@@ -558,7 +703,7 @@ th{background:#f5f5f5;}
                     key={index}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "40px 2fr 2fr 1.5fr 80px",
+                      gridTemplateColumns: "40px 2fr 2fr 1.5fr 130px",
                       alignItems: "center",
                       padding: "12px 18px",
                       borderBottom:
@@ -585,9 +730,44 @@ th{background:#f5f5f5;}
                     <div>
                       <s-badge tone="info">{item.barcode}</s-badge>
                     </div>
-                    <div style={{ textAlign: "center" }}>
-                      <s-badge tone="success">{item.qty}</s-badge>
-                    </div>
+                    <div
+    style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "8px",
+    }}
+>
+    <s-button
+        variant="tertiary"
+        accessibilityLabel={`Decrease quantity for ${item.product_title}`}
+        onClick={() => {
+            setPrintQuantities((prev) => ({
+                ...prev,
+                [index]: Math.max(1, (prev[index] || 1) - 1),
+            }));
+        }}
+    >
+        −
+    </s-button>
+
+    <s-badge tone="success">
+        {printQuantities[index] || 1}
+    </s-badge>
+
+    <s-button
+        variant="tertiary"
+        accessibilityLabel={`Increase quantity for ${item.product_title}`}
+        onClick={() => {
+            setPrintQuantities((prev) => ({
+                ...prev,
+                [index]: (prev[index] || 1) + 1,
+            }));
+        }}
+    >
+        +
+    </s-button>
+</div>
                   </div>
                 ))}
               </div>

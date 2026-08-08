@@ -47,7 +47,7 @@ export default function PrintPanel({ settings = {}, templates = [], onChange }) 
                 </s-grid>
 
                 <s-select
-                    label="Default Generate Option"
+                    label="Default Barcode Generate Option"
                     value={settings.default_generate_option || 'missing'}
                     onChange={(e) => onChange('default_generate_option', e.currentTarget.value)}
                 >

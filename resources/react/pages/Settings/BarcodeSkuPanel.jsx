@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 export default function BarcodeSkuPanel({ settings, onChange }) {
     const formatOptions = [
         { label: 'Code 128 (Recommended)', value: 'CODE128' },
-        { label: 'Code 39', value: 'Code39' },
+        { label: 'Code 39', value: 'CODE39' },
         { label: 'EAN 8', value: 'EAN8' },
         { label: 'EAN 13', value: 'EAN13' },
         { label: 'UPC-A', value: 'UPCA' },

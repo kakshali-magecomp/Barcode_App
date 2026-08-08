@@ -174,7 +174,7 @@ export default function SettingsIndex() {
     return (
         <>
             <ui-save-bar id={SAVE_BAR_ID}>
-                <button variant="primary" loading={loading || undefined} onClick={handleSave}>Save</button>
+                <button variant="primary" loading={loading ? "" : undefined} onClick={handleSave}>Save</button>
                 <button onClick={handleDiscard}>Discard</button>
             </ui-save-bar>
             <s-page heading="App Settings">  

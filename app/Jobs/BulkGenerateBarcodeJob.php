@@ -16,7 +16,6 @@ class BulkGenerateBarcodeJob implements ShouldQueue
 
     public $tries = 3;
     public $timeout = 120;
-
     protected $bulkOperationId;
     protected $userId;
     protected $variants; // this chunk's variants only
