@@ -3,10 +3,19 @@ import React from 'react';
 export default function PrintPanel({ settings = {}, templates = [], onChange }) {
 
     const currencyOptions = [
-        { label: 'Email without currency (e.g., 10.00)', value: 'without_currency' },
-        { label: 'Email with currency', value: 'with_currency' }
+        {
+            label: 'Without currency (e.g. 10.00)',
+            value: 'without_currency'
+        },
+        {
+            label: 'With currency (e.g. $10.00)',
+            value: 'with_currency'
+        },
+        {
+            label: 'Currency code (e.g. 10.00 USD)',
+            value: 'currency_code'
+        }
     ];
-
     const generateOptions = [
         { label: "Only generate barcode for selected products or variants that don't have barcode value yet", value: 'missing' },
         { label: "Generate barcode for all selected products or variants. If products or variants don't have barcode value, generate new barcode data. If products or variants already have barcode value, replace the old value with new one", value: 'replace' },

@@ -413,6 +413,33 @@ ${labels}
     const previewStart = (previewPage - 1) * PREVIEW_PAGE_SIZE;
     const previewEnd = previewStart + PREVIEW_PAGE_SIZE;
 
+    const formatProductPrice = (product) => {
+        const decimals = Number(
+            printSettings?.price_decimal_number ?? 2
+        );
+
+        let originalPrice = Number(product?.price ?? 0);
+
+        // Only keep this if your API can return price in cents
+        if (originalPrice > 999) {
+            originalPrice = originalPrice / 100;
+        }
+
+        // VAT
+        const vatPercentage = Number(
+            printSettings?.vat_percentage ?? 0
+        );
+
+        const priceWithVat =
+            originalPrice +
+            (originalPrice * vatPercentage) / 100;
+
+        const amount = priceWithVat.toFixed(decimals);
+
+        const format = templateDesign?.line2_currency_format || "{amount}";
+        return format.replace("{amount}", amount);
+    };
+
     return (
         <>
             <s-page heading="Generate Barcode" subheading="Manage and edit your customized Barcode">
@@ -613,6 +640,7 @@ ${labels}
                             quantity:
                                 selectedProducts.find(p => p.variant_id === product.variant_id)?.quantity ??
                                 product.quantity ??
+                                printSettings?.default_print_label_quantity ??
                                 1,
                         }));
 
@@ -702,9 +730,7 @@ ${labels}
                                             {templateDesign?.line2_name && <div>{product.product_title}</div>}
                                             {templateDesign?.line2_price && (
                                                 <div>
-                                                    {Number(product.price || 0).toFixed(
-                                                        Number(printSettings?.price_decimal_number ?? 2)
-                                                    )}
+                                                    {formatProductPrice(product)}
                                                 </div>
                                             )}
                                             {templateDesign.symbol_type === "BARCODE" ? (

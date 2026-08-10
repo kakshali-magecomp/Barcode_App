@@ -9,7 +9,7 @@ import QrCodeRenderer from '../../components/QrCodeRenderer';
 const SAVE_BAR_ID = 'designer-bar';
 
 export default function DesignCanvas() {
-    
+
     const shopify = useAppBridge();
     const { id } = useParams();
     const navigate = useNavigate();
@@ -258,9 +258,47 @@ ${labels}
     };
 
     const formatPreviewPrice = () => {
-        const format = design.line2_currency_format || "${amount}";
-        const amount = Number(previewItem.price || 0).toFixed(2);
-        return format.replace("{amount}", amount);
+        const decimals = Number(
+            printSettings?.price_decimal_number ?? 2
+        );
+
+        // Original Shopify variant price
+        let price = Number(previewItem?.price ?? 0);
+
+        // If price accidentally comes as cents (2086), convert to dollars
+        if (price > 999) {
+            price = price / 100;
+        }
+
+        // VAT CALCULATION
+        const vatPercentage = Number(
+            printSettings?.vat_percentage ?? 0
+        );
+
+        const vatAmount = (price * vatPercentage) / 100;
+
+        // Price including VAT
+        const priceWithVat = price + vatAmount;
+
+        // Apply decimal setting AFTER VAT calculation
+        const amount = priceWithVat.toFixed(decimals);
+
+        const currencyFormat =
+            design.line2_currency_format ||
+            printSettings?.currency_format ||
+            "without_currency";
+
+        switch (currencyFormat) {
+            case "without_currency":
+                return amount;
+
+            case "currency_code":
+                return `${amount} USD`;
+
+            case "with_currency":
+            default:
+                return `$${amount}`;
+        }
     };
 
     if (pageLoading) {
@@ -275,7 +313,7 @@ ${labels}
 
     return (
         <>
-           
+
             <ui-save-bar id={SAVE_BAR_ID}>
                 <button variant="primary" onClick={handleSave} disabled={loading || undefined}>
                     Save Design
@@ -285,7 +323,7 @@ ${labels}
 
             <s-page heading={`${templateTitle} - Design`}>
                 <s-section>
-                    
+
                     <s-link href="/TemplateList">← Back to Templates</s-link>
                 </s-section>
 

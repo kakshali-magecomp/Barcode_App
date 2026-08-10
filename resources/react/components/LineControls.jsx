@@ -5,7 +5,7 @@ export default function LineControls({ design, handleUpdate }) {
     return (
         <s-stack direction="block" gap="base">
             <s-section>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9' , paddingTop: '12px'}}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #bbc3c9', paddingTop: '12px' }}>
                     <s-heading>Line 1: 1 limited</s-heading>
                     <s-icon type="settings" tone="subdued"></s-icon>
                 </div>
@@ -32,8 +32,11 @@ export default function LineControls({ design, handleUpdate }) {
                     <s-checkbox
                         label="Price"
                         checked={!!design.line2_price || undefined}
-                        onChange={(e) => handleUpdate('line2_price', e.currentTarget.checked)}
+                        onChange={(e) =>
+                            handleUpdate("line2_price", e.currentTarget.checked)
+                        }
                     />
+
                     {design.line2_price && (
                         <div style={{ padding: '12px', backgroundColor: '#f1f2f4', borderRadius: '4px' }}>
                             <s-text-field

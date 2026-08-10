@@ -78,6 +78,13 @@ export default function DesignCanvasEdit({
                     ...template.data,
                     print_qty: defaultQty,
                 };
+
+                if (loadedDesign.line2_currency_format) {
+                    loadedDesign.line2_currency_format = loadedDesign.line2_currency_format
+                        .replace(/\{\{amount\}\}/gi, "{amount}")
+                        .trim();
+                }
+
                 setDesign(loadedDesign);
                 initialLoadCompleted.current = true;
             }
@@ -126,28 +133,28 @@ export default function DesignCanvasEdit({
         });
     }
 
-   const handlePrint = () => {
-    if (!printRef.current) return;
+    const handlePrint = () => {
+        if (!printRef.current) return;
 
-    const qty = Number(design.print_qty) || 1;
+        const qty = Number(design.print_qty) || 1;
 
-    let labels = "";
+        let labels = "";
 
-    for (let i = 0; i < qty; i++) {
-        labels += `
+        for (let i = 0; i < qty; i++) {
+            labels += `
             <div class="label">
                 ${printRef.current.innerHTML}
             </div>
         `;
-    }
+        }
 
-    const printWindow = window.open(
-        "",
-        "_blank",
-        "width=900,height=700"
-    );
+        const printWindow = window.open(
+            "",
+            "_blank",
+            "width=900,height=700"
+        );
 
-    printWindow.document.write(`
+        printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
@@ -293,8 +300,8 @@ export default function DesignCanvasEdit({
         </html>
     `);
 
-    printWindow.document.close();
-};
+        printWindow.document.close();
+    };
 
     if (loading) {
         return (
@@ -324,9 +331,70 @@ export default function DesignCanvasEdit({
     };
 
     const formatPrice = (price) => {
-        const amount = Number(price || 0).toFixed(2);
-        let format = design.line2_currency_format || "${amount}";
-        return format.replace("{amount}", amount);
+        const decimals = Number(
+            printSettings?.price_decimal_number ?? 2
+        );
+
+        // Shopify price
+        let originalPrice = Number(price ?? 0);
+
+        if (!Number.isFinite(originalPrice)) {
+            originalPrice = 0;
+        }
+
+        // Only convert if your API actually returns cents
+        if (originalPrice > 999) {
+            originalPrice = originalPrice / 100;
+        }
+
+        // VAT
+        const vatPercentage = Number(
+            printSettings?.vat_percentage ?? 0
+        );
+
+        const priceWithVat =
+            originalPrice +
+            (originalPrice * vatPercentage) / 100;
+
+        const amount = priceWithVat.toFixed(decimals);
+
+
+        // TEMPLATE FORMAT HAS FIRST PRIORITY
+
+
+        let templateFormat = String(
+            design?.line2_currency_format ?? ""
+        ).trim();
+
+        // Fix old saved formats
+        templateFormat = templateFormat
+            .replace(/\{\{amount\}\}/gi, "{amount}")
+            .replace(/\$\{amount\}\}/gi, "{amount} USD");
+
+        // If template has {amount}, ALWAYS use it.
+        if (templateFormat.includes("{amount}")) {
+            return templateFormat.replace(
+                /\{amount\}/g,
+                amount
+            );
+        }
+
+
+        // GLOBAL PRINT SETTING
+
+
+        const globalFormat =
+            printSettings?.currency_format ?? "without_currency";
+
+        if (globalFormat === "currency_code") {
+            return `${amount} USD`;
+        }
+
+        if (globalFormat === "with_currency") {
+            return `$${amount}`;
+        }
+
+        return amount;
     };
 
     return (
@@ -463,7 +531,7 @@ export default function DesignCanvasEdit({
                         {/* Print */}
                         <div style={{ borderTop: "1px solid #e1e3e5", paddingTop: "16px" }}>
                             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                                
+
                                 <s-number-field
                                     label="Print Quantity"
                                     value={String(design.print_qty || 1)}

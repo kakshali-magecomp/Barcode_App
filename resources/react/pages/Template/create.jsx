@@ -5,7 +5,7 @@ import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
 import QrCodeRenderer from '../../components/QrCodeRenderer';
-
+import PaperTemplateSettings from "../../components/PaperTemplateSettings";
 const SAVE_BAR_ID = 'create-template-save-bar';
 
 const defaultDesign = {
@@ -33,10 +33,7 @@ export default function CreateTemplate() {
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
-
-    // Design state — purely local until the final submit, since there's no
-    // template id to save design settings against until the template itself
-    // is created.
+    const [printSettings, setPrintSettings] = useState(null);
     const [design, setDesign] = useState(defaultDesign);
 
     // Preview state
@@ -102,19 +99,34 @@ export default function CreateTemplate() {
         }
     }, [isDirty, shopify]);
 
-   
+
     useEffect(() => {
         async function loadPreviewData() {
             try {
-                const [productRes, barcodeRes] = await Promise.all([
+                const [productRes, barcodeRes, printRes] = await Promise.all([
                     fetch('/api/products'),
                     fetch('/api/barcode-settings'),
+                    fetch('/api/print-settings'),
                 ]);
                 const products = await productRes.json();
                 const barcode = await barcodeRes.json();
+                const print = await printRes.json();
 
                 if (barcode.success) {
                     setBarcodeSettings(barcode.settings || barcode.data || barcode);
+                }
+                if (print.success) {
+                    setPrintSettings(print.settings);
+
+                    const snapshotFormat =
+                        print.settings.currency_format === 'with_currency' ? '${amount}' :
+                            print.settings.currency_format === 'currency_code' ? '{amount} USD' :
+                                '{amount}';
+                    setDesign((prev) => ({
+                        ...prev,
+                        print_qty: print.settings.default_print_label_quantity || 1,
+                        line2_currency_format: prev.line2_currency_format || snapshotFormat,
+                    }));
                 }
 
                 if (products.status === 1 && products.variants?.length) {
@@ -201,41 +213,416 @@ export default function CreateTemplate() {
     };
 
     const formatPreviewPrice = () => {
-        const amount = Number(previewItem.price || 0).toFixed(2);
-        const format = design.line2_currency_format || '${amount}';
-        return format.replace('{amount}', amount);
+        const decimals = Number(
+            printSettings?.price_decimal_number ?? 2
+        );
+
+        // Original Shopify variant price
+        let price = Number(previewItem?.price ?? 0);
+
+        // If price accidentally comes as cents (2086), convert to dollars
+        if (price > 999) {
+            price = price / 100;
+        }
+
+        // VAT CALCULATION
+        const vatPercentage = Number(
+            printSettings?.vat_percentage ?? 0
+        );
+
+        const vatAmount = (price * vatPercentage) / 100;
+
+        // Price including VAT
+        const priceWithVat = price + vatAmount;
+
+        // Apply decimal setting AFTER VAT calculation
+        const amount = priceWithVat.toFixed(decimals);
+
+        const format = design.line2_currency_format || "{amount}";
+        return format.replace("{amount}", amount);
     };
 
-    const handlePrint = () => {
-        if (!printRef.current) return;
-        const qty = Number(design.print_qty) || 1;
-        let labels = '';
-        for (let i = 0; i < qty; i++) {
-            labels += `<div class="label">${printRef.current.innerHTML}</div>`;
-        }
-        const printWindow = window.open('', '', 'width=900,height=700');
-        printWindow.document.write(`
-<html>
-<head>
-<title>Print Label</title>
-<style>
-body{margin:20px;display:flex;flex-wrap:wrap;gap:12px;font-family:Arial,sans-serif;}
-.label{width:250px;border:1px solid #ddd;padding:20px;page-break-inside:avoid;}
-svg{max-width:100%;}
-</style>
-</head>
-<body>
-${labels}
-</body>
-</html>
-`);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => {
-            printWindow.print();
-            printWindow.close();
-        }, 500);
-    };
+   const handlePrint = () => {
+    if (!printRef.current) return;
+
+    const qty = Math.max(
+        1,
+        Number(design.print_qty) || 1
+    );
+
+ 
+    const paper =
+        PAPER_TEMPLATES?.[brand]?.[model];
+
+    if (!paper) {
+        shopify.toast.show(
+            "Please select a paper brand and paper model."
+        );
+        return;
+    }
+
+   
+
+    const paperWidth = Number(
+        paper.paper.width
+    );
+
+    const paperHeight = Number(
+        paper.paper.height
+    );
+
+    const labelWidth = Number(
+        paper.label.width
+    );
+
+    const labelHeight = Number(
+        paper.label.height
+    );
+
+    const rows = Number(
+        paper.rows || 1
+    );
+
+    const columns = Number(
+        paper.columns || 1
+    );
+
+    const gapX = Number(
+        paper.gapX || 0
+    );
+
+    const gapY = Number(
+        paper.gapY || 0
+    );
+
+    const marginTop = Number(
+        paper.marginTop || 0
+    );
+
+    const marginLeft = Number(
+        paper.marginLeft || 0
+    );
+
+
+   
+
+    let labels = "";
+
+    for (let i = 0; i < qty; i++) {
+        labels += `
+            <div class="label">
+                ${printRef.current.innerHTML}
+            </div>
+        `;
+    }
+
+
+   
+    const printWindow = window.open(
+        "",
+        "_blank",
+        "width=1000,height=800"
+    );
+
+    if (!printWindow) {
+        shopify.toast.show(
+            "Please allow pop-ups to print."
+        );
+        return;
+    }
+
+
+
+
+    printWindow.document.write(`
+        <!DOCTYPE html>
+
+        <html>
+        <head>
+
+            <meta charset="UTF-8">
+
+            <title>
+                ${paper.name || "Barcode Labels"}
+            </title>
+
+            <style>
+
+
+                @page {
+                    size:
+                        ${paperWidth}mm
+                        ${paperHeight}mm;
+
+                    margin: 0;
+                }
+
+
+                
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                html,
+                body {
+                    margin: 0;
+                    padding: 0;
+
+                    width:
+                        ${paperWidth}mm;
+
+                    min-height:
+                        ${paperHeight}mm;
+
+                    background: #ffffff;
+
+                    font-family:
+                        Arial,
+                        Helvetica,
+                        sans-serif;
+                }
+
+
+               
+
+                .print-sheet {
+
+                    width:
+                        ${paperWidth}mm;
+
+                    min-height:
+                        ${paperHeight}mm;
+
+                    display: grid;
+
+                    grid-template-columns:
+                        repeat(
+                            ${columns},
+                            ${labelWidth}mm
+                        );
+
+                    grid-template-rows:
+                        repeat(
+                            ${rows},
+                            ${labelHeight}mm
+                        );
+
+                    column-gap:
+                        ${gapX}mm;
+
+                    row-gap:
+                        ${gapY}mm;
+
+                    padding-top:
+                        ${marginTop}mm;
+
+                    padding-left:
+                        ${marginLeft}mm;
+
+                    align-content:
+                        start;
+
+                    justify-content:
+                        start;
+
+                    overflow: hidden;
+                }
+
+
+               
+
+                .label {
+
+                    width:
+                        ${labelWidth}mm;
+
+                    height:
+                        ${labelHeight}mm;
+
+                    padding: 2mm;
+
+                    display: flex;
+
+                    flex-direction: column;
+
+                    justify-content: center;
+
+                    align-items: center;
+
+                    text-align: center;
+
+                    overflow: hidden;
+
+                    page-break-inside: avoid;
+
+                    break-inside: avoid;
+                }
+
+
+                
+
+                .label * {
+                    max-width: 100%;
+                }
+
+
+              
+
+                .title {
+
+                    width: 100%;
+
+                    font-size: 9pt;
+
+                    font-weight: 700;
+
+                    line-height: 1.1;
+
+                    margin-bottom: 1mm;
+
+                    word-break: break-word;
+
+                    overflow-wrap: anywhere;
+                }
+
+
+                .sku {
+
+                    width: 100%;
+
+                    font-size: 8pt;
+
+                    line-height: 1.1;
+
+                    margin-bottom: 1mm;
+
+                    word-break: break-word;
+
+                    overflow-wrap: anywhere;
+                }
+
+
+                .price {
+
+                    width: 100%;
+
+                    font-size: 8pt;
+
+                    font-weight: 600;
+
+                    margin-bottom: 1mm;
+                }
+
+
+              
+
+                .barcode {
+
+                    display: block;
+
+                    max-width: 100%;
+
+                    max-height: 60%;
+
+                    height: auto;
+
+                    margin: 1mm auto;
+                }
+
+
+               
+
+                .qr {
+
+                    display: block;
+
+                    max-width: 70%;
+
+                    max-height: 70%;
+
+                    width: auto;
+
+                    height: auto;
+
+                    margin: 1mm auto;
+                }
+
+
+                
+
+                @media print {
+
+                    html,
+                    body {
+
+                        width:
+                            ${paperWidth}mm;
+
+                        height:
+                            ${paperHeight}mm;
+
+                        margin: 0;
+
+                        padding: 0;
+                    }
+
+                    .print-sheet {
+
+                        width:
+                            ${paperWidth}mm;
+
+                        min-height:
+                            ${paperHeight}mm;
+                    }
+
+                    .label {
+
+                        page-break-inside:
+                            avoid;
+
+                        break-inside:
+                            avoid;
+                    }
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <div class="print-sheet">
+
+                ${labels}
+
+            </div>
+
+            <script>
+
+                window.onload = function () {
+
+                   
+
+                    setTimeout(function () {
+
+                        window.focus();
+
+                        window.print();
+
+                    }, 500);
+
+                };
+
+            </script>
+
+        </body>
+
+        </html>
+    `);
+
+    printWindow.document.close();
+};
 
     const handleSubmit = useCallback(async () => {
         if (!name.trim()) {
@@ -342,28 +729,12 @@ ${labels}
                                 rows={3}
                             />
 
-                            <div style={{ marginBottom: '16px', marginTop: '16px' }}>
-                            <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-                                <s-select label="Paper Brand" value={brand} onChange={handleBrandChange}>
-                                    <s-option value="">Select Brand...</s-option>
-                                    {brandOptions.map((opt) => (
-                                        <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                                    ))}
-                                </s-select>
-
-                                <s-select
-                                    label="Paper Model"
-                                    value={model}
-                                    onChange={handleFieldChange(setModel)}
-                                    disabled={!brand || undefined}
-                                >
-                                    <s-option value="">{brand ? 'Select Model...' : 'Select Brand First'}</s-option>
-                                    {(modelOptionsMap[brand] || []).map((opt) => (
-                                        <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                                    ))}
-                                </s-select>
-                            </s-grid>
-                            </div>
+                            <PaperTemplateSettings
+                                brand={brand}
+                                model={model}
+                                onBrandChange={setBrand}
+                                onModelChange={setModel}
+                            />
 
                             <s-select label="Preview Product Variant" value={selectedVariantId} onChange={handleVariantChange}>
                                 {storeVariants.map((v) => (
@@ -465,7 +836,7 @@ ${labels}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <s-number-field
                                 label="Print Quantity"
-                                value={String(design.print_qty || 1)}
+                                value={String(design.print_qty || printSettings?.default_print_label_quantity || 1)}
                                 min="1"
                                 step="1"
                                 onInput={(event) =>
