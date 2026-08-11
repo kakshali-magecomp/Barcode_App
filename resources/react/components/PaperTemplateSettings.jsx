@@ -9,11 +9,11 @@ const brandOptions = [
 const modelOptionsMap = {
     dymo: [
         {
-            label: "30334 (2-1/4 x 1-1/4)",
+            label: "30334 (Jewelry Label)",
             value: "30334",
         },
         {
-            label: "30252",
+            label: "30252 (Address Label)",
             value: "30252",
         },
     ],
@@ -49,13 +49,13 @@ export const PAPER_TEMPLATES = {
             type: "roll",
 
             paper: {
-                width: 54,
-                height: 25,
+                width: 57,
+                height: 32,
             },
 
             label: {
-                width: 54,
-                height: 25,
+                width: 57,
+                height: 32,
             },
 
             rows: 1,
@@ -81,12 +81,12 @@ export const PAPER_TEMPLATES = {
 
             paper: {
                 width: 89,
-                height: 36,
+                height: 28,
             },
 
             label: {
                 width: 89,
-                height: 36,
+                height: 28,
             },
 
             rows: 1,
@@ -196,28 +196,21 @@ export const PAPER_TEMPLATES = {
 
         "5167": {
             name: "Avery 5167",
-
             type: "sheet",
-
             paper: {
                 width: 215.9,
                 height: 279.4,
             },
-
             label: {
-                width: 66.7,
-                height: 25.4,
+                width: 44.5,
+                height: 12.7,
             },
-
-            rows: 10,
-            columns: 3,
-
-            gapX: 3.2,
+            rows: 20,
+            columns: 4,
+            gapX: 5,
             gapY: 0,
-
             marginTop: 12.7,
-            marginLeft: 4.8,
-
+            marginLeft: 7.5,
             roll: null,
         },
     },

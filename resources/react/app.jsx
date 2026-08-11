@@ -15,7 +15,7 @@ import { NavMenu } from '@shopify/app-bridge-react';
 		        <NavMenu>
 					<a href='/TemplateList'>Template</a>
 					<a href='/ProductsList'>Generate SKU</a>
-					<a href='/ProductsBarcodeList'>Generate Barcode</a>
+					<a href='/ProductsBarcodeList'>Generate Barcode & Print</a>
 					<a href='/Settingindex'>Setting</a>
 					<a href="/LabelHistory">Label History</a>
 		        </NavMenu>

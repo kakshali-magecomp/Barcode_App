@@ -58,7 +58,7 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
                     </s-stack>
                 </s-section>
             </s-grid>
-            
+
             <div style={{ height: '32px' }}></div>
             <s-grid gridTemplateColumns="1fr 2fr" gap="base" style={{ marginBottom: '32px' }}>
                 <s-stack direction="block" gap="tight">
@@ -90,17 +90,34 @@ export default function BarcodeSkuPanel({ settings, onChange }) {
                             </ul>
                         </div>
 
-                        <s-text-field
-                            label="Barcode Pattern Layout"
-                            value={settings.barcode_pattern || ''}
-                            onInput={(e) => onChange('barcode_pattern', e.currentTarget.value)}
-                            placeholder="e.g., [N.8]"
-                        />
-                        <s-text-field
-                            label="Contextual Pricing Value"
-                            value={settings.contextual_pricing_value || ''}
-                            onInput={(e) => onChange('contextual_pricing_value', e.currentTarget.value)}
-                        />
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "16px",
+                                width: "100%",
+                            }}
+                        >
+                            <div style={{ flex: 1 }}>
+                                <s-text-field
+                                    label="Barcode Pattern Layout"
+                                    value={settings.barcode_pattern || ""}
+                                    onInput={(e) =>
+                                        onChange("barcode_pattern", e.currentTarget.value)
+                                    }
+                                    placeholder="e.g., [N.8]"
+                                />
+                            </div>
+
+                            <div style={{ flex: 1 }}>
+                                <s-text-field
+                                    label="Contextual Pricing Value"
+                                    value={settings.contextual_pricing_value || ""}
+                                    onInput={(e) =>
+                                        onChange("contextual_pricing_value", e.currentTarget.value)
+                                    }
+                                />
+                            </div>
+                        </div>
                     </s-stack>
                 </s-section>
             </s-grid>

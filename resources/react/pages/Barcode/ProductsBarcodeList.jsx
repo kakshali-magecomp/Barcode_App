@@ -239,15 +239,12 @@ export default function GenerateBarcode() {
                 return;
             }
 
-            // Large batches are queued — poll for progress instead of
-            // blocking the request open.
             if (json.queued) {
                 setProgress({ processed: 0, total: json.total });
                 pollBarcodeBulkOperation(json.operation_id);
                 return; // setLoading(false) happens once polling completes
             }
 
-            // Fallback for any non-queued/legacy synchronous response
             const updatedProducts = json.updated_products || [];
             setGeneratedProducts(updatedProducts);
             setSelectedProducts(prev =>
@@ -345,26 +342,152 @@ export default function GenerateBarcode() {
 
     const handlePrint = () => {
         let labels = "";
-        selectedProducts.forEach((product) => {
-            const label = document
-                .getElementById(`label-${product.variant_id}`)
-                .querySelector(".print-label");
+
+        // Only products/variants that already have a barcode
+        const productsWithBarcode = selectedProducts.filter((product) => {
+            const barcode = String(
+                product?.barcode ??
+                product?.current_barcode ??
+                ""
+            ).trim();
+
+            return barcode !== "";
+        });
+
+        // Nothing to print
+        if (productsWithBarcode.length === 0) {
+            shopify.toast.show(
+                "No selected products or variants have a barcode."
+            );
+            return;
+        }
+
+        productsWithBarcode.forEach((product) => {
+            const labelElement = document.getElementById(
+                `label-${product.variant_id}`
+            );
+
+            if (!labelElement) return;
+
+            const label = labelElement.querySelector(".print-label");
+
             if (!label) return;
-            for (let i = 0; i < product.quantity; i++) {
+
+            const quantity = Math.max(
+                1,
+                Number(product.quantity) || 1
+            );
+
+            for (let i = 0; i < quantity; i++) {
                 labels += `
                 <div class="label">
-                <div class="label-content">
-                    ${label.innerHTML}
+                    <div class="label-content">
+                        ${label.innerHTML}
+                    </div>
                 </div>
-                </div>
-                `;
+            `;
             }
         });
+
+        // Your existing paper/layout code continues here...
+
+        const paper = templateDesign?.layout_settings;
+        console.log("DEBUG templateDesign:", templateDesign);
+        console.log("DEBUG layout_settings:", paper);
+        console.log("DEBUG hasRealPaper will be:", !!(paper && paper?.label?.width && paper?.label?.height));
+
+        const labelWidth = Number(paper?.label?.width) || null;
+        const labelHeight = Number(paper?.label?.height) || null;
+        const rows = Number(paper?.rows || 1);
+        const columns = Number(paper?.columns || 1);
+        const gapX = Number(paper?.gapX || 0);
+        const gapY = Number(paper?.gapY || 0);
+        const marginTop = Number(paper?.marginTop || 0);
+        const marginLeft = Number(paper?.marginLeft || 0);
+
+        const hasRealPaper = paper && labelWidth && labelHeight;
+        const paperWidth = hasRealPaper
+            ? Number(paper?.paper?.width) || (labelWidth * columns + gapX * (columns - 1) + marginLeft)
+            : null;
+        const paperHeight = hasRealPaper
+            ? Number(paper?.paper?.height) || (labelHeight * rows + gapY * (rows - 1) + marginTop)
+            : null;
+
+        const textPt = hasRealPaper
+            ? Math.max(5, Math.min(11, Math.round(labelHeight * 0.28)))
+            : 12;
+        const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
+
         const printWindow = window.open("", "", "width=900,height=700");
-        printWindow.document.write(`
-<html>
-<head>
-<style>
+
+        const printStyles = hasRealPaper
+            ? `
+@page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
+* { box-sizing: border-box; }
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: ${paperWidth}mm;
+    height: ${paperHeight}mm;
+    overflow: hidden;
+}
+body {
+    font-family: Arial, sans-serif;
+    display: grid;
+    grid-template-columns: repeat(${columns}, ${labelWidth}mm);
+    grid-auto-rows: ${labelHeight}mm;
+    column-gap: ${gapX}mm;
+    row-gap: ${gapY}mm;
+    padding-top: ${marginTop}mm !important;
+    padding-left: ${marginLeft}mm !important;
+    align-content: start;
+    justify-content: start;
+    align-items: start;
+    justify-items: start;
+}
+${rows === 1 && columns === 1 ? `
+body { display: block !important; }
+.label { page-break-after: always; break-after: page; }
+.label:last-child { page-break-after: auto; }
+` : ""}
+.label {
+    width: ${labelWidth}mm;
+    height: ${labelHeight}mm;
+    align-self: start;
+    justify-self: start;
+    padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
+    box-sizing: border-box;
+    overflow: hidden;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.label-content { width: 100%; }
+.label-content > div {
+    font-size: ${textPt}pt !important;
+    line-height: 1.15 !important;
+    margin: 0 0 0.5mm !important;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.label-content > div:first-child { font-weight: bold; }
+.label svg, .label img {
+    display: block;
+    max-width: 90%;
+    max-height: ${barcodeHeightMm}mm !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+    margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
+}
+`
+            : `
 @page{size:auto;margin:5mm;}
 body{margin:0;padding:10px;font-family:Arial,sans-serif;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;justify-content:start;align-content:start;}
 .label{width:250px;min-height:140px;padding:10px;box-sizing:border-box;border:1px solid #ddd;overflow:hidden;page-break-inside:avoid;break-inside:avoid;text-align:center;}
@@ -372,7 +495,12 @@ body{margin:0;padding:10px;font-family:Arial,sans-serif;display:grid;grid-templa
 .label-content{width:100%;}
 .label-content > div{font-size:12px;line-height:1.4;word-break:break-word;overflow-wrap:anywhere;white-space:normal;margin-bottom:4px;}
 .label-content > div:first-child{font-weight:bold;font-size:13px;}
-</style>
+`;
+
+        printWindow.document.write(`
+<html>
+<head>
+<style>${printStyles}</style>
 </head>
 <body>
 ${labels}
@@ -542,40 +670,41 @@ ${labels}
                             >
                                 Generate Barcode
                             </s-button>
-                            {loading && progress && progress.total > 0 && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    <s-text>Generating barcodes</s-text>
-                                    <div
-                                        role="progressbar"
-                                        aria-valuenow={progress.processed}
-                                        aria-valuemin={0}
-                                        aria-valuemax={progress.total}
-                                        aria-label={`${progress.processed} of ${progress.total} products processed`}
-                                        style={{
-                                            width: '100%',
-                                            height: '8px',
-                                            borderRadius: '999px',
-                                            background: '#e1e3e5',
-                                            overflow: 'hidden',
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: `${Math.min(100, (progress.processed / progress.total) * 100)}%`,
-                                                height: '100%',
-                                                background: '#008060',
-                                                borderRadius: '999px',
-                                                transition: 'width 0.3s ease',
-                                            }}
-                                        />
-                                    </div>
-                                    <s-text color="subdued">
-                                        {progress.processed} of {progress.total} products processed
-                                        {progress.processed >= progress.total ? '' : '...'}
-                                    </s-text>
-                                </div>
-                            )}
+
                         </s-stack>
+                        {loading && progress && progress.total > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <s-text>Generating barcodes</s-text>
+                                <div
+                                    role="progressbar"
+                                    aria-valuenow={progress.processed}
+                                    aria-valuemin={0}
+                                    aria-valuemax={progress.total}
+                                    aria-label={`${progress.processed} of ${progress.total} products processed`}
+                                    style={{
+                                        width: '100%',
+                                        height: '8px',
+                                        borderRadius: '999px',
+                                        background: '#e1e3e5',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            width: `${Math.min(100, (progress.processed / progress.total) * 100)}%`,
+                                            height: '100%',
+                                            background: '#008060',
+                                            borderRadius: '999px',
+                                            transition: 'width 0.3s ease',
+                                        }}
+                                    />
+                                </div>
+                                <s-text color="subdued">
+                                    {progress.processed} of {progress.total} products processed
+                                    {progress.processed >= progress.total ? '' : '...'}
+                                </s-text>
+                            </div>
+                        )}
                     </s-stack>
                 </s-section>
 

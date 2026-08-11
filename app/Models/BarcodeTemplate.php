@@ -19,7 +19,7 @@ class BarcodeTemplate extends Model
     ];
 
     protected $casts = [
-        'layout_setings' => 'array',
+        'layout_settings' => 'array',
     ];
 
     public function user()
@@ -50,7 +50,7 @@ class BarcodeTemplate extends Model
     }
     public function printHistories()
     {
-        return $this->hasMany(PrintHistory::class,'template_id');
+        return $this->hasMany(PrintHistory::class, 'template_id');
     }
 
 }

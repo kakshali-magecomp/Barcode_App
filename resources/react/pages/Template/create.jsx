@@ -78,8 +78,8 @@ export default function CreateTemplate() {
 
     const PAPER_TEMPLATES = {
         dymo: {
-            "30334": { name: "Jewelry Label", paper: { width: 54, height: 25 }, label: { width: 54, height: 25 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
-            "30252": { name: "Address Label", paper: { width: 89, height: 36 }, label: { width: 89, height: 36 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
+            "30334": { name: "Jewelry Label", paper: { width: 57, height: 32 }, label: { width: 57, height: 32 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
+            "30252": { name: "Address Label", paper: { width: 89, height: 28 }, label: { width: 89, height: 28 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
         },
         zebra: {
             "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
@@ -87,7 +87,7 @@ export default function CreateTemplate() {
         },
         avery: {
             "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
-            "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 279.6 }, rows: 10, columns: 3, gapx: 3.2, gapy: 0, marginTop: 12.7, marginLeft: 4.8 }
+            "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 44.5, height: 12.7 }, rows: 20, columns: 4, gapX: 5, gapY: 0, marginTop: 12.7, marginLeft: 7.5 }
         }
     };
 
@@ -242,387 +242,161 @@ export default function CreateTemplate() {
         return format.replace("{amount}", amount);
     };
 
-   const handlePrint = () => {
-    if (!printRef.current) return;
+    const handlePrint = () => {
+        if (!printRef.current) return;
+        const qty = Math.max(1, Number(design.print_qty) || 1);
+        const paper = PAPER_TEMPLATES?.[brand]?.[model];
 
-    const qty = Math.max(
-        1,
-        Number(design.print_qty) || 1
-    );
+        if (!paper) {
+            shopify.toast.show("Please select a paper brand and paper model.");
+            return;
+        }
 
- 
-    const paper =
-        PAPER_TEMPLATES?.[brand]?.[model];
+        const paperWidth = Number(paper.paper.width);
+        const paperHeight = Number(paper.paper.height);
+        const labelWidth = Number(paper.label.width);
+        const labelHeight = Number(paper.label.height);
+        const rows = Number(paper.rows || 1);
+        const columns = Number(paper.columns || 1);
+        const gapX = Number(paper.gapX || 0);
+        const gapY = Number(paper.gapY || 0);
+        const marginTop = Number(paper.marginTop || 0);
+        const marginLeft = Number(paper.marginLeft || 0);
+        const textPt = Math.max(5, Math.min(11, Math.round(labelHeight * 0.28)));
+        const barcodeHeightMm = Math.max(4, labelHeight * 0.4);
 
-    if (!paper) {
-        shopify.toast.show(
-            "Please select a paper brand and paper model."
-        );
-        return;
-    }
+        let labels = "";
+        for (let i = 0; i < qty; i++) {
+            labels += `<div class="label">${printRef.current.innerHTML}</div>`;
+        }
 
-   
+        const printWindow = window.open("", "_blank", "width=1000,height=800");
+        if (!printWindow) {
+            shopify.toast.show("Please allow pop-ups to print.");
+            return;
+        }
+        const rollPageBreakCss =
+            rows === 1 && columns === 1
+                ? `
+        .print-sheet { display: block !important; }
+        .label { page-break-after: always; break-after: page; }
+        .label:last-child { page-break-after: auto; }
+        `
+                : "";
 
-    const paperWidth = Number(
-        paper.paper.width
-    );
-
-    const paperHeight = Number(
-        paper.paper.height
-    );
-
-    const labelWidth = Number(
-        paper.label.width
-    );
-
-    const labelHeight = Number(
-        paper.label.height
-    );
-
-    const rows = Number(
-        paper.rows || 1
-    );
-
-    const columns = Number(
-        paper.columns || 1
-    );
-
-    const gapX = Number(
-        paper.gapX || 0
-    );
-
-    const gapY = Number(
-        paper.gapY || 0
-    );
-
-    const marginTop = Number(
-        paper.marginTop || 0
-    );
-
-    const marginLeft = Number(
-        paper.marginLeft || 0
-    );
-
-
-   
-
-    let labels = "";
-
-    for (let i = 0; i < qty; i++) {
-        labels += `
-            <div class="label">
-                ${printRef.current.innerHTML}
-            </div>
-        `;
-    }
-
-
-   
-    const printWindow = window.open(
-        "",
-        "_blank",
-        "width=1000,height=800"
-    );
-
-    if (!printWindow) {
-        shopify.toast.show(
-            "Please allow pop-ups to print."
-        );
-        return;
-    }
-
-
-
-
-    printWindow.document.write(`
-        <!DOCTYPE html>
-
-        <html>
-        <head>
-
-            <meta charset="UTF-8">
-
-            <title>
-                ${paper.name || "Barcode Labels"}
-            </title>
-
-            <style>
-
-
-                @page {
-                    size:
-                        ${paperWidth}mm
-                        ${paperHeight}mm;
-
-                    margin: 0;
-                }
-
-
-                
-
-                * {
-                    box-sizing: border-box;
-                }
-
-                html,
-                body {
+        printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>${paper.name || "Barcode Labels"}</title>
+        <style>
+            @page {
+                size: ${paperWidth}mm ${paperHeight}mm;
+                margin: 0;
+            }
+            * { box-sizing: border-box; }
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: ${paperWidth}mm;
+                min-height: ${paperHeight}mm;
+                background: #ffffff;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .print-sheet {
+                width: ${paperWidth}mm;
+                min-height: ${paperHeight}mm;
+                display: grid;
+                grid-template-columns: repeat(${columns}, ${labelWidth}mm);
+                grid-template-rows: repeat(${rows}, ${labelHeight}mm);
+                column-gap: ${gapX}mm;
+                row-gap: ${gapY}mm;
+                padding-top: ${marginTop}mm;
+                padding-left: ${marginLeft}mm;
+                align-content: start;
+                justify-content: start;
+                overflow: hidden;
+            }
+            ${rollPageBreakCss}
+            .label {
+                width: ${labelWidth}mm;
+                height: ${labelHeight}mm;
+                padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                overflow: hidden;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            /* Override whatever pixel font-size the on-screen preview
+               baked in via inline styles — those were tuned for a large
+               on-screen box, not the real physical label size. Scaled
+               dynamically per paper type instead of one fixed value. */
+            .label * {
+                max-width: 100%;
+                font-size: ${textPt}pt !important;
+                line-height: 1.15 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .label div {
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .label strong,
+            .label b {
+                font-weight: 700 !important;
+            }
+            .label svg,
+            .label img {
+                display: block;
+                max-width: 95%;
+                height: ${barcodeHeightMm}mm !important;
+                width: auto !important;
+                margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
+                flex-shrink: 0;
+            }
+            @media print {
+                html, body {
+                    width: ${paperWidth}mm;
+                    height: ${paperHeight}mm;
                     margin: 0;
                     padding: 0;
-
-                    width:
-                        ${paperWidth}mm;
-
-                    min-height:
-                        ${paperHeight}mm;
-
-                    background: #ffffff;
-
-                    font-family:
-                        Arial,
-                        Helvetica,
-                        sans-serif;
                 }
-
-
-               
-
                 .print-sheet {
-
-                    width:
-                        ${paperWidth}mm;
-
-                    min-height:
-                        ${paperHeight}mm;
-
-                    display: grid;
-
-                    grid-template-columns:
-                        repeat(
-                            ${columns},
-                            ${labelWidth}mm
-                        );
-
-                    grid-template-rows:
-                        repeat(
-                            ${rows},
-                            ${labelHeight}mm
-                        );
-
-                    column-gap:
-                        ${gapX}mm;
-
-                    row-gap:
-                        ${gapY}mm;
-
-                    padding-top:
-                        ${marginTop}mm;
-
-                    padding-left:
-                        ${marginLeft}mm;
-
-                    align-content:
-                        start;
-
-                    justify-content:
-                        start;
-
-                    overflow: hidden;
+                    width: ${paperWidth}mm;
+                    min-height: ${paperHeight}mm;
                 }
-
-
-               
-
                 .label {
-
-                    width:
-                        ${labelWidth}mm;
-
-                    height:
-                        ${labelHeight}mm;
-
-                    padding: 2mm;
-
-                    display: flex;
-
-                    flex-direction: column;
-
-                    justify-content: center;
-
-                    align-items: center;
-
-                    text-align: center;
-
-                    overflow: hidden;
-
                     page-break-inside: avoid;
-
                     break-inside: avoid;
                 }
-
-
-                
-
-                .label * {
-                    max-width: 100%;
-                }
-
-
-              
-
-                .title {
-
-                    width: 100%;
-
-                    font-size: 9pt;
-
-                    font-weight: 700;
-
-                    line-height: 1.1;
-
-                    margin-bottom: 1mm;
-
-                    word-break: break-word;
-
-                    overflow-wrap: anywhere;
-                }
-
-
-                .sku {
-
-                    width: 100%;
-
-                    font-size: 8pt;
-
-                    line-height: 1.1;
-
-                    margin-bottom: 1mm;
-
-                    word-break: break-word;
-
-                    overflow-wrap: anywhere;
-                }
-
-
-                .price {
-
-                    width: 100%;
-
-                    font-size: 8pt;
-
-                    font-weight: 600;
-
-                    margin-bottom: 1mm;
-                }
-
-
-              
-
-                .barcode {
-
-                    display: block;
-
-                    max-width: 100%;
-
-                    max-height: 60%;
-
-                    height: auto;
-
-                    margin: 1mm auto;
-                }
-
-
-               
-
-                .qr {
-
-                    display: block;
-
-                    max-width: 70%;
-
-                    max-height: 70%;
-
-                    width: auto;
-
-                    height: auto;
-
-                    margin: 1mm auto;
-                }
-
-
-                
-
-                @media print {
-
-                    html,
-                    body {
-
-                        width:
-                            ${paperWidth}mm;
-
-                        height:
-                            ${paperHeight}mm;
-
-                        margin: 0;
-
-                        padding: 0;
-                    }
-
-                    .print-sheet {
-
-                        width:
-                            ${paperWidth}mm;
-
-                        min-height:
-                            ${paperHeight}mm;
-                    }
-
-                    .label {
-
-                        page-break-inside:
-                            avoid;
-
-                        break-inside:
-                            avoid;
-                    }
-                }
-
-            </style>
-
-        </head>
-
-        <body>
-
-            <div class="print-sheet">
-
-                ${labels}
-
-            </div>
-
-            <script>
-
-                window.onload = function () {
-
-                   
-
-                    setTimeout(function () {
-
-                        window.focus();
-
-                        window.print();
-
-                    }, 500);
-
-                };
-
-            </script>
-
-        </body>
-
-        </html>
-    `);
-
-    printWindow.document.close();
-};
+            }
+        </style>
+    </head>
+    <body>
+        <div class="print-sheet">
+            ${labels}
+        </div>
+        <script>
+            window.onload = function () {
+                setTimeout(function () {
+                    window.focus();
+                    window.print();
+                }, 500);
+            };
+        </script>
+    </body>
+    </html>
+`);
+        printWindow.document.close();
+    };
 
     const handleSubmit = useCallback(async () => {
         if (!name.trim()) {
@@ -695,7 +469,7 @@ export default function CreateTemplate() {
 
             <s-page heading="Create Barcode Template">
                 <s-section>
-                    <s-link href="/TemplateList">← Back to Templates</s-link>
+                    <s-link href="/TemplateList">← Back to Template List</s-link>
                 </s-section>
 
                 <s-section>
@@ -732,8 +506,14 @@ export default function CreateTemplate() {
                             <PaperTemplateSettings
                                 brand={brand}
                                 model={model}
-                                onBrandChange={setBrand}
-                                onModelChange={setModel}
+                                onBrandChange={(value) => {
+                                    setBrand(value);
+                                    setIsDirty(true);
+                                }}
+                                onModelChange={(value) => {
+                                    setModel(value);
+                                    setIsDirty(true);
+                                }}
                             />
 
                             <s-select label="Preview Product Variant" value={selectedVariantId} onChange={handleVariantChange}>

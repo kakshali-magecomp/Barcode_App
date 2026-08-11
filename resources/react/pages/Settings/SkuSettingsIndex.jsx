@@ -273,7 +273,7 @@ export default function SkuSettingsIndex() {
                             </s-select>
                         </s-grid>
 
-                        <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                        <s-grid gridTemplateColumns="1fr 1fr 1fr" gap="base">
                             <s-select
                                 label="Product Type"
                                 value={skuSettings.segment_product_type}
@@ -292,9 +292,7 @@ export default function SkuSettingsIndex() {
                                     <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
                                 ))}
                             </s-select>
-                        </s-grid>
-
-                        <s-select
+                            <s-select
                             label="Metafield Rule"
                             value={skuSettings.segment_metafield_rule}
                             onChange={(e) => handleFieldChange('segment_metafield_rule', e.currentTarget.value)}
@@ -303,6 +301,9 @@ export default function SkuSettingsIndex() {
                                 <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
                             ))}
                         </s-select>
+                        </s-grid>
+
+                        
                     </s-stack>
                 </s-section>
 

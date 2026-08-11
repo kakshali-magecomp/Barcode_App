@@ -67,7 +67,7 @@ export default function SettingsIndex() {
 
     const [dbTemplates, setDbTemplates] = useState([]);
 
-    
+
     useEffect(() => {
         if (isDirty) {
             shopify.saveBar.show(SAVE_BAR_ID);
@@ -76,7 +76,7 @@ export default function SettingsIndex() {
         }
     }, [isDirty, shopify]);
 
-    
+
     const loadAllSettings = useCallback(async () => {
         try {
             setErrorBanner(null);
@@ -146,11 +146,11 @@ export default function SettingsIndex() {
             });
 
             if (res.ok) {
-                
+
                 shopify.toast.show("Settings profile updated successfully!");
                 setIsDirty(false);
             } else {
-                
+
                 let message = "Failed to save changes profile settings configuration.";
                 try {
                     const errJson = await res.json();
@@ -177,23 +177,74 @@ export default function SettingsIndex() {
                 <button variant="primary" loading={loading ? "" : undefined} onClick={handleSave}>Save</button>
                 <button onClick={handleDiscard}>Discard</button>
             </ui-save-bar>
-            <s-page heading="App Settings">  
-                <s-section>   
-                    <s-stack direction="inline" gap="base">
-                        {tabs.map((tab, index) => (
-                            <s-button
-                                key={tab.id}
-                                variant={selectedTab === index ? 'primary' : 'secondary'}
-                                onClick={() => {
-                                    setSelectedTab(index);
-                                    setIsDirty(false); 
-                                }}
-                            >
-                                {tab.content}
-                            </s-button>
-                        ))}
-                    </s-stack>
+            <s-page heading="App Settings">
+                <s-section padding="none">
+                    <div
+                        style={{
+                            height: "48px",
+                            borderBottom: "1px solid #e1e3e5",
+                            backgroundColor: "#ffffff",
+                            padding: "0 20px",
+                        }}
+                    >
+                        <div
+                            style={{
+                                height: "100%",
+                                display: "flex",
+                                alignItems: "stretch",
+                                justifyContent: "flex-start",
+                                gap: "28px",
+                            }}
+                        >
+                            {tabs.map((tab, index) => {
+                                const active = selectedTab === index;
+
+                                return (
+                                    <div
+                                        key={tab.id}
+                                        role="tab"
+                                        aria-selected={active}
+                                        onClick={() => {
+                                            setSelectedTab(index);
+                                            setIsDirty(false);
+                                        }}
+                                        style={{
+                                            position: "relative",
+                                            height: "48px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            cursor: "pointer",
+                                            color: active
+                                                ? "#202223"
+                                                : "#6d7175",
+                                            fontSize: "14px",
+                                            fontWeight: active ? 600 : 500,
+                                            whiteSpace: "nowrap",
+                                            padding: "0 2px",
+                                        }}
+                                    >
+                                        {tab.content}
+
+                                        {active && (
+                                            <span
+                                                style={{
+                                                    position: "absolute",
+                                                    bottom: "-1px",
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: "2px",
+                                                    backgroundColor: "#008060",
+                                                    borderRadius: "2px 2px 0 0",
+                                                }}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </s-section>
+
 
                 {errorBanner && (
                     <s-section>
@@ -203,7 +254,7 @@ export default function SettingsIndex() {
                     </s-section>
                 )}
 
-               
+
                 {selectedTab === 0 && (
                     <BarcodeSkuPanel settings={barcodeSettings} onChange={handleSettingChange} />
                 )}

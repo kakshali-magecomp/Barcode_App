@@ -135,14 +135,11 @@ export default function LabelHistory() {
 
   const handlePrintHistory = () => {
     if (!historyDetails) return;
-
     const printWindow = window.open("", "_blank");
-
     if (!printWindow) {
       shopify.toast.show("Please allow pop-ups to print.");
       return;
     }
-
     const labels = historyDetails.items
       .map((item, originalIndex) => ({
         item,
@@ -153,45 +150,27 @@ export default function LabelHistory() {
       )
       .map(({ item, originalIndex }) => {
         const settings = item.template_settings || {};
-
-        /*
-         * ----------------------------------------------------
-         * SYMBOL VALUE
-         * ----------------------------------------------------
-         */
         let symbolValue = "";
-
         switch (settings.symbol_field_source) {
           case "sku_value":
             symbolValue = item.sku || "";
             break;
-
           case "barcode_value":
             symbolValue = item.barcode || "";
             break;
-
           case "product_name":
             symbolValue = item.product_title || "";
             break;
-
           case "product_price":
             symbolValue = item.price || "";
             break;
-
           case "product_online_url":
             symbolValue = item.online_url || "";
             break;
-
           default:
             symbolValue = item.barcode || "";
             break;
         }
-
-        /*
-         * ----------------------------------------------------
-         * QUANTITY
-         * ----------------------------------------------------
-         */
         const quantity = Math.max(
           1,
           Number(
@@ -200,12 +179,6 @@ export default function LabelHistory() {
             1
           )
         );
-
-        /*
-         * ----------------------------------------------------
-         * PRICE
-         * ----------------------------------------------------
-         */
         const decimals = Number(
           settings.price_decimal_number ?? 2
         );
@@ -219,9 +192,6 @@ export default function LabelHistory() {
           originalPrice = originalPrice / 100;
         }
 
-        /*
-         * VAT
-         */
         const vatPercentage = Number(
           settings.vat_percentage ?? 0
         );
@@ -232,9 +202,6 @@ export default function LabelHistory() {
 
         const amount = priceWithVat.toFixed(decimals);
 
-        /*
-         * CURRENCY FORMAT
-         */
         const currencyFormat =
           settings.currency_format ||
           "without_currency";
@@ -249,9 +216,6 @@ export default function LabelHistory() {
           formattedPrice = `${amount} USD`;
         }
 
-        /*
-         * Custom currency format from template
-         */
         if (settings.line2_currency_format) {
           formattedPrice =
             settings.line2_currency_format.replace(
@@ -259,12 +223,6 @@ export default function LabelHistory() {
               amount
             );
         }
-
-        /*
-         * ----------------------------------------------------
-         * BARCODE / QR
-         * ----------------------------------------------------
-         */
         let symbolHTML = "";
 
         if (settings.symbol_enabled) {
@@ -301,16 +259,10 @@ export default function LabelHistory() {
               settings.barcode_format ||
               "CODE128";
 
-            /*
-             * JsBarcode uses UPC, not UPCA
-             */
             if (barcodeFormat === "UPCA") {
               barcodeFormat = "UPC";
             }
 
-            /*
-             * JsBarcode format names
-             */
             if (barcodeFormat === "Code39") {
               barcodeFormat = "CODE39";
             }
@@ -340,11 +292,6 @@ export default function LabelHistory() {
           }
         }
 
-        /*
-         * ----------------------------------------------------
-         * GENERATE LABELS
-         * ----------------------------------------------------
-         */
         let html = "";
 
         for (let i = 0; i < quantity; i++) {
@@ -410,47 +357,29 @@ export default function LabelHistory() {
                                 `
               : ""
             }
-
                         ${symbolHTML}
-
                     </div>
                 `;
         }
-
         return html;
       })
       .join("");
-
-    /*
-     * --------------------------------------------------------
-     * PRINT WINDOW
-     * --------------------------------------------------------
-     */
-
     printWindow.document.write(`
         <!DOCTYPE html>
-
         <html>
         <head>
-
             <meta charset="UTF-8">
-
             <title>
                 Print Job #${historyDetails.id || ""}
             </title>
-
             <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-
             <style>
-
                 @page {
                     margin: 5mm;
                 }
-
                 * {
                     box-sizing: border-box;
                 }
-
                 html,
                 body {
                     margin: 0;
@@ -458,198 +387,98 @@ export default function LabelHistory() {
                     background: #ffffff;
                     font-family: Arial, sans-serif;
                 }
-
                 body {
                     padding: 10px;
-
                     display: grid;
-
                     grid-template-columns:
                         repeat(
                             auto-fill,
                             250px
                         );
-
                     gap: 10px;
-
                     align-items: start;
-
                     justify-content: start;
                 }
-
-                /*
-                 * LABEL
-                 */
                 .label {
-
                     width: 250px;
-
-                    /*
-                     * IMPORTANT:
-                     * Do not force a large height.
-                     */
                     min-height: 0;
-
                     height: auto;
-
                     border: 1px solid #ddd;
-
                     padding: 10px;
-
                     text-align: center;
-
                     display: flex;
-
                     flex-direction: column;
-
                     justify-content: flex-start;
-
                     align-items: center;
-
                     page-break-inside: avoid;
-
                     break-inside: avoid;
-
                     overflow: hidden;
                 }
-
-                /*
-                 * SKU
-                 */
                 .sku {
-
                     width: 100%;
-
                     font-size: 12px;
-
                     font-weight: 500;
-
                     margin-bottom: 5px;
-
                     word-break: break-word;
-
                     overflow-wrap: anywhere;
-
                     white-space: normal;
                 }
-
-                /*
-                 * PRODUCT NAME
-                 */
                 .title {
-
                     width: 100%;
-
                     font-size: 13px;
-
                     font-weight: 700;
-
                     margin-bottom: 5px;
-
                     word-break: break-word;
-
                     overflow-wrap: anywhere;
-
                     white-space: normal;
                 }
-
-                /*
-                 * PRICE
-                 */
                 .price {
-
                     width: 100%;
-
                     font-size: 12px;
-
                     font-weight: 600;
-
                     margin-bottom: 7px;
-
                     word-break: break-word;
                 }
-
-                /*
-                 * OPTIONS
-                 */
                 .option {
-
                     width: 100%;
-
                     font-size: 11px;
-
                     margin-bottom: 3px;
-
                     word-break: break-word;
-
                     overflow-wrap: anywhere;
                 }
-
-                /*
-                 * BARCODE
-                 */
                 .barcode {
-
                     max-width: 100%;
-
                     height: auto;
-
                     display: block;
-
                     margin: 5px auto 0;
                 }
-
-                /*
-                 * QR
-                 */
                 .qr {
-
                     max-width: 100%;
-
                     width: auto;
-
                     height: auto;
-
                     display: block;
-
                     margin: 5px auto 0;
                 }
-
-                /*
-                 * PRINT
-                 */
                 @media print {
-
                     body {
                         padding: 0;
                     }
-
                     .label {
                         page-break-inside: avoid;
                         break-inside: avoid;
                     }
-
                 }
-
             </style>
-
         </head>
-
         <body>
-
             ${labels}
-
             <script>
-
                 window.onload = function () {
-
                     const barcodes =
                         document.querySelectorAll(
                             ".barcode"
                         );
-
                     barcodes.forEach(function (barcode) {
-
                         const format =
                             barcode.dataset.format ||
                             "CODE128";
@@ -708,27 +537,15 @@ export default function LabelHistory() {
                         }
 
                     });
-
-                    /*
-                     * Wait for QR images and barcodes
-                     */
                     setTimeout(function () {
-
                         window.focus();
-
                         window.print();
-
                     }, 800);
-
                 };
-
             </script>
-
         </body>
-
         </html>
     `);
-
     printWindow.document.close();
   };
 

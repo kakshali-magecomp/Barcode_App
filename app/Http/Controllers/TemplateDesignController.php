@@ -21,7 +21,7 @@ class TemplateDesignController extends Controller
 
             // Verify template owner security scope parameters
             $template = $user->barcodeTemplates()->findOrFail($template_id);
-            
+
             $barcodeSettings = BarcodeSetting::firstOrCreate(
                 ['user_id' => $user->id]
             );
@@ -67,6 +67,9 @@ class TemplateDesignController extends Controller
                 $design->toArray(),            // template overrides
                 [
                     'template_name' => $template->template_name,
+                    'paper_brand' => $template->paper_brand,
+                    'paper_model' => $template->paper_model,
+                    'layout_settings' => $template->layout_settings,
                 ]
             );
             Log::info("BARCODE SETTINGS", $barcodeSettings->toArray());
@@ -82,7 +85,6 @@ class TemplateDesignController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
-
 
     public function update(Request $request, $template_id)
     {

@@ -54,34 +54,62 @@ export default function ProductPickerModal({ open, onClose, onSelect,  alreadySe
 
   async function loadProducts() {
     setLoading(true);
+
     try {
-      const res = await fetch("/api/products");
-      const json = await res.json();
-      if (!json.status) {
-        setProducts([]);
-        return;
-      }
-      let variants = [...json.variants];
+        const res = await fetch("/api/products");
+        const json = await res.json();
 
-      if (printSettings?.hide_product_draft) {
-        variants = variants.filter((product) => product.status !== "draft");
-      }
+        if (!json.status || !Array.isArray(json.variants)) {
+            setProducts([]);
+            return;
+        }
 
-      if (printSettings?.hide_product_archived) {
-        variants = variants.filter((product) => product.status !== "archived");
-      }
+        let variants = [...json.variants];
 
-      if (printSettings?.sort_by_sku) {
-        variants.sort((a, b) => (a.current_sku || "").localeCompare(b.current_sku || ""));
-      }
+        // HIDE PRODUCT DRAFT
+        if (printSettings?.hide_product_draft) {
+            variants = variants.filter((product) => {
+                const status = String(
+                    product.status ??
+                    product.product_status ??
+                    ""
+                ).toLowerCase();
 
-      setProducts(variants);
+                return status !== "draft";
+            });
+        }
+
+        // HIDE PRODUCT ARCHIVED
+        if (printSettings?.hide_product_archived) {
+            variants = variants.filter((product) => {
+                const status = String(
+                    product.status ??
+                    product.product_status ??
+                    ""
+                ).toLowerCase();
+
+                return status !== "archived";
+            });
+        }
+
+        // SORT BY SKU
+        if (printSettings?.sort_by_sku) {
+            variants.sort((a, b) =>
+                String(a.current_sku || "").localeCompare(
+                    String(b.current_sku || "")
+                )
+            );
+        }
+
+        setProducts(variants);
+
     } catch (err) {
-      console.log(err);
+        console.error("Failed to load products:", err);
+        setProducts([]);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  }
+}
 
   const toggleSelectOne = (variantId) => {
     setSelectAll(false);

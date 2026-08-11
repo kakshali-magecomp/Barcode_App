@@ -97,6 +97,12 @@ export default function PrintPanel({ settings = {}, templates = [], onChange }) 
                 />
 
                 <s-checkbox
+                    label="Hide product Draft when selection"
+                    checked={!!settings.hide_product_draft || undefined}
+                    onChange={(e) => onChange('hide_product_draft', e.currentTarget.checked)}
+                />
+
+                <s-checkbox
                     label="Hide product archived when selection"
                     checked={!!settings.hide_product_archived || undefined}
                     onChange={(e) => onChange('hide_product_archived', e.currentTarget.checked)}

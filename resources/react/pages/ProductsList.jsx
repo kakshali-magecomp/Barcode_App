@@ -196,18 +196,37 @@ export default function GenerateSku() {
                         </s-button>
                     </s-stack>
                     {loading && progress && progress.total > 0 && (
-                        <s-stack direction="block" gap="small-200">
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <s-text>Generating SKUs</s-text>
-                            <s-progress
-                                value={progress.processed}
-                                max={progress.total}
-                                accessibilityLabel={`${progress.processed} of ${progress.total} products processed`}
-                            ></s-progress>
+                            <div
+                                role="progressbar"
+                                aria-valuenow={progress.processed}
+                                aria-valuemin={0}
+                                aria-valuemax={progress.total}
+                                aria-label={`${progress.processed} of ${progress.total} products processed`}
+                                style={{
+                                    width: '100%',
+                                    height: '8px',
+                                    borderRadius: '999px',
+                                    background: '#e1e3e5',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        width: `${Math.min(100, (progress.processed / progress.total) * 100)}%`,
+                                        height: '100%',
+                                        background: '#008060',
+                                        borderRadius: '999px',
+                                        transition: 'width 0.3s ease',
+                                    }}
+                                />
+                            </div>
                             <s-text color="subdued">
                                 {progress.processed} of {progress.total} products processed
                                 {progress.processed >= progress.total ? '' : '...'}
                             </s-text>
-                        </s-stack>
+                        </div>
                     )}
                 </s-stack>
             </s-section>

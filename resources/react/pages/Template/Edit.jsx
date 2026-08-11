@@ -142,6 +142,7 @@ export default function EditTemplate() {
         setErrorBanner(null);
 
         try {
+            const selectedPaperTemplate = PAPER_TEMPLATES?.[brand]?.[model] || {};
             const response = await fetch(`/api/templates/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -260,6 +261,7 @@ export default function EditTemplate() {
                             discardSignal={discardSignal}
                             onChange={handleDesignChange}
                             onDirty={() => { }}
+                            paperTemplate={PAPER_TEMPLATES?.[brand]?.[model] || null}
                         />
                     </s-box>
                 </s-section>
