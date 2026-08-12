@@ -140,6 +140,27 @@ export default function LabelHistory() {
       shopify.toast.show("Please allow pop-ups to print.");
       return;
     }
+
+    const firstSelected = historyDetails.items.find((_, index) => selectedItems.includes(index));
+    const paper = firstSelected?.template_settings?.layout_settings;
+
+    const labelWidth = Number(paper?.label?.width) || null;
+    const labelHeight = Number(paper?.label?.height) || null;
+    const rows = Number(paper?.rows || 1);
+    const columns = Number(paper?.columns || 1);
+    const gapX = Number(paper?.gapX || 0);
+    const gapY = Number(paper?.gapY || 0);
+    const marginTop = Number(paper?.marginTop || 0);
+    const marginLeft = Number(paper?.marginLeft || 0);
+    const hasRealPaper = paper && labelWidth && labelHeight;
+    const paperWidth = hasRealPaper
+      ? Number(paper?.paper?.width) || (labelWidth * columns + gapX * (columns - 1) + marginLeft)
+      : null;
+    const paperHeight = hasRealPaper
+      ? Number(paper?.paper?.height) || (labelHeight * rows + gapY * (rows - 1) + marginTop)
+      : null;
+    const textPt = hasRealPaper ? Math.max(5, Math.min(11, Math.round(labelHeight * 0.28))) : 15;
+    const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
     const labels = historyDetails.items
       .map((item, originalIndex) => ({
         item,
@@ -373,102 +394,79 @@ export default function LabelHistory() {
                 Print Job #${historyDetails.id || ""}
             </title>
             <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-            <style>
-                @page {
-                    margin: 5mm;
-                }
-                * {
-                    box-sizing: border-box;
-                }
-                html,
-                body {
-                    margin: 0;
-                    padding: 0;
-                    background: #ffffff;
-                    font-family: Arial, sans-serif;
-                }
-                body {
-                    padding: 10px;
-                    display: grid;
-                    grid-template-columns:
-                        repeat(
-                            auto-fill,
-                            250px
-                        );
-                    gap: 10px;
-                    align-items: start;
-                    justify-content: start;
-                }
-                .label {
-                    width: 250px;
-                    min-height: 0;
-                    height: auto;
-                    border: 1px solid #ddd;
-                    padding: 10px;
-                    text-align: center;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-start;
-                    align-items: center;
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                    overflow: hidden;
-                }
-                .sku {
-                    width: 100%;
-                    font-size: 12px;
-                    font-weight: 500;
-                    margin-bottom: 5px;
-                    word-break: break-word;
-                    overflow-wrap: anywhere;
-                    white-space: normal;
-                }
-                .title {
-                    width: 100%;
-                    font-size: 13px;
-                    font-weight: 700;
-                    margin-bottom: 5px;
-                    word-break: break-word;
-                    overflow-wrap: anywhere;
-                    white-space: normal;
-                }
-                .price {
-                    width: 100%;
-                    font-size: 12px;
-                    font-weight: 600;
-                    margin-bottom: 7px;
-                    word-break: break-word;
-                }
-                .option {
-                    width: 100%;
-                    font-size: 11px;
-                    margin-bottom: 3px;
-                    word-break: break-word;
-                    overflow-wrap: anywhere;
-                }
-                .barcode {
-                    max-width: 100%;
-                    height: auto;
-                    display: block;
-                    margin: 5px auto 0;
-                }
-                .qr {
-                    max-width: 100%;
-                    width: auto;
-                    height: auto;
-                    display: block;
-                    margin: 5px auto 0;
-                }
-                @media print {
-                    body {
-                        padding: 0;
-                    }
-                    .label {
-                        page-break-inside: avoid;
-                        break-inside: avoid;
-                    }
-                }
-            </style>
+           <style>
+${hasRealPaper ? `
+@page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
+* { box-sizing: border-box; }
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: ${paperWidth}mm;
+    ${rows === 1 && columns === 1 ? "" : `min-height: ${paperHeight}mm;`}
+}
+body {
+    font-family: Arial, sans-serif;
+    display: grid;
+    grid-template-columns: repeat(${columns}, ${labelWidth}mm);
+    grid-auto-rows: ${labelHeight}mm;
+    column-gap: ${gapX}mm;
+    row-gap: ${gapY}mm;
+    padding-top: ${marginTop}mm !important;
+    padding-left: ${marginLeft}mm !important;
+    align-content: start;
+    justify-content: start;
+    align-items: start;
+    justify-items: start;
+}
+${rows === 1 && columns === 1 ? `
+.label { page-break-after: always; break-after: page; }
+.label:last-child { page-break-after: auto; }
+` : ""}
+.label {
+    width: ${labelWidth}mm;
+    height: ${labelHeight}mm;
+    align-self: start;
+    justify-self: start;
+    padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
+    box-sizing: border-box;
+    overflow: hidden;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.title { font-weight: bold; font-size: ${textPt}pt !important; }
+.title, .sku {
+    width: 100%;
+    font-size: ${textPt}pt !important;
+    line-height: 1.15 !important;
+    margin: 0 0 0.5mm !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.barcode, .qr {
+    display: block;
+    max-width: 90%;
+    max-height: ${barcodeHeightMm}mm !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+    margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
+}
+` : `
+@page{margin:5mm;}
+body{margin:10px;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;font-family:Arial,sans-serif;}
+.label{width:250px;min-height:140px;border:1px solid #ddd;padding:10px;box-sizing:border-box;text-align:center;page-break-inside:avoid;break-inside:avoid;overflow:hidden;}
+.title{font-size:13px;font-weight:bold;margin-bottom:5px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
+.sku{font-size:12px;margin-bottom:10px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
+.barcode{max-width:100%;height:auto;}
+.qr{display:block;margin:auto;max-width:100%;}
+`}
+</style>
         </head>
         <body>
             ${labels}
@@ -512,29 +510,32 @@ export default function LabelHistory() {
 
                         try {
 
-                            JsBarcode(
-                                barcode,
-                                value,
-                                {
-                                    format: format,
-                                    width: width,
-                                    height: height,
-                                    fontSize: fontSize,
-                                    displayValue:
-                                        displayValue,
-                                    lineColor: color,
-                                    margin: 0
-                                }
-                            );
+    JsBarcode(
+        barcode,
+        value,
+        {
+            format: format,
+            width: width,
+            height: height,
+            fontSize: fontSize,
+            displayValue:
+                displayValue,
+            lineColor: color,
+            margin: 0
+        }
+    );
 
-                        } catch (error) {
+} catch (error) {
 
-                            console.error(
-                                "Barcode generation failed:",
-                                error
-                            );
+    console.error(
+        "Barcode generation failed:",
+        error
+    );
 
-                        }
+    barcode.outerHTML =
+        '<div style="color:#d82c0d;font-size:' + fontSize + 'px;font-weight:bold;padding:4px;border:1px dashed #d82c0d;text-align:center;">Incorrect value for ' + format + ' barcode format</div>';
+
+}
 
                     });
                     setTimeout(function () {

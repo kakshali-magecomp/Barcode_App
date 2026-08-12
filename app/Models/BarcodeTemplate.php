@@ -15,7 +15,7 @@ class BarcodeTemplate extends Model
         'note',
         'paper_brand',
         'paper_model',
-        'layout_setings'
+        'layout_settings'
     ];
 
     protected $casts = [

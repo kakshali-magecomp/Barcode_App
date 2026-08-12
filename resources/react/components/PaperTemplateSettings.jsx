@@ -9,7 +9,7 @@ const brandOptions = [
 const modelOptionsMap = {
     dymo: [
         {
-            label: "30334 (Jewelry Label)",
+            label: "30334 (Jewellery Label)",
             value: "30334",
         },
         {
@@ -44,7 +44,7 @@ const modelOptionsMap = {
 export const PAPER_TEMPLATES = {
     dymo: {
         "30334": {
-            name: "Jewelry Label",
+            name: "Jewellery Label",
 
             type: "roll",
 

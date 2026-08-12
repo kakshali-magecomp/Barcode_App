@@ -3,9 +3,10 @@ import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import ProductPickerModal from "../../components/ProductPickerModal";
 import BarcodeRenderer from "../../components/BarcodeRenderer";
 import QrCodeRenderer from "../../components/QrCodeRenderer";
+import TablePreview from "../../components/TablePreview";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const PREVIEW_PAGE_SIZE = 4;
+const PREVIEW_PAGE_SIZE = 6;
 const SUMMARY_PAGE_SIZE = 5;
 const REMOVE_PRODUCT_MODAL_ID = "remove-product-modal";
 const REMOVE_ALL_MODAL_ID = "remove-all-products-modal";
@@ -29,6 +30,7 @@ export default function GenerateBarcode() {
     const [previewItem, setPreviewItem] = useState(null);
     const [previewPage, setPreviewPage] = useState(1);
     const [productToRemove, setProductToRemove] = useState(null);
+    const [previewMode, setPreviewMode] = useState("card");
 
     useEffect(() => {
         if (!fromHistory) return;
@@ -311,12 +313,10 @@ export default function GenerateBarcode() {
             }
         }, 2000);
     };
-
     const requestRemoveProduct = (variantId) => {
         setProductToRemove(variantId);
         shopify.modal.show(REMOVE_PRODUCT_MODAL_ID);
     };
-
     const confirmRemoveProduct = () => {
         if (!productToRemove) return;
         setSelectedProducts((prevProducts) =>
@@ -328,11 +328,9 @@ export default function GenerateBarcode() {
         setProductToRemove(null);
         shopify.modal.hide(REMOVE_PRODUCT_MODAL_ID);
     };
-
     const requestRemoveAllProducts = () => {
         shopify.modal.show(REMOVE_ALL_MODAL_ID);
     };
-
     const confirmRemoveAllProducts = () => {
         setSelectedProducts([]);
         setGeneratedProducts([]);
@@ -342,8 +340,12 @@ export default function GenerateBarcode() {
 
     const handlePrint = () => {
         let labels = "";
-
-        // Only products/variants that already have a barcode
+        console.log("DEBUG selectedProducts:", selectedProducts.map(p => ({
+            title: p.product_title,
+            barcode: p.barcode,
+            current_barcode: p.current_barcode,
+            quantity: p.quantity,
+        })));
         const productsWithBarcode = selectedProducts.filter((product) => {
             const barcode = String(
                 product?.barcode ??
@@ -353,8 +355,6 @@ export default function GenerateBarcode() {
 
             return barcode !== "";
         });
-
-        // Nothing to print
         if (productsWithBarcode.length === 0) {
             shopify.toast.show(
                 "No selected products or variants have a barcode."
@@ -363,39 +363,39 @@ export default function GenerateBarcode() {
         }
 
         productsWithBarcode.forEach((product) => {
-            const labelElement = document.getElementById(
-                `label-${product.variant_id}`
-            );
+            const elementId = `label-${product.variant_id}`;
+            const labelElement = document.getElementById(elementId);
 
-            if (!labelElement) return;
+            console.log("DEBUG loop product:", product.product_title, {
+                elementId,
+                foundElement: !!labelElement,
+            });
 
+            if (!labelElement) {
+                console.warn("DEBUG: no DOM element found for id", elementId);
+                return;
+            }
             const label = labelElement.querySelector(".print-label");
-
-            if (!label) return;
-
-            const quantity = Math.max(
-                1,
-                Number(product.quantity) || 1
-            );
-
+            if (!label) {
+                console.warn("DEBUG: .print-label not found inside", elementId);
+                return;
+            }
+            const quantity = Math.max(1, Number(product.quantity) || 1);
+            console.log("DEBUG will print quantity:", quantity, "for", product.product_title);
             for (let i = 0; i < quantity; i++) {
                 labels += `
-                <div class="label">
-                    <div class="label-content">
-                        ${label.innerHTML}
-                    </div>
-                </div>
-            `;
+        <div class="label">
+            <div class="label-content">
+                ${label.innerHTML}
+            </div>
+        </div>
+    `;
             }
         });
-
-        // Your existing paper/layout code continues here...
-
         const paper = templateDesign?.layout_settings;
-        console.log("DEBUG templateDesign:", templateDesign);
+        console.log("DEBUG selected template name:", templateDesign?.template_name);
         console.log("DEBUG layout_settings:", paper);
-        console.log("DEBUG hasRealPaper will be:", !!(paper && paper?.label?.width && paper?.label?.height));
-
+        console.log("DEBUG rows/columns:", paper?.rows, paper?.columns);
         const labelWidth = Number(paper?.label?.width) || null;
         const labelHeight = Number(paper?.label?.height) || null;
         const rows = Number(paper?.rows || 1);
@@ -404,7 +404,6 @@ export default function GenerateBarcode() {
         const gapY = Number(paper?.gapY || 0);
         const marginTop = Number(paper?.marginTop || 0);
         const marginLeft = Number(paper?.marginLeft || 0);
-
         const hasRealPaper = paper && labelWidth && labelHeight;
         const paperWidth = hasRealPaper
             ? Number(paper?.paper?.width) || (labelWidth * columns + gapX * (columns - 1) + marginLeft)
@@ -417,9 +416,7 @@ export default function GenerateBarcode() {
             ? Math.max(5, Math.min(11, Math.round(labelHeight * 0.28)))
             : 12;
         const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
-
         const printWindow = window.open("", "", "width=900,height=700");
-
         const printStyles = hasRealPaper
             ? `
 @page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
@@ -428,8 +425,7 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
     width: ${paperWidth}mm;
-    height: ${paperHeight}mm;
-    overflow: hidden;
+    ${rows === 1 && columns === 1 ? "" : `height: ${paperHeight}mm; overflow: hidden;`}
 }
 body {
     font-family: Arial, sans-serif;
@@ -536,38 +532,28 @@ ${labels}
     const summaryStart = (summaryPage - 1) * SUMMARY_PAGE_SIZE;
     const summaryEnd = summaryStart + SUMMARY_PAGE_SIZE;
     const paginatedSummary = generatedProducts.slice(summaryStart, summaryEnd);
-
     const totalPreviewPages = Math.max(1, Math.ceil(selectedProducts.length / PREVIEW_PAGE_SIZE));
     const previewStart = (previewPage - 1) * PREVIEW_PAGE_SIZE;
     const previewEnd = previewStart + PREVIEW_PAGE_SIZE;
-
     const formatProductPrice = (product) => {
         const decimals = Number(
             printSettings?.price_decimal_number ?? 2
         );
-
         let originalPrice = Number(product?.price ?? 0);
-
-        // Only keep this if your API can return price in cents
         if (originalPrice > 999) {
             originalPrice = originalPrice / 100;
         }
-
-        // VAT
         const vatPercentage = Number(
             printSettings?.vat_percentage ?? 0
         );
-
         const priceWithVat =
             originalPrice +
             (originalPrice * vatPercentage) / 100;
 
         const amount = priceWithVat.toFixed(decimals);
-
         const format = templateDesign?.line2_currency_format || "{amount}";
         return format.replace("{amount}", amount);
     };
-
     return (
         <>
             <s-page heading="Generate Barcode" subheading="Manage and edit your customized Barcode">
@@ -785,96 +771,154 @@ ${labels}
                         <s-stack direction="block" gap="base">
                             <s-stack direction="inline" gap="base" alignItems="center" justifyContent="space-between">
                                 <s-heading>Preview</s-heading>
+                                <s-stack
+                                    direction="inline"
+                                    gap="none"
+                                    alignItems="center"
+                                >
+                                    {/* Card Preview */}
+                                    <s-button
+                                        icon="grid"
+                                        variant={previewMode === "card" ? "secondary" : "tertiary"}
+                                        accessibilityLabel="Card preview"
+                                        onClick={() => setPreviewMode("card")}
+                                    />
+
+                                    {/* Table Preview */}
+                                    <s-button
+                                        icon="data-table"
+                                        variant={previewMode === "table" ? "secondary" : "tertiary"}
+                                        accessibilityLabel="Table preview"
+                                        onClick={() => setPreviewMode("table")}
+                                    />
+                                </s-stack>
                                 <s-stack direction="inline" gap="base" alignItems="center">
-                                    {selectedProducts.length > PREVIEW_PAGE_SIZE && (
+                                    {/* {selectedProducts.length > PREVIEW_PAGE_SIZE && (
                                         <s-text tone="subdued">
                                             Page {previewPage} of {totalPreviewPages} ({selectedProducts.length} products)
                                         </s-text>
-                                    )}
+                                    )} */}
                                     <s-button tone="critical" variant="tertiary" onClick={requestRemoveAllProducts}>
                                         Delete All
                                     </s-button>
                                 </s-stack>
                             </s-stack>
+                            {previewMode === "card" && (
+                                <div
+                                    style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}
+                                    ref={printRef}
+                                    className="label"
+                                >
 
-                            <div
-                                style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}
-                                ref={printRef}
-                                className="label"
-                            >
-
-                                {selectedProducts.map((product, index) => (
-                                    <div
-                                        id={`label-${product.variant_id}`}
-                                        key={product.variant_id}
-                                        style={{
-                                            display: index >= previewStart && index < previewEnd ? undefined : "none",
-                                            width: "300px",
-                                            border: "1px solid #ddd",
-                                            borderRadius: "8px",
-                                            padding: "15px",
-                                            background: "#fff",
-                                        }}
-                                    >
+                                    {selectedProducts.map((product, index) => (
                                         <div
-                                            className="no-print"
+                                            id={`label-${product.variant_id}`}
+                                            key={product.variant_id}
                                             style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "flex-start",
-                                                marginBottom: "12px",
+                                                display: index >= previewStart && index < previewEnd ? undefined : "none",
+                                                width: "270px",
+                                                border: "1px solid #ddd",
+                                                borderRadius: "8px",
+                                                padding: "15px",
+                                                background: "#fff",
                                             }}
                                         >
-                                            <s-button
-                                                icon="delete"
-                                                variant="tertiary"
-                                                tone="critical"
-                                                accessibilityLabel="Remove product"
-                                                onClick={() => requestRemoveProduct(product.variant_id)}
-                                            />
-                                            <strong>{product.product_title}</strong>
-                                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                            <div
+                                                className="no-print"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "flex-start",
+                                                    marginBottom: "12px",
+                                                }}
+                                            >
                                                 <s-button
+                                                    icon="delete"
                                                     variant="tertiary"
-                                                    onClick={() =>
-                                                        updateProductQuantity(product.variant_id, product.quantity - 1)
-                                                    }
-                                                >
-                                                    -
-                                                </s-button>
-                                                <s-text>{product.quantity}</s-text>
-                                                <s-button
-                                                    variant="tertiary"
-                                                    onClick={() =>
-                                                        updateProductQuantity(product.variant_id, product.quantity + 1)
-                                                    }
-                                                >
-                                                    +
-                                                </s-button>
+                                                    tone="critical"
+                                                    accessibilityLabel="Remove product"
+                                                    onClick={() => requestRemoveProduct(product.variant_id)}
+                                                />
+                                                <strong>{product.product_title}</strong>
+                                                <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                                                    <s-button
+                                                        variant="tertiary"
+                                                        onClick={() =>
+                                                            updateProductQuantity(product.variant_id, product.quantity - 1)
+                                                        }
+                                                    >
+                                                        -
+                                                    </s-button>
+                                                    <div style={{ width: "auto" }}>
+                                                        <s-text-field
+                                                            label="Quantity"
+                                                            labelAccessibilityVisibility="exclusive"
+                                                            type="number"
+                                                            min="1"
+                                                            value={String(product.quantity ?? 1)}
+                                                            onInput={(e) => {
+                                                                const value = e.currentTarget.value;
+
+                                                                // Allow user to temporarily clear the field
+                                                                if (value === "") {
+                                                                    updateProductQuantity(product.variant_id, "");
+                                                                    return;
+                                                                }
+
+                                                                const quantity = parseInt(value, 10);
+
+                                                                if (!Number.isNaN(quantity) && quantity >= 1) {
+                                                                    updateProductQuantity(
+                                                                        product.variant_id,
+                                                                        quantity
+                                                                    );
+                                                                }
+                                                            }}
+                                                        ></s-text-field>
+                                                    </div>
+                                                    <s-button
+                                                        variant="tertiary"
+                                                        onClick={() =>
+                                                            updateProductQuantity(product.variant_id, product.quantity + 1)
+                                                        }
+                                                    >
+                                                        +
+                                                    </s-button>
+                                                </div>
+                                            </div>
+
+                                            <div className="print-label">
+                                                {templateDesign?.line1_sku && <div>{product.current_sku}</div>}
+                                                {templateDesign?.line2_name && <div>{product.product_title}</div>}
+                                                {templateDesign?.line2_price && (
+                                                    <div>
+                                                        {formatProductPrice(product)}
+                                                    </div>
+                                                )}
+                                                {templateDesign.symbol_type === "BARCODE" ? (
+                                                    <BarcodeRenderer
+                                                        value={getSymbolValue(product)}
+                                                        settings={templateDesign}
+                                                        barcodeSettings={templateDesign}
+                                                    />
+                                                ) : (
+                                                    <QrCodeRenderer value={getSymbolValue(product)} settings={templateDesign} />
+                                                )}
                                             </div>
                                         </div>
-
-                                        <div className="print-label">
-                                            {templateDesign?.line1_sku && <div>{product.current_sku}</div>}
-                                            {templateDesign?.line2_name && <div>{product.product_title}</div>}
-                                            {templateDesign?.line2_price && (
-                                                <div>
-                                                    {formatProductPrice(product)}
-                                                </div>
-                                            )}
-                                            {templateDesign.symbol_type === "BARCODE" ? (
-                                                <BarcodeRenderer
-                                                    value={getSymbolValue(product)}
-                                                    settings={templateDesign}
-                                                    barcodeSettings={templateDesign}
-                                                />
-                                            ) : (
-                                                <QrCodeRenderer value={getSymbolValue(product)} settings={templateDesign} />
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
+                            {previewMode === "table" && (
+                                <TablePreview
+                                    products={selectedProducts.slice(previewStart, previewEnd)}
+                                    templateDesign={templateDesign}
+                                    getSymbolValue={getSymbolValue}
+                                    formatProductPrice={formatProductPrice}
+                                    onRemoveProduct={requestRemoveProduct}
+                                    onUpdateQuantity={updateProductQuantity}
+                                />
+                            )}
 
                             {selectedProducts.length > PREVIEW_PAGE_SIZE && (
                                 <s-stack direction="inline" gap="tight" alignItems="center">

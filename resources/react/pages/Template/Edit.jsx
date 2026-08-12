@@ -152,7 +152,7 @@ export default function EditTemplate() {
                     note: note,
                     paper_brand: brand,
                     paper_model: model,
-                    layout_settings: { default_columns: 3 }
+                    layout_settings: selectedPaperTemplate,
                 }),
             });
 

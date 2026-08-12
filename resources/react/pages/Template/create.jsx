@@ -63,7 +63,7 @@ export default function CreateTemplate() {
     const modelOptionsMap = {
         '': [],
         'dymo': [
-            { label: '30334 (Jewelry Label)', value: '30334' },
+            { label: '30334 (Jewellery Label)', value: '30334' },
             { label: '30252 (Address Label)', value: '30252' }
         ],
         'zebra': [
@@ -78,7 +78,7 @@ export default function CreateTemplate() {
 
     const PAPER_TEMPLATES = {
         dymo: {
-            "30334": { name: "Jewelry Label", paper: { width: 57, height: 32 }, label: { width: 57, height: 32 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
+            "30334": { name: "Jewellery Label", paper: { width: 57, height: 32 }, label: { width: 57, height: 32 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
             "30252": { name: "Address Label", paper: { width: 89, height: 28 }, label: { width: 89, height: 28 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
         },
         zebra: {
@@ -588,7 +588,7 @@ export default function CreateTemplate() {
                                     <span style={{ color: '#666' }}>• {previewItem.option_1}</span>
                                 )}
                                 {design.line2_price && (
-                                    <span style={{ color: '#008060', fontWeight: 700 }}>
+                                    <span style={{ color: '#000000', fontWeight: 700 }}>
                                         {formatPreviewPrice()}
                                     </span>
                                 )}

@@ -429,7 +429,7 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://long-driving-meaning-make.trycloudflare.com/api/webhooks/products/create'),   
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://extensions-operating-sides-information.trycloudflare.com/api/webhooks/products/create'),   
             ], 
     ],     
 
