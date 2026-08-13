@@ -135,7 +135,7 @@ export default function TemplateList() {
                 onClose={closeDeleteSelectedConfirmation}
             />
 
-            <s-page heading="Label Templates" subheading="Manage and edit your customized sticker layout dimensions.">
+            <s-page heading="Barcode App" subheading="Manage and edit your customized sticker layout dimensions.">
                 <s-section>
                     <s-stack direction="inline" gap="base">
                         <s-button variant="primary" href="/TamplateCreate">

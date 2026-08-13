@@ -4,6 +4,9 @@ import ProductPickerModal from "../../components/ProductPickerModal";
 import BarcodeRenderer from "../../components/BarcodeRenderer";
 import QrCodeRenderer from "../../components/QrCodeRenderer";
 import TablePreview from "../../components/TablePreview";
+import TemplateLabelRenderer from "../../components/TemplateLabelRenderer"
+import { openPrintWindow } from "../../components/Printlayout";
+
 import { useNavigate, useLocation } from "react-router-dom";
 
 const PREVIEW_PAGE_SIZE = 6;
@@ -80,6 +83,7 @@ export default function GenerateBarcode() {
     const [generatedProducts, setGeneratedProducts] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState("");
     const printRef = useRef();
+    const printContainerRef = useRef(null);
     const [templates, setTemplates] = useState([]);
     const [templateDesign, setTemplateDesign] = useState(null);
     const [loadingTemplate, setLoadingTemplate] = useState(false);
@@ -339,176 +343,24 @@ export default function GenerateBarcode() {
     };
 
     const handlePrint = () => {
-        let labels = "";
-        console.log("DEBUG selectedProducts:", selectedProducts.map(p => ({
-            title: p.product_title,
-            barcode: p.barcode,
-            current_barcode: p.current_barcode,
-            quantity: p.quantity,
-        })));
-        const productsWithBarcode = selectedProducts.filter((product) => {
-            const barcode = String(
-                product?.barcode ??
-                product?.current_barcode ??
-                ""
-            ).trim();
+        const bodyHtml = selectedProducts
+            .map((product) => {
+                const label = document
+                    .getElementById(`label-${product.variant_id}`)
+                    ?.querySelector(".print-label");
+                if (!label) return "";
+                const qty = Math.max(1, Number(product.quantity) || 1);
+                return Array(qty)
+                    .fill(`<div class="label"><div class="label-content">${label.innerHTML}</div></div>`)
+                    .join("");
+            })
+            .join("");
 
-            return barcode !== "";
+        openPrintWindow({
+            bodyHtml,
+            paperTemplate: templateDesign?.layout_settings,
+            onAfterPrint: savePrintHistory,
         });
-        if (productsWithBarcode.length === 0) {
-            shopify.toast.show(
-                "No selected products or variants have a barcode."
-            );
-            return;
-        }
-
-        productsWithBarcode.forEach((product) => {
-            const elementId = `label-${product.variant_id}`;
-            const labelElement = document.getElementById(elementId);
-
-            console.log("DEBUG loop product:", product.product_title, {
-                elementId,
-                foundElement: !!labelElement,
-            });
-
-            if (!labelElement) {
-                console.warn("DEBUG: no DOM element found for id", elementId);
-                return;
-            }
-            const label = labelElement.querySelector(".print-label");
-            if (!label) {
-                console.warn("DEBUG: .print-label not found inside", elementId);
-                return;
-            }
-            const quantity = Math.max(1, Number(product.quantity) || 1);
-            console.log("DEBUG will print quantity:", quantity, "for", product.product_title);
-            for (let i = 0; i < quantity; i++) {
-                labels += `
-        <div class="label">
-            <div class="label-content">
-                ${label.innerHTML}
-            </div>
-        </div>
-    `;
-            }
-        });
-        const paper = templateDesign?.layout_settings;
-        console.log("DEBUG selected template name:", templateDesign?.template_name);
-        console.log("DEBUG layout_settings:", paper);
-        console.log("DEBUG rows/columns:", paper?.rows, paper?.columns);
-        const labelWidth = Number(paper?.label?.width) || null;
-        const labelHeight = Number(paper?.label?.height) || null;
-        const rows = Number(paper?.rows || 1);
-        const columns = Number(paper?.columns || 1);
-        const gapX = Number(paper?.gapX || 0);
-        const gapY = Number(paper?.gapY || 0);
-        const marginTop = Number(paper?.marginTop || 0);
-        const marginLeft = Number(paper?.marginLeft || 0);
-        const hasRealPaper = paper && labelWidth && labelHeight;
-        const paperWidth = hasRealPaper
-            ? Number(paper?.paper?.width) || (labelWidth * columns + gapX * (columns - 1) + marginLeft)
-            : null;
-        const paperHeight = hasRealPaper
-            ? Number(paper?.paper?.height) || (labelHeight * rows + gapY * (rows - 1) + marginTop)
-            : null;
-
-        const textPt = hasRealPaper
-            ? Math.max(5, Math.min(11, Math.round(labelHeight * 0.28)))
-            : 12;
-        const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
-        const printWindow = window.open("", "", "width=900,height=700");
-        const printStyles = hasRealPaper
-            ? `
-@page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
-* { box-sizing: border-box; }
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: ${paperWidth}mm;
-    ${rows === 1 && columns === 1 ? "" : `height: ${paperHeight}mm; overflow: hidden;`}
-}
-body {
-    font-family: Arial, sans-serif;
-    display: grid;
-    grid-template-columns: repeat(${columns}, ${labelWidth}mm);
-    grid-auto-rows: ${labelHeight}mm;
-    column-gap: ${gapX}mm;
-    row-gap: ${gapY}mm;
-    padding-top: ${marginTop}mm !important;
-    padding-left: ${marginLeft}mm !important;
-    align-content: start;
-    justify-content: start;
-    align-items: start;
-    justify-items: start;
-}
-${rows === 1 && columns === 1 ? `
-body { display: block !important; }
-.label { page-break-after: always; break-after: page; }
-.label:last-child { page-break-after: auto; }
-` : ""}
-.label {
-    width: ${labelWidth}mm;
-    height: ${labelHeight}mm;
-    align-self: start;
-    justify-self: start;
-    padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
-    box-sizing: border-box;
-    overflow: hidden;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-.label-content { width: 100%; }
-.label-content > div {
-    font-size: ${textPt}pt !important;
-    line-height: 1.15 !important;
-    margin: 0 0 0.5mm !important;
-    width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.label-content > div:first-child { font-weight: bold; }
-.label svg, .label img {
-    display: block;
-    max-width: 90%;
-    max-height: ${barcodeHeightMm}mm !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain;
-    margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
-}
-`
-            : `
-@page{size:auto;margin:5mm;}
-body{margin:0;padding:10px;font-family:Arial,sans-serif;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;justify-content:start;align-content:start;}
-.label{width:250px;min-height:140px;padding:10px;box-sizing:border-box;border:1px solid #ddd;overflow:hidden;page-break-inside:avoid;break-inside:avoid;text-align:center;}
-.label svg,.label img{max-width:100%;height:auto !important;display:block;margin:0 auto;}
-.label-content{width:100%;}
-.label-content > div{font-size:12px;line-height:1.4;word-break:break-word;overflow-wrap:anywhere;white-space:normal;margin-bottom:4px;}
-.label-content > div:first-child{font-weight:bold;font-size:13px;}
-`;
-
-        printWindow.document.write(`
-<html>
-<head>
-<style>${printStyles}</style>
-</head>
-<body>
-${labels}
-</body>
-</html>
-`);
-        printWindow.document.close();
-        setTimeout(() => {
-            printWindow.print();
-            savePrintHistory();
-            printWindow.close();
-        }, 500);
     };
 
     const getSymbolValue = (product) => {
@@ -889,10 +741,10 @@ ${labels}
 
                                             <div className="print-label">
                                                 {templateDesign?.line1_sku && <div>{product.current_sku}</div>}
-                                                {templateDesign?.line2_name && <div>{product.product_title}</div>}
-                                                {templateDesign?.line2_price && (
+                                                {(templateDesign?.line2_name || templateDesign?.line2_price) && (
                                                     <div>
-                                                        {formatProductPrice(product)}
+                                                        {templateDesign?.line2_name && <span>{product.product_title}</span>}
+                                                        {templateDesign?.line2_price && <span>{formatProductPrice(product)}</span>}
                                                     </div>
                                                 )}
                                                 {templateDesign.symbol_type === "BARCODE" ? (
@@ -946,7 +798,35 @@ ${labels}
                             </s-stack>
                         </s-stack>
                     </s-section>
+
                 )}
+                <div
+                    ref={printContainerRef}
+                    style={{
+                        position: "absolute",
+                        left: "-100000px",
+                        top: 0,
+                        width: "1px",
+                        height: "1px",
+                        overflow: "hidden",
+                    }}
+                >
+                    {selectedProducts.map((product) => (
+                        <div
+                            key={`print-${product.variant_id}`}
+                            id={`print-label-${product.variant_id}`}
+                            className="print-template-label"
+                        >
+                            <TemplateLabelRenderer
+                                design={templateDesign}
+                                product={product}
+                                barcodeSettings={templateDesign}
+                                formatPrice={formatProductPrice}
+                                printMode={true}
+                            />
+                        </div>
+                    ))}
+                </div>
             </s-page>
 
             <Modal id={REMOVE_PRODUCT_MODAL_ID}>

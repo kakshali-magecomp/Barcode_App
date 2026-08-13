@@ -157,8 +157,8 @@ export default function DesignCanvasEdit({
 
         // Scale text/barcode size to the actual physical label height.
         const textPt = hasRealPaper
-            ? Math.max(5, Math.min(11, Math.round(labelHeight * 0.28)))
-            : 13;
+            ? Math.max(4, Math.min(9, Math.round(labelHeight * 0.2)))
+            : 10;
         const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
 
         let labels = "";
@@ -223,6 +223,9 @@ body { display: block !important; }
     overflow-wrap: anywhere !important;
     white-space: normal !important;
     margin: 0 0 0.8mm !important;
+}
+    .label span + span {
+    margin-left: 4px !important;
 }
 .barcode, .qr, .label svg, .label img {
     display: block;
@@ -496,7 +499,7 @@ body {
                                         </span>
                                     )}
                                     {design.line2_price && (
-                                        <span style={{ marginLeft: 8, color: "#008060", fontWeight: 700 }}>
+                                        <span style={{ marginLeft: 8, color: "#000000", fontWeight: 700 }}>
                                             {formatPrice(previewItem.price)}
                                         </span>
                                     )}

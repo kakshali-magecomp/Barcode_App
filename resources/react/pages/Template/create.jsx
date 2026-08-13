@@ -6,6 +6,8 @@ import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
 import QrCodeRenderer from '../../components/QrCodeRenderer';
 import PaperTemplateSettings from "../../components/PaperTemplateSettings";
+import { openPrintWindow } from '../../components/Printlayout';
+
 const SAVE_BAR_ID = 'create-template-save-bar';
 
 const defaultDesign = {
@@ -252,150 +254,16 @@ export default function CreateTemplate() {
             return;
         }
 
-        const paperWidth = Number(paper.paper.width);
-        const paperHeight = Number(paper.paper.height);
-        const labelWidth = Number(paper.label.width);
-        const labelHeight = Number(paper.label.height);
-        const rows = Number(paper.rows || 1);
-        const columns = Number(paper.columns || 1);
-        const gapX = Number(paper.gapX || 0);
-        const gapY = Number(paper.gapY || 0);
-        const marginTop = Number(paper.marginTop || 0);
-        const marginLeft = Number(paper.marginLeft || 0);
-        const textPt = Math.max(5, Math.min(11, Math.round(labelHeight * 0.28)));
-        const barcodeHeightMm = Math.max(4, labelHeight * 0.4);
+        const bodyHtml = Array(qty)
+            .fill(`<div class="label">${printRef.current.innerHTML}</div>`)
+            .join("");
 
-        let labels = "";
-        for (let i = 0; i < qty; i++) {
-            labels += `<div class="label">${printRef.current.innerHTML}</div>`;
-        }
+        openPrintWindow({
+            bodyHtml,
+            paperTemplate: paper,
 
-        const printWindow = window.open("", "_blank", "width=1000,height=800");
-        if (!printWindow) {
-            shopify.toast.show("Please allow pop-ups to print.");
-            return;
-        }
-        const rollPageBreakCss =
-            rows === 1 && columns === 1
-                ? `
-        .print-sheet { display: block !important; }
-        .label { page-break-after: always; break-after: page; }
-        .label:last-child { page-break-after: auto; }
-        `
-                : "";
-
-        printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>${paper.name || "Barcode Labels"}</title>
-        <style>
-            @page {
-                size: ${paperWidth}mm ${paperHeight}mm;
-                margin: 0;
-            }
-            * { box-sizing: border-box; }
-            html, body {
-                margin: 0;
-                padding: 0;
-                width: ${paperWidth}mm;
-                min-height: ${paperHeight}mm;
-                background: #ffffff;
-                font-family: Arial, Helvetica, sans-serif;
-            }
-            .print-sheet {
-                width: ${paperWidth}mm;
-                min-height: ${paperHeight}mm;
-                display: grid;
-                grid-template-columns: repeat(${columns}, ${labelWidth}mm);
-                grid-template-rows: repeat(${rows}, ${labelHeight}mm);
-                column-gap: ${gapX}mm;
-                row-gap: ${gapY}mm;
-                padding-top: ${marginTop}mm;
-                padding-left: ${marginLeft}mm;
-                align-content: start;
-                justify-content: start;
-                overflow: hidden;
-            }
-            ${rollPageBreakCss}
-            .label {
-                width: ${labelWidth}mm;
-                height: ${labelHeight}mm;
-                padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                overflow: hidden;
-                page-break-inside: avoid;
-                break-inside: avoid;
-            }
-            /* Override whatever pixel font-size the on-screen preview
-               baked in via inline styles — those were tuned for a large
-               on-screen box, not the real physical label size. Scaled
-               dynamically per paper type instead of one fixed value. */
-            .label * {
-                max-width: 100%;
-                font-size: ${textPt}pt !important;
-                line-height: 1.15 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            .label div {
-                width: 100%;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            .label strong,
-            .label b {
-                font-weight: 700 !important;
-            }
-            .label svg,
-            .label img {
-                display: block;
-                max-width: 95%;
-                height: ${barcodeHeightMm}mm !important;
-                width: auto !important;
-                margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
-                flex-shrink: 0;
-            }
-            @media print {
-                html, body {
-                    width: ${paperWidth}mm;
-                    height: ${paperHeight}mm;
-                    margin: 0;
-                    padding: 0;
-                }
-                .print-sheet {
-                    width: ${paperWidth}mm;
-                    min-height: ${paperHeight}mm;
-                }
-                .label {
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="print-sheet">
-            ${labels}
-        </div>
-        <script>
-            window.onload = function () {
-                setTimeout(function () {
-                    window.focus();
-                    window.print();
-                }, 500);
-            };
-        </script>
-    </body>
-    </html>
-`);
-        printWindow.document.close();
+            fontOptions: { fontFactor: 0.2, fontMin: 4, fontMax: 9 },
+        });
     };
 
     const handleSubmit = useCallback(async () => {
@@ -590,6 +458,11 @@ export default function CreateTemplate() {
                                 {design.line2_price && (
                                     <span style={{ color: '#000000', fontWeight: 700 }}>
                                         {formatPreviewPrice()}
+                                    </span>
+                                )}
+                                {design.line3_Vendor && (
+                                    <span style={{ color: '#000000', fontWeight: 700 }}>
+                                        {formatPreviewVendor()}
                                     </span>
                                 )}
                             </div>

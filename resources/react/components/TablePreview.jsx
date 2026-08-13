@@ -48,7 +48,7 @@ export default function TablePreview({
 
             {/* Table */}
             <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "900px",}}>
+                <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "900px", }}>
                     <thead>
                         <tr style={{ background: "#f6f6f7", borderBottom: "1px solid #e1e3e5", }}>
                             <th style={headerStyle}>Product</th>
@@ -73,19 +73,69 @@ export default function TablePreview({
 
                                 return (
                                     <tr key={product.variant_id} id={`label-${product.variant_id}`}
-                                        style={{ borderBottom: "1px solid #e1e3e5",}}>
+                                        style={{ borderBottom: "1px solid #e1e3e5", }}>
                                         {/* Product */}
                                         <td style={cellStyle}>
-                                            <div style={{ display: "flex", flexDirection: "column", gap: "4px", }}>
-                                                <strong style={{ color: "#202223", fontSize: "14px",}}>
+
+
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    gap: "4px",
+                                                }}
+                                            >
+                                                <strong
+                                                    style={{
+                                                        color: "#202223",
+                                                        fontSize: "14px",
+                                                    }}
+                                                >
                                                     {product.product_title || "-"}
                                                 </strong>
-                                                {product.variant_title &&  product.variant_title !==  "Default Title" && (
-                                                        <span style={{ fontSize:"12px", color: "#6d7175", }} >
-                                                            { product.variant_title }
+
+                                                {product.variant_title &&
+                                                    product.variant_title !== "Default Title" && (
+                                                        <span
+                                                            style={{
+                                                                fontSize: "12px",
+                                                                color: "#6d7175",
+                                                            }}
+                                                        >
+                                                            {product.variant_title}
                                                         </span>
                                                     )}
                                             </div>
+
+
+                                            <div
+                                                className="print-label"
+                                                style={{
+                                                    position: "absolute",
+                                                    left: "-100000px",
+                                                    top: "0",
+                                                    width: "300px",
+                                                    visibility: "hidden",
+                                                }}
+                                            >
+                                                {templateDesign?.line1_sku && <div>{product.current_sku}</div>}
+                                                {(templateDesign?.line2_name || templateDesign?.line2_price) && (
+                                                    <div>
+                                                        {templateDesign?.line2_name && <span>{product.product_title}</span>}
+                                                        {templateDesign?.line2_price && <span>{formatProductPrice(product)}</span>}
+                                                    </div>
+                                                )}
+                                                {templateDesign?.symbol_type === "BARCODE" ? (
+                                                    <BarcodeRenderer
+                                                        value={symbolValue}
+                                                        settings={templateDesign}
+                                                        barcodeSettings={templateDesign}
+                                                    />
+                                                ) : (
+                                                    <QrCodeRenderer value={symbolValue} settings={templateDesign} />
+                                                )}
+                                            </div>
+
                                         </td>
 
                                         {/* SKU */}
@@ -99,41 +149,111 @@ export default function TablePreview({
                                         </td>
 
                                         {/* Barcode */}
-                                        <td  style={{ ...cellStyle, width: "25%",minWidth: 0,}} >
-                                            <div  style={{ width: "100%", minWidth: 0,display: "flex",flexDirection: "column", alignItems: "center", justifyContent: "center",overflow: "hidden",}} >
-                                                {/* Barcode */}
-                                                <div style={{ width: "100%", maxWidth: "150px",height: "58px",display: "flex",alignItems: "center",justifyContent: "center", overflow: "hidden", }}>
-                                                    {templateDesign?.symbol_type === "BARCODE" ? (
-                                                        <BarcodeRenderer
-                                                            value={symbolValue}
-                                                            settings={{
-                                                                ...templateDesign,
-                                                                // Make the preview barcode fit the table
-                                                                symbol_width_px: 140,
+                                        {/* Barcode / QR Code */}
+                                        <td
+                                            style={{
+                                                ...cellStyle,
+                                                width: "25%",
+                                                minWidth: "180px",
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    width: "100%",
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                {templateDesign?.symbol_type === "BARCODE" ? (
+                                                    <>
+                                                        {/* Barcode */}
+                                                        <div
+                                                            style={{
+                                                                width: "150px",
+                                                                height: "58px",
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                overflow: "hidden",
                                                             }}
-                                                            barcodeSettings={templateDesign}
-                                                        />
-                                                    ) : (
-                                                        <QrCodeRenderer
-                                                            value={symbolValue}
-                                                            settings={templateDesign}
-                                                        />
-                                                    )}
-                                                </div>
+                                                        >
+                                                            <BarcodeRenderer
+                                                                value={symbolValue}
+                                                                field={templateDesign?.symbol_field_source}
+                                                                settings={templateDesign}
+                                                                barcodeSettings={{
+                                                                    ...(templateDesign?.barcodeSettings || {}),
+                                                                    ...templateDesign,
+                                                                }}
+                                                            />
+                                                        </div>
 
-                                                {/* Barcode value BELOW barcode */}
-                                                <div style={{ width: "100%", maxWidth: "150px", marginTop: "4px", textAlign: "center", fontSize: "11px",
-                                                                 lineHeight: "14px",color: "#6d7175", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", }}
-                                                    title={symbolValue || ""}>
-                                                    {symbolValue || "-"}
-                                                </div>
+                                                        {/* Barcode value */}
+                                                        <div
+                                                            style={{
+                                                                width: "150px",
+                                                                marginTop: "4px",
+                                                                textAlign: "center",
+                                                                fontSize: "11px",
+                                                                lineHeight: "14px",
+                                                                color: "#6d7175",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                                whiteSpace: "nowrap",
+                                                            }}
+                                                            title={symbolValue || ""}
+                                                        >
+                                                            {symbolValue || "-"}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* QR Code */}
+                                                        <div
+                                                            style={{
+                                                                width: "120px",
+                                                                height: "120px",
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                flexShrink: 0,
+                                                            }}
+                                                        >
+                                                            <QrCodeRenderer
+                                                                value={symbolValue}
+                                                                settings={templateDesign}
+                                                            />
+                                                        </div>
+
+                                                        {/* QR value */}
+                                                        <div
+                                                            style={{
+                                                                width: "150px",
+                                                                marginTop: "6px",
+                                                                textAlign: "center",
+                                                                fontSize: "11px",
+                                                                lineHeight: "14px",
+                                                                color: "#6d7175",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                                whiteSpace: "nowrap",
+                                                            }}
+                                                            title={symbolValue || ""}
+                                                        >
+                                                            {symbolValue || "-"}
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         </td>
 
                                         {/* Quantity */}
                                         <td style={cellStyle}>
-                                            <div style={{display: "flex", alignItems: "center", gap: "6px", justifyContent: "center",}} >    
-                                           
+                                            <div style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", }} >
+
                                                 {/* MINUS */}
                                                 <button
                                                     type="button"
@@ -173,8 +293,10 @@ export default function TablePreview({
                                                             );
                                                         }
                                                     }}
-                                                    style={{ width: "64px", height: "32px", border: "1px solid #8c9196", borderRadius: "6px", textAlign: "center",
-                                                             fontSize: "14px", background: "#fff", color: "#202223", outline: "none", boxSizing: "border-box",}}/>
+                                                    style={{
+                                                        width: "64px", height: "32px", border: "1px solid #8c9196", borderRadius: "6px", textAlign: "center",
+                                                        fontSize: "14px", background: "#fff", color: "#202223", outline: "none", boxSizing: "border-box",
+                                                    }} />
                                                 {/* PLUS */}
                                                 <button
                                                     type="button"

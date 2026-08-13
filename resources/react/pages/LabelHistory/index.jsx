@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useNavigate } from "react-router-dom";
+import { openPrintWindow } from '../../components/Printlayout';
 
 const DELETE_MODAL_ID = "delete-history-modal";
 const VIEW_MODAL_ID = "view-history-modal";
@@ -14,7 +15,6 @@ export default function LabelHistory() {
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [error, setError] = useState("");
-
   const [selectedHistory, setSelectedHistory] = useState(null);
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -133,422 +133,48 @@ export default function LabelHistory() {
     shopify.modal.hide(DELETE_MODAL_ID);
   };
 
-  const handlePrintHistory = () => {
+ const handlePrintHistory = () => {
     if (!historyDetails) return;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      shopify.toast.show("Please allow pop-ups to print.");
-      return;
-    }
 
     const firstSelected = historyDetails.items.find((_, index) => selectedItems.includes(index));
     const paper = firstSelected?.template_settings?.layout_settings;
 
-    const labelWidth = Number(paper?.label?.width) || null;
-    const labelHeight = Number(paper?.label?.height) || null;
-    const rows = Number(paper?.rows || 1);
-    const columns = Number(paper?.columns || 1);
-    const gapX = Number(paper?.gapX || 0);
-    const gapY = Number(paper?.gapY || 0);
-    const marginTop = Number(paper?.marginTop || 0);
-    const marginLeft = Number(paper?.marginLeft || 0);
-    const hasRealPaper = paper && labelWidth && labelHeight;
-    const paperWidth = hasRealPaper
-      ? Number(paper?.paper?.width) || (labelWidth * columns + gapX * (columns - 1) + marginLeft)
-      : null;
-    const paperHeight = hasRealPaper
-      ? Number(paper?.paper?.height) || (labelHeight * rows + gapY * (rows - 1) + marginTop)
-      : null;
-    const textPt = hasRealPaper ? Math.max(5, Math.min(11, Math.round(labelHeight * 0.28))) : 15;
-    const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
-    const labels = historyDetails.items
-      .map((item, originalIndex) => ({
-        item,
-        originalIndex,
-      }))
-      .filter(({ originalIndex }) =>
-        selectedItems.includes(originalIndex)
-      )
-      .map(({ item, originalIndex }) => {
-        const settings = item.template_settings || {};
-        let symbolValue = "";
-        switch (settings.symbol_field_source) {
-          case "sku_value":
-            symbolValue = item.sku || "";
-            break;
-          case "barcode_value":
-            symbolValue = item.barcode || "";
-            break;
-          case "product_name":
-            symbolValue = item.product_title || "";
-            break;
-          case "product_price":
-            symbolValue = item.price || "";
-            break;
-          case "product_online_url":
-            symbolValue = item.online_url || "";
-            break;
-          default:
-            symbolValue = item.barcode || "";
-            break;
-        }
-        const quantity = Math.max(
-          1,
-          Number(
-            printQuantities?.[originalIndex] ||
-            item.qty ||
-            1
-          )
-        );
-        const decimals = Number(
-          settings.price_decimal_number ?? 2
-        );
-
-        let originalPrice = Number(
-          item.price ?? 0
-        );
-
-        // If API returns cents
-        if (originalPrice > 999) {
-          originalPrice = originalPrice / 100;
-        }
-
-        const vatPercentage = Number(
-          settings.vat_percentage ?? 0
-        );
-
-        const priceWithVat =
-          originalPrice +
-          (originalPrice * vatPercentage) / 100;
-
-        const amount = priceWithVat.toFixed(decimals);
-
-        const currencyFormat =
-          settings.currency_format ||
-          "without_currency";
-
-        let formattedPrice = amount;
-
-        if (currencyFormat === "with_currency") {
-          formattedPrice = `$${amount}`;
-        }
-
-        if (currencyFormat === "currency_code") {
-          formattedPrice = `${amount} USD`;
-        }
-
-        if (settings.line2_currency_format) {
-          formattedPrice =
-            settings.line2_currency_format.replace(
-              "{amount}",
-              amount
-            );
-        }
-        let symbolHTML = "";
-
-        if (settings.symbol_enabled) {
-          if (settings.symbol_type === "QR") {
-
-            const qrSize = Number(
-              settings.symbol_width_px || 140
-            );
-
-            const qrColor = (
-              settings.symbol_color ||
-              "#000000"
-            ).replace("#", "");
-
-            const qrURL =
-              `https://api.qrserver.com/v1/create-qr-code/` +
-              `?size=${qrSize}x${qrSize}` +
-              `&color=${qrColor}` +
-              `&data=${encodeURIComponent(
-                String(symbolValue || "")
-              )}`;
-
-            symbolHTML = `
-                        <img
-                            class="qr"
-                            src="${qrURL}"
-                            alt="QR Code"
-                        />
-                    `;
-
-          } else {
-
-            let barcodeFormat =
-              settings.barcode_format ||
-              "CODE128";
-
-            if (barcodeFormat === "UPCA") {
-              barcodeFormat = "UPC";
+    const bodyHtml = historyDetails.items
+        .filter((_, index) => selectedItems.includes(index))
+        .map((item) => {
+            const settings = item.template_settings || {};
+            let symbolValue;
+            switch (settings.symbol_field_source) {
+                case "sku_value": symbolValue = item.sku; break;
+                case "product_name": symbolValue = item.product_title; break;
+                case "product_price": symbolValue = item.price; break;
+                case "product_online_url": symbolValue = item.online_url; break;
+                default: symbolValue = item.barcode;
             }
 
-            if (barcodeFormat === "Code39") {
-              barcodeFormat = "CODE39";
+            let html = "";
+            for (let i = 0; i < item.qty; i++) {
+                html += `<div class="label">
+                    ${settings.line2_name ? `<div class="title">${item.product_title ?? ""}</div>` : ""}
+                    ${settings.line1_sku ? `<div class="sku">${item.sku ?? ""}</div>` : ""}
+                    ${settings.symbol_enabled ? (
+                        settings.symbol_type === "QR"
+                            ? `<img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140}x${settings.symbol_width_px || 140}&data=${encodeURIComponent(symbolValue || "")}" />`
+                            : `<svg class="barcode" data-format="${settings.barcode_format || "CODE128"}" data-value="${String(symbolValue || "").trim()}" data-width="${settings.symbol_bar_width || 2}" data-height="${settings.symbol_bar_height || 45}" data-font="${settings.symbol_font_size || 16}" data-display="${settings.hide_barcode_value ? "false" : "true"}" data-color="${settings.symbol_color || "#000000"}"></svg>`
+                    ) : ""}
+                </div>`;
             }
+            return html;
+        })
+        .join("");
 
-            symbolHTML = `
-                        <svg
-                            class="barcode"
-                            data-format="${barcodeFormat}"
-                            data-value="${String(
-              symbolValue || ""
-            ).trim()}"
-                            data-width="${settings.symbol_bar_width || 2
-              }"
-                            data-height="${settings.symbol_bar_height || 45
-              }"
-                            data-font="${settings.symbol_font_size || 16
-              }"
-                            data-display="${settings.hide_barcode_value
-                ? "false"
-                : "true"
-              }"
-                            data-color="${settings.symbol_color ||
-              "#000000"
-              }">
-                        </svg>
-                    `;
-          }
-        }
-
-        let html = "";
-
-        for (let i = 0; i < quantity; i++) {
-
-          html += `
-                    <div class="label">
-
-                        ${settings.line1_sku
-              ? `
-                                    <div class="sku">
-                                        ${item.sku || ""}
-                                    </div>
-                                `
-              : ""
-            }
-
-                        ${settings.line2_name
-              ? `
-                                    <div class="title">
-                                        ${item.product_title ||
-              ""
-              }
-                                    </div>
-                                `
-              : ""
-            }
-
-                        ${settings.line2_price
-              ? `
-                                    <div class="price">
-                                        ${formattedPrice}
-                                    </div>
-                                `
-              : ""
-            }
-
-                        ${settings.line2_option1 &&
-              item.option_1
-              ? `
-                                    <div class="option">
-                                        ${item.option_1}
-                                    </div>
-                                `
-              : ""
-            }
-
-                        ${settings.line2_option2 &&
-              item.option_2
-              ? `
-                                    <div class="option">
-                                        ${item.option_2}
-                                    </div>
-                                `
-              : ""
-            }
-
-                        ${settings.line2_option3 &&
-              item.option_3
-              ? `
-                                    <div class="option">
-                                        ${item.option_3}
-                                    </div>
-                                `
-              : ""
-            }
-                        ${symbolHTML}
-                    </div>
-                `;
-        }
-        return html;
-      })
-      .join("");
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>
-                Print Job #${historyDetails.id || ""}
-            </title>
-            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-           <style>
-${hasRealPaper ? `
-@page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
-* { box-sizing: border-box; }
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: ${paperWidth}mm;
-    ${rows === 1 && columns === 1 ? "" : `min-height: ${paperHeight}mm;`}
-}
-body {
-    font-family: Arial, sans-serif;
-    display: grid;
-    grid-template-columns: repeat(${columns}, ${labelWidth}mm);
-    grid-auto-rows: ${labelHeight}mm;
-    column-gap: ${gapX}mm;
-    row-gap: ${gapY}mm;
-    padding-top: ${marginTop}mm !important;
-    padding-left: ${marginLeft}mm !important;
-    align-content: start;
-    justify-content: start;
-    align-items: start;
-    justify-items: start;
-}
-${rows === 1 && columns === 1 ? `
-.label { page-break-after: always; break-after: page; }
-.label:last-child { page-break-after: auto; }
-` : ""}
-.label {
-    width: ${labelWidth}mm;
-    height: ${labelHeight}mm;
-    align-self: start;
-    justify-self: start;
-    padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
-    box-sizing: border-box;
-    overflow: hidden;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-.title { font-weight: bold; font-size: ${textPt}pt !important; }
-.title, .sku {
-    width: 100%;
-    font-size: ${textPt}pt !important;
-    line-height: 1.15 !important;
-    margin: 0 0 0.5mm !important;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.barcode, .qr {
-    display: block;
-    max-width: 90%;
-    max-height: ${barcodeHeightMm}mm !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain;
-    margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
-}
-` : `
-@page{margin:5mm;}
-body{margin:10px;display:grid;grid-template-columns:repeat(auto-fill,250px);gap:10px;font-family:Arial,sans-serif;}
-.label{width:250px;min-height:140px;border:1px solid #ddd;padding:10px;box-sizing:border-box;text-align:center;page-break-inside:avoid;break-inside:avoid;overflow:hidden;}
-.title{font-size:13px;font-weight:bold;margin-bottom:5px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
-.sku{font-size:12px;margin-bottom:10px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;}
-.barcode{max-width:100%;height:auto;}
-.qr{display:block;margin:auto;max-width:100%;}
-`}
-</style>
-        </head>
-        <body>
-            ${labels}
-            <script>
-                window.onload = function () {
-                    const barcodes =
-                        document.querySelectorAll(
-                            ".barcode"
-                        );
-                    barcodes.forEach(function (barcode) {
-                        const format =
-                            barcode.dataset.format ||
-                            "CODE128";
-
-                        const value =
-                            barcode.dataset.value ||
-                            "";
-
-                        const width =
-                            Number(
-                                barcode.dataset.width
-                            ) || 2;
-
-                        const height =
-                            Number(
-                                barcode.dataset.height
-                            ) || 45;
-
-                        const fontSize =
-                            Number(
-                                barcode.dataset.font
-                            ) || 16;
-
-                        const displayValue =
-                            barcode.dataset.display !==
-                            "false";
-
-                        const color =
-                            barcode.dataset.color ||
-                            "#000000";
-
-                        try {
-
-    JsBarcode(
-        barcode,
-        value,
-        {
-            format: format,
-            width: width,
-            height: height,
-            fontSize: fontSize,
-            displayValue:
-                displayValue,
-            lineColor: color,
-            margin: 0
-        }
-    );
-
-} catch (error) {
-
-    console.error(
-        "Barcode generation failed:",
-        error
-    );
-
-    barcode.outerHTML =
-        '<div style="color:#d82c0d;font-size:' + fontSize + 'px;font-weight:bold;padding:4px;border:1px dashed #d82c0d;text-align:center;">Incorrect value for ' + format + ' barcode format</div>';
-
-}
-
-                    });
-                    setTimeout(function () {
-                        window.focus();
-                        window.print();
-                    }, 800);
-                };
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-  };
+    openPrintWindow({
+        bodyHtml,
+        paperTemplate: paper,
+        useJsBarcodeScript: true,
+        onAfterPrint: () => {},
+    });
+};
 
   const handlePrintAll = () => {
     const win = window.open("", "_blank");
