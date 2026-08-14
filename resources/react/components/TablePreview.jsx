@@ -2,18 +2,10 @@ import React from "react";
 import BarcodeRenderer from "./BarcodeRenderer";
 import QrCodeRenderer from "./QrCodeRenderer";
 
-export default function TablePreview({
-    products = [],
-    templateDesign,
-    onRemoveProduct,
-    onUpdateQuantity,
-    formatProductPrice,
-    getSymbolValue,
-}) {
-
+export default function TablePreview({ products = [], templateDesign, onRemoveProduct, onUpdateQuantity, formatProductPrice, getSymbolValue,}) 
+{
     const handleQuantityChange = (product, value) => {
         const variantId = product.variant_id;
-        // Allow temporary empty input
         if (value === "") {
             onUpdateQuantity(variantId, "");
             return;
@@ -28,25 +20,6 @@ export default function TablePreview({
         <div
             style={{ width: "100%", border: "1px solid #e1e3e5", borderRadius: "10px", overflow: "hidden", background: "#fff", }}
         >
-            {/* Table Header */}
-            {/* <div
-                style={{
-                    padding: "12px 16px",
-                    borderBottom: "1px solid #e1e3e5",
-                    background: "#f6f6f7",
-                }}
-            >
-                <strong
-                    style={{
-                        fontSize: "14px",
-                        color: "#202223",
-                    }}
-                >
-                    Products
-                </strong>
-            </div> */}
-
-            {/* Table */}
             <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "900px", }}>
                     <thead>
@@ -74,10 +47,7 @@ export default function TablePreview({
                                 return (
                                     <tr key={product.variant_id} id={`label-${product.variant_id}`}
                                         style={{ borderBottom: "1px solid #e1e3e5", }}>
-                                        {/* Product */}
                                         <td style={cellStyle}>
-
-
                                             <div
                                                 style={{
                                                     display: "flex",
@@ -85,23 +55,14 @@ export default function TablePreview({
                                                     gap: "4px",
                                                 }}
                                             >
-                                                <strong
-                                                    style={{
-                                                        color: "#202223",
-                                                        fontSize: "14px",
-                                                    }}
-                                                >
+                                                <strong  style={{color: "#202223", fontSize: "14px",}}>
                                                     {product.product_title || "-"}
                                                 </strong>
 
                                                 {product.variant_title &&
                                                     product.variant_title !== "Default Title" && (
                                                         <span
-                                                            style={{
-                                                                fontSize: "12px",
-                                                                color: "#6d7175",
-                                                            }}
-                                                        >
+                                                            style={{fontSize: "12px",color: "#6d7175",}}>
                                                             {product.variant_title}
                                                         </span>
                                                     )}
@@ -125,6 +86,7 @@ export default function TablePreview({
                                                         {templateDesign?.line2_price && <span>{formatProductPrice(product)}</span>}
                                                     </div>
                                                 )}
+                                                {templateDesign?.line3_vendor && <div>{product.product_vendor || product.vendor || ""}</div>}
                                                 {templateDesign?.symbol_type === "BARCODE" ? (
                                                     <BarcodeRenderer
                                                         value={symbolValue}
@@ -137,27 +99,14 @@ export default function TablePreview({
                                             </div>
 
                                         </td>
-
-                                        {/* SKU */}
                                         <td style={cellStyle}>
                                             {product.current_sku || "-"}
                                         </td>
-
-                                        {/* Price */}
                                         <td style={cellStyle}>
                                             {formatProductPrice(product)}
                                         </td>
-
-                                        {/* Barcode */}
-                                        {/* Barcode / QR Code */}
                                         <td
-                                            style={{
-                                                ...cellStyle,
-                                                width: "25%",
-                                                minWidth: "180px",
-                                                textAlign: "center",
-                                            }}
-                                        >
+                                            style={{...cellStyle,width: "25%",minWidth: "180px",textAlign: "center",}}>
                                             <div
                                                 style={{
                                                     width: "100%",
@@ -169,7 +118,6 @@ export default function TablePreview({
                                             >
                                                 {templateDesign?.symbol_type === "BARCODE" ? (
                                                     <>
-                                                        {/* Barcode */}
                                                         <div
                                                             style={{
                                                                 width: "150px",
@@ -190,8 +138,6 @@ export default function TablePreview({
                                                                 }}
                                                             />
                                                         </div>
-
-                                                        {/* Barcode value */}
                                                         <div
                                                             style={{
                                                                 width: "150px",
@@ -211,7 +157,6 @@ export default function TablePreview({
                                                     </>
                                                 ) : (
                                                     <>
-                                                        {/* QR Code */}
                                                         <div
                                                             style={{
                                                                 width: "120px",
@@ -227,8 +172,6 @@ export default function TablePreview({
                                                                 settings={templateDesign}
                                                             />
                                                         </div>
-
-                                                        {/* QR value */}
                                                         <div
                                                             style={{
                                                                 width: "150px",
@@ -249,12 +192,8 @@ export default function TablePreview({
                                                 )}
                                             </div>
                                         </td>
-
-                                        {/* Quantity */}
                                         <td style={cellStyle}>
                                             <div style={{ display: "flex", alignItems: "center", gap: "6px", justifyContent: "center", }} >
-
-                                                {/* MINUS */}
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -269,8 +208,6 @@ export default function TablePreview({
                                                 >
                                                     −
                                                 </button>
-
-                                                {/* QUANTITY INPUT */}
                                                 <input
                                                     type="number"
                                                     min="1"
@@ -297,12 +234,10 @@ export default function TablePreview({
                                                         width: "64px", height: "32px", border: "1px solid #8c9196", borderRadius: "6px", textAlign: "center",
                                                         fontSize: "14px", background: "#fff", color: "#202223", outline: "none", boxSizing: "border-box",
                                                     }} />
-                                                {/* PLUS */}
                                                 <button
                                                     type="button"
                                                     onClick={() => {
                                                         const currentQuantity = Number(product.quantity) || 1;
-
                                                         onUpdateQuantity(
                                                             product.variant_id,
                                                             currentQuantity + 1
@@ -314,8 +249,6 @@ export default function TablePreview({
                                                 </button>
                                             </div>
                                         </td>
-
-                                        {/* Action */}
                                         <td style={{ ...cellStyle, textAlign: "center" }}>
                                             <s-button
                                                 variant="tertiary"

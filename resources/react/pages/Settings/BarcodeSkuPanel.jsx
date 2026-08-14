@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-
 export default function BarcodeSkuPanel({ settings, onChange }) {
     const formatOptions = [
         { label: 'Code 128 (Recommended)', value: 'CODE128' },

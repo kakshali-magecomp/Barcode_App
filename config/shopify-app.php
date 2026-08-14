@@ -429,7 +429,7 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://highlighted-civil-arts-territory.trycloudflare.com/api/webhooks/products/create'),   
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://shaped-browse-dem-independent.trycloudflare.com/api/webhooks/products/create'),   
             ], 
     ],     
 

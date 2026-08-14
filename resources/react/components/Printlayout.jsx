@@ -8,9 +8,7 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     const gapY = Number(paper?.gapY || 0);
     const marginTop = Number(paper?.marginTop || 0);
     const marginLeft = Number(paper?.marginLeft || 0);
-
     const hasRealPaper = paper && labelWidth && labelHeight;
-
     if (!hasRealPaper) {
         return {
             hasRealPaper: false,
@@ -20,8 +18,14 @@ export function buildPrintCss(paperTemplate, opts = {}) {
 body { margin:10px; padding:0; font-family:Arial,sans-serif; display:grid; grid-template-columns:repeat(auto-fill,250px); gap:10px; align-items:start; }
 .label { width:250px; min-height:140px; border:1px solid #ddd; padding:10px; box-sizing:border-box; text-align:center; page-break-inside:avoid; break-inside:avoid; overflow:hidden; }
 .label * { font-size: 12pt !important; line-height: 1.3 !important; }
-.label > div, .label span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin: 0 0 4px !important; }
-.label span + span { margin-left: 4px !important; }
+.label div,
+.label span {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0 0 0.6mm !important;
+}.label span + span { margin-left: 4px !important; }
 .barcode, .qr, .label svg, .label img { display:block; max-width:100%; height:auto; margin:0 auto; }
 @media print { body { margin: 5mm; } .label { page-break-inside: avoid; break-inside: avoid; } }
 `,
@@ -32,15 +36,12 @@ body { margin:10px; padding:0; font-family:Arial,sans-serif; display:grid; grid-
         Number(paper?.paper?.width) || labelWidth * columns + gapX * (columns - 1) + marginLeft;
     const paperHeight =
         Number(paper?.paper?.height) || labelHeight * rows + gapY * (rows - 1) + marginTop;
-
     const fontFactor = opts.fontFactor ?? 0.28;
     const fontMin = opts.fontMin ?? 5;
     const fontMax = opts.fontMax ?? 11;
     const textPt = Math.max(fontMin, Math.min(fontMax, Math.round(labelHeight * fontFactor)));
     const barcodeHeightMm = Math.max(4, labelHeight * 0.4);
-
     const isRoll = rows === 1 && columns === 1;
-
     const css = `
 @page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
 * { box-sizing: border-box; }

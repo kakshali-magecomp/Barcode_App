@@ -20,7 +20,6 @@ const defaultDesign = {
     symbol_type: 'BARCODE',
     symbol_color: '#000000',
     symbol_field_source: 'barcode_value',
-    barcode_format: 'CODE128',
     print_qty: 1,
 };
 
@@ -28,8 +27,6 @@ export default function CreateTemplate() {
     const shopify = useAppBridge();
     const navigate = useNavigate();
     const printRef = useRef(null);
-
-    // Template info state
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [note, setNote] = useState('');
@@ -37,8 +34,6 @@ export default function CreateTemplate() {
     const [model, setModel] = useState('');
     const [printSettings, setPrintSettings] = useState(null);
     const [design, setDesign] = useState(defaultDesign);
-
-    // Preview state
     const [previewItem, setPreviewItem] = useState({
         title: 'Sample Item',
         sku: 'SKU-1001',
@@ -203,6 +198,8 @@ export default function CreateTemplate() {
                 return previewItem.title || '';
             case 'product_price':
                 return previewItem.price || '';
+            case 'product_vendor':
+                return previewItem.vendor || '';
             case 'product_online_url':
                 return previewItem.online_url || '';
             case 'barcode_value':
@@ -218,26 +215,15 @@ export default function CreateTemplate() {
         const decimals = Number(
             printSettings?.price_decimal_number ?? 2
         );
-
-        // Original Shopify variant price
         let price = Number(previewItem?.price ?? 0);
-
-        // If price accidentally comes as cents (2086), convert to dollars
         if (price > 999) {
             price = price / 100;
         }
-
-        // VAT CALCULATION
         const vatPercentage = Number(
             printSettings?.vat_percentage ?? 0
         );
-
         const vatAmount = (price * vatPercentage) / 100;
-
-        // Price including VAT
         const priceWithVat = price + vatAmount;
-
-        // Apply decimal setting AFTER VAT calculation
         const amount = priceWithVat.toFixed(decimals);
 
         const format = design.line2_currency_format || "{amount}";
@@ -402,8 +388,6 @@ export default function CreateTemplate() {
                     </s-stack>
                 </s-section>
             </s-page>
-
-            {/* Fixed preview panel — same pattern used in DesignCanvasEdit */}
             <div
                 style={{
                     position: 'fixed',
@@ -460,13 +444,13 @@ export default function CreateTemplate() {
                                         {formatPreviewPrice()}
                                     </span>
                                 )}
-                                {design.line3_Vendor && (
-                                    <span style={{ color: '#000000', fontWeight: 700 }}>
-                                        {formatPreviewVendor()}
+                                
+                            </div>
+                                {design.line3_vendor && (
+                                    <span style={{ fontWeight: 500, fontSize: 10 }}>
+                                        {previewItem.vendor}
                                     </span>
                                 )}
-                            </div>
-
                             {design.symbol_enabled && (
                                 design.symbol_type === 'BARCODE' ? (
                                     <BarcodeRenderer

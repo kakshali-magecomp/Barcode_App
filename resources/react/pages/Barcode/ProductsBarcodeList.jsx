@@ -373,6 +373,8 @@ export default function GenerateBarcode() {
                 return product.product_title || "";
             case "product_price":
                 return String(product.price || "");
+            case "product_vendor":
+                return product.vendor || "";
             case "product_online_url":
                 return product.online_url || "";
             default:
@@ -410,9 +412,27 @@ export default function GenerateBarcode() {
         <>
             <s-page heading="Generate Barcode" subheading="Manage and edit your customized Barcode">
                 <s-section>
-                    <s-button variant="primary" onClick={() => navigate("/LabelHistory")}>
-                        Go to Label History
-                    </s-button>
+                    <div
+                        style={{
+                            display: "flex",
+                            gap: "12px",
+                            alignItems: "center",
+                        }}
+                    >
+                        <s-button
+                            variant="primary"
+                            onClick={() => navigate("/LabelHistory")}
+                        >
+                            Go to Label History
+                        </s-button>
+
+                        <s-button
+                            variant="primary"
+                            onClick={() => navigate("/TamplateCreate")}
+                        >
+                            Create Template
+                        </s-button>
+                    </div>
                 </s-section>
 
                 {error && (
@@ -628,7 +648,6 @@ export default function GenerateBarcode() {
                                     gap="none"
                                     alignItems="center"
                                 >
-                                    {/* Card Preview */}
                                     <s-button
                                         icon="grid"
                                         variant={previewMode === "card" ? "secondary" : "tertiary"}
@@ -636,7 +655,6 @@ export default function GenerateBarcode() {
                                         onClick={() => setPreviewMode("card")}
                                     />
 
-                                    {/* Table Preview */}
                                     <s-button
                                         icon="data-table"
                                         variant={previewMode === "table" ? "secondary" : "tertiary"}
@@ -645,11 +663,6 @@ export default function GenerateBarcode() {
                                     />
                                 </s-stack>
                                 <s-stack direction="inline" gap="base" alignItems="center">
-                                    {/* {selectedProducts.length > PREVIEW_PAGE_SIZE && (
-                                        <s-text tone="subdued">
-                                            Page {previewPage} of {totalPreviewPages} ({selectedProducts.length} products)
-                                        </s-text>
-                                    )} */}
                                     <s-button tone="critical" variant="tertiary" onClick={requestRemoveAllProducts}>
                                         Delete All
                                     </s-button>
@@ -711,7 +724,6 @@ export default function GenerateBarcode() {
                                                             onInput={(e) => {
                                                                 const value = e.currentTarget.value;
 
-                                                                // Allow user to temporarily clear the field
                                                                 if (value === "") {
                                                                     updateProductQuantity(product.variant_id, "");
                                                                     return;
@@ -747,6 +759,7 @@ export default function GenerateBarcode() {
                                                         {templateDesign?.line2_price && <span>{formatProductPrice(product)}</span>}
                                                     </div>
                                                 )}
+                                                {templateDesign?.line3_vendor && <div>{product.product_vendor || product.vendor || ""}</div>}
                                                 {templateDesign.symbol_type === "BARCODE" ? (
                                                     <BarcodeRenderer
                                                         value={getSymbolValue(product)}

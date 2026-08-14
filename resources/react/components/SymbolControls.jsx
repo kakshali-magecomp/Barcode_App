@@ -299,6 +299,7 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                     }
                     value={
                       design.barcode_format ||
+                      barcodeSettings?.barcode_format ||
                       "CODE128"
                     }
                     onChange={(value) => {

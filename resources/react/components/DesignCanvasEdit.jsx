@@ -224,7 +224,7 @@ body { display: block !important; }
     white-space: normal !important;
     margin: 0 0 0.8mm !important;
 }
-    .label span + span {
+.label span + span {
     margin-left: 4px !important;
 }
 .barcode, .qr, .label svg, .label img {

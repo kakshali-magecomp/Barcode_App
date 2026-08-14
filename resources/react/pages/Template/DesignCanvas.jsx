@@ -130,6 +130,7 @@ export default function DesignCanvas() {
                 ]);
                 let savedVariantId = "";
                 let defaultPrintQty = 1;
+                let globalBarcodeFormat = "CODE128";
 
                 if (sRes.ok) {
                     const settings = await sRes.json();
@@ -141,13 +142,20 @@ export default function DesignCanvas() {
                 if (bRes.ok) {
                     const barcode = await bRes.json();
                     setBarcodeSettings(barcode);
+                 
+                    globalBarcodeFormat =
+                        barcode?.settings?.barcode_format ||
+                        barcode?.data?.barcode_format ||
+                        barcode?.barcode_format ||
+                        "CODE128";
                 }
                 if (tRes.ok) {
                     const r = await tRes.json();
                     if (r.success) {
                         const designData = {
                             ...r.data,
-                            barcode_format: r.data.barcode_format || "CODE128",
+                        
+                            barcode_format: r.data.barcode_format || globalBarcodeFormat,
                             print_qty: defaultPrintQty,
                         };
                         setDesign(designData);
@@ -425,6 +433,11 @@ ${labels}
                                             {design.line2_price && (
                                                 <span style={{ color: "#008060", fontWeight: 700 }}>
                                                     {formatPreviewPrice()}
+                                                </span>
+                                            )}
+                                            {design.line3_vendor &&(
+                                                 <span style={{ fontWeight: 500, fontSize: 10 }}>
+                                                    {previewItem.vendor}
                                                 </span>
                                             )}
                                         </div>
