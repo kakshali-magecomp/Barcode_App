@@ -3,6 +3,7 @@ import LineControls from "../components/LineControls";
 import SymbolControls from "../components/SymbolControls";
 import BarcodeRenderer from "../components/BarcodeRenderer";
 import QrCodeRenderer from "../components/QrCodeRenderer";
+import { openPrintWindow } from "./Printlayout";
 
 const defaultDesign = {
     line1_sku: true,
@@ -81,9 +82,11 @@ export default function DesignCanvasEdit({
                 };
 
                 if (loadedDesign.line2_currency_format) {
-                    loadedDesign.line2_currency_format = loadedDesign.line2_currency_format
-                        .replace(/\{\{amount\}\}/gi, "{amount}")
-                        .trim();
+                    loadedDesign.line2_currency_format =
+                        loadedDesign.line2_currency_format
+                            .replace(/\{\{amount\}\}/gi, "amount")
+                            .replace(/\{amount\}/gi, "amount")
+                            .trim();
                 }
 
                 setDesign(loadedDesign);
@@ -137,174 +140,40 @@ export default function DesignCanvasEdit({
     const handlePrint = () => {
         if (!printRef.current) return;
 
-        const qty = Number(design.print_qty) || 1;
+        const qty = Math.max(
+            1,
+            Number(design.print_qty) || 1
+        );
+
         const paper = paperTemplate || design.layout_settings;
-        const labelWidth = Number(paper?.label?.width) || null;
-        const labelHeight = Number(paper?.label?.height) || null;
-        const rows = Number(paper?.rows || 1);
-        const columns = Number(paper?.columns || 1);
-        const gapX = Number(paper?.gapX || 0);
-        const gapY = Number(paper?.gapY || 0);
-        const marginTop = Number(paper?.marginTop || 0);
-        const marginLeft = Number(paper?.marginLeft || 0);
-        const hasRealPaper = paper && labelWidth && labelHeight;
-        const paperWidth = hasRealPaper
-            ? Number(paper?.paper?.width) || (labelWidth * columns + gapX * (columns - 1) + marginLeft)
-            : null;
-        const paperHeight = hasRealPaper
-            ? Number(paper?.paper?.height) || (labelHeight * rows + gapY * (rows - 1) + marginTop)
-            : null;
 
-        // Scale text/barcode size to the actual physical label height.
-        const textPt = hasRealPaper
-            ? Math.max(4, Math.min(9, Math.round(labelHeight * 0.2)))
-            : 10;
-        const barcodeHeightMm = hasRealPaper ? Math.max(4, labelHeight * 0.4) : null;
-
-        let labels = "";
-        for (let i = 0; i < qty; i++) {
-            labels += `<div class="label">${printRef.current.innerHTML}</div>`;
+        if (!paper) {
+            shopify.toast.show(
+                "Paper template information is missing."
+            );
+            return;
         }
 
-        const printWindow = window.open("", "_blank", "width=900,height=700");
+        const bodyHtml = Array.from(
+            { length: qty },
+            () => `
+            <div class="label">
+                ${printRef.current.innerHTML}
+            </div>
+        `
+        ).join("");
 
-        const printStyles = hasRealPaper
-            ? `
-@page { size: ${paperWidth}mm ${paperHeight}mm; margin: 0; }
-* { box-sizing: border-box; }
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: ${paperWidth}mm;
-    height: ${paperHeight}mm;
-    overflow: hidden;
-}
-body {
-    font-family: Arial, sans-serif;
-    display: grid;
-    grid-template-columns: repeat(${columns}, ${labelWidth}mm);
-    grid-auto-rows: ${labelHeight}mm;
-    column-gap: ${gapX}mm;
-    row-gap: ${gapY}mm;
-    padding-top: ${marginTop}mm !important;
-    padding-left: ${marginLeft}mm !important;
-    align-content: start;
-    justify-content: start;
-    align-items: start;
-    justify-items: start;
-}
-${rows === 1 && columns === 1 ? `
-body { display: block !important; }
-.label { page-break-after: always; break-after: page; }
-.label:last-child { page-break-after: auto; }
-` : ""}
-.label {
-    width: ${labelWidth}mm;
-    height: ${labelHeight}mm;
-    padding: ${Math.max(0.5, labelHeight * 0.05)}mm;
-    box-sizing: border-box;
-    text-align: center;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-.label * {
-    font-size: ${textPt}pt !important;
-    line-height: 1.2 !important;
-    max-width: 100% !important;
-}
-.label > div,
-.label span {
-    word-break: break-word !important;
-    overflow-wrap: anywhere !important;
-    white-space: normal !important;
-    margin: 0 0 0.8mm !important;
-}
-.label span + span {
-    margin-left: 4px !important;
-}
-.barcode, .qr, .label svg, .label img {
-    display: block;
-    max-width: 90%;
-    max-height: ${barcodeHeightMm}mm !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain;
-    margin: ${Math.max(0.3, labelHeight * 0.03)}mm auto !important;
-}
-.label > div {
-    height: auto !important;
-    min-height: 0 !important;
-}
-`
-            : `
-@page { margin: 5mm; }
-* { box-sizing: border-box; }
-body {
-    margin: 10px; padding: 0;
-    font-family: Arial, sans-serif;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 250px);
-    gap: 10px;
-    align-items: start;
-}
-.label {
-    width: 250px; min-height: 140px;
-    border: 1px solid #ddd;
-    padding: 10px;
-    box-sizing: border-box;
-    text-align: center;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-}
-.title {
-    width: 100%; font-size: 13px; font-weight: bold; margin-bottom: 5px;
-    word-break: break-word; overflow-wrap: anywhere; white-space: normal;
-}
-.sku {
-    width: 100%; font-size: 12px; margin-bottom: 10px;
-    word-break: break-word; overflow-wrap: anywhere; white-space: normal;
-}
-.barcode, .qr, .label svg, .label img {
-    display: block; max-width: 100%; height: auto; margin: 0 auto;
-}
-.label > div { height: auto !important; min-height: 0 !important; }
-@media print {
-    body { margin: 5mm; }
-    .label { page-break-inside: avoid; break-inside: avoid; }
-}
-`;
+        openPrintWindow({
+            bodyHtml,
+            paperTemplate: paper,
+            fontOptions: {
+                fontFactor: 0.20,
+                fontMin: 4,
+                fontMax: 9,
+            },
 
-        printWindow.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Print Labels</title>
-        <style>${printStyles}</style>
-    </head>
-    <body>
-        ${labels}
-        <script>
-            window.onload = function () {
-                setTimeout(function () {
-                    window.print();
-                }, 300);
-            };
-        </script>
-    </body>
-    </html>
-`);
-
-        printWindow.document.close();
+            onAfterPrint: () => { },
+        });
     };
 
 

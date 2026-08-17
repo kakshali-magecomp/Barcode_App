@@ -20,6 +20,11 @@ class PrintHistoryItem extends Model
         'template_settings',
         'price',
         'online_url',
+        'vendor',
+        'variant_title',
+        'option_1',
+        'option_2',
+        'option_3',
         'qty',
     ];
     protected $casts = [

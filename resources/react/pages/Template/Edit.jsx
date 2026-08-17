@@ -2,7 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
-
+import PaperTemplateSettings, {
+    PAPER_TEMPLATES,
+} from "../../components/PaperTemplateSettings";
 const SAVE_BAR_ID = 'edit-template-savebar';
 
 export default function EditTemplate() {
@@ -26,42 +28,42 @@ export default function EditTemplate() {
     const [design, setDesign] = useState({});
     const [discardSignal, setDiscardSignal] = useState(0);
 
-    const brandOptions = [
-        { label: 'Dymo', value: 'dymo' },
-        { label: 'Zebra', value: 'zebra' },
-        { label: 'Avery', value: 'avery' }
-    ];
+    // const brandOptions = [
+    //     { label: 'Dymo', value: 'dymo' },
+    //     { label: 'Zebra', value: 'zebra' },
+    //     { label: 'Avery', value: 'avery' }
+    // ];
 
-    const modelOptionsMap = {
-        '': [],
-        'dymo': [
-            { label: '30334 (Jewelry Label)', value: '30334' },
-            { label: '30252 (Address Label)', value: '30252' }
-        ],
-        'zebra': [
-            { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
-            { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
-        ],
-        'avery': [
-            { label: '5160 (Address 30-per-sheet)', value: '5160' },
-            { label: '5167 (Return Address)', value: '5167' }
-        ]
-    };
+    // const modelOptionsMap = {
+    //     '': [],
+    //     'dymo': [
+    //         { label: '30334 (Jewelry Label)', value: '30334' },
+    //         { label: '30252 (Address Label)', value: '30252' }
+    //     ],
+    //     'zebra': [
+    //         { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
+    //         { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
+    //     ],
+    //     'avery': [
+    //         { label: '5160 (Address 30-per-sheet)', value: '5160' },
+    //         { label: '5167 (Return Address)', value: '5167' }
+    //     ]
+    // };
 
-    const PAPER_TEMPLATES = {
-        dymo: {
-            "30334": { name: "Jewelry Label", paper: { width: 54, height: 25 }, label: { width: 54, height: 25 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
-            "30252": { name: "Address Label", paper: { width: 89, height: 36 }, label: { width: 89, height: 36 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
-        },
-        zebra: {
-            "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
-            "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
-        },
-        avery: {
-            "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
-            "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 279.6 }, rows: 10, columns: 3, gapx: 3.2, gapy: 0, marginTop: 12.7, marginLeft: 4.8 }
-        }
-    };
+    // const PAPER_TEMPLATES = {
+    //     dymo: {
+    //         "30334": { name: "Jewelry Label", paper: { width: 54, height: 25 }, label: { width: 54, height: 25 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
+    //         "30252": { name: "Address Label", paper: { width: 89, height: 36 }, label: { width: 89, height: 36 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
+    //     },
+    //     zebra: {
+    //         "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
+    //         "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
+    //     },
+    //     avery: {
+    //         "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
+    //         "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 279.6 }, rows: 10, columns: 3, gapx: 3.2, gapy: 0, marginTop: 12.7, marginLeft: 4.8 }
+    //     }
+    // };
 
 
     useEffect(() => {
@@ -236,21 +238,18 @@ export default function EditTemplate() {
                                 rows={3}
                             />
 
-                            <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-                                <s-select label="Paper Brand" value={brand} onChange={handleBrandChange}>
-                                    <s-option value="">Select Brand...</s-option>
-                                    {brandOptions.map((opt) => (
-                                        <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                                    ))}
-                                </s-select>
-
-                                <s-select label="Paper Model" value={model} onChange={handleFieldChange(setModel)} disabled={!brand || undefined}>
-                                    <s-option value="">{brand ? 'Select Model...' : 'Select Brand First'}</s-option>
-                                    {(modelOptionsMap[brand] || []).map((opt) => (
-                                        <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                                    ))}
-                                </s-select>
-                            </s-grid>
+                            <PaperTemplateSettings
+                                brand={brand}
+                                model={model}
+                                onBrandChange={(value) => {
+                                    setBrand(value);
+                                    setIsDirty(true);
+                                }}
+                                onModelChange={(value) => {
+                                    setModel(value);
+                                    setIsDirty(true);
+                                }}
+                            />
 
                         </div>
                     </s-stack>

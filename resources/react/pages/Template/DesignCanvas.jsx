@@ -5,6 +5,8 @@ import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
 import QrCodeRenderer from '../../components/QrCodeRenderer';
+import { openPrintWindow } from '../../components/Printlayout';
+import { PAPER_TEMPLATES } from '../../components/PaperTemplateSettings';
 
 const SAVE_BAR_ID = 'designer-bar';
 
@@ -142,7 +144,7 @@ export default function DesignCanvas() {
                 if (bRes.ok) {
                     const barcode = await bRes.json();
                     setBarcodeSettings(barcode);
-                 
+
                     globalBarcodeFormat =
                         barcode?.settings?.barcode_format ||
                         barcode?.data?.barcode_format ||
@@ -152,17 +154,20 @@ export default function DesignCanvas() {
                 if (tRes.ok) {
                     const r = await tRes.json();
                     if (r.success) {
+                        savedVariantId = r.data.selected_variant_id || "";
+
                         const designData = {
                             ...r.data,
-                        
-                            barcode_format: r.data.barcode_format || globalBarcodeFormat,
-                            print_qty: defaultPrintQty,
+                            barcode_format:
+                                r.data.barcode_format || globalBarcodeFormat,
+                            print_qty:
+                                r.data.print_qty || defaultPrintQty,
                         };
+
                         setDesign(designData);
                         setOriginalDesign(structuredClone(designData));
                         setOriginalVariantId(savedVariantId);
                         setIsDirty(false);
-                        savedVariantId = r.data.selected_variant_id || "";
                     }
                 }
                 if (pRes.ok) {
@@ -232,37 +237,37 @@ export default function DesignCanvas() {
 
     const handlePrint = () => {
         if (!printRef.current) return;
-        const qty = Number(design.print_qty) || 1;
-        let labels = "";
-        for (let i = 0; i < qty; i++) {
-            labels += `<div class="label">${printRef.current.innerHTML}</div>`;
+
+        const qty = Math.max(
+            1,
+            Number(design.print_qty) || 1
+        );
+
+        const paperBrand = design.paper_brand;
+        const paperModel = design.paper_model;
+
+        const paper = PAPER_TEMPLATES?.[paperBrand]?.[paperModel];
+
+        if (!paper) {
+            shopify.toast.show(
+                "Paper template information is missing."
+            );
+            return;
         }
-        const printWindow = window.open("", "", "width=900,height=700");
-        printWindow.document.write(`
-<!DOCTYPE html>
-<html>
-<head>
-<title>Print Barcode</title>
-<style>
-body{margin:15px;display:flex;flex-wrap:wrap;gap:12px;font-family:Arial,sans-serif;justify-content:flex-start;}
-.label{width:250px;border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center;page-break-inside:avoid;}
-.label > div{min-height:auto !important;padding:0 !important;justify-content:center !important;}
-img{max-width:100%;}
-svg{max-width:100%;}
-@media print{body{margin:0;gap:10px;}.label{border:none;page-break-inside:avoid;}}
-</style>
-</head>
-<body>
-${labels}
-</body>
-</html>
-`);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => {
-            printWindow.print();
-            printWindow.close();
-        }, 500);
+
+        const bodyHtml = Array.from(
+            { length: qty },
+            () => `
+            <div class="label">
+                ${printRef.current.innerHTML}
+            </div>
+        `
+        ).join("");
+
+        openPrintWindow({
+            bodyHtml,
+            paperTemplate: paper,
+        });
     };
 
     const formatPreviewPrice = () => {
@@ -435,8 +440,8 @@ ${labels}
                                                     {formatPreviewPrice()}
                                                 </span>
                                             )}
-                                            {design.line3_vendor &&(
-                                                 <span style={{ fontWeight: 500, fontSize: 10 }}>
+                                            {design.line3_vendor && (
+                                                <span style={{ fontWeight: 500, fontSize: 10 }}>
                                                     {previewItem.vendor}
                                                 </span>
                                             )}

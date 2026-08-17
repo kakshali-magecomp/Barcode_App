@@ -5,7 +5,9 @@ import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
 import QrCodeRenderer from '../../components/QrCodeRenderer';
-import PaperTemplateSettings from "../../components/PaperTemplateSettings";
+import PaperTemplateSettings, {
+    PAPER_TEMPLATES,
+} from "../../components/PaperTemplateSettings";
 import { openPrintWindow } from '../../components/Printlayout';
 
 const SAVE_BAR_ID = 'create-template-save-bar';
@@ -51,42 +53,42 @@ export default function CreateTemplate() {
     const [loading, setLoading] = useState(false);
     const [errorBanner, setErrorBanner] = useState(null);
 
-    const brandOptions = [
-        { label: 'Dymo', value: 'dymo' },
-        { label: 'Zebra', value: 'zebra' },
-        { label: 'Avery', value: 'avery' }
-    ];
+    // const brandOptions = [
+    //     { label: 'Dymo', value: 'dymo' },
+    //     { label: 'Zebra', value: 'zebra' },
+    //     { label: 'Avery', value: 'avery' }
+    // ];
 
-    const modelOptionsMap = {
-        '': [],
-        'dymo': [
-            { label: '30334 (Jewellery Label)', value: '30334' },
-            { label: '30252 (Address Label)', value: '30252' }
-        ],
-        'zebra': [
-            { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
-            { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
-        ],
-        'avery': [
-            { label: '5160 (Address 30-per-sheet)', value: '5160' },
-            { label: '5167 (Return Address)', value: '5167' }
-        ]
-    };
+    // const modelOptionsMap = {
+    //     '': [],
+    //     'dymo': [
+    //         { label: '30334 (Jewellery Label)', value: '30334' },
+    //         { label: '30252 (Address Label)', value: '30252' }
+    //     ],
+    //     'zebra': [
+    //         { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
+    //         { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
+    //     ],
+    //     'avery': [
+    //         { label: '5160 (Address 30-per-sheet)', value: '5160' },
+    //         { label: '5167 (Return Address)', value: '5167' }
+    //     ]
+    // };
 
-    const PAPER_TEMPLATES = {
-        dymo: {
-            "30334": { name: "Jewellery Label", paper: { width: 57, height: 32 }, label: { width: 57, height: 32 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
-            "30252": { name: "Address Label", paper: { width: 89, height: 28 }, label: { width: 89, height: 28 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
-        },
-        zebra: {
-            "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
-            "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
-        },
-        avery: {
-            "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
-            "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 44.5, height: 12.7 }, rows: 20, columns: 4, gapX: 5, gapY: 0, marginTop: 12.7, marginLeft: 7.5 }
-        }
-    };
+    // const PAPER_TEMPLATES = {
+    //     dymo: {
+    //         "30334": { name: "Jewellery Label", paper: { width: 57, height: 32 }, label: { width: 57, height: 32 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
+    //         "30252": { name: "Address Label", paper: { width: 89, height: 28 }, label: { width: 89, height: 28 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
+    //     },
+    //     zebra: {
+    //         "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
+    //         "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
+    //     },
+    //     avery: {
+    //         "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
+    //         "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 44.5, height: 12.7 }, rows: 20, columns: 4, gapX: 5, gapY: 0, marginTop: 12.7, marginLeft: 7.5 }
+    //     }
+    // };
 
     useEffect(() => {
         if (isDirty) {
@@ -231,26 +233,76 @@ export default function CreateTemplate() {
     };
 
     const handlePrint = () => {
-        if (!printRef.current) return;
-        const qty = Math.max(1, Number(design.print_qty) || 1);
-        const paper = PAPER_TEMPLATES?.[brand]?.[model];
+    if (!printRef.current) return;
 
-        if (!paper) {
-            shopify.toast.show("Please select a paper brand and paper model.");
-            return;
+    const qty = Math.max(
+        1,
+        Number(design.print_qty) || 1
+    );
+
+    const paper =
+        PAPER_TEMPLATES?.[brand]?.[model];
+
+    if (!paper) {
+        shopify.toast.show(
+            "Please select a brand and paper model."
+        );
+        return;
+    }
+
+    const rows = Number(paper.rows || 1);
+    const columns = Number(paper.columns || 1);
+
+    const labelsPerSheet = rows * columns;
+
+    const labelHtml = printRef.current.innerHTML;
+
+    const sheets = [];
+
+    for (
+        let start = 0;
+        start < qty;
+        start += labelsPerSheet
+    ) {
+        const labelsOnThisSheet = Math.min(
+            labelsPerSheet,
+            qty - start
+        );
+
+        let labels = "";
+
+        for (
+            let i = 0;
+            i < labelsOnThisSheet;
+            i++
+        ) {
+            labels += `
+                <div class="label">
+                    ${labelHtml}
+                </div>
+            `;
         }
 
-        const bodyHtml = Array(qty)
-            .fill(`<div class="label">${printRef.current.innerHTML}</div>`)
-            .join("");
+        sheets.push(`
+            <div class="print-sheet">
+                ${labels}
+            </div>
+        `);
+    }
 
-        openPrintWindow({
-            bodyHtml,
-            paperTemplate: paper,
+    const bodyHtml = sheets.join("");
 
-            fontOptions: { fontFactor: 0.2, fontMin: 4, fontMax: 9 },
-        });
-    };
+    openPrintWindow({
+        bodyHtml,
+        paperTemplate: paper,
+
+        fontOptions: {
+            fontFactor: 0.2,
+            fontMin: 4,
+            fontMax: 9,
+        },
+    });
+};
 
     const handleSubmit = useCallback(async () => {
         if (!name.trim()) {

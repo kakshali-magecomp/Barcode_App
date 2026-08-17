@@ -165,6 +165,7 @@ export default function GenerateBarcode() {
 
     const savePrintHistory = async () => {
         try {
+            console.log("DEBUG selectedProducts vendor check:", selectedProducts.map(p => ({ title: p.product_title, vendor: p.vendor })));
             const response = await fetch("/api/print-history", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -824,7 +825,7 @@ export default function GenerateBarcode() {
                         overflow: "hidden",
                     }}
                 >
-                    {selectedProducts.map((product) => (
+                    {templateDesign && selectedProducts.map((product) => (
                         <div
                             key={`print-${product.variant_id}`}
                             id={`print-label-${product.variant_id}`}
