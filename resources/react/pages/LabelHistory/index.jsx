@@ -133,62 +133,169 @@ export default function LabelHistory() {
     shopify.modal.hide(DELETE_MODAL_ID);
   };
 
- const handlePrintHistory = () => {
+  const handlePrintHistory = () => {
     if (!historyDetails) return;
 
-    const firstSelected = historyDetails.items.find((_, index) => selectedItems.includes(index));
-    const paper = firstSelected?.template_settings?.layout_settings;
+    const firstSelected = historyDetails.items.find((_, index) =>
+      selectedItems.includes(index)
+    );
+
+    const paper =
+      firstSelected?.template_settings?.layout_settings;
+
+    if (!paper) {
+      shopify.toast.show("Paper template information is missing.");
+      return;
+    }
 
     const bodyHtml = historyDetails.items
-    .filter((_, index) => selectedItems.includes(index))
-    .map((item) => {
-        const settings = item.template_settings || {};
-        let symbolValue;
-        switch (settings.symbol_field_source) {
-            case "sku_value": symbolValue = item.sku; break;
-            case "product_name": symbolValue = item.product_title; break;
-            case "product_price": symbolValue = item.price; break;
-            case "product_online_url": symbolValue = item.online_url; break;
-            default: symbolValue = item.barcode;
+      .map((item, index) => {
+        // Only print selected products
+        if (!selectedItems.includes(index)) {
+          return "";
         }
-        const decimals = Number(settings.price_decimal_number ?? 2);
-        const amount = Number(item.price || 0).toFixed(decimals);
-        const priceFormat = settings.line2_currency_format || "{amount}";
-        const formattedPrice = priceFormat.replace("{amount}", amount);
-        const nameLine =
-            settings.line2_name || settings.line2_price
-                ? `<div>
-                    ${settings.line2_name ? `<span>${item.product_title ?? ""}</span>` : ""}
-                    ${settings.line2_price ? `<span>${formattedPrice}</span>` : ""}
-                </div>`
-                : "";
 
-        const symbolHtml = settings.symbol_enabled
-            ? (settings.symbol_type === "QR"
-                ? `<img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140}x${settings.symbol_width_px || 140}&data=${encodeURIComponent(symbolValue || "")}" />`
-                : `<svg class="barcode" data-format="${settings.barcode_format || "CODE128"}" data-value="${String(symbolValue || "").trim()}" data-width="${settings.symbol_bar_width || 2}" data-height="${settings.symbol_bar_height || 45}" data-font="${settings.symbol_font_size || 16}" data-display="${settings.hide_barcode_value ? "false" : "true"}" data-color="${settings.symbol_color || "#000000"}"></svg>`)
+        const settings = item.template_settings || {};
+
+        let symbolValue;
+
+        switch (settings.symbol_field_source) {
+          case "sku_value":
+            symbolValue = item.sku;
+            break;
+
+          case "product_name":
+            symbolValue = item.product_title;
+            break;
+
+          case "product_price":
+            symbolValue = item.price;
+            break;
+
+          case "product_online_url":
+            symbolValue = item.online_url;
+            break;
+
+          default:
+            symbolValue = item.barcode;
+        }
+
+        const decimals = Number(
+          settings.price_decimal_number ?? 2
+        );
+
+        const amount = Number(
+          item.price || 0
+        ).toFixed(decimals);
+
+        const priceFormat =
+          settings.line2_currency_format || "{amount}";
+
+        const formattedPrice =
+          priceFormat.replace("{amount}", amount);
+
+        const nameLine =
+          settings.line2_name ||
+            settings.line2_price
+            ? `
+                        <div>
+                            ${settings.line2_name
+              ? `<span>${item.product_title ?? ""}</span>`
+              : ""
+            }
+
+                            ${settings.line2_price
+              ? `<span>${formattedPrice}</span>`
+              : ""
+            }
+                        </div>
+                    `
             : "";
 
+        const symbolHtml = settings.symbol_enabled
+          ? (
+            settings.symbol_type === "QR"
+              ? `
+                            <img
+                                class="qr"
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140
+              }x${settings.symbol_width_px || 140
+              }&data=${encodeURIComponent(
+                symbolValue || ""
+              )}"
+                            />
+                        `
+              : `
+                            <svg
+                                class="barcode"
+                                data-format="${settings.barcode_format || "CODE128"
+              }"
+                                data-value="${String(
+                symbolValue || ""
+              ).trim()}"
+                                data-width="${settings.symbol_bar_width || 2
+              }"
+                                data-height="${settings.symbol_bar_height || 45
+              }"
+                                data-font="${settings.symbol_font_size || 16
+              }"
+                                data-display="${settings.hide_barcode_value
+                ? "false"
+                : "true"
+              }"
+                                data-color="${settings.symbol_color || "#000000"
+              }"
+                            ></svg>
+                        `
+          )
+          : "";
+        const quantity = Math.max(
+          1,
+          Number(printQuantities[index]) ||
+          Number(item.qty) ||
+          1
+        );
+
         let html = "";
-        for (let i = 0; i < item.qty; i++) {
-            html += `<div class="label">
-                ${settings.line1_sku ? `<div>${item.sku ?? ""}</div>` : ""}
-                ${nameLine}
-                ${settings.line3_vendor ? `<div>${item.vendor ?? ""}</div>` : ""}
-                ${symbolHtml}
-            </div>`;
+
+        for (let i = 0; i < quantity; i++) {
+          html += `
+                    <div class="label">
+                        ${settings.line1_sku
+              ? `<div>${item.sku ?? ""}</div>`
+              : ""
+            }
+
+                        ${nameLine}
+
+                        ${settings.line3_vendor
+              ? `<div>${item.vendor ?? ""}</div>`
+              : ""
+            }
+
+                        ${symbolHtml}
+                    </div>
+                `;
         }
+
         return html;
-    })
-    .join("");
+      })
+      .join("");
+
+    if (!bodyHtml) {
+      shopify.toast.show(
+        "Please select at least one product."
+      );
+      return;
+    }
 
     openPrintWindow({
-        bodyHtml,
-        paperTemplate: paper,
-        useJsBarcodeScript: true,
-        onAfterPrint: () => {},
+      bodyHtml,
+      paperTemplate: paper,
+      useJsBarcodeScript: true,
+      onAfterPrint: () => { },
     });
-};
+  };
 
   const handlePrintAll = () => {
     const win = window.open("", "_blank");

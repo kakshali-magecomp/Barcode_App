@@ -47,7 +47,7 @@ export default function LineControls({ design, handleUpdate }) {
                         </div>
                     )}
                     <s-checkbox
-                        label="Variant option 1"
+                        label="Show Variants"
                         checked={!!design.line2_variant_option1 || undefined}
                         onChange={(e) => handleUpdate('line2_variant_option1', e.currentTarget.checked)}
                     />

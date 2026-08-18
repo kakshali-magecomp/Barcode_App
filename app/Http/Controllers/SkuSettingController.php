@@ -37,6 +37,7 @@ class SkuSettingController extends Controller
             'segment_metafield_rule' => 'nullable|string',
             'hide_options_1_2_3' => 'required|boolean',
             'force_uppercase_fields' => 'required|boolean',
+            'auto_generate_on_create' => 'required|boolean',
         ]);
         Log::info($validated);
 

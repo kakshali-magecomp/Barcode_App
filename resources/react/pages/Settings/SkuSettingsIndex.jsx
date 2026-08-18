@@ -20,14 +20,14 @@ export default function SkuSettingsIndex() {
         segment_metafield: '',
         segment_metafield_rule: 'full',
         hide_options_1_2_3: false,
-        force_uppercase_fields: true
+        force_uppercase_fields: true,
+        auto_generate_on_create: false
     });
 
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
     const [metafieldOptions, setMetafieldOptions] = useState([]);
     const [errorBanner, setErrorBanner] = useState(null);
-
     const loadMetafields = useCallback(async () => {
         try {
             const response = await fetch("/api/products");
@@ -53,7 +53,6 @@ export default function SkuSettingsIndex() {
     const generateSkuPreview = () => {
         const delimiter = skuSettings.sku_delimiter || '-';
         let segments = [];
-
         if (skuSettings.sku_prefix) segments.push(skuSettings.sku_prefix);
 
         const extractSubstring = (text, rule) => {
@@ -126,7 +125,8 @@ export default function SkuSettingsIndex() {
                     segment_option2: data.segment_option2 || 'none',
                     segment_option3: data.segment_option3 || 'none',
                     hide_options_1_2_3: !!data.hide_options_1_2_3,
-                    force_uppercase_fields: !!data.force_uppercase_fields
+                    force_uppercase_fields: !!data.force_uppercase_fields,
+                    auto_generate_on_create: !!data.auto_generate_on_create,
                 });
                 setIsDirty(false);
             }
@@ -209,6 +209,7 @@ export default function SkuSettingsIndex() {
                         </s-banner>
                     </s-section>
                 )}
+
 
                 <s-section>
                     <s-banner heading="Live SKU Generation Structure Preview" tone="info">
@@ -293,17 +294,76 @@ export default function SkuSettingsIndex() {
                                 ))}
                             </s-select>
                             <s-select
-                            label="Metafield Rule"
-                            value={skuSettings.segment_metafield_rule}
-                            onChange={(e) => handleFieldChange('segment_metafield_rule', e.currentTarget.value)}
-                        >
-                            {positionOptions.map(opt => (
-                                <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
-                            ))}
-                        </s-select>
+                                label="Metafield Rule"
+                                value={skuSettings.segment_metafield_rule}
+                                onChange={(e) => handleFieldChange('segment_metafield_rule', e.currentTarget.value)}
+                            >
+                                {positionOptions.map(opt => (
+                                    <s-option key={opt.value} value={opt.value}>{opt.label}</s-option>
+                                ))}
+                            </s-select>
                         </s-grid>
+                        <s-grid gridTemplateColumns="1fr 1fr 1fr" gap="base">
+                            <s-select
+                                label="Variant Option 1"
+                                value={skuSettings.segment_option1 || ''}
+                                onChange={(e) =>
+                                    handleFieldChange(
+                                        'segment_option1',
+                                        e.currentTarget.value
+                                    )
+                                }
+                            >
+                                {positionOptions.map((opt) => (
+                                    <s-option
+                                        key={opt.value}
+                                        value={opt.value}
+                                    >
+                                        {opt.label}
+                                    </s-option>
+                                ))}
+                            </s-select>
 
-                        
+                            <s-select
+                                label="Variant Option 2"
+                                value={skuSettings.segment_option2 || ''}
+                                onChange={(e) =>
+                                    handleFieldChange(
+                                        'segment_option2',
+                                        e.currentTarget.value
+                                    )
+                                }
+                            >
+                                {positionOptions.map((opt) => (
+                                    <s-option
+                                        key={opt.value}
+                                        value={opt.value}
+                                    >
+                                        {opt.label}
+                                    </s-option>
+                                ))}
+                            </s-select>
+
+                            <s-select
+                                label="Variant Option 3"
+                                value={skuSettings.segment_option3 || ''}
+                                onChange={(e) =>
+                                    handleFieldChange(
+                                        'segment_option3',
+                                        e.currentTarget.value
+                                    )
+                                }
+                            >
+                                {positionOptions.map((opt) => (
+                                    <s-option
+                                        key={opt.value}
+                                        value={opt.value}
+                                    >
+                                        {opt.label}
+                                    </s-option>
+                                ))}
+                            </s-select>
+                        </s-grid>
                     </s-stack>
                 </s-section>
 
@@ -311,10 +371,16 @@ export default function SkuSettingsIndex() {
                     <s-stack direction="block" gap="base">
                         <s-heading>Formatting Options</s-heading>
                         <s-checkbox
+                            label="Auto generate SKU after creating a new product"
+                            checked={skuSettings.auto_generate_on_create || undefined}
+                            onChange={(e) => handleFieldChange('auto_generate_on_create', e.currentTarget.checked)}
+                        />
+                        <s-checkbox
                             label="Force generated codes text characters to Uppercase"
                             checked={skuSettings.force_uppercase_fields || undefined}
                             onChange={(e) => handleFieldChange('force_uppercase_fields', e.currentTarget.checked)}
                         />
+
                     </s-stack>
                 </s-section>
             </s-page>

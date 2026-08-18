@@ -232,57 +232,53 @@ export default function CreateTemplate() {
         return format.replace("{amount}", amount);
     };
 
-    const handlePrint = () => {
-    if (!printRef.current) return;
+   const handlePrint = () => {
+    if (!printRef.current) {
+        console.error('Print reference is not available');
+        return;
+    }
 
-    const qty = Math.max(
-        1,
-        Number(design.print_qty) || 1
-    );
+    const qty = Math.max(1, Number(design.print_qty) || 1);
 
-    const paper =
-        PAPER_TEMPLATES?.[brand]?.[model];
+    // Get paper template from PAPER_TEMPLATES
+    const paper = PAPER_TEMPLATES?.[brand]?.[model];
 
     if (!paper) {
-        shopify.toast.show(
-            "Please select a brand and paper model."
-        );
+        shopify.toast.show("Please select a brand and paper model.", {
+            duration: 5000,
+            isError: true,
+        });
+        return;
+    }
+
+    // Validate paper template has required properties
+    if (!paper.label || !paper.label.width || !paper.label.height) {
+        shopify.toast.show("Invalid paper template selected. Please check your paper settings.", {
+            duration: 5000,
+            isError: true,
+        });
         return;
     }
 
     const rows = Number(paper.rows || 1);
     const columns = Number(paper.columns || 1);
-
     const labelsPerSheet = rows * columns;
 
+    // Get the label HTML content
     const labelHtml = printRef.current.innerHTML;
 
+    // Build sheets
     const sheets = [];
-
-    for (
-        let start = 0;
-        start < qty;
-        start += labelsPerSheet
-    ) {
-        const labelsOnThisSheet = Math.min(
-            labelsPerSheet,
-            qty - start
-        );
-
+    for (let start = 0; start < qty; start += labelsPerSheet) {
+        const labelsOnThisSheet = Math.min(labelsPerSheet, qty - start);
         let labels = "";
-
-        for (
-            let i = 0;
-            i < labelsOnThisSheet;
-            i++
-        ) {
+        for (let i = 0; i < labelsOnThisSheet; i++) {
             labels += `
                 <div class="label">
                     ${labelHtml}
                 </div>
             `;
         }
-
         sheets.push(`
             <div class="print-sheet">
                 ${labels}
@@ -292,16 +288,24 @@ export default function CreateTemplate() {
 
     const bodyHtml = sheets.join("");
 
-    openPrintWindow({
+    // Open print window with proper template
+    const success = openPrintWindow({
         bodyHtml,
         paperTemplate: paper,
-
+        useJsBarcodeScript: true,
         fontOptions: {
             fontFactor: 0.2,
             fontMin: 4,
             fontMax: 9,
         },
     });
+
+    if (!success) {
+        shopify.toast.show("Failed to open print window. Please allow popups.", {
+            duration: 5000,
+            isError: true,
+        });
+    }
 };
 
     const handleSubmit = useCallback(async () => {
@@ -468,11 +472,11 @@ export default function CreateTemplate() {
                                 textAlign: 'center',
                             }}
                         >
-                            {design.line1_sku && (
-                                <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 14 }}>
-                                    {previewItem.sku}
-                                </div>
-                            )}
+                          {design.line1_sku && (
+    <div className="print-sku">
+        {previewItem.sku}
+    </div>
+)}
 
                             <div
                                 style={{
@@ -496,13 +500,13 @@ export default function CreateTemplate() {
                                         {formatPreviewPrice()}
                                     </span>
                                 )}
-                                
+
                             </div>
-                                {design.line3_vendor && (
-                                    <span style={{ fontWeight: 500, fontSize: 10 }}>
-                                        {previewItem.vendor}
-                                    </span>
-                                )}
+                            {design.line3_vendor && (
+                                <span style={{ fontWeight: 500, fontSize: 10 }}>
+                                    {previewItem.vendor}
+                                </span>
+                            )}
                             {design.symbol_enabled && (
                                 design.symbol_type === 'BARCODE' ? (
                                     <BarcodeRenderer

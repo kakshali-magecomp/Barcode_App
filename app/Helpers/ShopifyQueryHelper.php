@@ -124,5 +124,30 @@ class ShopifyQueryHelper
     }
     GRAPHQL;
     }
+    public static function updateSku(): string
+    {
+        return <<<'GRAPHQL'
+mutation updateProductVariantSku(
+    $productId: ID!,
+    $variants: [ProductVariantsBulkInput!]!
+) {
+    productVariantsBulkUpdate(
+        productId: $productId,
+        variants: $variants
+    ) {
+        productVariants {
+            id
+            inventoryItem {
+                sku
+            }
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+GRAPHQL;
+    }
 
 }
