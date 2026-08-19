@@ -344,22 +344,55 @@ export default function GenerateBarcode() {
     };
 
     const handlePrint = () => {
+        if (!templateDesign) {
+            shopify.toast.show("Please select a template.");
+            return;
+        }
+
+        if (!selectedProducts.length) {
+            shopify.toast.show("Please select at least one product.");
+            return;
+        }
+
         const bodyHtml = selectedProducts
             .map((product) => {
-                const label = document
-                    .getElementById(`label-${product.variant_id}`)
-                    ?.querySelector(".print-label");
-                if (!label) return "";
-                const qty = Math.max(1, Number(product.quantity) || 1);
-                return Array(qty)
-                    .fill(`<div class="label"><div class="label-content">${label.innerHTML}</div></div>`)
-                    .join("");
+                const printLabel = document.getElementById(
+                    `print-label-${product.variant_id}`
+                );
+
+                if (!printLabel) {
+                    console.warn(
+                        `Print label not found for variant ${product.variant_id}`
+                    );
+                    return "";
+                }
+
+                const qty = Math.max(
+                    1,
+                    Number(product.quantity) || 1
+                );
+
+                const labelHtml = printLabel.innerHTML;
+
+                return Array.from({ length: qty }, () => `
+                <div class="label">
+                    <div class="label-content">
+                        ${labelHtml}
+                    </div>
+                </div>
+            `).join("");
             })
             .join("");
 
+        if (!bodyHtml.trim()) {
+            shopify.toast.show("No labels available to print.");
+            return;
+        }
+
         openPrintWindow({
             bodyHtml,
-            paperTemplate: templateDesign?.layout_settings,
+            paperTemplate: templateDesign.layout_settings,
+            useJsBarcodeScript: true,
             onAfterPrint: savePrintHistory,
         });
     };
@@ -406,8 +439,16 @@ export default function GenerateBarcode() {
             (originalPrice * vatPercentage) / 100;
 
         const amount = priceWithVat.toFixed(decimals);
-        const format = templateDesign?.line2_currency_format || "{amount}";
-        return format.replace("{amount}", amount);
+
+        let format =
+            templateDesign?.line2_currency_format || "{amount}";
+
+        // Normalize old currency formats
+        format = format
+            .replace(/\{\{amount\}\}/gi, "{amount}")
+            .replace(/\$amount/gi, "${amount}");
+
+        return format.replace(/\{amount\}/gi, amount);
     };
     return (
         <>
@@ -583,7 +624,7 @@ export default function GenerateBarcode() {
                                 <s-box key={summaryStart + index} padding="base" borderWidth="base" borderRadius="base">
                                     <s-stack direction="block" gap="tight">
                                         <s-text fontWeight="bold">{item.product_title}</s-text>
-                                        {item.variant_title !== "Default Title" && (
+                                        {item.variant_title !== "" && (
                                             <s-text tone="subdued">{item.variant_title}</s-text>
                                         )}
                                         <s-text>
@@ -754,13 +795,63 @@ export default function GenerateBarcode() {
 
                                             <div className="print-label">
                                                 {templateDesign?.line1_sku && <div>{product.current_sku}</div>}
-                                                {(templateDesign?.line2_name || templateDesign?.line2_price) && (
-                                                    <div>
-                                                        {templateDesign?.line2_name && <span>{product.product_title}</span>}
-                                                        {templateDesign?.line2_price && <span>{formatProductPrice(product)}</span>}
-                                                    </div>
+                                                {(() => {
+                                                    const isValidOption = (value) => {
+                                                        if (!value) return false;
+
+                                                        const normalized = String(value).trim().toLowerCase();
+
+                                                        return (
+                                                            normalized !== "" &&
+                                                            normalized !== "default title"
+                                                        );
+                                                    };
+
+                                                    const options = [
+                                                        templateDesign?.line2_variant_option1 && product.option_1,
+                                                        templateDesign?.line2_variant_option2 && product.option_2,
+                                                        templateDesign?.line2_variant_option3 && product.option_3,
+                                                    ].filter(isValidOption);
+
+                                                    const optionText = options.join(" / ");
+
+                                                    const showName = Boolean(templateDesign?.line2_name);
+                                                    const showPrice = Boolean(templateDesign?.line2_price);
+                                                    const showOption = Boolean(optionText);
+
+                                                    return (showName || showOption || showPrice) ? (
+                                                        <div
+                                                            style={{
+                                                                display: "flex",
+                                                                flexWrap: "wrap",
+                                                                alignItems: "center",
+                                                                justifyContent: "center",
+                                                                gap: "4px",
+                                                            }}
+                                                        >
+                                                            {showName && (
+                                                                <span>
+                                                                    {product.product_title}
+                                                                </span>
+                                                            )}
+
+                                                            {showOption && (
+                                                                <span>
+                                                                    {optionText}
+                                                                </span>
+                                                            )}
+
+                                                            {showPrice && (
+                                                                <span>
+                                                                    {formatProductPrice(product)}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ) : null;
+                                                })()}
+                                                {templateDesign?.line3_vendor && product.vendor && (
+                                                    <div>{product.vendor}</div>
                                                 )}
-                                                {templateDesign?.line3_vendor && <div>{product.product_vendor || product.vendor || ""}</div>}
                                                 {templateDesign.symbol_type === "BARCODE" ? (
                                                     <BarcodeRenderer
                                                         value={getSymbolValue(product)}

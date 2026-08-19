@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useNavigate } from "react-router-dom";
 import { openPrintWindow } from '../../components/Printlayout';
+import TemplateLabelRenderer from "../../components/TemplateLabelRenderer";
 
 const DELETE_MODAL_ID = "delete-history-modal";
 const VIEW_MODAL_ID = "view-history-modal";
@@ -19,6 +20,7 @@ export default function LabelHistory() {
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const printRef = useRef(null);
+  const historyPrintRef = useRef(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [printQuantities, setPrintQuantities] = useState({});
   const [selectedRows, setSelectedRows] = useState([]);
@@ -136,119 +138,37 @@ export default function LabelHistory() {
   const handlePrintHistory = () => {
     if (!historyDetails) return;
 
-    const firstSelected = historyDetails.items.find((_, index) =>
-      selectedItems.includes(index)
-    );
+    if (!selectedItems.length) {
+      shopify.toast.show("Please select at least one product.");
+      return;
+    }
+
+    const firstSelectedIndex = selectedItems[0];
+    const firstSelectedItem = historyDetails.items[firstSelectedIndex];
 
     const paper =
-      firstSelected?.template_settings?.layout_settings;
+      firstSelectedItem?.template_settings?.layout_settings;
 
     if (!paper) {
       shopify.toast.show("Paper template information is missing.");
       return;
     }
 
-    const bodyHtml = historyDetails.items
-      .map((item, index) => {
-        // Only print selected products
-        if (!selectedItems.includes(index)) {
+    const bodyHtml = selectedItems
+      .map((index) => {
+        const item = historyDetails.items[index];
+
+        const printLabel = document.getElementById(
+          `history-print-label-${index}`
+        );
+
+        if (!printLabel) {
+          console.warn(
+            `Print label not found for history item ${index}`
+          );
           return "";
         }
 
-        const settings = item.template_settings || {};
-
-        let symbolValue;
-
-        switch (settings.symbol_field_source) {
-          case "sku_value":
-            symbolValue = item.sku;
-            break;
-
-          case "product_name":
-            symbolValue = item.product_title;
-            break;
-
-          case "product_price":
-            symbolValue = item.price;
-            break;
-
-          case "product_online_url":
-            symbolValue = item.online_url;
-            break;
-
-          default:
-            symbolValue = item.barcode;
-        }
-
-        const decimals = Number(
-          settings.price_decimal_number ?? 2
-        );
-
-        const amount = Number(
-          item.price || 0
-        ).toFixed(decimals);
-
-        const priceFormat =
-          settings.line2_currency_format || "{amount}";
-
-        const formattedPrice =
-          priceFormat.replace("{amount}", amount);
-
-        const nameLine =
-          settings.line2_name ||
-            settings.line2_price
-            ? `
-                        <div>
-                            ${settings.line2_name
-              ? `<span>${item.product_title ?? ""}</span>`
-              : ""
-            }
-
-                            ${settings.line2_price
-              ? `<span>${formattedPrice}</span>`
-              : ""
-            }
-                        </div>
-                    `
-            : "";
-
-        const symbolHtml = settings.symbol_enabled
-          ? (
-            settings.symbol_type === "QR"
-              ? `
-                            <img
-                                class="qr"
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=${settings.symbol_width_px || 140
-              }x${settings.symbol_width_px || 140
-              }&data=${encodeURIComponent(
-                symbolValue || ""
-              )}"
-                            />
-                        `
-              : `
-                            <svg
-                                class="barcode"
-                                data-format="${settings.barcode_format || "CODE128"
-              }"
-                                data-value="${String(
-                symbolValue || ""
-              ).trim()}"
-                                data-width="${settings.symbol_bar_width || 2
-              }"
-                                data-height="${settings.symbol_bar_height || 45
-              }"
-                                data-font="${settings.symbol_font_size || 16
-              }"
-                                data-display="${settings.hide_barcode_value
-                ? "false"
-                : "true"
-              }"
-                                data-color="${settings.symbol_color || "#000000"
-              }"
-                            ></svg>
-                        `
-          )
-          : "";
         const quantity = Math.max(
           1,
           Number(printQuantities[index]) ||
@@ -256,36 +176,23 @@ export default function LabelHistory() {
           1
         );
 
-        let html = "";
+        const labelHtml = printLabel.innerHTML;
 
-        for (let i = 0; i < quantity; i++) {
-          html += `
+        return Array.from(
+          { length: quantity },
+          () => `
                     <div class="label">
-                        ${settings.line1_sku
-              ? `<div>${item.sku ?? ""}</div>`
-              : ""
-            }
-
-                        ${nameLine}
-
-                        ${settings.line3_vendor
-              ? `<div>${item.vendor ?? ""}</div>`
-              : ""
-            }
-
-                        ${symbolHtml}
+                        <div class="label-content">
+                            ${labelHtml}
+                        </div>
                     </div>
-                `;
-        }
-
-        return html;
+                `
+        ).join("");
       })
       .join("");
 
-    if (!bodyHtml) {
-      shopify.toast.show(
-        "Please select at least one product."
-      );
+    if (!bodyHtml.trim()) {
+      shopify.toast.show("No labels available to print.");
       return;
     }
 
@@ -462,7 +369,9 @@ th{background:#f5f5f5;}
                       type="checkbox"
                       checked={
                         paginatedHistory.length > 0 &&
-                        selectedRows.length === paginatedHistory.length
+                        paginatedHistory.every((item) =>
+                          selectedRows.includes(item.id)
+                        )
                       }
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -519,6 +428,105 @@ th{background:#f5f5f5;}
           )}
         </s-section>
       </s-page>
+
+      {/* Hidden labels used for printing */}
+      <div
+        ref={historyPrintRef}
+        style={{
+          position: "absolute",
+          left: "-100000px",
+          top: 0,
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+        }}
+      >
+        {historyDetails?.items?.map((item, index) => (
+          <div
+            key={`history-print-${index}`}
+            id={`history-print-label-${index}`}
+            className="print-template-label"
+          >
+            <TemplateLabelRenderer
+              design={item.template_settings || {}}
+              product={{
+                product_title: item.product_title,
+                current_sku: item.current_sku || item.sku,
+                sku: item.sku,
+                barcode: item.barcode,
+                price: item.price,
+                vendor: item.vendor,
+
+                variant_title:
+                  item.variant_title &&
+                    item.variant_title.trim().toLowerCase() !== "default title"
+                    ? item.variant_title
+                    : "",
+
+                option_1:
+                  item.option_1 &&
+                    item.option_1.trim().toLowerCase() !== "default title"
+                    ? item.option_1
+                    : "",
+
+                option_2:
+                  item.option_2 &&
+                    item.option_2.trim().toLowerCase() !== "default title"
+                    ? item.option_2
+                    : "",
+
+                option_3:
+                  item.option_3 &&
+                    item.option_3.trim().toLowerCase() !== "default title"
+                    ? item.option_3
+                    : "",
+
+                online_url: item.online_url,
+              }}
+              barcodeSettings={item.template_settings || {}}
+              formatPrice={(product) => {
+                const settings = item.template_settings || {};
+
+                const decimals = Number(
+                  settings.price_decimal_number ?? 2
+                );
+
+                let originalPrice = Number(
+                  product?.price ?? 0
+                );
+
+                if (originalPrice > 999) {
+                  originalPrice = originalPrice / 100;
+                }
+
+                const vatPercentage = Number(
+                  settings.vat_percentage ?? 0
+                );
+
+                const priceWithVat =
+                  originalPrice +
+                  (originalPrice * vatPercentage) / 100;
+
+                const amount = priceWithVat.toFixed(decimals);
+
+                let format =
+                  settings.line2_currency_format ||
+                  "{amount}";
+
+                format = format
+                  .replace(/\{\{amount\}\}/gi, "{amount}")
+                  .replace(/\$amount/gi, "${amount}");
+
+                return format.replace(
+                  /\{amount\}/gi,
+                  amount
+                );
+              }}
+              printMode={true}
+            />
+          </div>
+        ))}
+      </div>
 
       <Modal id={DELETE_MODAL_ID}>
         <p style={{ padding: '1rem' }}>

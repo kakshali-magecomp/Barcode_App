@@ -30,12 +30,6 @@ class GenerateSkuJob implements ShouldQueue
                 'shop' => $this->shop,
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | 1. Find Shopify store/user
-            |--------------------------------------------------------------------------
-            */
-
             $user = User::where(
                 'name',
                 $this->shop
@@ -50,22 +44,10 @@ class GenerateSkuJob implements ShouldQueue
                 return;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | 2. Get SKU settings
-            |--------------------------------------------------------------------------
-            */
-
             $setting = SkuSetting::where(
                 'user_id',
                 $user->id
             )->first();
-
-            /*
-            |--------------------------------------------------------------------------
-            | 3. Check Auto Generate SKU setting
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 !$setting ||
@@ -82,19 +64,7 @@ class GenerateSkuJob implements ShouldQueue
                 return;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | 4. Product webhook data
-            |--------------------------------------------------------------------------
-            */
-
             $product = $this->product;
-
-            /*
-            |--------------------------------------------------------------------------
-            | 5. Validate webhook data
-            |--------------------------------------------------------------------------
-            */
 
             if (
                 empty($product['admin_graphql_api_id']) ||
@@ -112,21 +82,9 @@ class GenerateSkuJob implements ShouldQueue
                 return;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | 6. Generate SKU for each variant
-            |--------------------------------------------------------------------------
-            */
-
             $variants = [];
 
             foreach ($product['variants'] as $variant) {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Variant ID validation
-                |--------------------------------------------------------------------------
-                */
 
                 $variantId =
                     $variant['admin_graphql_api_id']
@@ -144,12 +102,6 @@ class GenerateSkuJob implements ShouldQueue
                     continue;
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | Don't overwrite existing SKU
-                |--------------------------------------------------------------------------
-                */
-
                 if (!empty($variant['sku'])) {
 
                     Log::info(
@@ -162,12 +114,6 @@ class GenerateSkuJob implements ShouldQueue
 
                     continue;
                 }
-
-                /*
-                |--------------------------------------------------------------------------
-                | Generate SKU according to settings
-                |--------------------------------------------------------------------------
-                */
 
                 $sku = $this->generateSku(
                     $setting,
@@ -195,12 +141,6 @@ class GenerateSkuJob implements ShouldQueue
                     ]
                 );
 
-                /*
-                |--------------------------------------------------------------------------
-                | Shopify mutation structure
-                |--------------------------------------------------------------------------
-                */
-
                 $variants[] = [
                     'id' => $variantId,
                     'inventoryItem' => [
@@ -208,12 +148,6 @@ class GenerateSkuJob implements ShouldQueue
                     ],
                 ];
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | 7. Nothing to update
-            |--------------------------------------------------------------------------
-            */
 
             if (empty($variants)) {
 
@@ -223,12 +157,6 @@ class GenerateSkuJob implements ShouldQueue
 
                 return;
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | 8. Update Shopify
-            |--------------------------------------------------------------------------
-            */
 
             $variables = [
                 'productId' =>
@@ -263,12 +191,6 @@ class GenerateSkuJob implements ShouldQueue
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Generate SKU according to saved settings
-    |--------------------------------------------------------------------------
-    */
-
     private function generateSku(
         $setting,
         $product,
@@ -279,12 +201,6 @@ class GenerateSkuJob implements ShouldQueue
             $setting->sku_delimiter ?: '-';
 
         $parts = [];
-
-        /*
-        |--------------------------------------------------------------------------
-        | PREFIX
-        |--------------------------------------------------------------------------
-        */
 
         if (!empty($setting->sku_prefix)) {
 
@@ -297,12 +213,6 @@ class GenerateSkuJob implements ShouldQueue
                 $parts[] = $prefix;
             }
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRODUCT TITLE
-        |--------------------------------------------------------------------------
-        */
 
         $title = $this->parseSegment(
             $product['title'] ?? '',
@@ -321,12 +231,6 @@ class GenerateSkuJob implements ShouldQueue
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VENDOR
-        |--------------------------------------------------------------------------
-        */
-
         $vendor = $this->parseSegment(
             $product['vendor'] ?? '',
             $setting->segment_product_vendor
@@ -343,12 +247,6 @@ class GenerateSkuJob implements ShouldQueue
                 $parts[] = $vendor;
             }
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | PRODUCT TYPE
-        |--------------------------------------------------------------------------
-        */
 
         $productTypeValue =
             $product['product_type']
@@ -375,11 +273,6 @@ class GenerateSkuJob implements ShouldQueue
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | METAFIELD
-        |--------------------------------------------------------------------------
-        */
 
         if (!empty($setting->segment_metafield)) {
 
@@ -413,19 +306,7 @@ class GenerateSkuJob implements ShouldQueue
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | VARIANT OPTIONS
-        |--------------------------------------------------------------------------
-        */
-
         if (!$setting->hide_options_1_2_3) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Option 1
-            |--------------------------------------------------------------------------
-            */
 
             $option1Value =
                 $this->getVariantOption(
@@ -453,12 +334,6 @@ class GenerateSkuJob implements ShouldQueue
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Option 2
-            |--------------------------------------------------------------------------
-            */
-
             $option2Value =
                 $this->getVariantOption(
                     $variant,
@@ -484,12 +359,6 @@ class GenerateSkuJob implements ShouldQueue
                     $parts[] = $option2;
                 }
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Option 3
-            |--------------------------------------------------------------------------
-            */
 
             $option3Value =
                 $this->getVariantOption(
@@ -518,27 +387,10 @@ class GenerateSkuJob implements ShouldQueue
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | AUTO NUMBER
-        |--------------------------------------------------------------------------
-        |
-        | IMPORTANT:
-        | This uses your currently configured starting number.
-        | It does NOT increment the number automatically.
-        |
-        */
-
         $number =
             $setting->sku_auto_number_start ?: 1;
 
         $parts[] = $number;
-
-        /*
-        |--------------------------------------------------------------------------
-        | SUFFIX
-        |--------------------------------------------------------------------------
-        */
 
         if (!empty($setting->sku_suffix)) {
 
@@ -552,12 +404,6 @@ class GenerateSkuJob implements ShouldQueue
             }
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Remove empty parts
-        |--------------------------------------------------------------------------
-        */
-
         $parts = array_values(
             array_filter(
                 $parts,
@@ -568,22 +414,11 @@ class GenerateSkuJob implements ShouldQueue
             )
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Join all segments
-        |--------------------------------------------------------------------------
-        */
-
         $sku = implode(
             $delimiter,
             $parts
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Uppercase
-        |--------------------------------------------------------------------------
-        */
 
         if ($setting->force_uppercase_fields) {
             $sku = strtoupper($sku);
@@ -591,23 +426,6 @@ class GenerateSkuJob implements ShouldQueue
 
         return $sku;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Parse selected setting rule
-    |--------------------------------------------------------------------------
-    |
-    | Supported:
-    |
-    | none
-    | disabled
-    | full
-    | char_1
-    | char_2
-    | char_3
-    | char_4
-    |
-    */
 
     private function parseSegment(
         $value,
@@ -674,33 +492,12 @@ class GenerateSkuJob implements ShouldQueue
         }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get Variant Option
-    |--------------------------------------------------------------------------
-    |
-    | Supports both:
-    |
-    | option1 / option2 / option3
-    |
-    | and:
-    |
-    | selectedOptions
-    |
-    */
-
     private function getVariantOption(
         $variant,
         $number
     ) {
 
         $key = 'option' . $number;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Shopify webhook format
-        |--------------------------------------------------------------------------
-        */
 
         if (
             isset($variant[$key]) &&
@@ -711,11 +508,6 @@ class GenerateSkuJob implements ShouldQueue
             return (string) $variant[$key];
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | GraphQL selectedOptions fallback
-        |--------------------------------------------------------------------------
-        */
 
         $selectedOptions =
             $variant['selectedOptions']
@@ -740,11 +532,6 @@ class GenerateSkuJob implements ShouldQueue
         return '';
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Get Metafield Value
-    |--------------------------------------------------------------------------
-    */
 
     private function getMetafieldValue(
         $product,
@@ -762,18 +549,6 @@ class GenerateSkuJob implements ShouldQueue
             return '';
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Simple associative format
-        |--------------------------------------------------------------------------
-        |
-        | Example:
-        |
-        | [
-        |     'custom.color' => 'Red'
-        | ]
-        |
-        */
 
         if (
             isset($metafields[$key])
@@ -791,11 +566,6 @@ class GenerateSkuJob implements ShouldQueue
             return (string) $value;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Namespace + key format
-        |--------------------------------------------------------------------------
-        */
 
         foreach (
             $metafields as $metafield
@@ -826,12 +596,6 @@ class GenerateSkuJob implements ShouldQueue
 
         return '';
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Clean SKU segment
-    |--------------------------------------------------------------------------
-    */
 
     private function clean(
         $value,

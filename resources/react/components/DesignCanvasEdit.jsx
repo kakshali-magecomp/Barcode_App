@@ -78,14 +78,16 @@ export default function DesignCanvasEdit({
                     ...defaultDesign,
                     ...(barcode.settings || barcode.data || {}),
                     ...template.data,
-                    print_qty: defaultQty,
+                    print_qty:
+                        template.data?.print_qty ??
+                        defaultQty,
                 };
 
                 if (loadedDesign.line2_currency_format) {
                     loadedDesign.line2_currency_format =
                         loadedDesign.line2_currency_format
-                            .replace(/\{\{amount\}\}/gi, "amount")
-                            .replace(/\{amount\}/gi, "amount")
+                            .replace(/\{\{amount\}\}/gi, "{amount}")
+                            .replace(/\$amount/gi, "${amount}")
                             .trim();
                 }
 
@@ -137,127 +139,127 @@ export default function DesignCanvasEdit({
         });
     }
 
-  const handlePrint = () => {
-    if (!printRef.current) {
-        console.error('Print reference is not available');
-        shopify.toast.show("Print preview not ready. Please try again.", {
-            duration: 5000,
-            isError: true,
-        });
-        return;
-    }
+    const handlePrint = () => {
+        if (!printRef.current) {
+            console.error('Print reference is not available');
+            shopify.toast.show("Print preview not ready. Please try again.", {
+                duration: 5000,
+                isError: true,
+            });
+            return;
+        }
 
-    const qty = Math.max(1, Number(design.print_qty) || 1);
+        const qty = Math.max(1, Number(design.print_qty) || 1);
 
-    // Get paper template - check multiple possible sources
-    let paper = paperTemplate || 
-                design.layout_settings || 
-                design.paper_template ||
-                PAPER_TEMPLATES?.[brand]?.[model];
+        // Get paper template - check multiple possible sources
+        let paper = paperTemplate ||
+            design.layout_settings ||
+            design.paper_template ||
+            PAPER_TEMPLATES?.[brand]?.[model];
 
-    // If still no paper, try to get from design
-    if (!paper && design.paper_brand && design.paper_model) {
-        paper = PAPER_TEMPLATES?.[design.paper_brand]?.[design.paper_model];
-    }
+        // If still no paper, try to get from design
+        if (!paper && design.paper_brand && design.paper_model) {
+            paper = PAPER_TEMPLATES?.[design.paper_brand]?.[design.paper_model];
+        }
 
-    // Validate paper template
-    if (!paper) {
-        shopify.toast.show("Please select a brand and paper model for printing.", {
-            duration: 5000,
-            isError: true,
-        });
-        return;
-    }
+        // Validate paper template
+        if (!paper) {
+            shopify.toast.show("Please select a brand and paper model for printing.", {
+                duration: 5000,
+                isError: true,
+            });
+            return;
+        }
 
-    // Ensure paper has required properties
-    if (!paper.label || !paper.label.width || !paper.label.height) {
-        console.error('Invalid paper template:', paper);
-        shopify.toast.show("Invalid paper template. Please select a valid paper model.", {
-            duration: 5000,
-            isError: true,
-        });
-        return;
-    }
+        // Ensure paper has required properties
+        if (!paper.label || !paper.label.width || !paper.label.height) {
+            console.error('Invalid paper template:', paper);
+            shopify.toast.show("Invalid paper template. Please select a valid paper model.", {
+                duration: 5000,
+                isError: true,
+            });
+            return;
+        }
 
-    // Get the preview HTML content
-    let labelHtml = printRef.current.innerHTML;
-    
-    // Add proper classes and structure for print
-    labelHtml = `
+        // Get the preview HTML content
+        let labelHtml = printRef.current.innerHTML;
+
+        // Add proper classes and structure for print
+        labelHtml = `
         <div class="label-content">
             ${labelHtml}
         </div>
     `;
 
-    // Create sheets with proper grid layout
-    const rows = Number(paper.rows || 1);
-    const columns = Number(paper.columns || 1);
-    const labelsPerSheet = rows * columns;
-    
-    let sheets = [];
-    
-    // For roll labels (single label per sheet)
-    if (paper.type === 'roll' || (rows === 1 && columns === 1)) {
-        // Each label on its own sheet
-        for (let i = 0; i < qty; i++) {
-            sheets.push(`
+        // Create sheets with proper grid layout
+        const rows = Number(paper.rows || 1);
+        const columns = Number(paper.columns || 1);
+        const labelsPerSheet = rows * columns;
+
+        let sheets = [];
+
+        // For roll labels (single label per sheet)
+        if (paper.type === 'roll' || (rows === 1 && columns === 1)) {
+            // Each label on its own sheet
+            for (let i = 0; i < qty; i++) {
+                sheets.push(`
                 <div class="print-sheet">
                     <div class="label">
                         ${labelHtml}
                     </div>
                 </div>
             `);
-        }
-    } else {
-        // Sheet labels (multiple labels per sheet)
-        for (let start = 0; start < qty; start += labelsPerSheet) {
-            const labelsOnThisSheet = Math.min(labelsPerSheet, qty - start);
-            let labels = '';
-            for (let i = 0; i < labelsOnThisSheet; i++) {
-                labels += `
+            }
+        } else {
+            // Sheet labels (multiple labels per sheet)
+            for (let start = 0; start < qty; start += labelsPerSheet) {
+                const labelsOnThisSheet = Math.min(labelsPerSheet, qty - start);
+                let labels = '';
+                for (let i = 0; i < labelsOnThisSheet; i++) {
+                    labels += `
                     <div class="label">
                         ${labelHtml}
                     </div>
                 `;
-            }
-            sheets.push(`
+                }
+                sheets.push(`
                 <div class="print-sheet">
                     ${labels}
                 </div>
             `);
+            }
         }
-    }
 
-    const bodyHtml = sheets.join("");
+        const bodyHtml = sheets.join("");
 
-    // Log for debugging
-    console.log('Printing with paper template:', paper);
-    console.log('Quantity:', qty);
-    console.log('Labels per sheet:', labelsPerSheet);
+        // Log for debugging
+        console.log('Printing with paper template:', paper);
+        console.log('Quantity:', qty);
+        console.log('Labels per sheet:', labelsPerSheet);
 
-    // Open print window with all necessary settings
-    const success = openPrintWindow({
-        bodyHtml,
-        paperTemplate: paper,
-        useJsBarcodeScript: true,
-        fontOptions: {
-            fontFactor: 0.14,
-            fontMin: 3.5,
-            fontMax: 7,
-        },
-        onAfterPrint: () => {
-            // Optional: log print completion
-            console.log('Print completed');
-        },
-    });
-
-    if (!success) {
-        shopify.toast.show("Failed to open print window. Please allow popups for this website.", {
-            duration: 5000,
-            isError: true,
+        // Open print window with all necessary settings
+        const success = openPrintWindow({
+            bodyHtml,
+            paperTemplate: paper,
+            useJsBarcodeScript: true,
+            fontOptions: {
+                fontFactor: 0.14,
+                fontMin: 3.5,
+                fontMax: 7,
+            },
+            onAfterPrint: () => {
+                // Optional: log print completion
+                console.log('Print completed');
+            },
         });
-    }
-};
+
+        if (!success) {
+            shopify.toast.show("Failed to open print window. Please allow popups for this website.", {
+                duration: 5000,
+                isError: true,
+            });
+        }
+    };
 
 
     if (loading) {
@@ -426,38 +428,44 @@ export default function DesignCanvasEdit({
                             <div
                                 ref={printRef}
                                 style={{
-                                    border: "1px solid #dfe3e8",
-                                    borderRadius: 8,
-                                    background: "#fff",
-                                    minHeight: 220,
-                                    padding: 20,
-                                    textAlign: "center",
+                                    minHeight: '220px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    textAlign: 'center',
                                 }}
                             >
                                 {design.line1_sku && (
-                                    <div style={{ fontFamily: "monospace", fontSize: 12, marginBottom: 8 }}>
+                                    <div>
                                         {previewItem.sku}
                                     </div>
                                 )}
-                                <div style={{ marginBottom: 15 }}>
+                                <div style={{
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    justifyContent: 'center',
+                                    gap: 6,
+                                    marginBottom: 5,
+                                }}>
                                     {design.line2_name && (
-                                        <span style={{ fontWeight: 700, fontSize: 18 }}>
+                                        <span style={{ fontWeight: 700 }}>
                                             {previewItem.title}
                                         </span>
                                     )}
                                     {design.line2_variant_option1 && previewItem.option_1 && (
-                                        <span style={{ marginLeft: 5, color: "#666" }}>
+                                        <span style={{color: "#666" }}>
                                             {previewItem.option_1}
                                         </span>
                                     )}
                                     {design.line2_price && (
-                                        <span style={{ marginLeft: 8, color: "#000000", fontWeight: 700 }}>
+                                        <span style={{ color: "#000000", fontWeight: 700 }}>
                                             {formatPrice(previewItem.price)}
                                         </span>
                                     )}
                                 </div>
                                 {design.line3_vendor && (
-                                    <div style={{ marginBottom: 15, color: "#777" }}>
+                                    <div style={{ fontWeight: 500 , color: "#777" }}>
                                         {previewItem.vendor}
                                     </div>
                                 )}

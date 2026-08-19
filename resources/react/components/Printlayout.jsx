@@ -2,45 +2,74 @@
 let isPrinting = false;
 
 export function buildPrintCss(paperTemplate, opts = {}) {
-    // Validate paper template
     if (!paperTemplate || !paperTemplate.label) {
-        console.error('Invalid paper template for CSS generation');
+        console.error("Invalid paper template for CSS generation");
+
         return {
             hasRealPaper: false,
             css: getFallbackCss(),
         };
     }
 
-    // Get dimensions with proper defaults
     const labelWidth = Number(paperTemplate.label.width) || 50;
     const labelHeight = Number(paperTemplate.label.height) || 30;
-    const rows = Number(paperTemplate.rows || 1);
-    const columns = Number(paperTemplate.columns || 1);
-    const gapX = Number(paperTemplate.gapX || 0);
-    const gapY = Number(paperTemplate.gapY || 0);
-    const marginTop = Number(paperTemplate.marginTop || 0);
-    const marginLeft = Number(paperTemplate.marginLeft || 0);
 
-    // Calculate paper size
-    const paperWidth = Number(paperTemplate.paper?.width) || 
-                       (labelWidth * columns + gapX * (columns - 1) + marginLeft);
-    const paperHeight = Number(paperTemplate.paper?.height) || 
-                        (labelHeight * rows + gapY * (rows - 1) + marginTop);
+    const rows = Math.max(1, Number(paperTemplate.rows) || 1);
+    const columns = Math.max(1, Number(paperTemplate.columns) || 1);
 
-    // Font sizing
+    const gapX = Number(paperTemplate.gapX) || 0;
+    const gapY = Number(paperTemplate.gapY) || 0;
+
+    const marginTop = Number(paperTemplate.marginTop) || 0;
+    const marginLeft = Number(paperTemplate.marginLeft) || 0;
+
+    const paperWidth =
+        Number(paperTemplate.paper?.width) ||
+        (
+            marginLeft +
+            (columns * labelWidth) +
+            ((columns - 1) * gapX)
+        );
+
+    const paperHeight =
+        Number(paperTemplate.paper?.height) ||
+        (
+            marginTop +
+            (rows * labelHeight) +
+            ((rows - 1) * gapY)
+        );
+
     const fontFactor = opts.fontFactor ?? 0.14;
     const fontMin = opts.fontMin ?? 3.5;
     const fontMax = opts.fontMax ?? 7;
-    const textPt = Math.max(fontMin, Math.min(fontMax, Math.round(labelHeight * fontFactor)));
 
-    // Padding
-    const horizontalPadding = Math.max(0.8, Math.min(3, labelWidth * 0.04));
-    const verticalPadding = Math.max(0.4, Math.min(1.5, labelHeight * 0.04));
+    const textPt = Math.max(
+        fontMin,
+        Math.min(
+            fontMax,
+            labelHeight * fontFactor
+        )
+    );
 
-    // Barcode height
-    const barcodeHeightMm = Math.max(4, Math.min(labelHeight * 0.55, labelHeight - verticalPadding * 2));
+    const horizontalPadding = Math.min(
+        2,
+        Math.max(0.4, labelWidth * 0.025)
+    );
 
-    const isRoll = paperTemplate.type === 'roll' || (rows === 1 && columns === 1);
+    const verticalPadding = Math.min(
+        1,
+        Math.max(0.25, labelHeight * 0.025)
+    );
+
+    const barcodeHeightMm = Math.max(
+        3,
+        Math.min(
+            labelHeight * 0.45,
+            labelHeight - (verticalPadding * 2)
+        )
+    );
+
+    const isRoll = paperTemplate.type === "roll";
 
     const css = `
         @page {
@@ -48,17 +77,20 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             margin: 0 !important;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box !important;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0 !important;
             padding: 0 !important;
             width: ${paperWidth}mm !important;
-            background: white;
+            min-width: ${paperWidth}mm !important;
+            max-width: ${paperWidth}mm !important;
+            background: #ffffff !important;
         }
 
         body {
@@ -66,86 +98,124 @@ export function buildPrintCss(paperTemplate, opts = {}) {
         }
 
         .print-sheet {
-            position: relative;
-            width: ${paperWidth}mm;
-            height: ${paperHeight}mm;
+            position: relative !important;
+
+            width: ${paperWidth}mm !important;
+            height: ${paperHeight}mm !important;
+
             margin: 0 !important;
-            padding: ${marginTop}mm 0 0 ${marginLeft}mm !important;
-            
-            display: grid;
-            grid-template-columns: repeat(${columns}, ${labelWidth}mm);
-            grid-template-rows: repeat(${rows}, ${labelHeight}mm);
-            column-gap: ${gapX}mm;
-            row-gap: ${gapY}mm;
-            align-content: start;
-            justify-content: start;
-            
-            page-break-after: always;
-            break-after: page;
-            overflow: hidden;
+
+            padding:
+                ${marginTop}mm
+                0
+                0
+                ${marginLeft}mm !important;
+
+            display: grid !important;
+
+            grid-template-columns:
+                repeat(${columns}, ${labelWidth}mm) !important;
+
+            grid-template-rows:
+                repeat(${rows}, ${labelHeight}mm) !important;
+
+            column-gap: ${gapX}mm !important;
+            row-gap: ${gapY}mm !important;
+
+            align-content: start !important;
+            justify-content: start !important;
+            align-items: start !important;
+
+            overflow: hidden !important;
+
+            page-break-after: always !important;
+            break-after: page !important;
         }
 
         .print-sheet:last-child {
-            page-break-after: auto;
-            break-after: auto;
+            page-break-after: auto !important;
+            break-after: auto !important;
         }
 
         .label {
             width: ${labelWidth}mm !important;
-            height: ${labelHeight}mm !important;
             min-width: ${labelWidth}mm !important;
             max-width: ${labelWidth}mm !important;
+
+            height: ${labelHeight}mm !important;
             min-height: ${labelHeight}mm !important;
             max-height: ${labelHeight}mm !important;
-            
-            padding: ${verticalPadding}mm ${horizontalPadding}mm !important;
+
             margin: 0 !important;
-            
+
+            padding:
+                ${verticalPadding}mm
+                ${horizontalPadding}mm !important;
+
             display: flex !important;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            
-            text-align: center;
-            overflow: visible !important;
-            
-            page-break-inside: avoid;
-            break-inside: avoid;
-            box-sizing: border-box;
-        }
+            flex-direction: column !important;
 
-        .label-content {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+            align-items: center !important;
+            justify-content: center !important;
 
-        .label * {
-            box-sizing: border-box;
-            max-width: 100% !important;
+            text-align: center !important;
+
+            overflow: hidden !important;
+
             font-family: Arial, Helvetica, sans-serif !important;
             font-size: ${textPt}pt !important;
-            line-height: 1.2 !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            line-height: 1.05 !important;
+
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+
+            flex-shrink: 0 !important;
         }
 
-        .label > div, .label > span {
+        .label-content,
+        .template-label-content {
             width: 100% !important;
             max-width: 100% !important;
-            overflow: visible !important;
-            word-wrap: break-word !important;
-            margin-bottom: 0.5mm !important;
+
+            height: 100% !important;
+            max-height: 100% !important;
+
+            margin: 0 !important;
+            padding: 0 !important;
+
+            display: flex !important;
+            flex-direction: column !important;
+
+            align-items: center !important;
+            justify-content: center !important;
+
+            overflow: hidden !important;
+        }
+
+        .label *,
+        .label-content *,
+        .template-label-content * {
+            box-sizing: border-box !important;
+
+            max-width: 100% !important;
+
+            font-family: Arial, Helvetica, sans-serif !important;
+
+            line-height: 1.05 !important;
+        }
+
+        .label .template-label-content {
+            font-size: ${textPt}pt !important;
         }
 
         .print-sku {
             font-weight: 600 !important;
             font-size: ${textPt}pt !important;
-            padding-top: 1.5mm !important;
-            margin-bottom: 0.5mm !important;
+
+            padding: 0 !important;
+            margin: 0 0 0.3mm 0 !important;
+
+            line-height: 1 !important;
         }
 
         .label .barcode,
@@ -153,11 +223,16 @@ export function buildPrintCss(paperTemplate, opts = {}) {
         .label svg,
         .label img {
             display: block !important;
+
+            width: auto !important;
             max-width: 100% !important;
+
             height: auto !important;
             max-height: ${barcodeHeightMm}mm !important;
-            margin: 0.5mm auto !important;
-            flex-shrink: 0 !important;
+
+            margin: 0.3mm auto !important;
+
+            flex-shrink: 1 !important;
         }
 
         .label svg.barcode {
@@ -165,44 +240,58 @@ export function buildPrintCss(paperTemplate, opts = {}) {
         }
 
         .label .barcode text {
-            font-size: ${Math.max(3.5, Math.min(5, textPt * 0.7))}pt !important;
+            font-size: ${Math.max(
+                3,
+                Math.min(5, textPt * 0.75)
+            )}pt !important;
         }
 
         ${isRoll ? `
             .print-sheet {
                 display: block !important;
+
                 width: ${paperWidth}mm !important;
                 height: ${paperHeight}mm !important;
+
                 padding: 0 !important;
             }
+
             .print-sheet .label {
                 margin: 0 auto !important;
             }
-        ` : ''}
+        ` : ""}
 
         @media print {
-            html, body {
-                width: ${paperWidth}mm !important;
+
+            html,
+            body {
                 margin: 0 !important;
                 padding: 0 !important;
-                background: white !important;
+
+                width: ${paperWidth}mm !important;
+                min-width: ${paperWidth}mm !important;
+                max-width: ${paperWidth}mm !important;
+
+                background: #ffffff !important;
             }
-            
+
             .print-sheet {
                 width: ${paperWidth}mm !important;
                 height: ${paperHeight}mm !important;
+
                 margin: 0 !important;
-                padding: ${marginTop}mm 0 0 ${marginLeft}mm !important;
+
                 page-break-after: always !important;
                 break-after: page !important;
+
                 overflow: hidden !important;
             }
-            
+
             .print-sheet:last-child {
                 page-break-after: auto !important;
                 break-after: auto !important;
             }
-            
+
             .label {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -361,7 +450,7 @@ export function openPrintWindow({
 
     // Open print window
     const printWindow = window.open("", "_blank", "width=1000,height=800");
-    
+
     if (!printWindow) {
         alert('Please allow popups for this website to print labels.');
         return false;
@@ -420,7 +509,7 @@ export function openPrintWindow({
     printWindow.addEventListener('afterprint', cleanup);
 
     // Handle window close
-    printWindow.addEventListener('beforeunload', function() {
+    printWindow.addEventListener('beforeunload', function () {
         isPrinting = false;
     });
 

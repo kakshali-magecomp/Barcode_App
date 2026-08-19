@@ -11,6 +11,20 @@ export default function TemplateLabelRenderer({
 }) {
     if (!product) return null;
 
+    const variantTitle =
+        product.variant_title &&
+            product.variant_title.trim() !== "" &&
+            product.variant_title.trim().toLowerCase() !== "default title"
+            ? product.variant_title.trim()
+            : "";
+
+    const option1 =
+        product.option_1 &&
+            product.option_1.trim() !== "" &&
+            product.option_1.trim().toLowerCase() !== "default title"
+            ? product.option_1.trim()
+            : "";
+
     const previewItem = {
         title: product.product_title || product.title || "",
 
@@ -30,11 +44,7 @@ export default function TemplateLabelRenderer({
         vendor:
             product.vendor || "",
 
-        option_1:
-            product.variant_title &&
-            product.variant_title !== "Default Title"
-                ? product.variant_title
-                : product.option_1 || "",
+        option_1: variantTitle || option1,
 
         online_url:
             product.online_url || "",
@@ -71,7 +81,7 @@ export default function TemplateLabelRenderer({
                 width: "100%",
                 height: "100%",
 
-          
+
                 minHeight: printMode ? 0 : 220,
 
                 boxSizing: "border-box",
@@ -86,16 +96,12 @@ export default function TemplateLabelRenderer({
                 overflow: "hidden",
 
                 background: "#fff",
-
-                /*
-                 * Don't use large screen padding while printing.
-                 */
                 padding: printMode
                     ? "2mm"
                     : "20px",
             }}
         >
-           
+
 
             {design.line1_sku && (
                 <div
@@ -113,7 +119,7 @@ export default function TemplateLabelRenderer({
                 </div>
             )}
 
-        
+
 
             <div
                 style={{
@@ -166,15 +172,13 @@ export default function TemplateLabelRenderer({
                         }}
                     >
                         {formatPrice
-                            ? formatPrice(
-                                  previewItem.price
-                              )
+                            ? formatPrice(product)
                             : previewItem.price}
                     </span>
                 )}
             </div>
 
-            
+
 
             {design.line3_vendor && (
                 <div
