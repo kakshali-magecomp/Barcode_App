@@ -5,37 +5,34 @@ import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
 import BarcodeRenderer from '../../components/BarcodeRenderer';
 import QrCodeRenderer from '../../components/QrCodeRenderer';
-import PaperTemplateSettings, {
-    PAPER_TEMPLATES,
-} from "../../components/PaperTemplateSettings";
+import PaperTemplateSettings, { PAPER_TEMPLATES } from '../../components/PaperTemplateSettings';
 import { openPrintWindow } from '../../components/Printlayout';
 
 const SAVE_BAR_ID = 'create-template-save-bar';
 
-const defaultDesign = {
-    line1_sku: true,
-    line2_name: true,
-    line2_price: false,
-    line2_variant_option1: false,
-    line3_vendor: false,
-    symbol_enabled: true,
-    symbol_type: 'BARCODE',
-    symbol_color: '#000000',
-    symbol_field_source: 'barcode_value',
-    print_qty: 1,
-};
+const defaultDesign = { line1_sku: true, line2_name: true, line2_price: false, line2_variant_option1: false, line3_vendor: false, symbol_enabled: true, symbol_type: 'BARCODE', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 };
 
 export default function CreateTemplate() {
     const shopify = useAppBridge();
     const navigate = useNavigate();
     const printRef = useRef(null);
+    const initialStateRef = useRef(null);
+    const isDiscardingRef = useRef(false);
+
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
     const [printSettings, setPrintSettings] = useState(null);
-    const [design, setDesign] = useState(defaultDesign);
+    const [design, setDesign] = useState({ ...defaultDesign });
+    const [storeVariants, setStoreVariants] = useState([]);
+    const [selectedVariantId, setSelectedVariantId] = useState('');
+    const [barcodeSettings, setBarcodeSettings] = useState({});
+    const [isDirty, setIsDirty] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errorBanner, setErrorBanner] = useState(null);
+
     const [previewItem, setPreviewItem] = useState({
         title: 'Sample Item',
         sku: 'SKU-1001',
@@ -43,52 +40,8 @@ export default function CreateTemplate() {
         vendor: 'Vendor',
         option_1: '',
         online_url: '',
-        barcode: '',
+        barcode: ''
     });
-    const [storeVariants, setStoreVariants] = useState([]);
-    const [selectedVariantId, setSelectedVariantId] = useState('');
-    const [barcodeSettings, setBarcodeSettings] = useState({});
-
-    const [isDirty, setIsDirty] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errorBanner, setErrorBanner] = useState(null);
-
-    // const brandOptions = [
-    //     { label: 'Dymo', value: 'dymo' },
-    //     { label: 'Zebra', value: 'zebra' },
-    //     { label: 'Avery', value: 'avery' }
-    // ];
-
-    // const modelOptionsMap = {
-    //     '': [],
-    //     'dymo': [
-    //         { label: '30334 (Jewellery Label)', value: '30334' },
-    //         { label: '30252 (Address Label)', value: '30252' }
-    //     ],
-    //     'zebra': [
-    //         { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
-    //         { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
-    //     ],
-    //     'avery': [
-    //         { label: '5160 (Address 30-per-sheet)', value: '5160' },
-    //         { label: '5167 (Return Address)', value: '5167' }
-    //     ]
-    // };
-
-    // const PAPER_TEMPLATES = {
-    //     dymo: {
-    //         "30334": { name: "Jewellery Label", paper: { width: 57, height: 32 }, label: { width: 57, height: 32 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
-    //         "30252": { name: "Address Label", paper: { width: 89, height: 28 }, label: { width: 89, height: 28 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
-    //     },
-    //     zebra: {
-    //         "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
-    //         "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
-    //     },
-    //     avery: {
-    //         "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
-    //         "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 44.5, height: 12.7 }, rows: 20, columns: 4, gapX: 5, gapY: 0, marginTop: 12.7, marginLeft: 7.5 }
-    //     }
-    // };
 
     useEffect(() => {
         if (isDirty) {
@@ -98,79 +51,136 @@ export default function CreateTemplate() {
         }
     }, [isDirty, shopify]);
 
-
     useEffect(() => {
-        async function loadPreviewData() {
+        let mounted = true;
+
+        async function load() {
             try {
                 const [productRes, barcodeRes, printRes] = await Promise.all([
                     fetch('/api/products'),
                     fetch('/api/barcode-settings'),
-                    fetch('/api/print-settings'),
+                    fetch('/api/print-settings')
                 ]);
+
                 const products = await productRes.json();
                 const barcode = await barcodeRes.json();
                 const print = await printRes.json();
 
+                let initialDesign = { ...defaultDesign };
+                let initialVariant = '';
+
                 if (barcode.success) {
                     setBarcodeSettings(barcode.settings || barcode.data || barcode);
                 }
+
                 if (print.success) {
                     setPrintSettings(print.settings);
 
-                    const snapshotFormat =
-                        print.settings.currency_format === 'with_currency' ? '${amount}' :
-                            print.settings.currency_format === 'currency_code' ? '{amount} USD' :
-                                '{amount}';
-                    setDesign((prev) => ({
-                        ...prev,
+                    const format = print.settings.currency_format === 'with_currency'
+                        ? '${amount}'
+                        : print.settings.currency_format === 'currency_code'
+                            ? '{amount} USD'
+                            : '{amount}';
+
+                    initialDesign = {
+                        ...initialDesign,
                         print_qty: print.settings.default_print_label_quantity || 1,
-                        line2_currency_format: prev.line2_currency_format || snapshotFormat,
-                    }));
+                        line2_currency_format: format
+                    };
+
+                    if (mounted) setDesign(initialDesign);
                 }
 
                 if (products.status === 1 && products.variants?.length) {
                     setStoreVariants(products.variants);
+
                     const selected = products.variants[0];
-                    setSelectedVariantId(selected.variant_id);
-                    setPreviewItem({
-                        title: selected.product_title,
-                        sku: selected.current_sku || 'NO-SKU',
-                        barcode: selected.barcode || '',
-                        price: selected.price,
-                        vendor: selected.vendor,
-                        option_1:
-                            selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-                        online_url: selected.online_url || '',
-                    });
+                    initialVariant = selected.variant_id;
+
+                    if (mounted) {
+                        setSelectedVariantId(initialVariant);
+
+                        setPreviewItem({
+                            title: selected.product_title,
+                            sku: selected.current_sku || 'NO-SKU',
+                            barcode: selected.barcode || '',
+                            price: selected.price,
+                            vendor: selected.vendor,
+                            option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
+                            online_url: selected.online_url || ''
+                        });
+                    }
                 }
-            } catch (err) {
-                console.error(err);
+
+                initialStateRef.current = {
+                    name: '',
+                    description: '',
+                    note: '',
+                    brand: '',
+                    model: '',
+                    design: structuredClone(initialDesign),
+                    selectedVariantId: initialVariant
+                };
+
+                if (mounted) {
+                    setIsDirty(false);
+                    shopify.saveBar.hide(SAVE_BAR_ID);
+                }
+            } catch (error) {
+                console.error('Failed to load template data:', error);
             }
         }
-        loadPreviewData();
-    }, []);
 
-    const handleFieldChange = (setter) => (event) => {
+        load();
+
+        return () => {
+            mounted = false;
+        };
+    }, [shopify]);
+
+    useEffect(() => {
+        if (!initialStateRef.current || isDiscardingRef.current) return;
+
+        const current = {
+            name,
+            description,
+            note,
+            brand,
+            model,
+            design,
+            selectedVariantId
+        };
+
+        const dirty = JSON.stringify(current) !== JSON.stringify(initialStateRef.current);
+
+        if (!isDiscardingRef.current) setIsDirty(dirty);
+    }, [name, description, note, brand, model, design, selectedVariantId]);
+
+    const handleFieldChange = setter => event => {
+        if (isDiscardingRef.current) return;
         setter(event.currentTarget.value);
-        setIsDirty(true);
-    };
-
-    const handleBrandChange = (event) => {
-        setBrand(event.currentTarget.value);
-        setModel('');
-        setIsDirty(true);
     };
 
     const handleDesignUpdate = (key, value) => {
-        setDesign((prev) => ({ ...prev, [key]: value }));
-        setIsDirty(true);
+        if (isDiscardingRef.current) return;
+
+        setDesign(prev => ({
+            ...prev,
+            [key]: value
+        }));
     };
 
-    const handleVariantChange = (event) => {
+    const handleVariantChange = event => {
+        if (isDiscardingRef.current) return;
+
         const variantId = event.currentTarget.value;
+
         setSelectedVariantId(variantId);
-        const selected = storeVariants.find((item) => item.variant_id === variantId);
+
+        const selected = storeVariants.find(item => item.variant_id === variantId);
+
         if (!selected) return;
+
         setPreviewItem({
             title: selected.product_title,
             sku: selected.current_sku || 'NO-SKU',
@@ -178,28 +188,70 @@ export default function CreateTemplate() {
             price: selected.price,
             vendor: selected.vendor,
             option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-            online_url: selected.online_url || '',
+            online_url: selected.online_url || ''
         });
-        setIsDirty(true);
     };
 
     const handleDiscard = useCallback(() => {
-        setName('');
-        setDescription('');
-        setNote('');
-        setBrand('');
-        setModel('');
-        setDesign(defaultDesign);
-        setIsDirty(false);
-        setErrorBanner(null);
-    }, []);
+        const initial = initialStateRef.current;
 
-    const getSymbolTargetValue = () => {
+        if (!initial) return;
+
+        isDiscardingRef.current = true;
+
+        setName(initial.name);
+        setDescription(initial.description);
+        setNote(initial.note);
+        setBrand(initial.brand);
+        setModel(initial.model);
+        setDesign(structuredClone(initial.design));
+        setSelectedVariantId(initial.selectedVariantId);
+        setErrorBanner(null);
+
+        const selected = storeVariants.find(
+            item => item.variant_id === initial.selectedVariantId
+        );
+
+        if (selected) {
+            setPreviewItem({
+                title: selected.product_title,
+                sku: selected.current_sku || 'NO-SKU',
+                barcode: selected.barcode || '',
+                price: selected.price,
+                vendor: selected.vendor,
+                option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
+                online_url: selected.online_url || ''
+            });
+        }
+
+        setIsDirty(false);
+        shopify.saveBar.hide(SAVE_BAR_ID);
+
+        setTimeout(() => {
+            isDiscardingRef.current = false;
+            setIsDirty(false);
+            shopify.saveBar.hide(SAVE_BAR_ID);
+        }, 100);
+    }, [storeVariants, shopify]);
+
+    const formatPreviewPrice = useCallback(() => {
+        const decimals = Number(printSettings?.price_decimal_number ?? 2);
+        let price = Number(previewItem?.price ?? 0);
+
+        if (price > 999) price /= 100;
+
+        const vat = Number(printSettings?.vat_percentage ?? 0);
+        const amount = (price + (price * vat) / 100).toFixed(decimals);
+
+        return (design.line2_currency_format || '{amount}').replace('{amount}', amount);
+    }, [printSettings, previewItem?.price, design.line2_currency_format]);
+
+    const getSymbolTargetValue = useCallback(() => {
         switch (design.symbol_field_source) {
             case 'product_name':
                 return previewItem.title || '';
             case 'product_price':
-                return previewItem.price || '';
+                return formatPreviewPrice();
             case 'product_vendor':
                 return previewItem.vendor || '';
             case 'product_online_url':
@@ -211,118 +263,70 @@ export default function CreateTemplate() {
             default:
                 return previewItem.sku || '';
         }
-    };
-
-    const formatPreviewPrice = () => {
-        const decimals = Number(
-            printSettings?.price_decimal_number ?? 2
-        );
-        let price = Number(previewItem?.price ?? 0);
-        if (price > 999) {
-            price = price / 100;
-        }
-        const vatPercentage = Number(
-            printSettings?.vat_percentage ?? 0
-        );
-        const vatAmount = (price * vatPercentage) / 100;
-        const priceWithVat = price + vatAmount;
-        const amount = priceWithVat.toFixed(decimals);
-
-        const format = design.line2_currency_format || "{amount}";
-        return format.replace("{amount}", amount);
-    };
+    }, [design.symbol_field_source, previewItem, formatPreviewPrice]);
 
     const handlePrint = () => {
-        if (!printRef.current) {
-            console.error('Print reference is not available');
-            return;
-        }
+        if (!printRef.current) return;
 
         const qty = Math.max(1, Number(design.print_qty) || 1);
-
-        // Get paper template from PAPER_TEMPLATES
         const paper = PAPER_TEMPLATES?.[brand]?.[model];
 
         if (!paper) {
-            shopify.toast.show("Please select a brand and paper model.", {
-                duration: 5000,
-                isError: true,
-            });
+            shopify.toast.show('Please select a brand and paper model.', { duration: 5000, isError: true });
             return;
         }
 
-        // Validate paper template has required properties
-        if (!paper.label || !paper.label.width || !paper.label.height) {
-            shopify.toast.show("Invalid paper template selected. Please check your paper settings.", {
-                duration: 5000,
-                isError: true,
-            });
+        if (!paper.label?.width || !paper.label?.height) {
+            shopify.toast.show('Invalid paper template selected.', { duration: 5000, isError: true });
             return;
         }
 
-        const rows = Number(paper.rows || 1);
-        const columns = Number(paper.columns || 1);
-        const labelsPerSheet = rows * columns;
-
-        // Get the label HTML content
+        const labelsPerSheet = Number(paper.rows || 1) * Number(paper.columns || 1);
         const labelHtml = printRef.current.innerHTML;
-
-        // Build sheets
         const sheets = [];
+
         for (let start = 0; start < qty; start += labelsPerSheet) {
-            const labelsOnThisSheet = Math.min(labelsPerSheet, qty - start);
-            let labels = "";
-            for (let i = 0; i < labelsOnThisSheet; i++) {
-                labels += `
-                <div class="label">
-                    ${labelHtml}
-                </div>
-            `;
+            let labels = '';
+
+            for (let i = 0; i < Math.min(labelsPerSheet, qty - start); i++) {
+                labels += `<div class="label">${labelHtml}</div>`;
             }
-            sheets.push(`
-            <div class="print-sheet">
-                ${labels}
-            </div>
-        `);
+
+            sheets.push(`<div class="print-sheet">${labels}</div>`);
         }
 
-        const bodyHtml = sheets.join("");
-
-        // Open print window with proper template
         const success = openPrintWindow({
-            bodyHtml,
+            bodyHtml: sheets.join(''),
             paperTemplate: paper,
             useJsBarcodeScript: true,
-            fontOptions: {
-                fontFactor: 0.2,
-                fontMin: 2,
-                fontMax: 4,
-            },
+            fontOptions: { fontFactor: .2, fontMin: 2, fontMax: 4 }
         });
 
         if (!success) {
-            shopify.toast.show("Failed to open print window. Please allow popups.", {
-                duration: 5000,
-                isError: true,
-            });
+            shopify.toast.show('Failed to open print window. Please allow popups.', { duration: 5000, isError: true });
         }
     };
 
     const handleSubmit = useCallback(async () => {
+        if (loading) return;
+
         if (!name.trim()) {
             setErrorBanner('Template name is required.');
             return;
         }
+
         if (!brand) {
             setErrorBanner('Please select a paper brand.');
             return;
         }
+
         if (!model) {
             setErrorBanner('Please select a paper model.');
             return;
         }
 
         const selectedTemplate = PAPER_TEMPLATES?.[brand]?.[model];
+
         if (!selectedTemplate) {
             setErrorBanner('Invalid paper template selected.');
             return;
@@ -334,216 +338,179 @@ export default function CreateTemplate() {
         try {
             const createRes = await fetch('/api/templates', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
                 body: JSON.stringify({
                     template_name: name,
                     description,
                     note,
                     paper_brand: brand,
                     paper_model: model,
-                    layout_settings: { ...selectedTemplate },
-                }),
+                    layout_settings: { ...selectedTemplate }
+                })
             });
+
             const createResult = await createRes.json();
+
             if (!createRes.ok || !createResult.success) {
                 throw new Error(createResult.message || 'Failed to save template.');
             }
 
             const newId = createResult.data.id;
 
-            await fetch(`/api/templates/design/${newId}`, {
+            const designRes = await fetch(`/api/templates/design/${newId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...design, selected_variant_id: selectedVariantId }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                body: JSON.stringify({
+                    ...design,
+                    selected_variant_id: selectedVariantId
+                })
             });
 
-            shopify.toast.show('Template created successfully.');
+            const designResult = await designRes.json().catch(() => null);
+
+            if (!designRes.ok || designResult?.success === false) {
+                throw new Error(designResult?.message || 'Template was created, but the design could not be saved.');
+            }
+
+            initialStateRef.current = {
+                name,
+                description,
+                note,
+                brand,
+                model,
+                design: structuredClone(design),
+                selectedVariantId
+            };
+
+            isDiscardingRef.current = true;
             setIsDirty(false);
+            shopify.saveBar.hide(SAVE_BAR_ID);
+
+            shopify.toast.show('Template created successfully.');
+
             navigate('/TemplateList');
         } catch (error) {
-            console.error(error);
+            console.error('Save template error:', error);
             setErrorBanner(error.message || 'A server error occurred while saving.');
+            setIsDirty(true);
+            shopify.saveBar.show(SAVE_BAR_ID);
         } finally {
             setLoading(false);
         }
-    }, [name, description, note, brand, model, design, selectedVariantId, navigate, shopify]);
+    }, [name, description, note, brand, model, design, selectedVariantId, loading, navigate, shopify]);
 
     return (
         <>
             <ui-save-bar id={SAVE_BAR_ID}>
-                <button variant="primary" loading={loading ? "" : undefined} onClick={handleSubmit}>
-                    Save template
+                <button type="button" variant="primary" disabled={loading} onClick={handleSubmit}>
+                    {loading ? 'Saving…' : 'Save template'}
                 </button>
-                <button onClick={handleDiscard}>Discard</button>
+                <button type="button" disabled={loading} onClick={handleDiscard}>
+                    Discard
+                </button>
             </ui-save-bar>
 
             <s-page heading="Create Barcode Template">
-                <s-section>
-                    <s-link href="/TemplateList">← Back to Template List</s-link>
-                </s-section>
+                <s-box paddingBlockStart="base">
+                    <s-stack direction="inline" gap="small" alignItems="center">
+                        <s-link href="/TemplateList" tone="neutral">
+                            <s-icon type="arrow-left" />
+                        </s-link>
+                        <span style={{ fontSize: '17px', fontWeight: 700, color: '#000' }}>Back to Template List</span>
+                    </s-stack>
+                </s-box>
+
+                <s-box paddingBlockStart="base" />
 
                 <s-section>
-                    {errorBanner && (
-                        <s-banner tone="critical" onDismiss={() => setErrorBanner(null)}>
-                            {errorBanner}
-                        </s-banner>
-                    )}
+                    {errorBanner && <s-banner tone="critical" onDismiss={() => setErrorBanner(null)}>{errorBanner}</s-banner>}
 
                     <s-stack direction="block" gap="base">
                         <div style={{ paddingRight: '340px' }}>
                             <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-                                <s-text-field
-                                    label="Template Name"
-                                    value={name}
-                                    onInput={handleFieldChange(setName)}
-                                    placeholder="e.g., Standard Dymo Label"
-                                />
-                                <s-text-area
-                                    label="Internal Note"
-                                    value={note}
-                                    onInput={handleFieldChange(setNote)}
-                                    rows={2}
-                                />
+                                <s-text-field label="Template Name" value={name} onInput={handleFieldChange(setName)} placeholder="e.g., Standard Dymo Label" />
+                                <s-text-area label="Internal Note" value={note} onInput={handleFieldChange(setNote)} rows={2} />
                             </s-grid>
 
-                            <s-text-area
-                                label="Description"
-                                value={description}
-                                onInput={handleFieldChange(setDescription)}
-                                rows={3}
-                            />
+                            <s-text-area label="Description" value={description} onInput={handleFieldChange(setDescription)} rows={3} />
 
                             <PaperTemplateSettings
                                 brand={brand}
                                 model={model}
-                                onBrandChange={(value) => {
+                                onBrandChange={value => {
+                                    if (isDiscardingRef.current) return;
                                     setBrand(value);
-                                    setIsDirty(true);
+                                    setModel('');
                                 }}
-                                onModelChange={(value) => {
+                                onModelChange={value => {
+                                    if (isDiscardingRef.current) return;
                                     setModel(value);
-                                    setIsDirty(true);
                                 }}
                             />
 
                             <s-select label="Preview Product Variant" value={selectedVariantId} onChange={handleVariantChange}>
-                                {storeVariants.map((v) => (
+                                {storeVariants.map(v =>
                                     <s-option key={v.variant_id} value={v.variant_id}>
                                         {`${v.product_title} (${v.barcode || 'No Barcode'})`}
                                     </s-option>
-                                ))}
+                                )}
                             </s-select>
 
                             <LineControls design={design} handleUpdate={handleDesignUpdate} />
-                            <SymbolControls
-                                design={design}
-                                handleUpdate={handleDesignUpdate}
-                                barcodeSettings={barcodeSettings}
-                            />
+
+                            <SymbolControls design={design} handleUpdate={handleDesignUpdate} barcodeSettings={barcodeSettings} />
                         </div>
                     </s-stack>
                 </s-section>
             </s-page>
-            <div
-                style={{
-                    position: 'fixed',
-                    top: '140px',
-                    right: '80px',
-                    width: '330px',
-                    maxHeight: 'calc(100vh - 185px)',
-                    overflowY: 'auto',
-                    background: '#fff',
-                    border: '1px solid #e1e3e5',
-                    borderRadius: '12px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                    padding: '16px',
-                }}
-            >
+
+            <div style={{ position: 'fixed', top: '140px', right: '80px', width: '330px', maxHeight: 'calc(100vh - 185px)', overflowY: 'auto', background: '#fff', border: '1px solid #e1e3e5', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', padding: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <div>
-                        <div
-                            ref={printRef}
-                            style={{
-                                minHeight: '220px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                textAlign: 'center',
-                            }}
-                        >
-                            {design.line1_sku && (
-                                <div className="print-sku">
-                                    {previewItem.sku}
-                                </div>
-                            )}
 
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    flexWrap: 'wrap',
-                                    justifyContent: 'center',
-                                    gap: 6,
-                                    marginBottom:5,
-                                }}
-                            >
-                                {design.line2_name && (
-                                    <span style={{ fontWeight: 700, }}>
-                                        {previewItem.title}
-                                    </span>
-                                )}
-                                {design.line2_variant_option1 && previewItem.option_1 && (
-                                    <span style={{ color: '#666' }}>• {previewItem.option_1}</span>
-                                )}
-                                {design.line2_price && (
-                                    <span style={{ color: '#000000', fontWeight: 700 }}>
-                                        {formatPreviewPrice()}
-                                    </span>
-                                )}
+                    <div ref={printRef} style={{ minHeight: '220px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                        {design.line1_sku && <div className="print-sku">{previewItem.sku}</div>}
 
-                            </div>
-                            {design.line3_vendor && (
-                                <span style={{ fontWeight: 500, color: '#666'  }}>
-                                    {previewItem.vendor}
-                                </span>
-                            )}
-                            {design.symbol_enabled && (
-                                design.symbol_type === 'BARCODE' ? (
-                                    <BarcodeRenderer
-                                        value={getSymbolTargetValue()}
-                                        field={design.symbol_field_source}
-                                        settings={design}
-                                        barcodeSettings={{
-                                            ...(barcodeSettings.data ?? barcodeSettings),
-                                            ...design,
-                                        }}
-                                    />
-                                ) : (
-                                    <QrCodeRenderer value={getSymbolTargetValue()} settings={design} />
-                                )
-                            )}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginBottom: 5 }}>
+                            {design.line2_name && <span style={{ fontWeight: 700 }}>{previewItem.title}</span>}
+                            {design.line2_variant_option1 && previewItem.option_1 && <span style={{ color: '#666' }}>• {previewItem.option_1}</span>}
+                            {design.line2_price && <span style={{ color: '#000', fontWeight: 700 }}>{formatPreviewPrice()}</span>}
                         </div>
+
+                        {design.line3_vendor && <span style={{ fontWeight: 500, color: '#666' }}>{previewItem.vendor}</span>}
+
+                        {design.symbol_enabled && (design.symbol_type === 'BARCODE' ?
+                            <BarcodeRenderer
+                                value={getSymbolTargetValue()}
+                                field={design.symbol_field_source}
+                                settings={design}
+                                barcodeSettings={{ ...(barcodeSettings?.data ?? barcodeSettings), ...design }}
+                            /> :
+                            <QrCodeRenderer value={getSymbolTargetValue()} settings={design} />
+                        )}
                     </div>
 
                     <div style={{ borderTop: '1px solid #e1e3e5', paddingTop: '16px' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <s-number-field
                                 label="Print Quantity"
-                                value={String(design.print_qty || printSettings?.default_print_label_quantity || 1)}
-                                min="1"
-                                step="1"
-                                onInput={(event) =>
-                                    handleDesignUpdate(
-                                        'print_qty',
-                                        Math.max(1, parseInt(event.currentTarget.value) || 1)
-                                    )
-                                }
+                                value={design.print_qty || printSettings?.default_print_label_quantity || 1}
+                                min={1}
+                                step={1}
+                                onInput={e => handleDesignUpdate('print_qty', Math.max(1, parseInt(e.currentTarget.value) || 1))}
                             />
+
                             <s-button variant="primary" icon="print" onClick={handlePrint}>
                                 Print
                             </s-button>
                         </div>
                     </div>
+
                 </div>
             </div>
         </>

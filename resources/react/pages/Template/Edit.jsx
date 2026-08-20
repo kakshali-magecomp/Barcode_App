@@ -205,9 +205,21 @@ export default function EditTemplate() {
             </ui-save-bar>
 
             <s-page heading={`Edit Template: ${name}`}>
-                <s-section>
-                    <s-link href="/TemplateList">← Back to Templates</s-link>
-                </s-section>
+                <s-box paddingBlockStart="base">
+                    <s-stack direction="inline" gap="small">
+
+                        <s-stack direction="inline" gap="small" alignItems="center">
+                            <s-link href="/TemplateList" tone="neutral">
+                                <s-icon type="arrow-left" />
+                            </s-link>
+                            <span style={{ fontSize: '17px', fontWeight: 700 }}>
+                                Back to Template List
+                            </span>
+                        </s-stack>
+
+                    </s-stack>
+                </s-box>
+                <s-box paddingBlockStart="base"></s-box>
 
                 <s-section>
                     {errorBanner && (

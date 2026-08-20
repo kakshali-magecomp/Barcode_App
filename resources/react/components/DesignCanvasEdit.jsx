@@ -275,7 +275,7 @@ export default function DesignCanvasEdit({
             case "product_name":
                 return previewItem.title || "";
             case "product_price":
-                return previewItem.price || "";
+                return formatPrice(previewItem.price);
             case "product_online_url":
                 return previewItem.online_url || "";
             case "barcode_value":
@@ -411,7 +411,7 @@ export default function DesignCanvasEdit({
                     style={{
                         position: "fixed",
                         top: "140px",
-                        right: "90px",
+                        right: "80px",
                         width: "300px",
                         maxHeight: "calc(100vh - 185px)",
                         overflowY: "auto",
@@ -454,7 +454,7 @@ export default function DesignCanvasEdit({
                                         </span>
                                     )}
                                     {design.line2_variant_option1 && previewItem.option_1 && (
-                                        <span style={{color: "#666" }}>
+                                        <span style={{ color: "#666" }}>
                                             {previewItem.option_1}
                                         </span>
                                     )}
@@ -465,7 +465,7 @@ export default function DesignCanvasEdit({
                                     )}
                                 </div>
                                 {design.line3_vendor && (
-                                    <div style={{ fontWeight: 500 , color: "#777" }}>
+                                    <div style={{ fontWeight: 500, color: "#777" }}>
                                         {previewItem.vendor}
                                     </div>
                                 )}
@@ -485,11 +485,11 @@ export default function DesignCanvasEdit({
                                         <QrCodeRenderer value={getSymbolTargetValue()} settings={design} />
                                     )
                                 )}
-                                {design.barcode && (
+                                {/* {design.barcode && (
                                     <div style={{ marginTop: 12, fontWeight: 600 }}>
                                         {previewItem.barcode}
                                     </div>
-                                )}
+                                )} */}
                             </div>
                         </div>
 

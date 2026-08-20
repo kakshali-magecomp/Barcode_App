@@ -354,40 +354,44 @@ export default function GenerateBarcode() {
             return;
         }
 
-        const bodyHtml = selectedProducts
-            .map((product) => {
-                const printLabel = document.getElementById(
-                    `print-label-${product.variant_id}`
+        const labels = [];
+
+        selectedProducts.forEach((product) => {
+            const printLabel = document.getElementById(
+                `print-label-${product.variant_id}`
+            );
+
+            if (!printLabel) {
+                console.warn(
+                    `Print label not found for variant ${product.variant_id}`
                 );
+                return;
+            }
 
-                if (!printLabel) {
-                    console.warn(
-                        `Print label not found for variant ${product.variant_id}`
-                    );
-                    return "";
-                }
+            const qty = Math.max(
+                1,
+                Number(product.quantity) || 1
+            );
 
-                const qty = Math.max(
-                    1,
-                    Number(product.quantity) || 1
-                );
+            const labelHtml = printLabel.innerHTML;
 
-                const labelHtml = printLabel.innerHTML;
-
-                return Array.from({ length: qty }, () => `
+            for (let i = 0; i < qty; i++) {
+                labels.push(`
                 <div class="label">
                     <div class="label-content">
                         ${labelHtml}
                     </div>
                 </div>
-            `).join("");
-            })
-            .join("");
+            `);
+            }
+        });
 
-        if (!bodyHtml.trim()) {
+        if (!labels.length) {
             shopify.toast.show("No labels available to print.");
             return;
         }
+
+        const bodyHtml = labels.join("");
 
         openPrintWindow({
             bodyHtml,

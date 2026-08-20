@@ -106,19 +106,29 @@ export default function TemplateList() {
 
     const toggleSelectAll = () => {
         const currentIds = currentTemplates.map((t) => t.id);
-        const allSelected = currentIds.length > 0 && currentIds.every((id) => selectedIds.includes(id));
+        const allSelected =
+            currentIds.length > 0 && currentIds.every((id) => selectedIds.includes(id));
         setSelectedIds((prev) =>
             allSelected
                 ? prev.filter((id) => !currentIds.includes(id))
-                : [...new Set([...prev, ...currentIds])]
+                : [...new Set([...prev, ...currentIds])],
         );
     };
 
     if (loading) {
         return (
             <s-page heading="Label Templates">
-                <s-box padding="loose" alignContent="center">
-                    <s-spinner accessibilityLabel="Syncing template profiles" size="large" />
+                <s-box padding="base">
+                    <s-stack
+                        direction="block"
+                        alignItems="center"
+                        justifyContent="center"
+                    >
+                        <s-spinner
+                            accessibilityLabel="Loading templates"
+                            size="large"
+                        />
+                    </s-stack>
                 </s-box>
             </s-page>
         );
@@ -136,19 +146,19 @@ export default function TemplateList() {
             />
 
             <s-page heading="Barcode App" subheading="Manage and edit your customized sticker layout dimensions.">
-                <s-section>
-                    <s-stack direction="inline" gap="base">
-                        <s-button variant="primary" href="/TamplateCreate">
-                            Create Template
+                <s-stack direction="inline" gap="base" justifyContent="end">
+                    {selectedIds.length > 0 && (
+                        <s-button tone="critical" onClick={openDeleteSelectedConfirmation}>
+                            Delete Selected ({selectedIds.length})
                         </s-button>
+                    )}
 
-                        {selectedIds.length > 0 && (
-                            <s-button tone="critical" onClick={openDeleteSelectedConfirmation}>
-                                Delete Selected ({selectedIds.length})
-                            </s-button>
-                        )}
-                    </s-stack>
-                </s-section>
+                    <s-button variant="primary" href="/TamplateCreate">
+                        Create Template
+                    </s-button>
+                </s-stack>
+                <s-box paddingBlockStart="base"></s-box>
+
                 <s-section>
                     <s-grid gridTemplateColumns="3fr 1fr" gap="base">
                         <s-search-field
@@ -179,19 +189,39 @@ export default function TemplateList() {
                 )}
 
                 {filteredTemplates.length === 0 ? (
-                    <s-section>
-                        <s-empty-state
-                            heading="Design your first barcode template layout"
-                            image="https://shopify.com"
-                        >
-                            <s-paragraph>
-                                Configure paper sizes, padding parameters, and item data positions to align accurately with your hardware label rolls.
-                            </s-paragraph>
-                            <s-button variant="primary" href="/TamplateCreate">
-                                Create Template
-                            </s-button>
-                        </s-empty-state>
-                    </s-section>
+                    <s-page heading="Label Templates">
+                        <s-section>
+                            <s-box
+                                padding="base"
+                                background="subdued"
+                                border="base"
+                                borderRadius="base"
+                            >
+                                <s-stack direction="block" gap="base" alignItems="center">
+                                    {/* Empty logo icon */}
+                                    <div style={{ transform: "scale(1.8)" }}>
+                                        <s-icon
+                                            type="info"
+                                            tone="auto"
+                                            color="base"
+                                            size="base"
+                                        ></s-icon>
+                                    </div>
+                                    <s-heading>
+                                        Design your first barcode template layout
+                                    </s-heading>
+                                    <s-paragraph>
+                                        Configure paper sizes, padding parameters, and item data
+                                        positions to align accurately with your hardware label rolls.
+                                    </s-paragraph>
+
+                                    <s-button variant="primary" href="/TamplateCreate">
+                                        Create template
+                                    </s-button>
+                                </s-stack>
+                            </s-box>
+                        </s-section>
+                    </s-page>
                 ) : (
                     <s-section padding="none">
                         <s-table

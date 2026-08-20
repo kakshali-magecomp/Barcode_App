@@ -176,7 +176,6 @@ if (shouldAutoDetect && isNumeric) {
     }
 }
 
-// Generic Mod10 Checksum
 // Used for EAN13 / UPCA / ITF14
 function calculateModulo10(digits) {
     let sum = 0;

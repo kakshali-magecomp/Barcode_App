@@ -154,7 +154,11 @@ export default function LabelHistory() {
       return;
     }
 
-    const bodyHtml = selectedItems
+    const rows = Number(paper.rows || 1);
+    const columns = Number(paper.columns || 1);
+    const labelsPerSheet = rows * columns;
+
+    const labels = selectedItems
       .map((index) => {
         const item = historyDetails.items[index];
 
@@ -178,23 +182,48 @@ export default function LabelHistory() {
 
         const labelHtml = printLabel.innerHTML;
 
-        return Array.from(
-          { length: quantity },
-          () => `
-                    <div class="label">
-                        <div class="label-content">
-                            ${labelHtml}
-                        </div>
-                    </div>
-                `
-        ).join("");
+        return Array.from({ length: quantity }, () => `
+        <div class="label">
+          <div class="label-content">
+            ${labelHtml}
+          </div>
+        </div>
+      `).join("");
       })
       .join("");
 
-    if (!bodyHtml.trim()) {
+    if (!labels.trim()) {
       shopify.toast.show("No labels available to print.");
       return;
     }
+
+    const tempContainer = document.createElement("div");
+    tempContainer.innerHTML = labels;
+
+    const allLabels = Array.from(
+      tempContainer.querySelectorAll(".label")
+    );
+
+    const sheets = [];
+
+    for (
+      let start = 0;
+      start < allLabels.length;
+      start += labelsPerSheet
+    ) {
+      const sheetLabels = allLabels
+        .slice(start, start + labelsPerSheet)
+        .map((label) => label.outerHTML)
+        .join("");
+
+      sheets.push(`
+      <div class="print-sheet">
+        ${sheetLabels}
+      </div>
+    `);
+    }
+
+    const bodyHtml = sheets.join("");
 
     openPrintWindow({
       bodyHtml,
@@ -338,12 +367,33 @@ th{background:#f5f5f5;}
           </s-box>
 
           {filteredHistory.length === 0 ? (
-            <s-empty-state
-              heading="No print history found"
-              image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-            >
-              <s-paragraph>No barcode labels have been printed yet.</s-paragraph>
-            </s-empty-state>
+            <s-section>
+              <s-box
+                padding="base"
+                background="subdued"
+                border="base"
+                borderRadius="base"
+              >
+                <s-stack direction="block" gap="base" alignItems="center">
+                  <div style={{ maxWidth: "200px", width: "100%" }}>
+                    <s-image
+                      src="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                      alt="No print history illustration"
+                      aspectRatio="1/1"
+                      objectFit="contain"
+                    ></s-image>
+                  </div>
+
+                  <s-heading>
+                    No print history found
+                  </s-heading>
+
+                  <s-paragraph>
+                    No barcode labels have been printed yet.
+                  </s-paragraph>
+                </s-stack>
+              </s-box>
+            </s-section>
           ) : (
             <>
               {selectedRows.length > 0 && (
