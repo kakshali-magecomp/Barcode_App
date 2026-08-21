@@ -23,21 +23,25 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     const marginTop = Number(paperTemplate.marginTop) || 0;
     const marginLeft = Number(paperTemplate.marginLeft) || 0;
 
+    const calculatedPaperWidth =
+        marginLeft +
+        (columns * labelWidth) +
+        ((columns - 1) * gapX);
+
+    const calculatedPaperHeight =
+        marginTop +
+        (rows * labelHeight) +
+        ((rows - 1) * gapY);
+
     const paperWidth =
-        Number(paperTemplate.paper?.width) ||
-        (
-            marginLeft +
-            (columns * labelWidth) +
-            ((columns - 1) * gapX)
-        );
+        Number(paperTemplate.paper?.width) > 0
+            ? Number(paperTemplate.paper.width)
+            : calculatedPaperWidth;
 
     const paperHeight =
-        Number(paperTemplate.paper?.height) ||
-        (
-            marginTop +
-            (rows * labelHeight) +
-            ((rows - 1) * gapY)
-        );
+        Number(paperTemplate.paper?.height) > 0
+            ? Number(paperTemplate.paper.height)
+            : calculatedPaperHeight;
 
     const fontFactor = opts.fontFactor ?? 0.14;
     const fontMin = opts.fontMin ?? 3.5;
@@ -70,7 +74,6 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     );
 
     const isRoll = paperTemplate.type === "roll";
-
     const css = `
         @page {
             size: ${paperWidth}mm ${paperHeight}mm;
@@ -97,40 +100,43 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             font-family: Arial, Helvetica, sans-serif;
         }
 
-        .print-sheet {
-            position: relative !important;
+       .print-sheet {
+    position: relative !important;
 
-            width: ${paperWidth}mm !important;
-            height: ${paperHeight}mm !important;
+    width: ${paperWidth}mm !important;
+    height: ${paperHeight}mm !important;
 
-            margin: 0 !important;
+    margin: 0 !important;
 
-            padding:
-                ${marginTop}mm
-                0
-                0
-                ${marginLeft}mm !important;
+    padding:
+        ${marginTop}mm
+        0
+        0
+        ${marginLeft}mm !important;
 
-            display: grid !important;
+    display: grid !important;
 
-            grid-template-columns:
-                repeat(${columns}, ${labelWidth}mm) !important;
+    grid-template-columns:
+        repeat(${columns}, ${labelWidth}mm) !important;
 
-            grid-template-rows:
-                repeat(${rows}, ${labelHeight}mm) !important;
+    grid-template-rows:
+        repeat(${rows}, ${labelHeight}mm) !important;
 
-            column-gap: ${gapX}mm !important;
-            row-gap: ${gapY}mm !important;
+    column-gap: ${gapX}mm !important;
+    row-gap: ${gapY}mm !important;
 
-            align-content: start !important;
-            justify-content: start !important;
-            align-items: start !important;
+    align-items: start !important;
+    align-content: start !important;
+    justify-content: start !important;
 
-            overflow: hidden !important;
+    overflow: hidden !important;
 
-            page-break-after: always !important;
-            break-after: page !important;
-        }
+    page-break-after: always !important;
+    break-after: page !important;
+
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
 
         .print-sheet:last-child {
             page-break-after: auto !important;
@@ -138,39 +144,42 @@ export function buildPrintCss(paperTemplate, opts = {}) {
         }
 
         .label {
-            width: ${labelWidth}mm !important;
-            min-width: ${labelWidth}mm !important;
-            max-width: ${labelWidth}mm !important;
+    width: ${labelWidth}mm !important;
+    min-width: ${labelWidth}mm !important;
+    max-width: ${labelWidth}mm !important;
 
-            height: ${labelHeight}mm !important;
-            min-height: ${labelHeight}mm !important;
-            max-height: ${labelHeight}mm !important;
+    height: ${labelHeight}mm !important;
+    min-height: ${labelHeight}mm !important;
+    max-height: ${labelHeight}mm !important;
 
-            margin: 0 !important;
+    margin: 0 !important;
 
-            padding:
-                ${verticalPadding}mm
-                ${horizontalPadding}mm !important;
+    padding:
+        ${verticalPadding}mm
+        ${horizontalPadding}mm !important;
 
-            display: flex !important;
-            flex-direction: column !important;
+    display: flex !important;
+    flex-direction: column !important;
 
-            align-items: center !important;
-            justify-content: center !important;
+    align-items: center !important;
+    justify-content: center !important;
 
-            text-align: center !important;
+    text-align: center !important;
 
-            overflow: hidden !important;
+    overflow: hidden !important;
 
-            font-family: Arial, Helvetica, sans-serif !important;
-            font-size: ${textPt}pt !important;
-            line-height: 1.05 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
 
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+    font-size: ${textPt}pt !important;
+    line-height: 1.05 !important;
 
-            flex-shrink: 0 !important;
-        }
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+
+    box-sizing: border-box !important;
+
+    flex-shrink: 0 !important;
+}
 
         .label-content,
         .template-label-content {
@@ -241,9 +250,9 @@ export function buildPrintCss(paperTemplate, opts = {}) {
 
         .label .barcode text {
             font-size: ${Math.max(
-                3,
-                Math.min(5, textPt * 0.75)
-            )}pt !important;
+        3,
+        Math.min(5, textPt * 0.75)
+    )}pt !important;
         }
 
         ${isRoll ? `
@@ -272,6 +281,8 @@ export function buildPrintCss(paperTemplate, opts = {}) {
                 min-width: ${paperWidth}mm !important;
                 max-width: ${paperWidth}mm !important;
 
+                height: ${paperHeight}mm !important;
+                min-height: ${paperHeight}mm !important;
                 background: #ffffff !important;
             }
 

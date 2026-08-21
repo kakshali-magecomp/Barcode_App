@@ -11,7 +11,24 @@ import { openPrintWindow } from '../../components/Printlayout';
 const SAVE_BAR_ID = 'create-template-save-bar';
 
 const defaultDesign = { line1_sku: true, line2_name: true, line2_price: false, line2_variant_option1: false, line3_vendor: false, symbol_enabled: true, symbol_type: 'BARCODE', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 };
-
+const defaultCustomPaper = {
+    type: 'sheet',
+    paper: {
+        width: '',
+        height: ''
+    },
+    label: {
+        width: '',
+        height: ''
+    },
+    rows: 1,
+    columns: 1,
+    gapX: 0,
+    gapY: 0,
+    marginTop: 0,
+    marginLeft: 0,
+    roll: null
+};
 export default function CreateTemplate() {
     const shopify = useAppBridge();
     const navigate = useNavigate();
@@ -24,6 +41,9 @@ export default function CreateTemplate() {
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
+    const [customPaper, setCustomPaper] = useState(
+        structuredClone(defaultCustomPaper)
+    );
     const [printSettings, setPrintSettings] = useState(null);
     const [design, setDesign] = useState({ ...defaultDesign });
     const [storeVariants, setStoreVariants] = useState([]);
@@ -118,6 +138,7 @@ export default function CreateTemplate() {
                     note: '',
                     brand: '',
                     model: '',
+                    customPaper: structuredClone(defaultCustomPaper),
                     design: structuredClone(initialDesign),
                     selectedVariantId: initialVariant
                 };
@@ -147,6 +168,7 @@ export default function CreateTemplate() {
             note,
             brand,
             model,
+            customPaper,
             design,
             selectedVariantId
         };
@@ -154,7 +176,7 @@ export default function CreateTemplate() {
         const dirty = JSON.stringify(current) !== JSON.stringify(initialStateRef.current);
 
         if (!isDiscardingRef.current) setIsDirty(dirty);
-    }, [name, description, note, brand, model, design, selectedVariantId]);
+    }, [name, description, note, brand, model, design, customPaper, selectedVariantId]);
 
     const handleFieldChange = setter => event => {
         if (isDiscardingRef.current) return;
@@ -204,6 +226,9 @@ export default function CreateTemplate() {
         setNote(initial.note);
         setBrand(initial.brand);
         setModel(initial.model);
+        setCustomPaper(
+            structuredClone(initial.customPaper || defaultCustomPaper)
+        );
         setDesign(structuredClone(initial.design));
         setSelectedVariantId(initial.selectedVariantId);
         setErrorBanner(null);
@@ -269,15 +294,29 @@ export default function CreateTemplate() {
         if (!printRef.current) return;
 
         const qty = Math.max(1, Number(design.print_qty) || 1);
-        const paper = PAPER_TEMPLATES?.[brand]?.[model];
+        const paper =
+            model === 'custom'
+                ? customPaper
+                : PAPER_TEMPLATES?.[brand]?.[model];
 
         if (!paper) {
-            shopify.toast.show('Please select a brand and paper model.', { duration: 5000, isError: true });
+            shopify.toast.show('Please select a paper size.', {
+                duration: 5000,
+                isError: true
+            });
             return;
         }
 
-        if (!paper.label?.width || !paper.label?.height) {
-            shopify.toast.show('Invalid paper template selected.', { duration: 5000, isError: true });
+        if (
+            !paper.paper?.width ||
+            !paper.paper?.height ||
+            !paper.label?.width ||
+            !paper.label?.height
+        ) {
+            shopify.toast.show('Please enter valid paper and label dimensions.', {
+                duration: 5000,
+                isError: true
+            });
             return;
         }
 
@@ -325,7 +364,10 @@ export default function CreateTemplate() {
             return;
         }
 
-        const selectedTemplate = PAPER_TEMPLATES?.[brand]?.[model];
+        const selectedTemplate =
+            model === 'custom'
+                ? customPaper
+                : PAPER_TEMPLATES?.[brand]?.[model];
 
         if (!selectedTemplate) {
             setErrorBanner('Invalid paper template selected.');
@@ -384,6 +426,7 @@ export default function CreateTemplate() {
                 note,
                 brand,
                 model,
+                customPaper: structuredClone(defaultCustomPaper),
                 design: structuredClone(design),
                 selectedVariantId
             };
@@ -403,7 +446,7 @@ export default function CreateTemplate() {
         } finally {
             setLoading(false);
         }
-    }, [name, description, note, brand, model, design, selectedVariantId, loading, navigate, shopify]);
+    }, [name, description, note, brand, model, customPaper, design, selectedVariantId, loading, navigate, shopify]);
 
     return (
         <>
@@ -434,23 +477,28 @@ export default function CreateTemplate() {
                     <s-stack direction="block" gap="base">
                         <div style={{ paddingRight: '340px' }}>
                             <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-                                <s-text-field label="Template Name" value={name} onInput={handleFieldChange(setName)} placeholder="e.g., Standard Dymo Label" />
-                                <s-text-area label="Internal Note" value={note} onInput={handleFieldChange(setNote)} rows={2} />
+                                <s-text-field label="Template Name" value={name} onInput={handleFieldChange(setName)} placeholder="e.g., Standard Dymo Label" details="Enter a name to easily identify this label template."/>
+                                <s-text-area label="Internal Note" value={note} onInput={handleFieldChange(setNote)} rows={2} details="Add a Short note to help you remember details about this template."/>
                             </s-grid>
 
-                            <s-text-area label="Description" value={description} onInput={handleFieldChange(setDescription)} rows={3} />
+                            <s-text-area label="Description" value={description} onInput={handleFieldChange(setDescription)} rows={3} details="Provide a brief description of the template and how it will be used."/>
 
                             <PaperTemplateSettings
                                 brand={brand}
                                 model={model}
+                                customPaper={customPaper}
                                 onBrandChange={value => {
                                     if (isDiscardingRef.current) return;
                                     setBrand(value);
-                                    setModel('');
+                                    setModel(value === 'custom' ? 'custom' : '');
                                 }}
                                 onModelChange={value => {
                                     if (isDiscardingRef.current) return;
                                     setModel(value);
+                                }}
+                                onCustomChange={value => {
+                                    if (isDiscardingRef.current) return;
+                                    setCustomPaper(value);
                                 }}
                             />
 
@@ -470,7 +518,7 @@ export default function CreateTemplate() {
                 </s-section>
             </s-page>
 
-            <div style={{ position: 'fixed', top: '140px', right: '80px', width: '330px', maxHeight: 'calc(100vh - 185px)', overflowY: 'auto', background: '#fff', border: '1px solid #e1e3e5', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', padding: '16px' }}>
+            <div style={{ position: 'fixed', top: '140px', right: '85px', width: '330px', maxHeight: 'calc(100vh - 185px)', overflowY: 'auto', background: '#fff', border: '1px solid #e1e3e5', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', padding: '16px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
                     <div ref={printRef} style={{ minHeight: '220px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>

@@ -1,17 +1,19 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useAppBridge } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 import PaperTemplateSettings, {
     PAPER_TEMPLATES,
-} from "../../components/PaperTemplateSettings";
+} from '../../components/PaperTemplateSettings';
+
 const SAVE_BAR_ID = 'edit-template-savebar';
 
 export default function EditTemplate() {
-
     const shopify = useAppBridge();
     const navigate = useNavigate();
     const { id } = useParams();
+    const initialStateRef = useRef(null);
+    const isDiscardingRef = useRef(false);
 
     const [pageLoading, setPageLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
@@ -22,49 +24,29 @@ export default function EditTemplate() {
     const [note, setNote] = useState('');
     const [brand, setBrand] = useState('');
     const [model, setModel] = useState('');
+    const [customPaper, setCustomPaper] = useState({
+        type: 'sheet',
+        paper: {
+            width: 215.9,
+            height: 279.4,
+        },
+        label: {
+            width: 66.7,
+            height: 25.4,
+        },
+        rows: 1,
+        columns: 1,
+        gapX: 0,
+        gapY: 0,
+        marginTop: 0,
+        marginLeft: 0,
+        roll: null,
+    });
 
     const [errorBanner, setErrorBanner] = useState(null);
     const [originalTemplate, setOriginalTemplate] = useState(null);
     const [design, setDesign] = useState({});
     const [discardSignal, setDiscardSignal] = useState(0);
-
-    // const brandOptions = [
-    //     { label: 'Dymo', value: 'dymo' },
-    //     { label: 'Zebra', value: 'zebra' },
-    //     { label: 'Avery', value: 'avery' }
-    // ];
-
-    // const modelOptionsMap = {
-    //     '': [],
-    //     'dymo': [
-    //         { label: '30334 (Jewelry Label)', value: '30334' },
-    //         { label: '30252 (Address Label)', value: '30252' }
-    //     ],
-    //     'zebra': [
-    //         { label: 'Z-Select 4000D (2" x 1")', value: '4000d-2x1' },
-    //         { label: 'Z-Select 4000D (4" x 6")', value: '4000d-4x6' }
-    //     ],
-    //     'avery': [
-    //         { label: '5160 (Address 30-per-sheet)', value: '5160' },
-    //         { label: '5167 (Return Address)', value: '5167' }
-    //     ]
-    // };
-
-    // const PAPER_TEMPLATES = {
-    //     dymo: {
-    //         "30334": { name: "Jewelry Label", paper: { width: 54, height: 25 }, label: { width: 54, height: 25 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 },
-    //         "30252": { name: "Address Label", paper: { width: 89, height: 36 }, label: { width: 89, height: 36 }, rows: 1, columns: 1, gapX: 0, gapY: 0, marginTop: 0, marginLeft: 0 }
-    //     },
-    //     zebra: {
-    //         "4000d-4x6": { name: "Shipping Label", paper: { width: 101.6, height: 152.4 }, label: { width: 101.6, height: 152.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 },
-    //         "4000d-2x1": { name: "Small Label", paper: { width: 50.8, height: 25.4 }, label: { width: 50.8, height: 25.4 }, rows: 1, columns: 1, gapX: 0, gapY: 0 }
-    //     },
-    //     avery: {
-    //         "5160": { name: "Address", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 25.4 }, rows: 10, columns: 3, gapX: 3.2, gapY: 0, marginTop: 12.7, marginLeft: 4.8 },
-    //         "5167": { name: "ReturnAddress", paper: { width: 215.9, height: 279.4 }, label: { width: 66.7, height: 279.6 }, rows: 10, columns: 3, gapx: 3.2, gapy: 0, marginTop: 12.7, marginLeft: 4.8 }
-    //     }
-    // };
-
 
     useEffect(() => {
         if (isDirty) {
@@ -75,68 +57,221 @@ export default function EditTemplate() {
     }, [isDirty, shopify]);
 
     useEffect(() => {
+        let mounted = true;
+
         async function fetchTemplateData() {
             try {
                 setPageLoading(true);
+
                 const response = await fetch(`/api/templates/${id}`);
                 const result = await response.json();
 
-                if (response.ok && result.success) {
-                    const t = result.data;
-
-                    setOriginalTemplate(t);
-                    setName(t.template_name || "");
-                    setDescription(t.description || "");
-                    setNote(t.note || "");
-                    setBrand(t.paper_brand || "");
-                    setModel(t.paper_model || "");
-                    setIsDirty(false);
-                } else {
-                    setErrorBanner(result.message || "Failed to load template profile details.");
+                if (!response.ok || !result.success) {
+                    setErrorBanner(
+                        result.message || 'Failed to load template profile details.'
+                    );
+                    return;
                 }
+
+                const t = result.data;
+
+                if (!mounted) return;
+
+                setOriginalTemplate(t);
+                setName(t.template_name || '');
+                setDescription(t.description || '');
+                setNote(t.note || '');
+                setBrand(t.paper_brand || '');
+                setModel(t.paper_model || '');
+
+                if (
+                    t.paper_brand === 'custom' &&
+                    t.layout_settings
+                ) {
+                    setCustomPaper(t.layout_settings);
+                }
+
+                initialStateRef.current = {
+                    name: t.template_name || '',
+                    description: t.description || '',
+                    note: t.note || '',
+                    brand: t.paper_brand || '',
+                    model: t.paper_model || '',
+                    customPaper:
+                        t.paper_brand === 'custom' && t.layout_settings
+                            ? structuredClone(t.layout_settings)
+                            : null,
+                    design: null,
+                };
+
+                setIsDirty(false);
+                shopify.saveBar.hide(SAVE_BAR_ID);
             } catch (err) {
-                setErrorBanner("Could not establish communication with the server channel.");
+                if (mounted) {
+                    setErrorBanner(
+                        'Could not establish communication with the server channel.'
+                    );
+                }
             } finally {
-                setPageLoading(false);
+                if (mounted) {
+                    setPageLoading(false);
+                }
             }
         }
+
         fetchTemplateData();
-    }, [id]);
 
-    const handleFieldChange = (setter) => (event) => {
-        setter(event.currentTarget.value);
-        setIsDirty(true);
-    };
+        return () => {
+            mounted = false;
+        };
+    }, [id, shopify]);
 
-    const handleBrandChange = (event) => {
-        setBrand(event.currentTarget.value);
-        setModel(''); // Reset model selection when brand shifts
-        setIsDirty(true);
-    };
+    useEffect(() => {
+        if (!initialStateRef.current || isDiscardingRef.current) {
+            return;
+        }
 
-    const handleDesignChange = (updatedDesign) => {
-        setDesign(updatedDesign);
-        setIsDirty(true);
-    };
+        if (initialStateRef.current.design === null) {
+            return;
+        }
 
-    const handleDiscard = () => {
-        if (!originalTemplate) return;
+        const current = {
+            name,
+            description,
+            note,
+            brand,
+            model,
+            customPaper: brand === 'custom' ? customPaper : null,
+            design,
+        };
 
-        setName(originalTemplate.template_name || "");
-        setDescription(originalTemplate.description || "");
-        setNote(originalTemplate.note || "");
-        setBrand(originalTemplate.paper_brand || "");
-        setModel(originalTemplate.paper_model || "");
+        const dirty =
+            JSON.stringify(current) !==
+            JSON.stringify(initialStateRef.current);
 
-        setDiscardSignal(prev => prev + 1); // tell child to reload
+        if (!isDiscardingRef.current) {
+            setIsDirty(dirty);
+        }
+    }, [
+        name,
+        description,
+        note,
+        brand,
+        model,
+        customPaper,
+        design,
+    ]);
 
-        setIsDirty(false);
+    const handleFieldChange = useCallback(
+        (setter) => (event) => {
+            if (isDiscardingRef.current) return;
+            setter(event.currentTarget.value);
+        },
+        []
+    );
+
+    const handleBrandChange = useCallback((value) => {
+        if (isDiscardingRef.current) return;
+
+        setBrand(value);
+
+        if (value === 'custom') {
+            setModel('custom');
+        } else {
+            setModel('');
+        }
+    }, []);
+
+    const handleModelChange = useCallback((value) => {
+        if (isDiscardingRef.current) return;
+        setModel(value);
+    }, []);
+
+    const handleCustomPaperChange = useCallback((value) => {
+        if (isDiscardingRef.current) return;
+        setCustomPaper(value);
+    }, []);
+
+    const handleDesignChange = useCallback(
+        (updatedDesign, isInitialLoad = false) => {
+            if (isDiscardingRef.current) return;
+
+            setDesign(updatedDesign);
+
+            if (
+                isInitialLoad &&
+                initialStateRef.current
+            ) {
+                initialStateRef.current = {
+                    ...initialStateRef.current,
+                    design: structuredClone(updatedDesign),
+                };
+
+                setIsDirty(false);
+                shopify.saveBar.hide(SAVE_BAR_ID);
+            }
+        },
+        [shopify]
+    );
+
+    const handleDiscard = useCallback(() => {
+        if (!initialStateRef.current) return;
+
+        isDiscardingRef.current = true;
+
+        const initial = initialStateRef.current;
+
+        setName(initial.name);
+        setDescription(initial.description);
+        setNote(initial.note);
+        setBrand(initial.brand);
+        setModel(initial.model);
+
+        if (initial.customPaper) {
+            setCustomPaper(structuredClone(initial.customPaper));
+        }
+
+        if (initial.design) {
+            setDesign(structuredClone(initial.design));
+        }
+
         setErrorBanner(null);
-    };
+        setDiscardSignal((prev) => prev + 1);
+        setIsDirty(false);
+        shopify.saveBar.hide(SAVE_BAR_ID);
+
+        setTimeout(() => {
+            isDiscardingRef.current = false;
+            setIsDirty(false);
+            shopify.saveBar.hide(SAVE_BAR_ID);
+        }, 100);
+    }, [shopify]);
 
     const handleSubmit = useCallback(async () => {
-        if (!name) {
+        if (loading) return;
+
+        if (!name.trim()) {
             setErrorBanner('Template Name is required.');
+            return;
+        }
+
+        if (!brand) {
+            setErrorBanner('Please select a paper brand.');
+            return;
+        }
+
+        if (!model) {
+            setErrorBanner('Please select a paper model.');
+            return;
+        }
+
+        const selectedPaperTemplate =
+            brand === 'custom'
+                ? customPaper
+                : PAPER_TEMPLATES?.[brand]?.[model];
+
+        if (!selectedPaperTemplate) {
+            setErrorBanner('Invalid paper template selected.');
             return;
         }
 
@@ -144,125 +279,232 @@ export default function EditTemplate() {
         setErrorBanner(null);
 
         try {
-            const selectedPaperTemplate = PAPER_TEMPLATES?.[brand]?.[model] || {};
             const response = await fetch(`/api/templates/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
                 body: JSON.stringify({
                     template_name: name,
-                    description: description,
-                    note: note,
+                    description,
+                    note,
                     paper_brand: brand,
                     paper_model: model,
                     layout_settings: selectedPaperTemplate,
                 }),
             });
 
-            if (Object.keys(design).length > 0) {
-                await fetch(`/api/templates/design/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(design),
-                });
-            }
-
             const result = await response.json();
 
-            if (response.ok && result.success) {
-                shopify.toast.show('Template updated successfully!');
-                setIsDirty(false);
-
-                setTimeout(() => {
-                    navigate('/TemplateList');
-                }, 1500);
-            } else {
-                setErrorBanner(result.message || 'Failed to update template.');
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || 'Failed to update template.'
+                );
             }
+
+            if (Object.keys(design).length > 0) {
+                const designResponse = await fetch(
+                    `/api/templates/design/${id}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Accept: 'application/json',
+                        },
+                        body: JSON.stringify(design),
+                    }
+                );
+
+                const designResult =
+                    await designResponse.json().catch(() => null);
+
+                if (
+                    !designResponse.ok ||
+                    designResult?.success === false
+                ) {
+                    throw new Error(
+                        designResult?.message ||
+                        'Template was updated, but the design could not be saved.'
+                    );
+                }
+            }
+
+            initialStateRef.current = {
+                name,
+                description,
+                note,
+                brand,
+                model,
+                customPaper:
+                    brand === 'custom'
+                        ? structuredClone(customPaper)
+                        : null,
+                design: structuredClone(design),
+            };
+
+            isDiscardingRef.current = true;
+
+            setOriginalTemplate((prev) => ({
+                ...prev,
+                template_name: name,
+                description,
+                note,
+                paper_brand: brand,
+                paper_model: model,
+                layout_settings: selectedPaperTemplate,
+            }));
+
+            setIsDirty(false);
+            shopify.saveBar.hide(SAVE_BAR_ID);
+            shopify.toast.show('Template updated successfully!');
+            navigate('/TemplateList');
         } catch (error) {
-            setErrorBanner('A server error occurred while executing the update.');
+            console.error('Update template error:', error);
+
+            setErrorBanner(
+                error.message ||
+                'A server error occurred while executing the update.'
+            );
+
+            setIsDirty(true);
+            shopify.saveBar.show(SAVE_BAR_ID);
         } finally {
             setLoading(false);
         }
-    }, [id, name, description, note, brand, model, design, navigate, shopify]);
+    }, [
+        id,
+        name,
+        description,
+        note,
+        brand,
+        model,
+        customPaper,
+        design,
+        loading,
+        navigate,
+        shopify,
+    ]);
 
     if (pageLoading) {
         return (
             <s-page heading="Edit Template">
                 <s-box padding="loose" alignContent="center">
-                    <s-spinner accessibilityLabel="Syncing template profile details" size="large" />
+                    <s-spinner
+                        accessibilityLabel="Syncing template profile details"
+                        size="large"
+                    />
                 </s-box>
             </s-page>
         );
     }
 
+    const selectedPaperTemplate =
+        brand === 'custom'
+            ? customPaper
+            : PAPER_TEMPLATES?.[brand]?.[model] || null;
+
     return (
         <>
             <ui-save-bar id={SAVE_BAR_ID}>
-                <button variant="primary" loading={loading ? "" : undefined} onClick={handleSubmit}>
-                    Save
+                <button
+                    type="button"
+                    variant="primary"
+                    disabled={loading}
+                    onClick={handleSubmit}
+                >
+                    {loading ? 'Saving…' : 'Save template'}
                 </button>
-                <button onClick={handleDiscard}>Discard</button>
+
+                <button
+                    type="button"
+                    disabled={loading}
+                    onClick={handleDiscard}
+                >
+                    Discard
+                </button>
             </ui-save-bar>
 
             <s-page heading={`Edit Template: ${name}`}>
                 <s-box paddingBlockStart="base">
-                    <s-stack direction="inline" gap="small">
+                    <s-stack
+                        direction="inline"
+                        gap="small"
+                        alignItems="center"
+                    >
+                        <s-link
+                            href="/TemplateList"
+                            tone="neutral"
+                        >
+                            <s-icon type="arrow-left" />
+                        </s-link>
 
-                        <s-stack direction="inline" gap="small" alignItems="center">
-                            <s-link href="/TemplateList" tone="neutral">
-                                <s-icon type="arrow-left" />
-                            </s-link>
-                            <span style={{ fontSize: '17px', fontWeight: 700 }}>
-                                Back to Template List
-                            </span>
-                        </s-stack>
-
+                        <span
+                            style={{
+                                fontSize: '17px',
+                                fontWeight: 700,
+                            }}
+                        >
+                            Back to Template List
+                        </span>
                     </s-stack>
                 </s-box>
-                <s-box paddingBlockStart="base"></s-box>
+
+                <s-box paddingBlockStart="base" />
 
                 <s-section>
                     {errorBanner && (
-                        <s-banner tone="critical" onDismiss={() => setErrorBanner(null)}>
+                        <s-banner
+                            tone="critical"
+                            onDismiss={() =>
+                                setErrorBanner(null)
+                            }
+                        >
                             {errorBanner}
                         </s-banner>
                     )}
 
-                    <s-stack direction="block" gap="base">
-                        <div style={{ paddingRight: "340px" }}>
-                            <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                    <s-stack
+                        direction="block"
+                        gap="base"
+                    >
+                        <div style={{ paddingRight: '340px' }}>
+                            <s-grid
+                                gridTemplateColumns="1fr 1fr"
+                                gap="base"
+                            >
                                 <s-text-field
                                     label="Template Name"
                                     value={name}
                                     onInput={handleFieldChange(setName)}
+                                    details="Enter a name to easily identify this label template."
                                 />
+
                                 <s-text-area
                                     label="Internal Note"
                                     value={note}
                                     onInput={handleFieldChange(setNote)}
                                     rows={2}
+                                    details="Add a Short note to help you remember details about this template."
                                 />
                             </s-grid>
+
                             <s-text-area
                                 label="Description"
                                 value={description}
                                 onInput={handleFieldChange(setDescription)}
                                 rows={3}
+                                details="Provide a brief description of the template and how it will be used."
                             />
 
                             <PaperTemplateSettings
                                 brand={brand}
                                 model={model}
-                                onBrandChange={(value) => {
-                                    setBrand(value);
-                                    setIsDirty(true);
-                                }}
-                                onModelChange={(value) => {
-                                    setModel(value);
-                                    setIsDirty(true);
-                                }}
+                                customPaper={customPaper}
+                                onBrandChange={handleBrandChange}
+                                onModelChange={handleModelChange}
+                                onCustomChange={handleCustomPaperChange}
                             />
-
                         </div>
                     </s-stack>
 
@@ -272,7 +514,7 @@ export default function EditTemplate() {
                             discardSignal={discardSignal}
                             onChange={handleDesignChange}
                             onDirty={() => { }}
-                            paperTemplate={PAPER_TEMPLATES?.[brand]?.[model] || null}
+                            paperTemplate={selectedPaperTemplate}
                         />
                     </s-box>
                 </s-section>

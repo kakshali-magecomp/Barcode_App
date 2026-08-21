@@ -354,7 +354,31 @@ export default function GenerateBarcode() {
             return;
         }
 
-        const labels = [];
+        const paper = templateDesign?.layout_settings;
+
+        if (!paper || !paper.label) {
+            console.error("Invalid layout settings:", paper);
+
+            shopify.toast.show(
+                "This template does not have valid paper settings."
+            );
+
+            return;
+        }
+
+        const rows = Math.max(
+            1,
+            Number(paper.rows) || 1
+        );
+
+        const columns = Math.max(
+            1,
+            Number(paper.columns) || 1
+        );
+
+        const labelsPerSheet = rows * columns;
+
+        const allLabels = [];
 
         selectedProducts.forEach((product) => {
             const printLabel = document.getElementById(
@@ -365,6 +389,7 @@ export default function GenerateBarcode() {
                 console.warn(
                     `Print label not found for variant ${product.variant_id}`
                 );
+
                 return;
             }
 
@@ -376,7 +401,7 @@ export default function GenerateBarcode() {
             const labelHtml = printLabel.innerHTML;
 
             for (let i = 0; i < qty; i++) {
-                labels.push(`
+                allLabels.push(`
                 <div class="label">
                     <div class="label-content">
                         ${labelHtml}
@@ -386,19 +411,69 @@ export default function GenerateBarcode() {
             }
         });
 
-        if (!labels.length) {
+        if (!allLabels.length) {
             shopify.toast.show("No labels available to print.");
             return;
         }
 
-        const bodyHtml = labels.join("");
+        /*
+         * IMPORTANT:
+         * Group labels into actual sheets.
+         *
+         * Example:
+         * rows = 10
+         * columns = 3
+         * labelsPerSheet = 30
+         *
+         * Every .print-sheet contains maximum 30 labels.
+         */
 
-        openPrintWindow({
+        const sheets = [];
+
+        for (
+            let start = 0;
+            start < allLabels.length;
+            start += labelsPerSheet
+        ) {
+            const sheetLabels = allLabels.slice(
+                start,
+                start + labelsPerSheet
+            );
+
+            sheets.push(`
+            <div class="print-sheet">
+                ${sheetLabels.join("")}
+            </div>
+        `);
+        }
+
+        const bodyHtml = sheets.join("");
+
+        console.log("========== PRINT SETTINGS ==========");
+        console.log("Paper:", paper);
+        console.log("Rows:", rows);
+        console.log("Columns:", columns);
+        console.log("Labels per sheet:", labelsPerSheet);
+        console.log("Total labels:", allLabels.length);
+        console.log("Total sheets:", sheets.length);
+        console.log("====================================");
+
+        const success = openPrintWindow({
             bodyHtml,
-            paperTemplate: templateDesign.layout_settings,
+            paperTemplate: paper,
             useJsBarcodeScript: true,
             onAfterPrint: savePrintHistory,
         });
+
+        if (!success) {
+            shopify.toast.show(
+                "Failed to open print window. Please allow popups for this website.",
+                {
+                    duration: 5000,
+                    isError: true,
+                }
+            );
+        }
     };
 
     const getSymbolValue = (product) => {
@@ -678,7 +753,6 @@ export default function GenerateBarcode() {
                         }));
 
                         setSelectedProducts(productsWithQty);
-
                         setPreviewItem(prev => prev || productsWithQty[0] || null);
                         setPickerOpen(false);
                     }}
