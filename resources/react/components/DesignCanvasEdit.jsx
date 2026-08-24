@@ -42,7 +42,7 @@ export default function DesignCanvasEdit({
     const [selectedVariantId, setSelectedVariantId] = useState("");
     const [printSettings, setPrintSettings] = useState({});
     const [barcodeSettings, setBarcodeSettings] = useState({});
-
+    const [currencyCode, setCurrencyCode] = useState('USD');
     const initialLoadCompleted = useRef(false);
 
     useEffect(() => {
@@ -52,7 +52,7 @@ export default function DesignCanvasEdit({
     async function loadDesign() {
         try {
             setLoading(true);
-            const [ templateRes, productRes, settingRes, barcodeRes,
+            const [templateRes, productRes, settingRes, barcodeRes,
             ] = await Promise.all([
                 fetch(`/api/templates/design/${templateId}`),
                 fetch(`/api/products`),
@@ -64,6 +64,8 @@ export default function DesignCanvasEdit({
             const products = await productRes.json();
             const settings = await settingRes.json();
             const barcode = await barcodeRes.json();
+            const storeCurrency = products.currency_code || 'USD';
+            setCurrencyCode(storeCurrency);
 
             if (barcode.success) {
                 setBarcodeSettings(
@@ -88,11 +90,15 @@ export default function DesignCanvasEdit({
                         defaultQty,
                 };
                 if (loadedDesign.line2_currency_format) {
+                    const cleaned = loadedDesign.line2_currency_format
+                        .replace(/\{\{amount\}\}/gi, "{amount}")
+                        .replace(/\$amount/gi, "${amount}")
+                        .trim();
                     loadedDesign.line2_currency_format =
-                        loadedDesign.line2_currency_format
-                            .replace(/\{\{amount\}\}/gi, "{amount}")
-                            .replace(/\$amount/gi, "${amount}")
-                            .trim();
+                        cleaned === "${amount}" || cleaned === "{amount}" ? "" : cleaned;
+                }
+                if (!loadedDesign.line2_currency_format || loadedDesign.line2_currency_format.trim() === '') {
+                    loadedDesign.line2_currency_format = settings?.settings?.currency_format ?? 'without_currency';
                 }
 
                 setDesign(loadedDesign);
@@ -378,22 +384,34 @@ export default function DesignCanvasEdit({
             .replace(/\$\{amount\}\}/gi, "{amount} USD");
 
         if (templateFormat.includes("{amount}")) {
-            return templateFormat.replace(
-                /{amount}/g,
-                amount
-            );
+            return templateFormat.replace(/{amount}/g, amount);
+        }
+
+        const ENUM_TOKENS = ["without_currency", "with_currency", "currency_code"];
+        const isEnumToken = ENUM_TOKENS.includes(templateFormat.toLowerCase());
+
+        if (templateFormat && !isEnumToken) {
+            return `${templateFormat} ${amount}`;
         }
 
         const globalFormat =
-            printSettings?.currency_format ??
-            "without_currency";
+            isEnumToken ? templateFormat.toLowerCase() : (printSettings?.currency_format ?? "without_currency");
+
+        const currency = currencyCode || 'USD';
+        const locale = currency === 'INR' ? 'en-IN' : 'en';
 
         if (globalFormat === "currency_code") {
-            return `${amount} USD`;
+            return `${amount} ${currency}`;
         }
 
         if (globalFormat === "with_currency") {
-            return `$${amount}`;
+            return new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency,
+                currencyDisplay: 'symbol',
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            }).format(priceWithVat);
         }
 
         return amount;
@@ -449,7 +467,7 @@ export default function DesignCanvasEdit({
                                     vendor: selected.vendor,
                                     option_1:
                                         selected.variant_title !==
-                                        "Default Title"
+                                            "Default Title"
                                             ? selected.variant_title
                                             : "",
                                     online_url:
@@ -467,10 +485,9 @@ export default function DesignCanvasEdit({
                                     key={item.variant_id}
                                     value={item.variant_id}
                                 >
-                                    {`${item.product_title} (${
-                                        item.barcode ||
+                                    {`${item.product_title} (${item.barcode ||
                                         "No barcode"
-                                    })`}
+                                        })`}
                                 </s-option>
                             ))}
                         </s-select>
@@ -587,7 +604,7 @@ export default function DesignCanvasEdit({
 
                                 {design.symbol_enabled &&
                                     (design.symbol_type ===
-                                    "BARCODE" ? (
+                                        "BARCODE" ? (
                                         <BarcodeRenderer
                                             value={getSymbolTargetValue()}
                                             settings={design}

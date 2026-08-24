@@ -9,6 +9,10 @@ class ShopifyQueryHelper
     {
         return <<<'GRAPHQL'
     {
+        shop {
+            currencyCode
+        }
+
         products(first: 100) {
             edges {
                 node {
@@ -16,13 +20,12 @@ class ShopifyQueryHelper
                     title
                     vendor
                     productType
-                    handle        
-                    onlineStoreUrl 
+                    handle
+                    onlineStoreUrl
                     status
-
-                    metafields(first: 100){
-                        edges{
-                            node{
+                    metafields(first: 100) {
+                        edges {
+                            node {
                                 namespace
                                 key
                                 value
@@ -33,9 +36,11 @@ class ShopifyQueryHelper
                             }
                         }
                     }
+
                     featuredImage {
                         url
                     }
+
                     variants(first: 100) {
                         edges {
                             node {
@@ -44,9 +49,11 @@ class ShopifyQueryHelper
                                 price
                                 sku
                                 barcode
-                                 inventoryItem {
+
+                                inventoryItem {
                                     id
                                 }
+
                                 selectedOptions {
                                     name
                                     value
@@ -61,6 +68,57 @@ class ShopifyQueryHelper
     GRAPHQL;
     }
 
+    public static function showProductWithContextualPricing(string $country): string
+    {
+        return <<<GRAPHQL
+    {
+        products(first: 100) {
+            edges {
+                node {
+                    id
+                    title
+                    vendor
+                    productType
+                    handle
+                    status
+
+                    featuredImage {
+                        url
+                    }
+
+                    variants(first: 100) {
+                        edges {
+                            node {
+                                id
+                                title
+                                price
+                                sku
+                                barcode
+
+                                contextualPricing(context: { country: {$country} }) {
+                                    price {
+                                        amount
+                                        currencyCode
+                                    }
+                                }
+
+                                inventoryItem {
+                                    id
+                                }
+
+                                selectedOptions {
+                                    name
+                                    value
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    GRAPHQL;
+    }
     public static function updateInventoryItem(): string
     {
         return <<<'GRAPHQL'

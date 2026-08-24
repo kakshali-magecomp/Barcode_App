@@ -21,10 +21,27 @@ class ShopifyProductController extends Controller
                 return response()->json(["status" => 0, "error" => "Unauthenticated"], 401);
             }
 
-            $query = ShopifyQueryHelper::showproduct();
+            $barcodeSetting = $shop->barcodeSetting()->firstOrCreate([]);
+
+            $contextualPricingValue = strtoupper(
+                trim($barcodeSetting->contextual_pricing_value ?? '')
+            );
+
+            if ($contextualPricingValue && preg_match('/^[A-Z]{2}$/', $contextualPricingValue)) {
+                $query = ShopifyQueryHelper::showProductWithContextualPricing(
+                    $contextualPricingValue
+                );
+            } else {
+                $query = ShopifyQueryHelper::showproduct();
+            }
+
             $rawResponse = $shop->api()->graph($query);
+
             $responseArray = json_decode(json_encode($rawResponse), true);
-            // Load all PRODUCT metafield definitions
+            $currencyCode =
+                $responseArray['body']['container']['data']['shop']['currencyCode']
+                ?? $responseArray['body']['data']['shop']['currencyCode']
+                ?? 'USD';
             $definitionsQuery = ShopifyQueryHelper::metafieldDefinitions();
             $definitionsRaw = $shop->api()->graph($definitionsQuery);
             $definitionsResponse = json_decode(json_encode($definitionsRaw), true);
@@ -93,7 +110,12 @@ class ShopifyProductController extends Controller
                             'variant_title' => $variant['title'] ?? '',
                             'current_sku' => $variant['sku'] ?? '',
                             'barcode' => $variant['barcode'] ?? '',
-                            'price' => $variant['price'] ?? '0.00',
+                            'price' => $variant['contextualPricing']['price']['amount']
+                                ?? $variant['price']
+                                ?? '0.00',
+
+                            'currency_code' => $variant['contextualPricing']['price']['currencyCode']
+                                ?? $currencyCode,
                             'image' => $finalImage,
                             'option_1' => $options[0]['value'] ?? '',
                             'option_2' => $options[1]['value'] ?? '',
@@ -111,6 +133,7 @@ class ShopifyProductController extends Controller
                 "variants" => $flattenedVariants,
                 "sku_rules" => $skuSettings,
                 "metafield_options" => $metafieldOptions,
+                "currency_code" => $currencyCode,
             ]);
 
         } catch (\Exception $e) {

@@ -475,7 +475,7 @@ export default function SettingsIndex() {
                     <PrintPanel
                         settings={printSettings}
                         templates={dbTemplates}
-                        onChange={handleSettingChange}
+                        onChange={handleSettingChange}                  
                     />
                 )}
             </s-page>

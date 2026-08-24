@@ -10,7 +10,7 @@ import { openPrintWindow } from '../../components/Printlayout';
 
 const SAVE_BAR_ID = 'create-template-save-bar';
 
-const defaultDesign = { line1_sku: true, line2_name: true, line2_price: false, line2_variant_option1: false, line3_vendor: false, symbol_enabled: true, symbol_type: 'BARCODE', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 };
+const defaultDesign = { line1_sku: true, line2_name: true, line2_price: false, line2_currency_format: 'without_currency', line2_variant_option1: false, line3_vendor: false, symbol_enabled: true, symbol_type: 'BARCODE', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 };
 const defaultCustomPaper = {
     type: 'sheet',
     paper: {
@@ -45,6 +45,7 @@ export default function CreateTemplate() {
         structuredClone(defaultCustomPaper)
     );
     const [printSettings, setPrintSettings] = useState(null);
+    const [currencyCode, setCurrencyCode] = useState('USD');
     const [design, setDesign] = useState({ ...defaultDesign });
     const [storeVariants, setStoreVariants] = useState([]);
     const [selectedVariantId, setSelectedVariantId] = useState('');
@@ -52,6 +53,7 @@ export default function CreateTemplate() {
     const [isDirty, setIsDirty] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errorBanner, setErrorBanner] = useState(null);
+    const [pageLoading, setPageLoading] = useState(true);
 
     const [previewItem, setPreviewItem] = useState({
         title: 'Sample Item',
@@ -84,31 +86,48 @@ export default function CreateTemplate() {
 
                 const products = await productRes.json();
                 const barcode = await barcodeRes.json();
+                console.log('BARCODE SETTINGS RESPONSE:', barcode);
                 const print = await printRes.json();
+                const storeCurrency = products.currency_code || 'USD';
+
+                if (mounted) {
+                    setCurrencyCode(storeCurrency);
+                }
 
                 let initialDesign = { ...defaultDesign };
                 let initialVariant = '';
 
-                if (barcode.success) {
-                    setBarcodeSettings(barcode.settings || barcode.data || barcode);
+                let barcodeData = null;
+                if (barcode && barcode.id) {
+                    barcodeData = barcode.settings || barcode.data || barcode;
+                    setBarcodeSettings(barcodeData);
+
+                    initialDesign = {
+                        ...initialDesign,
+                        barcode_format: barcodeData?.barcode_format || 'CODE128'
+                    };
                 }
 
                 if (print.success) {
                     setPrintSettings(print.settings);
 
-                    const format = print.settings.currency_format === 'with_currency'
-                        ? '${amount}'
-                        : print.settings.currency_format === 'currency_code'
-                            ? '{amount} USD'
-                            : '{amount}';
-
                     initialDesign = {
                         ...initialDesign,
-                        print_qty: print.settings.default_print_label_quantity || 1,
-                        line2_currency_format: format
+
+                        print_qty:
+                            print.settings.default_print_label_quantity || 1,
+
+                        currency_code:
+                            products.currency_code || 'USD',
+
+                        line2_currency_format:
+                            print.settings.currency_format ||
+                            'without_currency'
                     };
 
-                    if (mounted) setDesign(initialDesign);
+                    if (mounted) {
+                        setDesign(initialDesign);
+                    }
                 }
 
                 if (products.status === 1 && products.variants?.length) {
@@ -146,9 +165,11 @@ export default function CreateTemplate() {
                 if (mounted) {
                     setIsDirty(false);
                     shopify.saveBar.hide(SAVE_BAR_ID);
+                    setPageLoading(false);
                 }
             } catch (error) {
                 console.error('Failed to load template data:', error);
+                if (mounted) setPageLoading(false);
             }
         }
 
@@ -259,17 +280,73 @@ export default function CreateTemplate() {
         }, 100);
     }, [storeVariants, shopify]);
 
+    const getCurrencySymbol = useCallback((currency) => {
+        try {
+            return new Intl.NumberFormat('en', {
+                style: 'currency',
+                currency,
+                currencyDisplay: 'narrowSymbol'
+            })
+                .formatToParts(0)
+                .find(part => part.type === 'currency')?.value || currency;
+        } catch {
+            return currency;
+        }
+    }, []);
+
     const formatPreviewPrice = useCallback(() => {
-        const decimals = Number(printSettings?.price_decimal_number ?? 2);
+        const decimals = Number(
+            printSettings?.price_decimal_number ?? 2
+        );
+
         let price = Number(previewItem?.price ?? 0);
 
         if (price > 999) price /= 100;
 
-        const vat = Number(printSettings?.vat_percentage ?? 0);
-        const amount = (price + (price * vat) / 100).toFixed(decimals);
+        const vat = Number(
+            printSettings?.vat_percentage ?? 0
+        );
 
-        return (design.line2_currency_format || '{amount}').replace('{amount}', amount);
-    }, [printSettings, previewItem?.price, design.line2_currency_format]);
+        const amount =
+            price + (price * vat) / 100;
+
+        const number = new Intl.NumberFormat('en', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }).format(amount);
+
+        const currency =
+            design.currency_code ||
+            currencyCode ||
+            'USD';
+
+        const currencyFormat =
+            design.line2_currency_format ||
+            printSettings?.currency_format ||
+            'without_currency';
+
+        if (currencyFormat === 'currency_code') {
+            return `${number} ${currency}`;
+        }
+
+        if (currencyFormat === 'with_currency') {
+            return new Intl.NumberFormat('en', {
+                style: 'currency',
+                currency,
+                currencyDisplay: 'symbol',
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }).format(amount);
+        }
+
+        return number;
+    }, [
+        printSettings,
+        previewItem?.price,
+        design.currency_code,
+        design.line2_currency_format,
+        currencyCode
+    ]);
 
     const getSymbolTargetValue = useCallback(() => {
         switch (design.symbol_field_source) {
@@ -401,7 +478,13 @@ export default function CreateTemplate() {
             }
 
             const newId = createResult.data.id;
-
+            const resolvedDesign = {
+                ...design,
+                line2_currency_format:
+                    design.line2_currency_format ||
+                    printSettings?.currency_format ||
+                    'without_currency',
+            };
             const designRes = await fetch(`/api/templates/design/${newId}`, {
                 method: 'PUT',
                 headers: {
@@ -409,7 +492,7 @@ export default function CreateTemplate() {
                     Accept: 'application/json'
                 },
                 body: JSON.stringify({
-                    ...design,
+                    ...resolvedDesign,
                     selected_variant_id: selectedVariantId
                 })
             });
@@ -448,6 +531,19 @@ export default function CreateTemplate() {
         }
     }, [name, description, note, brand, model, customPaper, design, selectedVariantId, loading, navigate, shopify]);
 
+    if (pageLoading) {
+        return (
+            <s-page heading="Create Barcode Template">
+                <s-box padding="loose" alignContent="center">
+                    <s-spinner
+                        accessibilityLabel="Loading template data"
+                        size="large"
+                    />
+                </s-box>
+            </s-page>
+        );
+    }
+
     return (
         <>
             <ui-save-bar id={SAVE_BAR_ID}>
@@ -477,11 +573,11 @@ export default function CreateTemplate() {
                     <s-stack direction="block" gap="base">
                         <div style={{ paddingRight: '340px' }}>
                             <s-grid gridTemplateColumns="1fr 1fr" gap="base">
-                                <s-text-field label="Template Name" value={name} onInput={handleFieldChange(setName)} placeholder="e.g., Standard Dymo Label" details="Enter a name to easily identify this label template."/>
-                                <s-text-area label="Internal Note" value={note} onInput={handleFieldChange(setNote)} rows={2} details="Add a Short note to help you remember details about this template."/>
+                                <s-text-field label="Template Name" value={name} onInput={handleFieldChange(setName)} placeholder="e.g., Standard Dymo Label" details="Enter a name to easily identify this label template." />
+                                <s-text-area label="Internal Note" value={note} onInput={handleFieldChange(setNote)} rows={2} details="Add a Short note to help you remember details about this template." />
                             </s-grid>
 
-                            <s-text-area label="Description" value={description} onInput={handleFieldChange(setDescription)} rows={3} details="Provide a brief description of the template and how it will be used."/>
+                            <s-text-area label="Description" value={description} onInput={handleFieldChange(setDescription)} rows={3} details="Provide a brief description of the template and how it will be used." />
 
                             <PaperTemplateSettings
                                 brand={brand}

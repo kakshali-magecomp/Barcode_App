@@ -26,6 +26,7 @@ export default function LabelHistory() {
   const [selectedRows, setSelectedRows] = useState([]);
   const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
+  const [currencyCode, setCurrencyCode] = useState('USD');
 
   useEffect(() => {
     setCurrentPage(1);
@@ -53,6 +54,19 @@ export default function LabelHistory() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
+
+  useEffect(() => {
+    async function loadStoreCurrency() {
+      try {
+        const res = await fetch("/api/products");
+        const json = await res.json();
+        setCurrencyCode(json.currency_code || 'USD');
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    loadStoreCurrency();
+  }, []);
 
   useEffect(() => {
     let result = histories;
@@ -534,6 +548,7 @@ th{background:#f5f5f5;}
                 online_url: item.online_url,
               }}
               barcodeSettings={item.template_settings || {}}
+
               formatPrice={(product) => {
                 const settings = item.template_settings || {};
 
@@ -559,18 +574,47 @@ th{background:#f5f5f5;}
 
                 const amount = priceWithVat.toFixed(decimals);
 
-                let format =
-                  settings.line2_currency_format ||
-                  "{amount}";
+                let format = String(
+                  settings.line2_currency_format ?? ""
+                ).trim();
 
                 format = format
                   .replace(/\{\{amount\}\}/gi, "{amount}")
                   .replace(/\$amount/gi, "${amount}");
 
-                return format.replace(
-                  /\{amount\}/gi,
-                  amount
-                );
+                // Placeholder-style custom format (e.g. "Rs. {amount}")
+                if (format.includes("{amount}")) {
+                  return format.replace(/\{amount\}/gi, amount);
+                }
+
+                // Enum tokens saved from Print Settings / template currencyOptions
+                const ENUM_TOKENS = ["without_currency", "with_currency", "currency_code"];
+                const isEnumToken = ENUM_TOKENS.includes(format.toLowerCase());
+
+                // Plain custom text prefix (e.g. "Rs.", "$") with no placeholder
+                if (format && !isEnumToken) {
+                  return `${format} ${amount}`;
+                }
+
+                const resolvedFormat = isEnumToken ? format.toLowerCase() : "without_currency";
+                const currency = currencyCode || 'USD';
+                const locale = currency === 'INR' ? 'en-IN' : 'en';
+
+                if (resolvedFormat === "currency_code") {
+                  return `${amount} ${currency}`;
+                }
+
+                if (resolvedFormat === "with_currency") {
+                  return new Intl.NumberFormat(locale, {
+                    style: 'currency',
+                    currency,
+                    currencyDisplay: 'symbol',
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals,
+                  }).format(priceWithVat);
+                }
+
+                return amount;
               }}
               printMode={true}
             />

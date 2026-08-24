@@ -1,5 +1,5 @@
 import React from 'react';
-
+import CurrencyFormatSelect from './CurrencyFormatSelect';
 export default function LineControls({ design, handleUpdate }) {
 
     return (
@@ -36,13 +36,27 @@ export default function LineControls({ design, handleUpdate }) {
                             handleUpdate("line2_price", e.currentTarget.checked)
                         }
                     />
-
                     {design.line2_price && (
-                        <div style={{ padding: '12px', backgroundColor: '#f1f2f4', borderRadius: '4px' }}>
-                            <s-text-field
+                        <div
+                            style={{
+                                padding: '12px',
+                                backgroundColor: '#f1f2f4',
+                                borderRadius: '4px'
+                            }}
+                        >
+                            <CurrencyFormatSelect
+                                value={
+                                    design.line2_currency_format ||
+                                    'without_currency'
+                                }
+                                onChange={(value) =>
+                                    handleUpdate(
+                                        'line2_currency_format',
+                                        value
+                                    )
+                                }
                                 label="Currency Format"
-                                value={design.line2_currency_format}
-                                onInput={(e) => handleUpdate('line2_currency_format', e.currentTarget.value)}
+                                details="Select the currency format for this template."
                             />
                         </div>
                     )}

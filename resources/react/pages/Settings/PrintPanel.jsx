@@ -1,24 +1,24 @@
 import React from 'react';
-
+import CurrencyFormatSelect from '../../components/CurrencyFormatSelect';
 export default function PrintPanel({
     settings = {},
     templates = [],
     onChange,
 }) {
-    const currencyOptions = [
-        {
-            label: 'Without currency (e.g. 10.00)',
-            value: 'without_currency',
-        },
-        {
-            label: 'With currency (e.g. $10.00)',
-            value: 'with_currency',
-        },
-        {
-            label: 'Currency code (e.g. 10.00 USD)',
-            value: 'currency_code',
-        },
-    ];
+    // const currencyOptions = [
+    //     {
+    //         label: 'Without currency (e.g. 10.00)',
+    //         value: 'without_currency',
+    //     },
+    //     {
+    //         label: 'With currency (e.g. $10.00)',
+    //         value: 'with_currency',
+    //     },
+    //     {
+    //         label: 'Currency code (e.g. 10.00 USD)',
+    //         value: 'currency_code',
+    //     },
+    // ];
 
     const generateOptions = [
         {
@@ -65,32 +65,17 @@ export default function PrintPanel({
                                     : parseInt(val) || 0
                             );
                         }}
-                        details="Leave blank to round automatic"
+                        details="Set the number of decimal places shown for product prices."
                     />
 
-                    <s-select
+                    <CurrencyFormatSelect
+                        value={settings.currency_format}
+                        onChange={(value) =>
+                            onChange('currency_format', value)
+                        }
                         label="Currency Format"
-                        value={
-                            settings.currency_format ||
-                            'without_currency'
-                        }
-                        onChange={(e) =>
-                            onChange(
-                                'currency_format',
-                                e.currentTarget.value
-                            )
-                        }
-                        details="This configuration is following the Setting of Shopify here"
-                    >
-                        {currencyOptions.map((opt) => (
-                            <s-option
-                                key={opt.value}
-                                value={opt.value}
-                            >
-                                {opt.label}
-                            </s-option>
-                        ))}
-                    </s-select>
+                        details="Select how the currency should be displayed on printed labels."
+                    />
                 </s-grid>
 
                 <s-select
@@ -105,6 +90,7 @@ export default function PrintPanel({
                             e.currentTarget.value
                         )
                     }
+                    details="Select the default method for barcode generation."
                 >
                     {generateOptions.map((opt) => (
                         <s-option
@@ -140,11 +126,11 @@ export default function PrintPanel({
                                     : parseInt(val) || 1
                             );
                         }}
-                        details="Leave blank to match inventory quantity"
+                        details="Set the default number of labels to print."
                     />
 
                     <s-text-field
-                        label="VAT Percentage"
+                        label="Tax Percentage"
                         type="number"
                         suffix="%"
                         value={
@@ -162,7 +148,7 @@ export default function PrintPanel({
                                     : parseFloat(val) || 0.00
                             );
                         }}
-                        details="A combination of both original Price and VAT."
+                        details="Enter the tax percentage to include in the displayed price."
                     />
                 </s-grid>
 

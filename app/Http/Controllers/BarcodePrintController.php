@@ -66,27 +66,27 @@ class BarcodePrintController extends Controller
         $symbolValue = trim((string) $symbolValue);
         if ($barcodeFormat === 'UPCA') {
 
-    $digits = preg_replace('/\D/', '', $symbolValue);
+            $digits = preg_replace('/\D/', '', $symbolValue);
 
-    if (strlen($digits) == 11) {
+            if (strlen($digits) == 11) {
 
-        $sum = 0;
+                $sum = 0;
 
-        for ($i = 0; $i < 11; $i++) {
+                for ($i = 0; $i < 11; $i++) {
 
-            if ($i % 2 == 0) {
-                $sum += intval($digits[$i]) * 3;
-            } else {
-                $sum += intval($digits[$i]);
+                    if ($i % 2 == 0) {
+                        $sum += intval($digits[$i]) * 3;
+                    } else {
+                        $sum += intval($digits[$i]);
+                    }
+
+                }
+
+                $checkDigit = (10 - ($sum % 10)) % 10;
+
+                $symbolValue = $digits . $checkDigit;
             }
-
         }
-
-        $checkDigit = (10 - ($sum % 10)) % 10;
-
-        $symbolValue = $digits . $checkDigit;
-    }
-}
 
         if ($symbolValue === '') {
             $symbolValue = 'EMPTY';
@@ -100,52 +100,52 @@ class BarcodePrintController extends Controller
 
                 $generator = new BarcodeGeneratorPNG();
 
-$widthMultiplier = (int)($design['symbol_bar_width'] ?? 2);
-$heightMm = (int)($design['symbol_bar_height'] ?? 45);
+                $widthMultiplier = (int) ($design['symbol_bar_width'] ?? 2);
+                $heightMm = (int) ($design['symbol_bar_height'] ?? 45);
 
-$barcodeFormat = strtoupper($design['barcode_format'] ?? 'CODE128');
+                $barcodeFormat = strtoupper($design['barcode_format'] ?? 'CODE128');
 
-switch ($barcodeFormat) {
+                switch ($barcodeFormat) {
 
-    case 'UPCA':
-        $barcodeType = $generator::TYPE_UPC_A;
-        break;
+                    case 'UPCA':
+                        $barcodeType = $generator::TYPE_UPC_A;
+                        break;
 
-    case 'EAN13':
-        $barcodeType = $generator::TYPE_EAN_13;
-        break;
+                    case 'EAN13':
+                        $barcodeType = $generator::TYPE_EAN_13;
+                        break;
 
-    case 'EAN8':
-        $barcodeType = $generator::TYPE_EAN_8;
-        break;
+                    case 'EAN8':
+                        $barcodeType = $generator::TYPE_EAN_8;
+                        break;
 
-    case 'CODE39':
-        $barcodeType = $generator::TYPE_CODE_39;
-        break;
+                    case 'CODE39':
+                        $barcodeType = $generator::TYPE_CODE_39;
+                        break;
 
-    case 'CODE128':
-        $barcodeType = $generator::TYPE_CODE_128;
-        break;
+                    case 'CODE128':
+                        $barcodeType = $generator::TYPE_CODE_128;
+                        break;
 
-    default:
-        $barcodeType = $generator::TYPE_CODE_128;
-        break;
-}
+                    default:
+                        $barcodeType = $generator::TYPE_CODE_128;
+                        break;
+                }
 
-$barcodeBase64 = base64_encode(
-    $generator->getBarcode(
-        $symbolValue,
-        $barcodeType,
-        $widthMultiplier,
-        $heightMm,
-        [$r, $g, $b]
-    )
-);
+                $barcodeBase64 = base64_encode(
+                    $generator->getBarcode(
+                        $symbolValue,
+                        $barcodeType,
+                        $widthMultiplier,
+                        $heightMm,
+                        [$r, $g, $b]
+                    )
+                );
 
-$renderedSymbolHtml =
-    '<img src="data:image/png;base64,' .
-    $barcodeBase64 .
-    '" style="width:140px;height:auto;display:block;margin:0 auto;">';
+                $renderedSymbolHtml =
+                    '<img src="data:image/png;base64,' .
+                    $barcodeBase64 .
+                    '" style="width:140px;height:auto;display:block;margin:0 auto;">';
             } else {
                 $qrWidth = isset($design['symbol_width_px']) && !empty($design['symbol_width_px']) ? (int) $design['symbol_width_px'] : 120;
 
@@ -208,7 +208,27 @@ $renderedSymbolHtml =
                 $htmlMarkup .= '— ' . htmlspecialchars($request->input('option_1')) . ' ';
             }
             if (!empty($design['line2_price'])) {
-                $formattedPrice = ($design['line2_currency_format'] ?? '${{amount}}') === '${{amount}}' ? '$' . $request->input('price') : $request->input('price');
+
+                $price = (float) $request->input('price');
+                $decimals = (int) ($design['price_decimal_number'] ?? 2);
+                $vat = (float) ($design['vat_percentage'] ?? 0);
+
+                $price += ($price * $vat) / 100;
+
+                $currencyCode = $design['currency_code'] ?? 'USD';
+                $currencyFormat = $design['currency_format'] ?? 'without_currency';
+                $currencySymbol = $design['currency_symbol'] ?? $currencyCode;
+
+                $amount = number_format($price, $decimals, '.', '');
+
+                if ($currencyFormat === 'with_currency') {
+                    $formattedPrice = $currencySymbol . $amount;
+                } elseif ($currencyFormat === 'currency_code') {
+                    $formattedPrice = $amount . ' ' . $currencyCode;
+                } else {
+                    $formattedPrice = $amount;
+                }
+
                 $htmlMarkup .= '<span style="color:#108043;">| ' . htmlspecialchars($formattedPrice) . '</span>';
             }
             $htmlMarkup .= '</div>';

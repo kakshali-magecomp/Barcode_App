@@ -6,7 +6,6 @@ import QrCodeRenderer from "../../components/QrCodeRenderer";
 import TablePreview from "../../components/TablePreview";
 import TemplateLabelRenderer from "../../components/TemplateLabelRenderer"
 import { openPrintWindow } from "../../components/Printlayout";
-
 import { useNavigate, useLocation } from "react-router-dom";
 
 const PREVIEW_PAGE_SIZE = 6;
@@ -34,6 +33,7 @@ export default function GenerateBarcode() {
     const [previewPage, setPreviewPage] = useState(1);
     const [productToRemove, setProductToRemove] = useState(null);
     const [previewMode, setPreviewMode] = useState("card");
+    const [currencyCode, setCurrencyCode] = useState('USD');
 
     useEffect(() => {
         if (!fromHistory) return;
@@ -93,7 +93,6 @@ export default function GenerateBarcode() {
     const navigate = useNavigate();
     const [printSettings, setPrintSettings] = useState(null);
 
-
     useEffect(() => {
         async function loadTemplates() {
             try {
@@ -122,6 +121,19 @@ export default function GenerateBarcode() {
             }
         }
         loadPrintSettings();
+    }, []);
+
+    useEffect(() => {
+        async function loadStoreCurrency() {
+            try {
+                const res = await fetch("/api/products");
+                const json = await res.json();
+                setCurrencyCode(json.currency_code || 'USD');
+            } catch (err) {
+                console.log(err);
+            }
+        }
+        loadStoreCurrency();
     }, []);
 
     useEffect(() => {
@@ -377,14 +389,11 @@ export default function GenerateBarcode() {
         );
 
         const labelsPerSheet = rows * columns;
-
         const allLabels = [];
-
         selectedProducts.forEach((product) => {
             const printLabel = document.getElementById(
                 `print-label-${product.variant_id}`
             );
-
             if (!printLabel) {
                 console.warn(
                     `Print label not found for variant ${product.variant_id}`
@@ -392,14 +401,11 @@ export default function GenerateBarcode() {
 
                 return;
             }
-
             const qty = Math.max(
                 1,
                 Number(product.quantity) || 1
             );
-
             const labelHtml = printLabel.innerHTML;
-
             for (let i = 0; i < qty; i++) {
                 allLabels.push(`
                 <div class="label">
@@ -416,20 +422,7 @@ export default function GenerateBarcode() {
             return;
         }
 
-        /*
-         * IMPORTANT:
-         * Group labels into actual sheets.
-         *
-         * Example:
-         * rows = 10
-         * columns = 3
-         * labelsPerSheet = 30
-         *
-         * Every .print-sheet contains maximum 30 labels.
-         */
-
         const sheets = [];
-
         for (
             let start = 0;
             start < allLabels.length;
@@ -448,16 +441,6 @@ export default function GenerateBarcode() {
         }
 
         const bodyHtml = sheets.join("");
-
-        console.log("========== PRINT SETTINGS ==========");
-        console.log("Paper:", paper);
-        console.log("Rows:", rows);
-        console.log("Columns:", columns);
-        console.log("Labels per sheet:", labelsPerSheet);
-        console.log("Total labels:", allLabels.length);
-        console.log("Total sheets:", sheets.length);
-        console.log("====================================");
-
         const success = openPrintWindow({
             bodyHtml,
             paperTemplate: paper,
@@ -519,15 +502,51 @@ export default function GenerateBarcode() {
 
         const amount = priceWithVat.toFixed(decimals);
 
-        let format =
-            templateDesign?.line2_currency_format || "{amount}";
+        let format = String(
+            templateDesign?.line2_currency_format ?? ""
+        ).trim();
 
-        // Normalize old currency formats
+        // Normalize old placeholder-style formats
         format = format
             .replace(/\{\{amount\}\}/gi, "{amount}")
             .replace(/\$amount/gi, "${amount}");
 
-        return format.replace(/\{amount\}/gi, amount);
+        // Placeholder-style custom format (e.g. "Rs. {amount}")
+        if (format.includes("{amount}")) {
+            return format.replace(/\{amount\}/gi, amount);
+        }
+
+        // Enum tokens saved from Print Settings / template currencyOptions
+        const ENUM_TOKENS = ["without_currency", "with_currency", "currency_code"];
+        const isEnumToken = ENUM_TOKENS.includes(format.toLowerCase());
+
+        // Plain custom text prefix (e.g. "Rs.", "$") with no placeholder
+        if (format && !isEnumToken) {
+            return `${format} ${amount}`;
+        }
+
+        const resolvedFormat = isEnumToken
+            ? format.toLowerCase()
+            : (printSettings?.currency_format ?? "without_currency");
+
+        const currency = currencyCode || 'USD';
+        const locale = currency === 'INR' ? 'en-IN' : 'en';
+
+        if (resolvedFormat === "currency_code") {
+            return `${amount} ${currency}`;
+        }
+
+        if (resolvedFormat === "with_currency") {
+            return new Intl.NumberFormat(locale, {
+                style: 'currency',
+                currency,
+                currencyDisplay: 'symbol',
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            }).format(priceWithVat);
+        }
+
+        return amount;
     };
     return (
         <>
@@ -983,6 +1002,7 @@ export default function GenerateBarcode() {
                     </s-section>
 
                 )}
+
                 <div
                     ref={printContainerRef}
                     style={{

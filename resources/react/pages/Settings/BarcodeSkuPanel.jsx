@@ -190,14 +190,14 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                         gap="base"
                     >
                         <s-select
-                            label="Generate Barcode Format"
+                            label="Default Barcode Format for Template Barcode Field"
                             value={
                                 settings.barcode_format || 'CODE128'
                             }
                             onChange={(e) =>
                                 onChange(
                                     'barcode_format',
-                                    e.currentTarget.value
+                                    e.currentTarget.value   
                                 )
                             }
                         >
@@ -249,7 +249,7 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                         >
                             <div style={{ flex: 1 }}>
                                 <s-text-field
-                                    label="Barcode Pattern Layout"
+                                    label="Barcode Generation Pattern"
                                     value={
                                         settings.barcode_pattern || ''
                                     }
@@ -260,6 +260,7 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                                         )
                                     }
                                     placeholder="e.g., [N.8]"
+                                    details="Define the pattern used to generate barcode values."
                                 />
                             </div>
 
@@ -275,6 +276,7 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                                             e.currentTarget.value
                                         )
                                     }
+                                    details="Specify the country code used for contextual pricing, such as US, VN, or UA..."
                                 />
                             </div>
                         </div>

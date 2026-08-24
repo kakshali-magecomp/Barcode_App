@@ -225,6 +225,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Enter the prefix to add at the beginning of each generated SKU."
                         />
 
                         <s-text-field
@@ -242,7 +243,9 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Enter the starting number for generated SKUs."
                         />
+   
                     </s-grid>
 
                     <s-grid
@@ -258,6 +261,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Enter the suffix to append to the end of each generated SKU."
                         />
 
                         <s-text-field
@@ -269,6 +273,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Enter the symbol used to separate different parts of the generated SKU."
                         />
                     </s-grid>
                 </s-stack>
@@ -296,6 +301,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include the product title in the SKU."
                         >
                             {positionOptions.map(option => (
                                 <s-option
@@ -319,6 +325,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include the vendor in the SKU."
                         >
                             {positionOptions.map(option => (
                                 <s-option
@@ -347,6 +354,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include the product type in the SKU."
                         >
                             {positionOptions.map(option => (
                                 <s-option
@@ -364,11 +372,12 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                 settings.segment_metafield || ''
                             }
                             onChange={e =>
-                                handleChange(
+                                handleChange(   
                                     'segment_metafield',
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include the selected metafield in the SKU."
                         >
                             <s-option value="">
                                 Not used
@@ -396,6 +405,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                             details="Define how the metafield value is used."
                         >
                             {positionOptions.map(option => (
                                 <s-option
@@ -424,6 +434,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include variant option 1 in the SKU."
                         >
                             {positionOptions.map(option => (
                                 <s-option
@@ -447,6 +458,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include variant option 2 in the SKU."
                         >
                             {positionOptions.map(option => (
                                 <s-option
@@ -470,6 +482,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
+                            details="Include variant option 3 in the SKU."
                         >
                             {positionOptions.map(option => (
                                 <s-option

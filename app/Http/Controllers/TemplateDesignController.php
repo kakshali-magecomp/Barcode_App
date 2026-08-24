@@ -61,7 +61,6 @@ class TemplateDesignController extends Controller
 
             // Merge template properties for the React state payload
 
-
             $responsePayload = array_merge(
                 $barcodeSettings->toArray(),   // defaults
                 $design->toArray(),            // template overrides
