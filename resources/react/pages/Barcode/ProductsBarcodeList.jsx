@@ -48,6 +48,7 @@ export default function GenerateBarcode() {
             online_url: item.online_url,
             current_sku: item.current_sku ?? item.sku,
             price: item.price,
+            currency_code: item.currency_code,
             vendor: item.vendor,
             variant_title: item.variant_title,
             option_1: item.option_1,
@@ -467,8 +468,26 @@ export default function GenerateBarcode() {
                 return product.current_sku || "";
             case "product_name":
                 return product.product_title || "";
-            case "product_price":
-                return String(product.price || "");
+            case "product_price": {
+                const decimals = Number(
+                    printSettings?.price_decimal_number ?? 2
+                );
+
+                let price = Number(product?.price ?? 0);
+
+                if (price > 999) {
+                    price = price / 100;
+                }
+
+                const vatPercentage = Number(
+                    printSettings?.vat_percentage ?? 0
+                );
+
+                const priceWithVat =
+                    price + (price * vatPercentage) / 100;
+
+                return priceWithVat.toFixed(decimals);
+            }
             case "product_vendor":
                 return product.vendor || "";
             case "product_online_url":
@@ -529,7 +548,7 @@ export default function GenerateBarcode() {
             ? format.toLowerCase()
             : (printSettings?.currency_format ?? "without_currency");
 
-        const currency = currencyCode || 'USD';
+        const currency = product?.currency_code || currencyCode || 'USD';
         const locale = currency === 'INR' ? 'en-IN' : 'en';
 
         if (resolvedFormat === "currency_code") {

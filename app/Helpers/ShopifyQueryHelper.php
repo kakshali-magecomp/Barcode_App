@@ -72,6 +72,9 @@ class ShopifyQueryHelper
     {
         return <<<GRAPHQL
     {
+        shop {
+        currencyCode
+    }
         products(first: 100) {
             edges {
                 node {
@@ -207,5 +210,29 @@ mutation updateProductVariantSku(
 }
 GRAPHQL;
     }
-
+public static function marketsCountries(): string
+{
+    return <<<'GRAPHQL'
+{
+    markets(first: 250) {
+        edges {
+            node {
+                id
+                name
+                regions(first: 250) {
+                    edges {
+                        node {
+                            ... on MarketRegionCountry {
+                                code
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+GRAPHQL;
+}
 }

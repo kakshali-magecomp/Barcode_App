@@ -1,6 +1,23 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function BarcodeSkuPanel({ settings = {}, onChange }) {
+    const [countryOptions, setCountryOptions] = useState([]);
+    useEffect(() => {
+        async function fetchCountries() {
+            try {
+                const response = await fetch('/api/contextual-pricing-countries');
+                const data = await response.json();
+
+                if (data.success !== false && data.status === 1) {
+                    setCountryOptions(data.countries || []);
+                }
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+            }
+        }
+
+        fetchCountries();
+    }, []);
     const formatOptions = [
         {
             label: 'Code 128 (Recommended)',
@@ -197,7 +214,7 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                             onChange={(e) =>
                                 onChange(
                                     'barcode_format',
-                                    e.currentTarget.value   
+                                    e.currentTarget.value
                                 )
                             }
                         >
@@ -265,19 +282,24 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                             </div>
 
                             <div style={{ flex: 1 }}>
-                                <s-text-field
+                                <s-select
                                     label="Contextual Pricing Value"
-                                    value={
-                                        settings.contextual_pricing_value || ''
-                                    }
-                                    onInput={(e) =>
+                                    value={settings.contextual_pricing_value || ''}
+                                    onChange={(e) =>
                                         onChange(
                                             'contextual_pricing_value',
                                             e.currentTarget.value
                                         )
                                     }
-                                    details="Specify the country code used for contextual pricing, such as US, VN, or UA..."
-                                />
+                                    details="Only countries with a Market configured in Shopify Admin appear here — this guarantees the selected country's price is actually used."
+                                >
+                                    <s-option value="">Select a country</s-option>
+                                    {countryOptions.map((opt) => (
+                                        <s-option key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                        </s-option>
+                                    ))}
+                                </s-select>
                             </div>
                         </div>
                     </s-stack>

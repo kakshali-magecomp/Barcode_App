@@ -27,6 +27,13 @@ class ShopifyProductController extends Controller
                 trim($barcodeSetting->contextual_pricing_value ?? '')
             );
 
+            // ADDED LOGGING
+            Log::info('Product list: contextual pricing check', [
+                'raw_setting' => $barcodeSetting->contextual_pricing_value,
+                'normalized' => $contextualPricingValue,
+                'passes_regex' => (bool) ($contextualPricingValue && preg_match('/^[A-Z]{2}$/', $contextualPricingValue)),
+            ]);
+
             if ($contextualPricingValue && preg_match('/^[A-Z]{2}$/', $contextualPricingValue)) {
                 $query = ShopifyQueryHelper::showProductWithContextualPricing(
                     $contextualPricingValue
@@ -38,6 +45,16 @@ class ShopifyProductController extends Controller
             $rawResponse = $shop->api()->graph($query);
 
             $responseArray = json_decode(json_encode($rawResponse), true);
+
+            // ADDED LOGGING — catches Shopify GraphQL errors (invalid country enum, missing scope, etc.)
+            $graphqlErrors = $responseArray['body']['errors'] ?? $responseArray['errors'] ?? null;
+
+            if (!empty($graphqlErrors)) {
+                Log::error('Product list: Shopify GraphQL errors', [
+                    'errors' => $graphqlErrors,
+                ]);
+            }
+
             $currencyCode =
                 $responseArray['body']['container']['data']['shop']['currencyCode']
                 ?? $responseArray['body']['data']['shop']['currencyCode']
@@ -127,6 +144,15 @@ class ShopifyProductController extends Controller
 
                     }
                 }
+            }
+
+            if (!empty($flattenedVariants)) {
+                Log::info('Product list: sample variant after mapping', [
+                    'contextual_country_used' => $contextualPricingValue,
+                    'sample_price' => $flattenedVariants[0]['price'],
+                    'sample_currency' => $flattenedVariants[0]['currency_code'],
+                    'store_default_currency' => $currencyCode,
+                ]);
             }
             return response()->json([
                 "status" => 1,
@@ -573,5 +599,79 @@ class ShopifyProductController extends Controller
             ], 500);
         }
     }
+    public function contextualPricingCountries()
+    {
+        try {
+            $shop = Auth::user();
 
+            if (!$shop) {
+                Log::error('Contextual pricing countries: unauthenticated request.');
+                return response()->json(["status" => 0, "error" => "Unauthenticated"], 401);
+            }
+
+            Log::info('Contextual pricing countries: fetching markets', [
+                'shop' => $shop->name ?? '',
+            ]);
+
+            $query = ShopifyQueryHelper::marketsCountries();
+            $rawResponse = $shop->api()->graph($query);
+            $responseArray = json_decode(json_encode($rawResponse), true);
+
+            $shopifyErrors = $responseArray['body']['errors'] ?? $responseArray['errors'] ?? null;
+
+            if (!empty($shopifyErrors)) {
+                Log::error('Contextual pricing countries: Shopify returned errors', [
+                    'errors' => $shopifyErrors,
+                ]);
+            }
+
+            $marketEdges =
+                $responseArray['body']['container']['data']['markets']['edges']
+                ?? $responseArray['body']['data']['markets']['edges']
+                ?? [];
+
+            Log::info('Contextual pricing countries: market edges found', [
+                'market_count' => count($marketEdges),
+            ]);
+
+            $countries = [];
+            foreach ($marketEdges as $marketEdge) {
+                $regionEdges = $marketEdge['node']['regions']['edges'] ?? [];
+
+                foreach ($regionEdges as $regionEdge) {
+                    $region = $regionEdge['node'];
+                    if (!empty($region['code'])) {
+                        $countries[$region['code']] = $region['name'] ?? $region['code'];
+                    }
+                }
+            }
+
+            ksort($countries);
+
+            $options = [];
+            foreach ($countries as $code => $name) {
+                $options[] = [
+                    "label" => "{$name} ({$code})",
+                    "value" => $code,
+                ];
+            }
+
+            Log::info('Contextual pricing countries: final country list', [
+                'total_countries' => count($options),
+                'codes' => array_keys($countries),
+            ]);
+
+            return response()->json([
+                "status" => 1,
+                "countries" => $options,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Contextual pricing countries: exception', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json(["status" => 0, "error" => $e->getMessage()], 500);
+        }
+    }
 }

@@ -35,6 +35,7 @@ export default function DesignCanvasEdit({
         vendor: "Vendor",
         option_1: "",
         online_url: "",
+        currency_code: "USD",
     });
 
     const printRef = useRef(null);
@@ -133,6 +134,7 @@ export default function DesignCanvasEdit({
                             ? selected.variant_title
                             : "",
                     online_url: selected.online_url || "",
+                    currency_code: selected.currency_code || storeCurrency,
                 });
             }
         } catch (err) {
@@ -397,7 +399,7 @@ export default function DesignCanvasEdit({
         const globalFormat =
             isEnumToken ? templateFormat.toLowerCase() : (printSettings?.currency_format ?? "without_currency");
 
-        const currency = currencyCode || 'USD';
+        const currency = previewItem.currency_code || currencyCode || 'USD';
         const locale = currency === 'INR' ? 'en-IN' : 'en';
 
         if (globalFormat === "currency_code") {
@@ -472,6 +474,8 @@ export default function DesignCanvasEdit({
                                             : "",
                                     online_url:
                                         selected.online_url || "",
+                                    currency_code:
+                                        selected.currency_code || currencyCode,
                                 });
 
                                 updateField(

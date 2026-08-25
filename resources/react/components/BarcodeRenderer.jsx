@@ -60,7 +60,7 @@ export default function BarcodeRenderer({
         console.log("VALUE =", barcodeValue);
         console.log("SETTINGS =", barcodeSettings);
 
-
+        barcodeValue = String(barcodeValue).replace(/[^\x20-\x7E]/g, "").trim();
         // Numeric barcode validation
         if (
             ["EAN8", "EAN13", "UPCA", "ITF14"].includes(format)
@@ -128,6 +128,7 @@ export default function BarcodeRenderer({
 
             // Last fallback
             try {
+                const sanitizedValue = String(value).replace(/[^\x20-\x7E]/g, "").trim();
                 JsBarcode(barcodeRef.current, String(value), {
                     format: "CODE128",
                     width: Number(settings.symbol_bar_width) || 3,

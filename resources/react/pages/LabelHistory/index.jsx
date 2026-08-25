@@ -24,9 +24,10 @@ export default function LabelHistory() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [printQuantities, setPrintQuantities] = useState({});
   const [selectedRows, setSelectedRows] = useState([]);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [currencyCode, setCurrencyCode] = useState('USD');
+  const [printSettings, setPrintSettings] = useState(null);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -66,6 +67,23 @@ export default function LabelHistory() {
       }
     }
     loadStoreCurrency();
+  }, []);
+
+  useEffect(() => {
+    async function loadPrintSettings() {
+      try {
+        const res = await fetch("/api/print-settings");
+        const json = await res.json();
+
+        if (json.success) {
+          setPrintSettings(json.settings);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    loadPrintSettings();
   }, []);
 
   useEffect(() => {
@@ -505,7 +523,7 @@ th{background:#f5f5f5;}
           overflow: "hidden",
         }}
       >
-        {historyDetails?.items?.map((item, index) => (
+        {historyDetails && printSettings && historyDetails.items?.map((item, index) => (
           <div
             key={`history-print-${index}`}
             id={`history-print-label-${index}`}
@@ -552,20 +570,24 @@ th{background:#f5f5f5;}
               formatPrice={(product) => {
                 const settings = item.template_settings || {};
 
+                // Same decimal setting used by GenerateBarcode
                 const decimals = Number(
-                  settings.price_decimal_number ?? 2
+                  printSettings?.price_decimal_number ?? 2
                 );
 
+                // Shopify product price
                 let originalPrice = Number(
                   product?.price ?? 0
                 );
 
+                // Shopify sometimes returns cents
                 if (originalPrice > 999) {
                   originalPrice = originalPrice / 100;
                 }
 
+                // Same VAT calculation used in GenerateBarcode
                 const vatPercentage = Number(
-                  settings.vat_percentage ?? 0
+                  printSettings?.vat_percentage ?? 0
                 );
 
                 const priceWithVat =
@@ -574,46 +596,80 @@ th{background:#f5f5f5;}
 
                 const amount = priceWithVat.toFixed(decimals);
 
+                // Template-specific currency format
                 let format = String(
                   settings.line2_currency_format ?? ""
                 ).trim();
 
+                // Normalize old placeholder formats
                 format = format
                   .replace(/\{\{amount\}\}/gi, "{amount}")
                   .replace(/\$amount/gi, "${amount}");
 
-                // Placeholder-style custom format (e.g. "Rs. {amount}")
+                // Custom placeholder format
+                // Example: "Rs. {amount}"
+                // Example: "$ {amount}"
+                // Example: "Price: {amount}"
                 if (format.includes("{amount}")) {
-                  return format.replace(/\{amount\}/gi, amount);
+                  return format.replace(
+                    /\{amount\}/gi,
+                    amount
+                  );
                 }
 
-                // Enum tokens saved from Print Settings / template currencyOptions
-                const ENUM_TOKENS = ["without_currency", "with_currency", "currency_code"];
-                const isEnumToken = ENUM_TOKENS.includes(format.toLowerCase());
+                // Same enum values used by GenerateBarcode
+                const ENUM_TOKENS = [
+                  "without_currency",
+                  "with_currency",
+                  "currency_code",
+                ];
 
-                // Plain custom text prefix (e.g. "Rs.", "$") with no placeholder
+                const isEnumToken =
+                  ENUM_TOKENS.includes(format.toLowerCase());
+
+                // Custom prefix
+                // Example: "Rs." -> "Rs. 120.30"
                 if (format && !isEnumToken) {
                   return `${format} ${amount}`;
                 }
 
-                const resolvedFormat = isEnumToken ? format.toLowerCase() : "without_currency";
-                const currency = currencyCode || 'USD';
-                const locale = currency === 'INR' ? 'en-IN' : 'en';
+                // IMPORTANT:
+                // If template doesn't have its own currency format,
+                // use Print Settings just like GenerateBarcode.
+                const resolvedFormat = isEnumToken
+                  ? format.toLowerCase()
+                  : (
+                    printSettings?.currency_format ??
+                    "without_currency"
+                  );
 
+                const currency = currencyCode || "USD";
+
+                const locale =
+                  currency === "INR"
+                    ? "en-IN"
+                    : "en";
+
+                // Example: 120.30 INR
                 if (resolvedFormat === "currency_code") {
                   return `${amount} ${currency}`;
                 }
 
+                // Example: ₹120.30
                 if (resolvedFormat === "with_currency") {
-                  return new Intl.NumberFormat(locale, {
-                    style: 'currency',
-                    currency,
-                    currencyDisplay: 'symbol',
-                    minimumFractionDigits: decimals,
-                    maximumFractionDigits: decimals,
-                  }).format(priceWithVat);
+                  return new Intl.NumberFormat(
+                    locale,
+                    {
+                      style: "currency",
+                      currency,
+                      currencyDisplay: "symbol",
+                      minimumFractionDigits: decimals,
+                      maximumFractionDigits: decimals,
+                    }
+                  ).format(priceWithVat);
                 }
 
+                // Example: 120.30
                 return amount;
               }}
               printMode={true}

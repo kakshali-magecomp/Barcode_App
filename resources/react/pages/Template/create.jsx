@@ -10,7 +10,7 @@ import { openPrintWindow } from '../../components/Printlayout';
 
 const SAVE_BAR_ID = 'create-template-save-bar';
 
-const defaultDesign = { line1_sku: true, line2_name: true, line2_price: false, line2_currency_format: 'without_currency', line2_variant_option1: false, line3_vendor: false, symbol_enabled: true, symbol_type: 'BARCODE', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1 };
+const defaultDesign = { line1_sku: true, line2_name: true, line2_price: false, line2_currency_format: 'without_currency', line2_variant_option1: false, line3_vendor: false, symbol_enabled: true, symbol_type: 'BARCODE', symbol_color: '#000000', symbol_field_source: 'barcode_value', print_qty: 1, currency_code: 'USD', };
 const defaultCustomPaper = {
     type: 'sheet',
     paper: {
@@ -146,7 +146,8 @@ export default function CreateTemplate() {
                             price: selected.price,
                             vendor: selected.vendor,
                             option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-                            online_url: selected.online_url || ''
+                            online_url: selected.online_url || '',
+                            currency_code: selected.currency_code || currencyCode,
                         });
                     }
                 }
@@ -231,7 +232,8 @@ export default function CreateTemplate() {
             price: selected.price,
             vendor: selected.vendor,
             option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-            online_url: selected.online_url || ''
+            online_url: selected.online_url || '',
+            currency_code: selected.currency_code || currencyCode
         });
     };
 
@@ -266,7 +268,8 @@ export default function CreateTemplate() {
                 price: selected.price,
                 vendor: selected.vendor,
                 option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-                online_url: selected.online_url || ''
+                online_url: selected.online_url || '',
+                currency_code: selected.currency_code || currencyCode,
             });
         }
 
@@ -316,6 +319,7 @@ export default function CreateTemplate() {
         }).format(amount);
 
         const currency =
+            previewItem.currency_code ||
             design.currency_code ||
             currencyCode ||
             'USD';
@@ -343,6 +347,7 @@ export default function CreateTemplate() {
     }, [
         printSettings,
         previewItem?.price,
+        previewItem?.currency_code,
         design.currency_code,
         design.line2_currency_format,
         currencyCode

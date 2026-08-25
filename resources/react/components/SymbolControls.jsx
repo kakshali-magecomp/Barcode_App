@@ -6,7 +6,6 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
     barcodeSettings?.barcode_format ||
     "CODE128";
   const firstLoad = useRef(true);
-
   const fieldOptions = [
     {
       label: "Barcode Value",
@@ -71,11 +70,8 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
   useEffect(() => {
 
     if (firstLoad.current) return;
-
     const validFields = allowedFields[barcodeFormat];
-
     if (!validFields) return;
-
     if (
       !validFields.includes(design.symbol_field_source)
     ) {
@@ -86,15 +82,10 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
     }
 
   }, [barcodeFormat, design.symbol_field_source]);
-
   useEffect(() => {
-
     if (firstLoad.current) {
-
       firstLoad.current = false;
-
       return;
-
     }
 
     switch (barcodeFormat) {
@@ -251,9 +242,6 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                 onChange={(value) => {
 
                   handleUpdate("symbol_field_source", value);
-
-                  // If user changes to a text field,
-                  // automatically switch barcode format to CODE128
                   if (
                     value !== "barcode_value" &&
                     ["EAN8", "EAN13", "UPCA", "ITF14"].includes(design.barcode_format)
@@ -330,6 +318,7 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                     value={String(
                       design.symbol_bar_width || 2
                     )}
+                    suffix="px"
                     onChange={(value) =>
                       handleUpdate(
                         "symbol_bar_width",

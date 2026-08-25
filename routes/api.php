@@ -42,7 +42,8 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::post('/products/barcode-update', [ShopifyProductController::class, 'bulkBarcodeUpdate']);
     Route::post('/products/generate-sku', [ShopifyProductController::class, 'generateSku']);
     Route::post('/products/generate-barcode', [ShopifyProductController::class, 'generateBarcode']);
-        Route::get('/bulk-operations/{id}', [BulkOperationController::class, 'show']);
+    Route::get('/bulk-operations/{id}', [BulkOperationController::class, 'show']);
+    Route::get('/contextual-pricing-countries', [ShopifyProductController::class, 'contextualPricingCountries']);
 
 
     Route::get('/print-settings', [PrintSettingController::class, 'show']);

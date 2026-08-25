@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function SkuSettingsIndex({ settings = {}, onChange }) {
     const [metafieldOptions, setMetafieldOptions] = useState([]);
+    const [metafieldsLoaded, setMetafieldsLoaded] = useState(false);
 
     const positionOptions = [
         { label: 'Choose an option', value: 'none' },
@@ -19,6 +20,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                 const response = await fetch('/api/products');
 
                 if (!response.ok) {
+                    setMetafieldsLoaded(true);   // 👈 add this too, so it doesn't hang if the request fails
                     return;
                 }
 
@@ -27,6 +29,8 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                 setMetafieldOptions(data.metafield_options || []);
             } catch (error) {
                 console.error('Error loading metafields:', error);
+            } finally {
+                setMetafieldsLoaded(true);   // 👈 add this
             }
         }
 
@@ -245,7 +249,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                             }
                             details="Enter the starting number for generated SKUs."
                         />
-   
+
                     </s-grid>
 
                     <s-grid
@@ -366,32 +370,46 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                             ))}
                         </s-select>
 
-                        <s-select
-                            label="Metafield"
-                            value={
-                                settings.segment_metafield || ''
-                            }
-                            onChange={e =>
-                                handleChange(   
-                                    'segment_metafield',
-                                    e.currentTarget.value
-                                )
-                            }
-                            details="Include the selected metafield in the SKU."
-                        >
-                            <s-option value="">
-                                Not used
-                            </s-option>
-
-                            {metafieldOptions.map(option => (
-                                <s-option
-                                    key={option.value}
-                                    value={option.value}
-                                >
-                                    {option.label}
+                        {!metafieldsLoaded ? (
+                            <s-select
+                                label="Metafield"
+                                value=""
+                                disabled
+                                details="Loading metafields…"
+                            >
+                                <s-option value="">Loading…</s-option>
+                            </s-select>
+                        ) : (
+                            <s-select
+                                key={`metafield-select-${metafieldOptions.length}`}
+                                label="Metafield"
+                                value={
+                                    metafieldOptions.find(
+                                        option => String(option.value) === String(settings.segment_metafield)
+                                    )?.value ?? (settings.segment_metafield || '')
+                                }
+                                onChange={e =>
+                                    handleChange(
+                                        'segment_metafield',
+                                        e.currentTarget.value
+                                    )
+                                }
+                                details="Include the selected metafield in the SKU."
+                            >
+                                <s-option value="">
+                                    Not used
                                 </s-option>
-                            ))}
-                        </s-select>
+
+                                {metafieldOptions.map(option => (
+                                    <s-option
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </s-option>
+                                ))}
+                            </s-select>
+                        )}
 
                         <s-select
                             label="Metafield Rule"
@@ -405,7 +423,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
                                     e.currentTarget.value
                                 )
                             }
-                             details="Define how the metafield value is used."
+                            details="Define how the metafield value is used."
                         >
                             {positionOptions.map(option => (
                                 <s-option

@@ -16,25 +16,19 @@ export default function ProductPickerModal({
 
   const getNumericId = (gid) => {
     if (!gid) return null;
-
     const value = String(gid);
-
     if (!value.startsWith("gid://shopify/")) {
       return value;
     }
-
     return value.split("/").pop();
   };
 
   const toGid = (id, resourceType) => {
     if (!id) return null;
-
     const value = String(id);
-
     if (value.startsWith("gid://shopify/")) {
       return value;
     }
-
     return `gid://shopify/${resourceType}/${value}`;
   };
 

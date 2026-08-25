@@ -8,6 +8,7 @@ export default function TemplateLabelRenderer({
     barcodeSettings = {},
     formatPrice,
     printMode = false,
+    barcodeValue = null,
 }) {
     if (!product) return null;
 
@@ -34,9 +35,11 @@ export default function TemplateLabelRenderer({
             "",
 
         barcode:
-            product.barcode ||
-            product.current_barcode ||
-            "",
+            barcodeValue !== null && barcodeValue !== undefined
+                ? String(barcodeValue)
+                : product.current_barcode ||
+                product.barcode ||
+                "",
 
         price:
             product.price ?? "",
@@ -50,13 +53,17 @@ export default function TemplateLabelRenderer({
             product.online_url || "",
     };
 
+    const displayPrice = formatPrice
+        ? String(formatPrice(product))
+        : String(previewItem.price ?? "");
+
     const getSymbolValue = () => {
         switch (design.symbol_field_source) {
             case "product_name":
                 return previewItem.title;
 
             case "product_price":
-                return String(previewItem.price);
+                return displayPrice;
 
             case "product_online_url":
                 return previewItem.online_url;
@@ -171,9 +178,7 @@ export default function TemplateLabelRenderer({
                             fontWeight: 700,
                         }}
                     >
-                        {formatPrice
-                            ? formatPrice(product)
-                            : previewItem.price}
+                        {displayPrice}
                     </span>
                 )}
             </div>
