@@ -19,6 +19,7 @@ class PrintHistoryItem extends Model
         'barcode_format',
         'template_settings',
         'price',
+        'currency_code',
         'online_url',
         'vendor',
         'variant_title',

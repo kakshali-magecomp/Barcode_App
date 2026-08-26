@@ -88,6 +88,7 @@ export default function CreateTemplate() {
                 const barcode = await barcodeRes.json();
                 console.log('BARCODE SETTINGS RESPONSE:', barcode);
                 const print = await printRes.json();
+                console.log('Print SETTINGS RESPONSE:', print);
                 const storeCurrency = products.currency_code || 'USD';
 
                 if (mounted) {
@@ -106,8 +107,9 @@ export default function CreateTemplate() {
                         ...initialDesign,
                         barcode_format: barcodeData?.barcode_format || 'CODE128'
                     };
-                }
+                }   
 
+                const printSettingsData = print.settings || print.data || print;
                 if (print.success) {
                     setPrintSettings(print.settings);
 
@@ -304,7 +306,7 @@ export default function CreateTemplate() {
 
         let price = Number(previewItem?.price ?? 0);
 
-        if (price > 999) price /= 100;
+        // if (price > 999) price /= 100;
 
         const vat = Number(
             printSettings?.vat_percentage ?? 0

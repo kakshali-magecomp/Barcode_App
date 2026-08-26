@@ -407,8 +407,6 @@ class ShopifyProductController extends Controller
 
             $skuSetting = $shop->skuSetting()->firstOrCreate([]);
 
-            // Resolve variant list (unchanged — this stays a single GraphQL
-            // call, it's the per-VARIANT mutation loop that was the bottleneck).
             if ($request->input('method') === "missing") {
                 $query = ShopifyQueryHelper::showproduct();
                 $rawResponse = $shop->api()->graph($query);
@@ -464,8 +462,6 @@ class ShopifyProductController extends Controller
                 'updated_products' => [],
             ]);
 
-            // Chunk and dispatch — 100 variants per job, each with its own
-            // pre-reserved slice of the counter range.
             $chunks = array_chunk($variants, 100);
             $counterCursor = $reservedStart;
             foreach ($chunks as $chunk) {

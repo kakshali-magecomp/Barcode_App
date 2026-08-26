@@ -363,9 +363,9 @@ export default function DesignCanvasEdit({
             originalPrice = 0;
         }
 
-        if (originalPrice > 999) {
-            originalPrice = originalPrice / 100;
-        }
+        // if (originalPrice > 999) {
+        //     originalPrice = originalPrice / 100;
+        // }
 
         const vatPercentage = Number(
             printSettings?.vat_percentage ?? 0

@@ -194,6 +194,7 @@ export default function GenerateBarcode() {
                         template_settings: templateDesign,
                         online_url: product.online_url,
                         price: product.price,
+                        currency_code: product.currency_code,
                         vendor: product.vendor,
                         variant_title: product.variant_title,
                         option_1: product.option_1,
@@ -509,9 +510,9 @@ export default function GenerateBarcode() {
             printSettings?.price_decimal_number ?? 2
         );
         let originalPrice = Number(product?.price ?? 0);
-        if (originalPrice > 999) {
-            originalPrice = originalPrice / 100;
-        }
+        // if (originalPrice > 999) {
+        //     originalPrice = originalPrice / 100;
+        // }
         const vatPercentage = Number(
             printSettings?.vat_percentage ?? 0
         );

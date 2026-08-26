@@ -318,7 +318,6 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                     value={String(
                       design.symbol_bar_width || 2
                     )}
-                    suffix="px"
                     onChange={(value) =>
                       handleUpdate(
                         "symbol_bar_width",

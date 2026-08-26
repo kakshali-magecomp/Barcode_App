@@ -15,7 +15,7 @@ use App\Http\Controllers\LabelHistoryController;
 use App\Http\Controllers\ProductWebhookController;
 use App\Http\Controllers\Api\PrintHistoryController;
 use App\Http\Controllers\BulkOperationController;
-
+use App\Http\Controllers\PlanController;
 
 
 Route::middleware(['verify.shopify'])->group(function () {
@@ -62,6 +62,8 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/print-history/{id}', [PrintHistoryController::class, 'show']);
     Route::delete('/print-history/{id}', [PrintHistoryController::class, 'destroy']);
 
+    Route::get('/plans', [PlanController::class, 'index']);
+    Route::post('/plans/{plan}/subscribe', [PlanController::class, 'subscribe']);
 
 });
 Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);

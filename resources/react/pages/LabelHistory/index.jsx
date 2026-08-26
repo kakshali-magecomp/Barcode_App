@@ -580,10 +580,10 @@ th{background:#f5f5f5;}
                   product?.price ?? 0
                 );
 
-                // Shopify sometimes returns cents
-                if (originalPrice > 999) {
-                  originalPrice = originalPrice / 100;
-                }
+                // // Shopify sometimes returns cents
+                // if (originalPrice > 999) {
+                //   originalPrice = originalPrice / 100;
+                // }
 
                 // Same VAT calculation used in GenerateBarcode
                 const vatPercentage = Number(
@@ -606,10 +606,7 @@ th{background:#f5f5f5;}
                   .replace(/\{\{amount\}\}/gi, "{amount}")
                   .replace(/\$amount/gi, "${amount}");
 
-                // Custom placeholder format
-                // Example: "Rs. {amount}"
-                // Example: "$ {amount}"
-                // Example: "Price: {amount}"
+        
                 if (format.includes("{amount}")) {
                   return format.replace(
                     /\{amount\}/gi,
@@ -627,15 +624,11 @@ th{background:#f5f5f5;}
                 const isEnumToken =
                   ENUM_TOKENS.includes(format.toLowerCase());
 
-                // Custom prefix
-                // Example: "Rs." -> "Rs. 120.30"
+  
                 if (format && !isEnumToken) {
                   return `${format} ${amount}`;
                 }
 
-                // IMPORTANT:
-                // If template doesn't have its own currency format,
-                // use Print Settings just like GenerateBarcode.
                 const resolvedFormat = isEnumToken
                   ? format.toLowerCase()
                   : (
@@ -643,7 +636,7 @@ th{background:#f5f5f5;}
                     "without_currency"
                   );
 
-                const currency = currencyCode || "USD";
+                const currency = item.currency_code || currencyCode || "USD";
 
                 const locale =
                   currency === "INR"

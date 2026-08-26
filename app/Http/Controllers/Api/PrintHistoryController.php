@@ -27,6 +27,7 @@ class PrintHistoryController extends Controller
             'products.*.option_1' => 'nullable',
             'products.*.option_2' => 'nullable',
             'products.*.option_3' => 'nullable',
+            'products.*.currency_code' => 'nullable|string|max:10',
             'products.*.qty' => 'required|integer|min:1',
         ]);
         
@@ -52,6 +53,7 @@ class PrintHistoryController extends Controller
                 'template_settings' => $product['template_settings'] ?? null,
                 'online_url' => $product['online_url'] ?? null,
                 'price' => $product['price'] ?? null,
+                'currency_code' => $product['currency_code'] ?? null,
                 'vendor' => $product['vendor'] ?? null,
                 'variant_title' => $product['variant_title'] ?? null,
                 'option_1' => $product['option_1'] ?? null,

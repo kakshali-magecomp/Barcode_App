@@ -18,6 +18,7 @@ import { NavMenu } from '@shopify/app-bridge-react';
 					<a href='/ProductsBarcodeList'>Generate Barcode & Print</a>
 					<a href='/Settingindex'>Setting</a>
 					<a href="/LabelHistory">Label History</a>
+					<a href="/Plan">Plan</a>
 		        </NavMenu>
 		        <AppRoute />
 		    </Router>
