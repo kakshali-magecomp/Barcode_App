@@ -1,19 +1,12 @@
-import React, {
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 export default function PlanPage() {
     const [plans, setPlans] = useState([]);
-    const [selectedInterval, setSelectedInterval] =
-        useState("monthly");
-
+    const [selectedInterval, setSelectedInterval] = useState("monthly");
     const [loading, setLoading] = useState(true);
-    const [subscribing, setSubscribing] =
-        useState(false);
-
+    const [subscribingInterval, setSubscribingInterval] = useState(null);
     const [error, setError] = useState("");
+    const [activePlanId, setActivePlanId] = useState(null);
 
     const features = [
         "Create unlimited barcode labels",
@@ -26,21 +19,14 @@ export default function PlanPage() {
         "All core app features",
     ];
 
-  
-
     const getShopifyContext = () => {
-        const params = new URLSearchParams(
-            window.location.search
-        );
-
+        const params = new URLSearchParams(window.location.search);
         return {
             shop: params.get("shop"),
             host: params.get("host"),
             embedded: params.get("embedded"),
         };
     };
-
- 
 
     useEffect(() => {
         loadPlans();
@@ -51,109 +37,59 @@ export default function PlanPage() {
             setLoading(true);
             setError("");
 
-            const response = await fetch(
-                "/api/plans",
-                {
-                    method: "GET",
-
-                    headers: {
-                        Accept: "application/json",
-                    },
-
-                    credentials: "include",
-                }
-            );
+            const response = await fetch("/api/plans", {
+                method: "GET",
+                headers: { Accept: "application/json" },
+                credentials: "include",
+            });
 
             const data = await response.json();
 
-            if (
-                !response.ok ||
-                !data.success
-            ) {
-                throw new Error(
-                    data.message ||
-                    "Unable to load plans."
-                );
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to load plans.");
             }
 
-            setPlans(
-                Array.isArray(data.plans)
-                    ? data.plans
-                    : []
-            );
-        } catch (error) {
-            console.error(
-                "Plan loading error:",
-                error
+            const loadedPlans = Array.isArray(data.plans) ? data.plans : [];
+            setPlans(loadedPlans);
+
+            const resolvedActiveId =
+                data.active_plan_id != null ? Number(data.active_plan_id) : null;
+            setActivePlanId(resolvedActiveId);
+
+            const activePlanObj = loadedPlans.find(
+                (plan) => Number(plan.id) === Number(resolvedActiveId)
             );
 
-            setError(
-                error.message ||
-                "Unable to load plans."
-            );
+            if (activePlanObj) {
+                setSelectedInterval(activePlanObj.billing_period);
+            }
+        } catch (error) {
+            console.error("Plan loading error:", error);
+            setError(error.message || "Unable to load plans.");
         } finally {
             setLoading(false);
         }
     };
 
-   
+    const monthlyPlan = useMemo(
+        () => plans.find((plan) => plan.billing_period === "monthly"),
+        [plans]
+    );
 
-    const monthlyPlan = useMemo(() => {
-        return plans.find(
-            (plan) =>
-                plan.billing_period ===
-                "monthly"
-        );
-    }, [plans]);
+    const yearlyPlan = useMemo(
+        () => plans.find((plan) => plan.billing_period === "yearly"),
+        [plans]
+    );
 
-  
-
-    const yearlyPlan = useMemo(() => {
-        return plans.find(
-            (plan) =>
-                plan.billing_period ===
-                "yearly"
-        );
-    }, [plans]);
-
-    
-
-    const selectedPlan =
-        selectedInterval === "monthly"
-            ? monthlyPlan
-            : yearlyPlan;
-
-  
-
-    const handleSubscribe = async () => {
-        if (
-            !selectedPlan ||
-            subscribing
-        ) {
-            return;
-        }
+    const handleSubscribe = async (plan, interval) => {
+        if (!plan || subscribingInterval) return;
 
         try {
-            setSubscribing(true);
+            setSubscribingInterval(interval);
+            setSelectedInterval(interval);
             setError("");
 
-           
-
-            const {
-                shop,
-                host,
-                embedded,
-            } = getShopifyContext();
-
-            console.log(
-                "Shopify subscription context:",
-                {
-                    shop,
-                    host,
-                    embedded,
-                }
-            );
-
+            const { shop, host, embedded } = getShopifyContext();
 
             if (!host) {
                 throw new Error(
@@ -161,513 +97,153 @@ export default function PlanPage() {
                 );
             }
 
-        
-
             const params = new URLSearchParams();
+            params.set("host", host);
+            if (shop) params.set("shop", shop);
+            if (embedded) params.set("embedded", embedded);
 
-            params.set(
-                "host",
-                host
+            const response = await fetch(
+                `/api/plans/${plan.id}/subscribe?${params.toString()}`,
+                {
+                    method: "POST",
+                    headers: { Accept: "application/json" },
+                    credentials: "include",
+                }
             );
 
-            if (shop) {
-                params.set(
-                    "shop",
-                    shop
-                );
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || "Unable to start subscription.");
             }
-
-            if (embedded) {
-                params.set(
-                    "embedded",
-                    embedded
-                );
-            }
-
-           
-
-            const response =
-                await fetch(
-                    `/api/plans/${selectedPlan.id}/subscribe?${params.toString()}`,
-                    {
-                        method: "POST",
-
-                        headers: {
-                            Accept:
-                                "application/json",
-                        },
-
-                        credentials:
-                            "include",
-                    }
-                );
-
-            const data =
-                await response.json();
-
-            console.log(
-                "Subscription response:",
-                data
-            );
-
-            if (
-                !response.ok ||
-                !data.success
-            ) {
-                throw new Error(
-                    data.message ||
-                    "Unable to start subscription."
-                );
-            }
-
 
             if (data.billing_url) {
-                window.top.location.href =
-                    data.billing_url;
-
+                window.top.location.href = data.billing_url;
                 return;
             }
 
-            throw new Error(
-                "Billing URL was not returned."
-            );
+            throw new Error("Billing URL was not returned.");
         } catch (error) {
-            console.error(
-                "Subscription error:",
-                error
-            );
-
-            setError(
-                error.message ||
-                "Unable to start subscription."
-            );
-
-            setSubscribing(false);
+            console.error("Subscription error:", error);
+            setError(error.message || "Unable to start subscription.");
+            setSubscribingInterval(null);
         }
     };
 
-
     if (loading) {
         return (
-            <div
-                style={{
-                    minHeight: "100vh",
-                    background: "#f6f6f7",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent:
-                        "center",
-                    fontFamily:
-                        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-                }}
-            >
-                <div
-                    style={{
-                        fontSize: "14px",
-                        color: "#616161",
-                    }}
-                >
-                    Loading plans...
-                </div>
-            </div>
+            <s-box inlineSize="100%" padding="large">
+                <s-stack direction="block" alignItems="center" gap="base" inlineSize="100%">
+                    <s-spinner size="base" accessibilityLabel="Loading plans"></s-spinner>
+                    <s-text tone="neutral">Loading plans...</s-text>
+                </s-stack>
+            </s-box>
         );
     }
 
+    const isAnySubscribing = subscribingInterval !== null;
+
+    const getActivePlanRank = () => {
+        if (activePlanId == null) return null;
+        if (monthlyPlan && Number(monthlyPlan.id) === Number(activePlanId)) return "monthly";
+        if (yearlyPlan && Number(yearlyPlan.id) === Number(activePlanId)) return "yearly";
+        return null;
+    };
+
+    const renderPlanCard = (plan, interval, title) => {
+        if (!plan) return null;
+
+        const isActive =
+            activePlanId != null && Number(plan.id) === Number(activePlanId);
+        const isThis = subscribingInterval === interval;
+        const activeRank = getActivePlanRank();
+
+        let buttonLabel = `Choose ${interval}`;
+        if (isActive) {
+            buttonLabel = "Current plan";
+        } else if (activeRank === "yearly" && interval === "monthly") {
+            buttonLabel = "Monthly plan";
+        } else if (activeRank === "monthly" && interval === "yearly") {
+            buttonLabel = "Upgrade plan";
+        } else if (isThis) {
+            buttonLabel = "Opening Shopify...";
+        }
+
+        return (
+
+            <s-box inlineSize="360px" maxInlineSize="100%" padding="large" background="base" border="base" borderRadius="large">
+                <s-stack direction="block" gap="base">
+                    <s-stack direction="inline" alignItems="center" gap="small">
+                        <s-text type="strong">{title}</s-text>
+                        {isActive && <s-badge tone="success">Current plan</s-badge>}
+                    </s-stack>
+
+                    <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+                        <span style={{ fontSize: "26px", lineHeight: "32px", fontWeight: 700, color: "#1a1a1a" }}>
+                            ${plan.price}
+                        </span>
+                        <span style={{ fontSize: "14px", lineHeight: "20px", fontWeight: 400, color: "#6b6b6b" }}>
+                            / {interval === "monthly" ? "month" : "year"}
+                        </span>
+                    </div>
+
+                    <s-unordered-list>
+                        {features.map((feature, index) => (
+                            <s-list-item key={index}>{feature}</s-list-item>
+                        ))}
+                    </s-unordered-list>
+
+                    <s-button
+                        inlineSize="fill"
+                        variant={isActive ? "secondary" : "primary"}
+                        disabled={isActive || (isAnySubscribing && !isThis)}
+                        loading={isThis}
+                        accessibilityLabel={buttonLabel}
+                        onClick={() => handleSubscribe(plan, interval)}
+                    >
+                        {buttonLabel}
+                    </s-button>
+                </s-stack>
+            </s-box>
+        );
+    };
 
     return (
-        <div
-            style={{
-                minHeight: "100vh",
-                width: "100%",
-                background: "#f6f6f7",
-                boxSizing: "border-box",
-                padding: 0,
-                fontFamily:
-                    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-            }}
-        >
-            <div
-                style={{
-                    width: "100%",
-                    maxWidth: "520px",
-                    margin: "0 auto",
-                    padding:
-                        "4px 20px 40px",
-                    boxSizing:
-                        "border-box",
-                }}
-            >
-                {/* Page title */}
-
-                <div
-                    style={{
-                        paddingBottom:
-                            "20px",
-                    }}
-                >
-                    <h1
-                        style={{
-                            margin: 0,
-                            padding: 0,
-                            fontSize: "21px",
-                            lineHeight:
-                                "28px",
-                            fontWeight: 700,
-                            color: "#303030",
-                        }}
-                    >
+        <s-box inlineSize="100%" padding="none">
+            <s-query-container>
+                <s-stack direction="block" alignItems="center" inlineSize="100%" gap="large">
+                    <h1 style={{ margin: "0", fontSize: "25px", lineHeight: "34px", fontWeight: "700" }}>
                         Select a plan
                     </h1>
-                </div>
 
-                {/* Error */}
-
-                {error && (
-                    <div
-                        style={{
-                            background:
-                                "#fff4f4",
-                            border:
-                                "1px solid #e0b3b3",
-                            color: "#b42318",
-                            borderRadius:
-                                "8px",
-                            padding: "12px",
-                            marginBottom:
-                                "16px",
-                            fontSize: "13px",
-                            lineHeight:
-                                "20px",
-                        }}
-                    >
-                        {error}
-                    </div>
-                )}
-
-                {/* Plan card */}
-
-                {selectedPlan && (
-                    <div
-                        style={{
-                            width: "100%",
-                            backgroundColor:
-                                "#ffffff",
-                            border:
-                                "1px solid #d1d1d1",
-                            borderRadius:
-                                "12px",
-                            padding: "16px",
-                            boxSizing:
-                                "border-box",
-                            boxShadow:
-                                "0 1px 2px rgba(0, 0, 0, 0.04)",
-                        }}
-                    >
-                        {/* Plan name */}
-
-                        <div
-                            style={{
-                                fontSize: "15px",
-                                lineHeight:
-                                    "22px",
-                                fontWeight: 700,
-                                color: "#303030",
-                                marginBottom:
-                                    "10px",
-                            }}
-                        >
-                            {selectedPlan.name}
-                        </div>
-
-                        {/* Price */}
-
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems:
-                                    "baseline",
-                                marginBottom:
-                                    "4px",
-                            }}
-                        >
-                            <span
-                                style={{
-                                    fontSize:
-                                        "25px",
-                                    lineHeight:
-                                        "31px",
-                                    fontWeight:
-                                        700,
-                                    color:
-                                        "#303030",
-                                }}
-                            >
-                                $
-                                {
-                                    selectedPlan.price
-                                }
-                            </span>
-
-                            <span
-                                style={{
-                                    marginLeft:
-                                        "4px",
-                                    fontSize:
-                                        "13px",
-                                    lineHeight:
-                                        "20px",
-                                    color:
-                                        "#616161",
-                                }}
-                            >
-                                /
-                                {selectedInterval ===
-                                "monthly"
-                                    ? "month"
-                                    : "year"}
-                            </span>
-                        </div>
-
-                        {/* Secondary price */}
-
-                        <div
-                            style={{
-                                fontSize: "13px",
-                                lineHeight:
-                                    "20px",
-                                color:
-                                    "#616161",
-                                marginBottom:
-                                    "14px",
-                            }}
-                        >
-                            {selectedInterval ===
-                            "monthly"
-                                ? yearlyPlan
-                                    ? `$${yearlyPlan.price} / year`
-                                    : ""
-                                : monthlyPlan
-                                  ? `$${monthlyPlan.price} / month`
-                                  : ""}
-                        </div>
-
-                        {/* Monthly */}
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSelectedInterval(
-                                    "monthly"
-                                )
-                            }
-                            style={{
-                                width: "100%",
-                                height: "29px",
-                                padding:
-                                    "0 12px",
-                                margin: 0,
-                                marginBottom:
-                                    "7px",
-                                borderRadius:
-                                    "7px",
-                                border:
-                                    selectedInterval ===
-                                    "monthly"
-                                        ? "1px solid #1f1f1f"
-                                        : "1px solid #c7c7c7",
-                                background:
-                                    selectedInterval ===
-                                    "monthly"
-                                        ? "linear-gradient(#424242, #252525)"
-                                        : "#ffffff",
-                                color:
-                                    selectedInterval ===
-                                    "monthly"
-                                        ? "#ffffff"
-                                        : "#424242",
-                                fontSize:
-                                    "12px",
-                                lineHeight:
-                                    "16px",
-                                fontWeight:
-                                    600,
-                                textAlign:
-                                    "center",
-                                cursor:
-                                    "pointer",
-                                boxSizing:
-                                    "border-box",
-                                outline: "none",
-                            }}
-                        >
-                            Choose monthly
-                        </button>
-
-                        {/* Yearly */}
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSelectedInterval(
-                                    "yearly"
-                                )
-                            }
-                            style={{
-                                width: "100%",
-                                height: "29px",
-                                padding:
-                                    "0 12px",
-                                margin: 0,
-                                marginBottom:
-                                    "16px",
-                                borderRadius:
-                                    "7px",
-                                border:
-                                    selectedInterval ===
-                                    "yearly"
-                                        ? "1px solid #1f1f1f"
-                                        : "1px solid #c7c7c7",
-                                background:
-                                    selectedInterval ===
-                                    "yearly"
-                                        ? "linear-gradient(#424242, #252525)"
-                                        : "#ffffff",
-                                color:
-                                    selectedInterval ===
-                                    "yearly"
-                                        ? "#ffffff"
-                                        : "#424242",
-                                fontSize:
-                                    "12px",
-                                lineHeight:
-                                    "16px",
-                                fontWeight:
-                                    600,
-                                textAlign:
-                                    "center",
-                                cursor:
-                                    "pointer",
-                                boxSizing:
-                                    "border-box",
-                                outline: "none",
-                            }}
-                        >
-                            Choose yearly
-                        </button>
-
-                        {/* Features */}
-
-                        <ul
-                            style={{
-                                margin: 0,
-                                padding:
-                                    "0 0 0 20px",
-                                color:
-                                    "#303030",
-                            }}
-                        >
-                            {features.map(
-                                (
-                                    feature,
-                                    index
-                                ) => (
-                                    <li
-                                        key={
-                                            index
-                                        }
-                                        style={{
-                                            fontSize:
-                                                "13px",
-                                            lineHeight:
-                                                "20px",
-                                            marginBottom:
-                                                index ===
-                                                features.length -
-                                                    1
-                                                    ? "0"
-                                                    : "4px",
-                                            padding: 0,
-                                        }}
-                                    >
-                                        {
-                                            feature
-                                        }
-                                    </li>
-                                )
-                            )}
-                        </ul>
-
-                        {/* Subscribe button */}
-
-                        <button
-                            type="button"
-                            onClick={
-                                handleSubscribe
-                            }
-                            disabled={
-                                subscribing
-                            }
-                            style={{
-                                width: "100%",
-                                height: "38px",
-                                marginTop:
-                                    "20px",
-                                borderRadius:
-                                    "7px",
-                                border:
-                                    "1px solid #1f1f1f",
-                                background:
-                                    subscribing
-                                        ? "#777777"
-                                        : "#303030",
-                                color:
-                                    "#ffffff",
-                                fontSize:
-                                    "13px",
-                                fontWeight:
-                                    600,
-                                cursor:
-                                    subscribing
-                                        ? "not-allowed"
-                                        : "pointer",
-                            }}
-                        >
-                            {subscribing
-                                ? "Opening Shopify..."
-                                : selectedInterval ===
-                                    "monthly"
-                                  ? "Continue with monthly"
-                                  : "Continue with yearly"}
-                        </button>
-                    </div>
-                )}
-
-                {/* No plans */}
-
-                {!selectedPlan &&
-                    !loading && (
-                        <div
-                            style={{
-                                background:
-                                    "#ffffff",
-                                border:
-                                    "1px solid #d1d1d1",
-                                borderRadius:
-                                    "12px",
-                                padding: "20px",
-                                textAlign:
-                                    "center",
-                                color:
-                                    "#616161",
-                                fontSize:
-                                    "13px",
-                            }}
-                        >
-                            No plans are
-                            available.
-                        </div>
+                    {error && (
+                        <s-banner tone="critical" heading="Unable to process request">
+                            {error}
+                        </s-banner>
                     )}
-            </div>
-        </div>
+
+                    {/* {activePlanId === null && (
+                        <s-banner tone="caution" heading="No active plan">
+                            Choose a plan below to activate your subscription.
+                        </s-banner>
+                    )} */}
+
+                    {(monthlyPlan || yearlyPlan) && (
+                        <s-stack direction="inline" gap="large" wrap="wrap" alignItems="start" justifyContent="center">
+                            {renderPlanCard(monthlyPlan, "monthly", "Basic monthly")}
+                            {renderPlanCard(yearlyPlan, "yearly", "Basic yearly")}
+                        </s-stack>
+                    )}
+
+                    {!monthlyPlan && !yearlyPlan && !loading && (
+                        <s-box inlineSize="100%" padding="large" background="subdued" border="base" borderRadius="large">
+                            <s-stack direction="block" alignItems="center" gap="base">
+                                <s-text tone="neutral">No plans are available.</s-text>
+                            </s-stack>
+                        </s-box>
+                    )}
+                </s-stack>
+            </s-query-container>
+        </s-box>
     );
 }

@@ -429,7 +429,7 @@ return [
             ],  */
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'PRODUCTS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://portfolio-theft-nest-saying.trycloudflare.com/api/webhooks/products/create'),   
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://how-estimation-aaron-worldwide.trycloudflare.com/api/webhooks/products/create'),   
             ], 
     ],     
 

@@ -15,67 +15,25 @@ class PlanController extends Controller
     {
         try {
 
-            Log::info('Plan request received.', [
-                'method' => $request->method(),
-                'url' => $request->fullUrl(),
-                'shop' => $request->input('shop'),
-                'host' => $request->input('host'),
-                'user_id' => Auth::id(),
-            ]);
-
-
-
             $allPlans = DB::table('plans')
                 ->get();
-
-            Log::info('All records found in plans table.', [
-                'count' => $allPlans->count(),
-                'plans' => $allPlans->map(function ($plan) {
-                    return (array) $plan;
-                })->toArray(),
-            ]);
-
-
 
             $recurringPlans = DB::table('plans')
                 ->where('type', 'RECURRING')
                 ->get();
-
-            Log::info('RECURRING plans found.', [
-                'count' => $recurringPlans->count(),
-                'plans' => $recurringPlans->map(function ($plan) {
-                    return (array) $plan;
-                })->toArray(),
-            ]);
 
             $monthlyPlans = DB::table('plans')
                 ->where('type', 'RECURRING')
                 ->where('interval', 'EVERY_30_DAYS')
                 ->get();
 
-            Log::info('Monthly plans found.', [
-                'count' => $monthlyPlans->count(),
-                'plans' => $monthlyPlans->map(function ($plan) {
-                    return (array) $plan;
-                })->toArray(),
-            ]);
-
-
-
             $yearlyPlans = DB::table('plans')
                 ->where('type', 'RECURRING')
                 ->where('interval', 'ANNUAL')
                 ->get();
 
-            Log::info('Yearly plans found.', [
-                'count' => $yearlyPlans->count(),
-                'plans' => $yearlyPlans->map(function ($plan) {
-                    return (array) $plan;
-                })->toArray(),
-            ]);
 
-
-
+            // EVERY_30_DAYS or ANNUAL — these two string values are Shopify's own enum values for the Billing API
             $plans = DB::table('plans')
                 ->where('type', 'RECURRING')
                 ->whereIn('interval', [
@@ -91,15 +49,6 @@ class PlanController extends Controller
                     'on_install',
                 ]);
 
-            Log::info('Final subscription plans query result.', [
-                'count' => $plans->count(),
-                'plans' => $plans->map(function ($plan) {
-                    return (array) $plan;
-                })->toArray(),
-            ]);
-
-
-
             $intervalOrder = [
                 'EVERY_30_DAYS' => 1,
                 'ANNUAL' => 2,
@@ -111,10 +60,7 @@ class PlanController extends Controller
                 })
                 ->values();
 
-
-
             $formattedPlans = $plans->map(function ($plan) {
-
                 $billingPeriod = null;
 
                 if ($plan->interval === 'EVERY_30_DAYS') {
@@ -138,34 +84,22 @@ class PlanController extends Controller
                     ),
 
                     'interval' => $plan->interval,
-
                     'billing_period' => $billingPeriod,
-
                     'test' => (bool) $plan->test,
-
                     'on_install' => (bool) $plan->on_install,
                 ];
             })->values();
 
-            Log::info('Final formatted plans sent to React.', [
-                'count' => $formattedPlans->count(),
-                'plans' => $formattedPlans->toArray(),
-            ]);
-
+            $shop = Auth::user();
+            $activePlanId = $shop && $shop->plan_id ? (int) $shop->plan_id : null;
 
             return response()->json([
                 'success' => true,
                 'plans' => $formattedPlans,
+                'active_plan_id' => $activePlanId,
             ]);
 
         } catch (\Throwable $e) {
-
-            Log::error('PLAN LIST ERROR.', [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
 
             return response()->json([
                 'success' => false,
@@ -182,16 +116,6 @@ class PlanController extends Controller
     ): JsonResponse {
         try {
 
-
-            Log::info('Subscription request received.', [
-                'plan_id' => $plan,
-                'shop' => $request->input('shop'),
-                'host' => $request->input('host'),
-                'user_id' => Auth::id(),
-            ]);
-
-
-
             $selectedPlan = DB::table('plans')
                 ->where('id', $plan)
                 ->where('type', 'RECURRING')
@@ -203,32 +127,16 @@ class PlanController extends Controller
 
             if (!$selectedPlan) {
 
-                Log::warning(
-                    'Selected plan was not found.',
-                    [
-                        'requested_plan_id' => $plan,
-                    ]
-                );
-
                 return response()->json([
                     'success' => false,
                     'message' => 'Selected plan was not found.',
                 ], 404);
             }
-
-            Log::info('Selected plan found.', [
-                'plan' => (array) $selectedPlan,
-            ]);
-
-
-
+            // $shop->name — in the kyon147 package's schema, the shop's name column stores the .myshopify.com domain
+            // This is required because Shopify's Billing API needs to know exactly which store to attach the charge to
             $shop = Auth::user();
 
             if (!$shop) {
-
-                Log::warning(
-                    'Subscription request has no authenticated shop.'
-                );
 
                 return response()->json([
                     'success' => false,
@@ -236,24 +144,9 @@ class PlanController extends Controller
                 ], 401);
             }
 
-            Log::info('Authenticated Shopify shop.', [
-                'user_id' => $shop->id,
-                'shop_name' => $shop->name,
-                'plan_id' => $shop->plan_id ?? null,
-            ]);
-
-
-
             $shopDomain = $shop->name;
 
             if (!$shopDomain) {
-
-                Log::error(
-                    'Shop domain is missing from authenticated user.',
-                    [
-                        'user_id' => $shop->id,
-                    ]
-                );
 
                 return response()->json([
                     'success' => false,
@@ -261,14 +154,11 @@ class PlanController extends Controller
                 ], 422);
             }
 
-
+            // host — the base64-encoded Shopify Admin host parameter that your React code reads 
+            // from window.location.search and appends to the request URL (?host=...)
             $host = $request->input('host');
 
             if (!$host) {
-
-                Log::warning(
-                    'Shopify host parameter is missing.'
-                );
 
                 return response()->json([
                     'success' => false,
@@ -276,20 +166,15 @@ class PlanController extends Controller
                 ], 422);
             }
 
-
-
+            // The core kyon147 integration point.
+            // frontend does via window.top.location.href — triggers the package's internal controller to actually call Shopify's Billing API and create the charge, 
+            // then redirect the merchant to Shopify's hosted confirmation page.
+            // Your controller here only builds the URL; it does not itself talk to Shopify.
             $billingUrl = route('billing', [
                 'plan' => $selectedPlan->id,
                 'shop' => $shopDomain,
                 'host' => $host,
             ]);
-
-            Log::info('Billing URL generated.', [
-                'billing_url' => $billingUrl,
-                'plan_id' => $selectedPlan->id,
-                'shop' => $shopDomain,
-            ]);
-
 
             return response()->json([
                 'success' => true,
@@ -313,17 +198,6 @@ class PlanController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-
-            Log::error(
-                'PLAN SUBSCRIPTION ERROR.',
-                [
-                    'plan_id' => $plan,
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString(),
-                ]
-            );
 
             return response()->json([
                 'success' => false,

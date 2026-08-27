@@ -1,53 +1,463 @@
-[2026-08-26 12:54:06] local.INFO: ================ PLAN LIST REQUEST ================  
-[2026-08-26 12:54:06] local.INFO: Plan request received. {"method":"GET","url":"http://portfolio-theft-nest-saying.trycloudflare.com/api/plans","shop":null,"host":null,"user_id":48} 
-[2026-08-26 12:54:06] local.INFO: All records found in plans table. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 12:54:06] local.INFO: RECURRING plans found. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 12:54:06] local.INFO: Monthly plans found. {"count":1,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 12:54:06] local.INFO: Yearly plans found. {"count":1,"plans":[{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 12:54:06] local.INFO: Final subscription plans query result. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","test":1,"on_install":0},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","test":1,"on_install":0}]} 
-[2026-08-26 12:54:06] local.INFO: Final formatted plans sent to React. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","billing_period":"monthly","test":true,"on_install":false},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","billing_period":"yearly","test":true,"on_install":false}]} 
-[2026-08-26 12:54:06] local.INFO: ================ PLAN LIST COMPLETE ================  
-[2026-08-26 12:54:37] local.INFO: ================ PLAN SUBSCRIPTION REQUEST ================  
-[2026-08-26 12:54:37] local.INFO: Subscription request received. {"plan_id":1,"shop":null,"host":null,"user_id":48} 
-[2026-08-26 12:54:37] local.INFO: Selected plan found. {"plan":{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}} 
-[2026-08-26 12:54:37] local.INFO: Authenticated Shopify shop. {"user_id":48,"shop_name":"kakshalijani.myshopify.com","plan_id":null} 
-[2026-08-26 12:54:37] local.WARNING: Shopify host parameter is missing.  
-[2026-08-26 13:01:28] local.INFO: ================ PLAN LIST REQUEST ================  
-[2026-08-26 13:01:28] local.INFO: Plan request received. {"method":"GET","url":"http://portfolio-theft-nest-saying.trycloudflare.com/api/plans","shop":null,"host":null,"user_id":48} 
-[2026-08-26 13:01:28] local.INFO: All records found in plans table. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:01:28] local.INFO: RECURRING plans found. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:01:28] local.INFO: Monthly plans found. {"count":1,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:01:28] local.INFO: Yearly plans found. {"count":1,"plans":[{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:01:28] local.INFO: Final subscription plans query result. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","test":1,"on_install":0},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","test":1,"on_install":0}]} 
-[2026-08-26 13:01:28] local.INFO: Final formatted plans sent to React. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","billing_period":"monthly","test":true,"on_install":false},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","billing_period":"yearly","test":true,"on_install":false}]} 
-[2026-08-26 13:01:28] local.INFO: ================ PLAN LIST COMPLETE ================  
-[2026-08-26 13:01:31] local.INFO: ================ PLAN SUBSCRIPTION REQUEST ================  
-[2026-08-26 13:01:31] local.INFO: Subscription request received. {"plan_id":1,"shop":"kakshalijani.myshopify.com","host":"YWRtaW4uc2hvcGlmeS5jb20vc3RvcmUva2Frc2hhbGlqYW5p","user_id":48} 
-[2026-08-26 13:01:31] local.INFO: Selected plan found. {"plan":{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}} 
-[2026-08-26 13:01:31] local.INFO: Authenticated Shopify shop. {"user_id":48,"shop_name":"kakshalijani.myshopify.com","plan_id":null} 
-[2026-08-26 13:01:31] local.INFO: Billing URL generated. {"billing_url":"http://portfolio-theft-nest-saying.trycloudflare.com/billing/1?shop=kakshalijani.myshopify.com&host=YWRtaW4uc2hvcGlmeS5jb20vc3RvcmUva2Frc2hhbGlqYW5p","plan_id":1,"shop":"kakshalijani.myshopify.com"} 
-[2026-08-26 13:01:31] local.INFO: ================ PLAN SUBSCRIPTION COMPLETE ================  
-[2026-08-26 13:02:29] local.INFO: ================ PLAN LIST REQUEST ================  
-[2026-08-26 13:02:29] local.INFO: Plan request received. {"method":"GET","url":"http://portfolio-theft-nest-saying.trycloudflare.com/api/plans","shop":null,"host":null,"user_id":48} 
-[2026-08-26 13:02:29] local.INFO: All records found in plans table. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:02:29] local.INFO: RECURRING plans found. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:02:29] local.INFO: Monthly plans found. {"count":1,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:02:29] local.INFO: Yearly plans found. {"count":1,"plans":[{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:02:29] local.INFO: Final subscription plans query result. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","test":1,"on_install":0},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","test":1,"on_install":0}]} 
-[2026-08-26 13:02:29] local.INFO: Final formatted plans sent to React. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","billing_period":"monthly","test":true,"on_install":false},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","billing_period":"yearly","test":true,"on_install":false}]} 
-[2026-08-26 13:02:29] local.INFO: ================ PLAN LIST COMPLETE ================  
-[2026-08-26 13:14:56] local.INFO: ================ PLAN LIST REQUEST ================  
-[2026-08-26 13:14:56] local.INFO: Plan request received. {"method":"GET","url":"http://portfolio-theft-nest-saying.trycloudflare.com/api/plans","shop":null,"host":null,"user_id":48} 
-[2026-08-26 13:14:56] local.INFO: All records found in plans table. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:14:56] local.INFO: RECURRING plans found. {"count":2,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"},{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:14:56] local.INFO: Monthly plans found. {"count":1,"plans":[{"id":1,"type":"RECURRING","name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:14:56] local.INFO: Yearly plans found. {"count":1,"plans":[{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}]} 
-[2026-08-26 13:14:56] local.INFO: Final subscription plans query result. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","test":1,"on_install":0},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","test":1,"on_install":0}]} 
-[2026-08-26 13:14:56] local.INFO: Final formatted plans sent to React. {"count":2,"plans":[{"id":1,"name":"Basic","price":"3.99","interval":"EVERY_30_DAYS","billing_period":"monthly","test":true,"on_install":false},{"id":2,"name":"Basic","price":"39.99","interval":"ANNUAL","billing_period":"yearly","test":true,"on_install":false}]} 
-[2026-08-26 13:14:56] local.INFO: ================ PLAN LIST COMPLETE ================  
-[2026-08-26 13:15:09] local.INFO: ================ PLAN SUBSCRIPTION REQUEST ================  
-[2026-08-26 13:15:09] local.INFO: Subscription request received. {"plan_id":2,"shop":"kakshalijani.myshopify.com","host":"YWRtaW4uc2hvcGlmeS5jb20vc3RvcmUva2Frc2hhbGlqYW5p","user_id":48} 
-[2026-08-26 13:15:09] local.INFO: Selected plan found. {"plan":{"id":2,"type":"RECURRING","name":"Basic","price":"39.99","interval":"ANNUAL","capped_amount":null,"terms":null,"trial_days":0,"test":1,"on_install":0,"created_at":"2026-08-26 12:15:06","updated_at":"2026-08-26 12:15:06"}} 
-[2026-08-26 13:15:09] local.INFO: Authenticated Shopify shop. {"user_id":48,"shop_name":"kakshalijani.myshopify.com","plan_id":1} 
-[2026-08-26 13:15:09] local.INFO: Billing URL generated. {"billing_url":"http://portfolio-theft-nest-saying.trycloudflare.com/billing/2?shop=kakshalijani.myshopify.com&host=YWRtaW4uc2hvcGlmeS5jb20vc3RvcmUva2Frc2hhbGlqYW5p","plan_id":2,"shop":"kakshalijani.myshopify.com"} 
-[2026-08-26 13:15:09] local.INFO: ================ PLAN SUBSCRIPTION COMPLETE ================  
+[2026-08-27 06:48:58] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:48:59] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:50:39] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:50:40] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:50:40] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 06:50:57] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:50:58] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:50:59] local.INFO: array (
+  'sku_prefix' => 'SKU',
+  'sku_auto_number_start' => '1001',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '-',
+  'segment_product_title' => 'char_2',
+  'segment_product_vendor' => 'char_2',
+  'segment_product_type' => 'char_2',
+  'segment_option1' => 'char_2',
+  'segment_option2' => 'char_2',
+  'segment_option3' => 'char_2',
+  'segment_metafield' => 'custom.dietary_flags',
+  'segment_metafield_rule' => 'char_2',
+  'hide_options_1_2_3' => false,
+  'force_uppercase_fields' => true,
+  'auto_generate_on_create' => false,
+)  
+[2026-08-27 06:50:59] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
+[2026-08-27 06:51:14] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:51:14] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:51:14] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 06:51:16] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:51:17] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:53:05] local.INFO: ProductWebhookController call  
+[2026-08-27 06:53:06] local.INFO: generateBarcode job is called  
+[2026-08-27 06:53:06] local.INFO: Auto barcode generation disabled.  
+[2026-08-27 06:53:07] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:53:07] local.INFO: Auto SKU generation disabled. {"user_id":49} 
+[2026-08-27 06:53:13] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:53:14] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:54:02] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:54:03] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:54:03] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 06:54:08] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:54:09] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:54:11] local.INFO: array (
+  'sku_prefix' => 'SKU',
+  'sku_auto_number_start' => '1001',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '-',
+  'segment_product_title' => 'char_2',
+  'segment_product_vendor' => 'char_2',
+  'segment_product_type' => 'char_2',
+  'segment_option1' => 'char_2',
+  'segment_option2' => 'char_2',
+  'segment_option3' => 'char_2',
+  'segment_metafield' => 'custom.dietary_flags',
+  'segment_metafield_rule' => 'char_2',
+  'hide_options_1_2_3' => false,
+  'force_uppercase_fields' => true,
+  'auto_generate_on_create' => true,
+)  
+[2026-08-27 06:54:11] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
+[2026-08-27 06:55:26] local.INFO: ProductWebhookController call  
+[2026-08-27 06:55:27] local.INFO: generateBarcode job is called  
+[2026-08-27 06:55:27] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-27 06:55:27] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12591140045118',
+  'body_html' => '<p>Test</p>',
+  'created_at' => '2026-08-27T02:55:24-04:00',
+  'handle' => 'test',
+  'id' => 12591140045118,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'Test',
+  'updated_at' => '2026-08-27T02:55:25-04:00',
+  'vendor' => 'magecomp',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'most_favorite',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337106739518',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-27T02:55:24-04:00',
+      'id' => 54337106739518,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12591140045118,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-27T02:55:24-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56356082843966,
+      'inventory_quantity' => 40,
+      'old_inventory_quantity' => 40,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15178659299646,
+      'product_id' => 12591140045118,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54906702922046,
+      'product_id' => 12591140045118,
+      'position' => 1,
+      'created_at' => '2026-08-27T02:54:43-04:00',
+      'updated_at' => '2026-08-27T02:55:25-04:00',
+      'alt' => NULL,
+      'width' => 1080,
+      'height' => 1350,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_b834fdc0-de99-454f-b019-640fb019de4a.jpg?v=1787813685',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906702922046',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54906702922046,
+    'product_id' => 12591140045118,
+    'position' => 1,
+    'created_at' => '2026-08-27T02:54:43-04:00',
+    'updated_at' => '2026-08-27T02:55:25-04:00',
+    'alt' => NULL,
+    'width' => 1080,
+    'height' => 1350,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_b834fdc0-de99-454f-b019-640fb019de4a.jpg?v=1787813685',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906702922046',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45818508312894,
+      'product_id' => 12591140045118,
+      'position' => 1,
+      'created_at' => '2026-08-27T02:54:43-04:00',
+      'updated_at' => '2026-08-27T02:55:25-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 1080,
+        'height' => 1350,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_b834fdc0-de99-454f-b019-640fb019de4a.jpg?v=1787813685',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45818508312894',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337106739518',
+      'updated_at' => '2026-08-27T06:55:24.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/na',
+    'name' => 'Uncategorized',
+    'full_name' => 'Uncategorized',
+  ),
+)  
+[2026-08-27 06:55:28] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337106739518","barcode":"93520097497"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1787813727488774.0]}} 
+[2026-08-27 06:55:28] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:55:28] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54337106739518","sku":"SKU-TE-MA-FA-DE-1001-2026"} 
+[2026-08-27 06:55:29] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337106739518","inventoryItem":{"sku":"SKU-TE-MA-FA-DE-1001-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1787813728446816.0]}} 
+[2026-08-27 06:55:41] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:55:42] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:56:01] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:56:02] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:56:02] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 06:56:06] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:56:07] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:56:09] local.INFO: array (
+  'sku_prefix' => 'SKU',
+  'sku_auto_number_start' => '1001',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '-',
+  'segment_product_title' => 'char_2',
+  'segment_product_vendor' => 'char_2',
+  'segment_product_type' => 'char_2',
+  'segment_option1' => 'char_2',
+  'segment_option2' => 'char_2',
+  'segment_option3' => 'char_2',
+  'segment_metafield' => 'custom.dietary_flags',
+  'segment_metafield_rule' => 'char_2',
+  'hide_options_1_2_3' => false,
+  'force_uppercase_fields' => true,
+  'auto_generate_on_create' => false,
+)  
+[2026-08-27 06:56:09] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
+[2026-08-27 06:56:23] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:56:24] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:56:24] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 06:58:15] local.INFO: ProductWebhookController call  
+[2026-08-27 06:58:17] local.INFO: generateBarcode job is called  
+[2026-08-27 06:58:17] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-27 06:58:17] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12591142568254',
+  'body_html' => '<p>test</p>',
+  'created_at' => '2026-08-27T02:58:12-04:00',
+  'handle' => 'test',
+  'id' => 12591142568254,
+  'product_type' => 'fast food',
+  'published_at' => '2026-08-27T02:58:14-04:00',
+  'template_suffix' => NULL,
+  'title' => 'test',
+  'updated_at' => '2026-08-27T02:58:14-04:00',
+  'vendor' => 'kakshalijani',
+  'status' => 'active',
+  'published_scope' => 'global',
+  'tags' => 'most_favorite',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337109328190',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-27T02:58:12-04:00',
+      'id' => 54337109328190,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12591142568254,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-27T02:58:12-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56356085432638,
+      'inventory_quantity' => 100,
+      'old_inventory_quantity' => 100,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15178661855550,
+      'product_id' => 12591142568254,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54906716062014,
+      'product_id' => 12591142568254,
+      'position' => 1,
+      'created_at' => '2026-08-27T02:57:34-04:00',
+      'updated_at' => '2026-08-27T02:58:13-04:00',
+      'alt' => NULL,
+      'width' => 1080,
+      'height' => 1350,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_9239ca66-5498-4ae1-a4d4-a51bbddcb330.jpg?v=1787813855',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906716062014',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54906716062014,
+    'product_id' => 12591142568254,
+    'position' => 1,
+    'created_at' => '2026-08-27T02:57:34-04:00',
+    'updated_at' => '2026-08-27T02:58:13-04:00',
+    'alt' => NULL,
+    'width' => 1080,
+    'height' => 1350,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_9239ca66-5498-4ae1-a4d4-a51bbddcb330.jpg?v=1787813855',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906716062014',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45818521321790,
+      'product_id' => 12591142568254,
+      'position' => 1,
+      'created_at' => '2026-08-27T02:57:34-04:00',
+      'updated_at' => '2026-08-27T02:58:13-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 1080,
+        'height' => 1350,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_9239ca66-5498-4ae1-a4d4-a51bbddcb330.jpg?v=1787813855',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45818521321790',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337109328190',
+      'updated_at' => '2026-08-27T06:58:12.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/na',
+    'name' => 'Uncategorized',
+    'full_name' => 'Uncategorized',
+  ),
+)  
+[2026-08-27 06:58:18] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337109328190","barcode":"17120778028"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1787813897554245.0]}} 
+[2026-08-27 06:58:18] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:58:18] local.INFO: Auto SKU generation disabled. {"user_id":49} 
+[2026-08-27 06:58:24] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:58:25] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:58:38] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:58:39] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:59:04] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:59:05] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:59:05] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 06:59:09] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 06:59:10] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 06:59:12] local.INFO: array (
+  'sku_prefix' => 'SKU',
+  'sku_auto_number_start' => '1001',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '-',
+  'segment_product_title' => 'char_2',
+  'segment_product_vendor' => 'char_2',
+  'segment_product_type' => 'char_2',
+  'segment_option1' => 'char_2',
+  'segment_option2' => 'char_2',
+  'segment_option3' => 'char_2',
+  'segment_metafield' => 'custom.dietary_flags',
+  'segment_metafield_rule' => 'char_2',
+  'hide_options_1_2_3' => false,
+  'force_uppercase_fields' => true,
+  'auto_generate_on_create' => true,
+)  
+[2026-08-27 06:59:12] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
+[2026-08-27 06:59:26] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 06:59:26] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 06:59:26] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 07:01:30] local.INFO: ProductWebhookController call  
+[2026-08-27 07:01:31] local.INFO: generateBarcode job is called  
+[2026-08-27 07:01:31] local.INFO: Auto barcode generation disabled.  
+[2026-08-27 07:01:31] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 07:01:31] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54337112932670","sku":"SKU-TE-PA-FA-DE-1001-2026"} 
+[2026-08-27 07:01:32] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337112932670","inventoryItem":{"sku":"SKU-TE-PA-FA-DE-1001-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1787814091797331.0]}} 
+[2026-08-27 07:01:47] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 07:01:48] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 07:02:16] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 07:02:16] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 07:02:16] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 09:57:06] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 09:57:07] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 09:57:07] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 09:57:42] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 09:57:43] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 09:58:12] local.INFO: array (
+  'sku_prefix' => 'SKU',
+  'sku_auto_number_start' => '1001',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '-',
+  'segment_product_title' => 'char_2',
+  'segment_product_vendor' => 'char_2',
+  'segment_product_type' => 'char_2',
+  'segment_option1' => 'char_2',
+  'segment_option2' => 'char_2',
+  'segment_option3' => 'char_2',
+  'segment_metafield' => 'custom.dietary_flags',
+  'segment_metafield_rule' => 'char_2',
+  'hide_options_1_2_3' => false,
+  'force_uppercase_fields' => true,
+  'auto_generate_on_create' => true,
+)  
+[2026-08-27 09:58:12] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 50  
+[2026-08-27 09:59:20] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 09:59:21] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 09:59:23] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 09:59:24] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 09:59:36] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 09:59:38] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:00:17] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 10:00:19] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:00:32] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 10:00:32] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 10:00:32] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 10:00:41] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 10:00:42] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:00:44] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 10:00:45] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:00:50] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 10:00:51] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 10:00:51] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 10:01:01] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 10:01:02] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:01:03] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 10:01:04] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:01:19] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 10:01:20] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 10:01:20] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 10:01:30] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 10:01:31] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 10:01:31] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 10:01:33] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-27 10:01:34] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-27 10:01:42] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 10:01:43] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 10:01:43] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-27 10:01:50] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-27 10:01:51] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-27 10:01:51] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
