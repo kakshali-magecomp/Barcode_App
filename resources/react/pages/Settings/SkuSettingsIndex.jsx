@@ -175,6 +175,7 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
             );
         }
 
+        
         const finalPreview = segments
             .filter(Boolean)
             .join(delimiter);

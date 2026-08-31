@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal.jsx';
 import { useNavigate } from "react-router-dom";
 
@@ -118,6 +118,7 @@ export default function TemplateList() {
     if (loading) {
         return (
             <s-page heading="Label Templates">
+                <TitleBar title="barcodedemo-app" />
                 <s-box padding="base">
                     <s-stack
                         direction="block"
@@ -146,6 +147,7 @@ export default function TemplateList() {
             />
 
             <s-page heading="Barcode App" subheading="Manage and edit your customized sticker layout dimensions.">
+                <TitleBar title="barcodedemo-app" />
                 <s-stack direction="inline" gap="base" justifyContent="end">
                     {selectedIds.length > 0 && (
                         <s-button tone="critical" onClick={openDeleteSelectedConfirmation}>

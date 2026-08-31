@@ -418,6 +418,7 @@ class GenerateSkuJob implements ShouldQueue
             $delimiter,
             $parts
         );
+        
 
 
         if ($setting->force_uppercase_fields) {

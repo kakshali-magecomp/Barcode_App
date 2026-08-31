@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
@@ -317,6 +317,7 @@ export default function DesignCanvas() {
     if (pageLoading) {
         return (
             <s-page heading="Template Designer">
+                <TitleBar title="barcodedemo-app" />
                 <s-box padding="loose" alignContent="center">
                     <s-spinner accessibilityLabel="Loading template designer" size="large" />
                 </s-box>
@@ -335,6 +336,7 @@ export default function DesignCanvas() {
             </ui-save-bar>
 
             <s-page heading={`${templateTitle} - Design`}>
+                <TitleBar title="barcodedemo-app" />
                 <s-section>
 
                     <s-link href="/TemplateList">← Back to Templates</s-link>

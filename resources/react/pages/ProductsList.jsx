@@ -1,9 +1,11 @@
-import React, { useState } from "react";
-import { useAppBridge } from "@shopify/app-bridge-react";
+import React, { useState, useEffect } from "react";
+import { useAppBridge, TitleBar } from "@shopify/app-bridge-react";
+import { useNavigate } from "react-router-dom";
 import ProductPickerModal from "../components/ProductPickerModal";
 
 export default function GenerateSku() {
     const shopify = useAppBridge();
+    const navigate = useNavigate();
     const [updatedProducts, setUpdatedProducts] = useState([]);
     const [selectedProducts, setSelectedProducts] = useState([]);
     const [pickerOpen, setPickerOpen] = useState(false);
@@ -138,7 +140,21 @@ export default function GenerateSku() {
     const paginatedSummary = updatedProducts.slice(summaryStart, summaryEnd);
 
     return (
-        <s-page heading="Generate SKU" subheading="Manage and edit your customized SKU">
+        <>
+            <TitleBar title="barcodedemo-app" />
+            <s-page>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: '24px' 
+                }}>
+                    <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
+                        Generate SKU
+                    </h1>
+                    <s-button icon="settings" onClick={() => navigate('/Settingindex')}></s-button>
+                </div>
+
             {error && (
                 <s-section>
                     <s-banner tone="critical" onDismiss={() => setError("")}>
@@ -196,7 +212,7 @@ export default function GenerateSku() {
                         </s-button>
                     </s-stack>
                     {loading && progress && progress.total > 0 && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
                             <s-text>Generating SKUs</s-text>
                             <div
                                 role="progressbar"
@@ -222,7 +238,7 @@ export default function GenerateSku() {
                                     }}
                                 />
                             </div>
-                            <s-text color="subdued">
+                            <s-text tone="subdued">
                                 {progress.processed} of {progress.total} products processed
                                 {progress.processed >= progress.total ? '' : '...'}
                             </s-text>
@@ -291,6 +307,7 @@ export default function GenerateSku() {
                     setPickerOpen(false);
                 }}
             />
-        </s-page>
+            </s-page>
+        </>
     );
 }

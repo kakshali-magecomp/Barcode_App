@@ -73,6 +73,16 @@ class DashboardController extends Controller
             $productsCount = 0;
         }
 
+        $planName = 'No plan is selected';
+        if ($user->plan) {
+            $planName = $user->plan->name;
+            if ($user->plan->interval === 'EVERY_30_DAYS') {
+                $planName .= ' Monthly';
+            } elseif ($user->plan->interval === 'ANNUAL') {
+                $planName .= ' Yearly';
+            }
+        }
+
         return response()->json([
 
             "success" => true,
@@ -91,7 +101,9 @@ class DashboardController extends Controller
 
                 "top_template" => $topTemplate,
 
-                "recent_prints" => $recentPrints
+                "recent_prints" => $recentPrints,
+
+                "plan_name" => $planName
 
             ]
 

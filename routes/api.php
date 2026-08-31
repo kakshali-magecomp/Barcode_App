@@ -16,6 +16,7 @@ use App\Http\Controllers\ProductWebhookController;
 use App\Http\Controllers\Api\PrintHistoryController;
 use App\Http\Controllers\BulkOperationController;
 use App\Http\Controllers\PlanController;
+use App\Http\Controllers\PromoController;
 
 
 Route::middleware(['verify.shopify'])->group(function () {
@@ -65,6 +66,8 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/plans', [PlanController::class, 'index']);
     Route::post('/plans/{plan}/subscribe', [PlanController::class, 'subscribe']);
 
+    Route::post('/closepromo', [PromoController::class, 'closePromo']);
+    Route::get('/getpromptdata', [PromoController::class, 'getPromptdata']);
 });
 Route::post('/webhooks/products/create', [ProductWebhookController::class, 'created']);
 

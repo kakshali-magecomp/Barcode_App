@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 import { useNavigate } from 'react-router-dom';
 import LineControls from '../../components/LineControls';
 import SymbolControls from '../../components/SymbolControls';
@@ -541,7 +541,8 @@ export default function CreateTemplate() {
     if (pageLoading) {
         return (
             <s-page heading="Create Barcode Template">
-                <s-box padding="loose" alignContent="center">
+                <TitleBar title="barcodedemo-app" />
+                <s-box padding="base" alignContent="center">
                     <s-spinner
                         accessibilityLabel="Loading template data"
                         size="large"
@@ -563,6 +564,7 @@ export default function CreateTemplate() {
             </ui-save-bar>
 
             <s-page heading="Create Barcode Template">
+                <TitleBar title="barcodedemo-app" />
                 <s-box paddingBlockStart="base">
                     <s-stack direction="inline" gap="small" alignItems="center">
                         <s-link href="/TemplateList" tone="neutral">

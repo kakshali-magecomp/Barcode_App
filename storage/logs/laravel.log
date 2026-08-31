@@ -1,269 +1,211 @@
-[2026-08-27 06:48:58] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:48:59] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:50:39] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:50:40] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:50:40] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 06:50:57] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:50:58] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:50:59] local.INFO: array (
-  'sku_prefix' => 'SKU',
-  'sku_auto_number_start' => '1001',
-  'sku_suffix' => '2026',
-  'sku_delimiter' => '-',
-  'segment_product_title' => 'char_2',
-  'segment_product_vendor' => 'char_2',
-  'segment_product_type' => 'char_2',
-  'segment_option1' => 'char_2',
-  'segment_option2' => 'char_2',
-  'segment_option3' => 'char_2',
-  'segment_metafield' => 'custom.dietary_flags',
-  'segment_metafield_rule' => 'char_2',
-  'hide_options_1_2_3' => false,
-  'force_uppercase_fields' => true,
-  'auto_generate_on_create' => false,
-)  
-[2026-08-27 06:50:59] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
-[2026-08-27 06:51:14] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:51:14] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:51:14] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 06:51:16] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:51:17] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:53:05] local.INFO: ProductWebhookController call  
-[2026-08-27 06:53:06] local.INFO: generateBarcode job is called  
-[2026-08-27 06:53:06] local.INFO: Auto barcode generation disabled.  
-[2026-08-27 06:53:07] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:53:07] local.INFO: Auto SKU generation disabled. {"user_id":49} 
-[2026-08-27 06:53:13] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:53:14] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:54:02] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:54:03] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:54:03] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 06:54:08] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:54:09] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:54:11] local.INFO: array (
-  'sku_prefix' => 'SKU',
-  'sku_auto_number_start' => '1001',
-  'sku_suffix' => '2026',
-  'sku_delimiter' => '-',
-  'segment_product_title' => 'char_2',
-  'segment_product_vendor' => 'char_2',
-  'segment_product_type' => 'char_2',
-  'segment_option1' => 'char_2',
-  'segment_option2' => 'char_2',
-  'segment_option3' => 'char_2',
-  'segment_metafield' => 'custom.dietary_flags',
-  'segment_metafield_rule' => 'char_2',
-  'hide_options_1_2_3' => false,
-  'force_uppercase_fields' => true,
-  'auto_generate_on_create' => true,
-)  
-[2026-08-27 06:54:11] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
-[2026-08-27 06:55:26] local.INFO: ProductWebhookController call  
-[2026-08-27 06:55:27] local.INFO: generateBarcode job is called  
-[2026-08-27 06:55:27] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-27 06:55:27] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12591140045118',
-  'body_html' => '<p>Test</p>',
-  'created_at' => '2026-08-27T02:55:24-04:00',
-  'handle' => 'test',
-  'id' => 12591140045118,
+[2026-08-31 04:22:05] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 04:22:06] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 04:22:11] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 04:22:12] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 04:22:12] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 04:22:16] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 04:22:17] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 04:22:22] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 04:22:23] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:11:50] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:11:51] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:11:58] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:11:59] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:12:05] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 07:12:05] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 07:12:05] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 07:36:28] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 07:36:28] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 07:36:28] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 07:42:01] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:42:02] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:42:03] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 07:42:04] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 07:42:04] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 07:42:05] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:42:06] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:42:16] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:42:17] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:45:00] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:45:01] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:45:03] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 07:45:03] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 07:45:03] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 07:45:06] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:45:07] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:45:13] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:45:14] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:46:46] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:46:47] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:46:57] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:46:58] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:47:05] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:47:06] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:47:14] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":51,"requested_template_id":"384"} 
+[2026-08-31 07:47:14] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:47:15] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:47:15] local.INFO: BARCODE SETTINGS {"id":42,"user_id":51,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.8]","contextual_pricing_value":"DE","created_at":"2026-08-31T04:06:18.000000Z","updated_at":"2026-08-31T04:07:36.000000Z"} 
+[2026-08-31 07:47:15] local.INFO: TEMPLATE DESIGN {"id":385,"barcode_template_id":384,"selected_variant_id":"gid://shopify/ProductVariant/54136885674302","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"with_currency","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":true,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"UPCA","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":2,"created_at":"2026-08-31T04:09:33.000000Z","updated_at":"2026-08-31T04:09:33.000000Z"} 
+[2026-08-31 07:47:15] local.INFO: FINAL RESPONSE {"id":385,"user_id":51,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.8]","contextual_pricing_value":"DE","created_at":"2026-08-31T04:09:33.000000Z","updated_at":"2026-08-31T04:09:33.000000Z","barcode_template_id":384,"selected_variant_id":"gid://shopify/ProductVariant/54136885674302","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"with_currency","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":true,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":2,"template_name":"NEW","paper_brand":"zebra","paper_model":"4000d-2x1","layout_settings":{"gapX":0,"gapY":0,"name":"Z-Select 4000D (2\" x 1\")","roll":{"coreDiameter":25.4,"labelsPerRoll":2340,"outerDiameter":127},"rows":1,"type":"roll","label":{"width":50.8,"height":25.4},"paper":{"width":50.8,"height":25.4},"columns":1,"marginTop":0,"marginLeft":0}} 
+[2026-08-31 07:49:31] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:49:32] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:50:46] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:50:47] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:50:59] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:51:00] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:51:01] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:51:02] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:51:13] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:51:14] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:51:35] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:51:36] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:52:11] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:52:12] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:52:19] local.INFO: Attempting template fetch lookup trace {"authenticated_user_id":51,"requested_template_id":"384"} 
+[2026-08-31 07:52:19] local.INFO: BARCODE SETTINGS {"id":42,"user_id":51,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.8]","contextual_pricing_value":"DE","created_at":"2026-08-31T04:06:18.000000Z","updated_at":"2026-08-31T04:07:36.000000Z"} 
+[2026-08-31 07:52:19] local.INFO: TEMPLATE DESIGN {"id":385,"barcode_template_id":384,"selected_variant_id":"gid://shopify/ProductVariant/54136885674302","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"with_currency","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":true,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"UPCA","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":2,"created_at":"2026-08-31T04:09:33.000000Z","updated_at":"2026-08-31T04:09:33.000000Z"} 
+[2026-08-31 07:52:19] local.INFO: FINAL RESPONSE {"id":385,"user_id":51,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.8]","contextual_pricing_value":"DE","created_at":"2026-08-31T04:09:33.000000Z","updated_at":"2026-08-31T04:09:33.000000Z","barcode_template_id":384,"selected_variant_id":"gid://shopify/ProductVariant/54136885674302","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"with_currency","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":true,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":2,"template_name":"NEW","paper_brand":"zebra","paper_model":"4000d-2x1","layout_settings":{"gapX":0,"gapY":0,"name":"Z-Select 4000D (2\" x 1\")","roll":{"coreDiameter":25.4,"labelsPerRoll":2340,"outerDiameter":127},"rows":1,"type":"roll","label":{"width":50.8,"height":25.4},"paper":{"width":50.8,"height":25.4},"columns":1,"marginTop":0,"marginLeft":0}} 
+[2026-08-31 07:52:19] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:52:20] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:52:28] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:52:29] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:53:27] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:53:28] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 07:53:44] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 07:53:45] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 09:51:37] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 09:51:38] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 09:54:52] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 09:54:53] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 09:54:53] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 09:55:08] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 09:55:09] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 09:55:15] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 09:55:16] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 09:55:23] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 09:55:24] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 09:55:24] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 09:59:23] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 09:59:24] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:01:49] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:01:49] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:01:49] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:01:50] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:01:51] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:02:32] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:02:33] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:02:33] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:02:35] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:02:36] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:02:36] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:02:37] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:02:37] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:04:12] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:04:13] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:07:19] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:07:20] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:07:44] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:07:45] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:07:50] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:07:51] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:09:22] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:09:22] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:09:22] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:09:25] local.INFO: Product list: contextual pricing check {"raw_setting":"DE","normalized":"DE","passes_regex":true} 
+[2026-08-31 10:09:26] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"DE","sample_price":"1.95","sample_currency":"EUR","store_default_currency":"INR"} 
+[2026-08-31 10:09:26] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:09:27] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:09:27] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:12:27] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:12:27] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:12:27] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:12:37] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:12:38] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:12:39] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:12:40] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:12:40] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:15:48] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:15:49] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:15:56] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:15:57] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:15:57] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:15:58] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:15:59] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:16:04] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:16:04] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:16:04] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:16:46] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:16:47] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:17:09] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:17:09] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:17:09] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:17:28] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:17:29] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:17:34] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:17:36] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:21:14] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:21:15] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:21:15] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:21:20] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:21:21] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:21:25] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:21:25] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:21:25] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:23:07] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:23:08] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:23:27] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:23:28] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:23:28] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:23:30] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:23:31] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:23:37] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:23:38] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:23:38] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:23:50] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:23:51] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:23:55] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:23:55] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:23:55] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:25:00] local.INFO: ProductWebhookController call  
+[2026-08-31 10:25:01] local.INFO: generateBarcode job is called  
+[2026-08-31 10:25:01] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 10:25:01] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594070815038',
+  'body_html' => '<p>SKU-Generate</p>',
+  'created_at' => '2026-08-31T06:24:58-04:00',
+  'handle' => 'sku-generate',
+  'id' => 12594070815038,
   'product_type' => 'fast food',
   'published_at' => NULL,
   'template_suffix' => NULL,
-  'title' => 'Test',
-  'updated_at' => '2026-08-27T02:55:25-04:00',
-  'vendor' => 'magecomp',
+  'title' => 'SKU-Generate',
+  'updated_at' => '2026-08-31T06:24:59-04:00',
+  'vendor' => 'Dumplings',
   'status' => 'active',
   'published_scope' => 'web',
-  'tags' => 'most_favorite',
+  'tags' => 'fast-food',
   'variants' => 
   array (
     0 => 
     array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337106739518',
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355186680126',
       'barcode' => NULL,
       'compare_at_price' => NULL,
-      'created_at' => '2026-08-27T02:55:24-04:00',
-      'id' => 54337106739518,
+      'created_at' => '2026-08-31T06:24:58-04:00',
+      'id' => 54355186680126,
       'inventory_policy' => 'deny',
       'position' => 1,
-      'price' => '140.30',
-      'product_id' => 12591140045118,
+      'price' => '120.00',
+      'product_id' => 12594070815038,
       'sku' => NULL,
       'taxable' => true,
       'title' => 'Default Title',
-      'updated_at' => '2026-08-27T02:55:24-04:00',
+      'updated_at' => '2026-08-31T06:24:58-04:00',
       'option1' => 'Default Title',
       'option2' => NULL,
       'option3' => NULL,
       'image_id' => NULL,
-      'inventory_item_id' => 56356082843966,
-      'inventory_quantity' => 40,
-      'old_inventory_quantity' => 40,
-    ),
-  ),
-  'options' => 
-  array (
-    0 => 
-    array (
-      'name' => 'Title',
-      'id' => 15178659299646,
-      'product_id' => 12591140045118,
-      'position' => 1,
-      'values' => 
-      array (
-        0 => 'Default Title',
-      ),
-    ),
-  ),
-  'images' => 
-  array (
-    0 => 
-    array (
-      'id' => 54906702922046,
-      'product_id' => 12591140045118,
-      'position' => 1,
-      'created_at' => '2026-08-27T02:54:43-04:00',
-      'updated_at' => '2026-08-27T02:55:25-04:00',
-      'alt' => NULL,
-      'width' => 1080,
-      'height' => 1350,
-      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_b834fdc0-de99-454f-b019-640fb019de4a.jpg?v=1787813685',
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906702922046',
-    ),
-  ),
-  'image' => 
-  array (
-    'id' => 54906702922046,
-    'product_id' => 12591140045118,
-    'position' => 1,
-    'created_at' => '2026-08-27T02:54:43-04:00',
-    'updated_at' => '2026-08-27T02:55:25-04:00',
-    'alt' => NULL,
-    'width' => 1080,
-    'height' => 1350,
-    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_b834fdc0-de99-454f-b019-640fb019de4a.jpg?v=1787813685',
-    'variant_ids' => 
-    array (
-    ),
-    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906702922046',
-  ),
-  'media' => 
-  array (
-    0 => 
-    array (
-      'id' => 45818508312894,
-      'product_id' => 12591140045118,
-      'position' => 1,
-      'created_at' => '2026-08-27T02:54:43-04:00',
-      'updated_at' => '2026-08-27T02:55:25-04:00',
-      'alt' => NULL,
-      'status' => 'READY',
-      'media_content_type' => 'IMAGE',
-      'preview_image' => 
-      array (
-        'width' => 1080,
-        'height' => 1350,
-        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_b834fdc0-de99-454f-b019-640fb019de4a.jpg?v=1787813685',
-        'status' => 'READY',
-      ),
-      'variant_ids' => 
-      array (
-      ),
-      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45818508312894',
-    ),
-  ),
-  'variant_gids' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337106739518',
-      'updated_at' => '2026-08-27T06:55:24.000Z',
-    ),
-  ),
-  'has_variants_that_requires_components' => false,
-  'category' => 
-  array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/na',
-    'name' => 'Uncategorized',
-    'full_name' => 'Uncategorized',
-  ),
-)  
-[2026-08-27 06:55:28] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337106739518","barcode":"93520097497"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1787813727488774.0]}} 
-[2026-08-27 06:55:28] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:55:28] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54337106739518","sku":"SKU-TE-MA-FA-DE-1001-2026"} 
-[2026-08-27 06:55:29] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337106739518","inventoryItem":{"sku":"SKU-TE-MA-FA-DE-1001-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1787813728446816.0]}} 
-[2026-08-27 06:55:41] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:55:42] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:56:01] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:56:02] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:56:02] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 06:56:06] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:56:07] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:56:09] local.INFO: array (
-  'sku_prefix' => 'SKU',
-  'sku_auto_number_start' => '1001',
-  'sku_suffix' => '2026',
-  'sku_delimiter' => '-',
-  'segment_product_title' => 'char_2',
-  'segment_product_vendor' => 'char_2',
-  'segment_product_type' => 'char_2',
-  'segment_option1' => 'char_2',
-  'segment_option2' => 'char_2',
-  'segment_option3' => 'char_2',
-  'segment_metafield' => 'custom.dietary_flags',
-  'segment_metafield_rule' => 'char_2',
-  'hide_options_1_2_3' => false,
-  'force_uppercase_fields' => true,
-  'auto_generate_on_create' => false,
-)  
-[2026-08-27 06:56:09] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
-[2026-08-27 06:56:23] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:56:24] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:56:24] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 06:58:15] local.INFO: ProductWebhookController call  
-[2026-08-27 06:58:17] local.INFO: generateBarcode job is called  
-[2026-08-27 06:58:17] local.INFO: WEBHOOK PRODUCT DATA  
-[2026-08-27 06:58:17] local.INFO: array (
-  'admin_graphql_api_id' => 'gid://shopify/Product/12591142568254',
-  'body_html' => '<p>test</p>',
-  'created_at' => '2026-08-27T02:58:12-04:00',
-  'handle' => 'test',
-  'id' => 12591142568254,
-  'product_type' => 'fast food',
-  'published_at' => '2026-08-27T02:58:14-04:00',
-  'template_suffix' => NULL,
-  'title' => 'test',
-  'updated_at' => '2026-08-27T02:58:14-04:00',
-  'vendor' => 'kakshalijani',
-  'status' => 'active',
-  'published_scope' => 'global',
-  'tags' => 'most_favorite',
-  'variants' => 
-  array (
-    0 => 
-    array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337109328190',
-      'barcode' => NULL,
-      'compare_at_price' => NULL,
-      'created_at' => '2026-08-27T02:58:12-04:00',
-      'id' => 54337109328190,
-      'inventory_policy' => 'deny',
-      'position' => 1,
-      'price' => '140.30',
-      'product_id' => 12591142568254,
-      'sku' => NULL,
-      'taxable' => true,
-      'title' => 'Default Title',
-      'updated_at' => '2026-08-27T02:58:12-04:00',
-      'option1' => 'Default Title',
-      'option2' => NULL,
-      'option3' => NULL,
-      'image_id' => NULL,
-      'inventory_item_id' => 56356085432638,
+      'inventory_item_id' => 56374263185726,
       'inventory_quantity' => 100,
       'old_inventory_quantity' => 100,
     ),
@@ -273,8 +215,8 @@
     0 => 
     array (
       'name' => 'Title',
-      'id' => 15178661855550,
-      'product_id' => 12591142568254,
+      'id' => 15187477037374,
+      'product_id' => 12594070815038,
       'position' => 1,
       'values' => 
       array (
@@ -286,178 +228,1436 @@
   array (
     0 => 
     array (
-      'id' => 54906716062014,
-      'product_id' => 12591142568254,
+      'id' => 54919983399230,
+      'product_id' => 12594070815038,
       'position' => 1,
-      'created_at' => '2026-08-27T02:57:34-04:00',
-      'updated_at' => '2026-08-27T02:58:13-04:00',
+      'created_at' => '2026-08-31T06:24:35-04:00',
+      'updated_at' => '2026-08-31T06:24:59-04:00',
       'alt' => NULL,
-      'width' => 1080,
-      'height' => 1350,
-      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_9239ca66-5498-4ae1-a4d4-a51bbddcb330.jpg?v=1787813855',
+      'width' => 675,
+      'height' => 1200,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_8cd81bed-1e3b-4e91-963f-c1f2d46872de.jpg?v=1788171877',
       'variant_ids' => 
       array (
       ),
-      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906716062014',
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54919983399230',
     ),
   ),
   'image' => 
   array (
-    'id' => 54906716062014,
-    'product_id' => 12591142568254,
+    'id' => 54919983399230,
+    'product_id' => 12594070815038,
     'position' => 1,
-    'created_at' => '2026-08-27T02:57:34-04:00',
-    'updated_at' => '2026-08-27T02:58:13-04:00',
+    'created_at' => '2026-08-31T06:24:35-04:00',
+    'updated_at' => '2026-08-31T06:24:59-04:00',
     'alt' => NULL,
-    'width' => 1080,
-    'height' => 1350,
-    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_9239ca66-5498-4ae1-a4d4-a51bbddcb330.jpg?v=1787813855',
+    'width' => 675,
+    'height' => 1200,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_8cd81bed-1e3b-4e91-963f-c1f2d46872de.jpg?v=1788171877',
     'variant_ids' => 
     array (
     ),
-    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54906716062014',
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54919983399230',
   ),
   'media' => 
   array (
     0 => 
     array (
-      'id' => 45818521321790,
-      'product_id' => 12591142568254,
+      'id' => 45831382958398,
+      'product_id' => 12594070815038,
       'position' => 1,
-      'created_at' => '2026-08-27T02:57:34-04:00',
-      'updated_at' => '2026-08-27T02:58:13-04:00',
+      'created_at' => '2026-08-31T06:24:35-04:00',
+      'updated_at' => '2026-08-31T06:24:59-04:00',
       'alt' => NULL,
       'status' => 'READY',
       'media_content_type' => 'IMAGE',
       'preview_image' => 
       array (
-        'width' => 1080,
-        'height' => 1350,
-        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/pav-bhaji_9239ca66-5498-4ae1-a4d4-a51bbddcb330.jpg?v=1787813855',
+        'width' => 675,
+        'height' => 1200,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_8cd81bed-1e3b-4e91-963f-c1f2d46872de.jpg?v=1788171877',
         'status' => 'READY',
       ),
       'variant_ids' => 
       array (
       ),
-      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45818521321790',
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831382958398',
     ),
   ),
   'variant_gids' => 
   array (
     0 => 
     array (
-      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54337109328190',
-      'updated_at' => '2026-08-27T06:58:12.000Z',
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355186680126',
+      'updated_at' => '2026-08-31T10:24:58.000Z',
     ),
   ),
   'has_variants_that_requires_components' => false,
   'category' => 
   array (
-    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/na',
-    'name' => 'Uncategorized',
-    'full_name' => 'Uncategorized',
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-1-8',
+    'name' => 'Donuts',
+    'full_name' => 'Food, Beverages & Tobacco > Food Items > Bakery > Donuts',
   ),
 )  
-[2026-08-27 06:58:18] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337109328190","barcode":"17120778028"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1787813897554245.0]}} 
-[2026-08-27 06:58:18] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:58:18] local.INFO: Auto SKU generation disabled. {"user_id":49} 
-[2026-08-27 06:58:24] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:58:25] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:58:38] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:58:39] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:59:04] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:59:05] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:59:05] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 06:59:09] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 06:59:10] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 06:59:12] local.INFO: array (
+[2026-08-31 10:25:02] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355186680126","barcode":"30322724"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788171901219096.0]}} 
+[2026-08-31 10:25:02] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:25:02] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355186680126","sku":"NEW-SK-DU-FA-DE-1002-2026"} 
+[2026-08-31 10:25:03] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355186680126","inventoryItem":{"sku":"NEW-SK-DU-FA-DE-1002-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788171902164863.0]}} 
+[2026-08-31 10:25:18] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:25:19] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:25:44] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:25:45] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:30:06] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:30:07] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:30:08] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:30:09] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:30:09] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:30:10] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:30:11] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:30:18] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:30:19] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:32:16] local.INFO: ProductWebhookController call  
+[2026-08-31 10:32:19] local.INFO: generateBarcode job is called  
+[2026-08-31 10:32:19] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 10:32:19] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594072289598',
+  'body_html' => '<p>SKU_generate</p>',
+  'created_at' => '2026-08-31T06:32:14-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594072289598,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_generate',
+  'updated_at' => '2026-08-31T06:32:14-04:00',
+  'vendor' => 'kakshalijani',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355189727550',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T06:32:14-04:00',
+      'id' => 54355189727550,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '120.20',
+      'product_id' => 12594072289598,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T06:32:14-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56374266233150,
+      'inventory_quantity' => 20,
+      'old_inventory_quantity' => 20,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187479724350,
+      'product_id' => 12594072289598,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54919998308670,
+      'product_id' => 12594072289598,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:31:47-04:00',
+      'updated_at' => '2026-08-31T06:32:14-04:00',
+      'alt' => NULL,
+      'width' => 736,
+      'height' => 1313,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_1ef7fd4a-10b5-4cd5-b2f3-30021dee0ece.jpg?v=1788172309',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54919998308670',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54919998308670,
+    'product_id' => 12594072289598,
+    'position' => 1,
+    'created_at' => '2026-08-31T06:31:47-04:00',
+    'updated_at' => '2026-08-31T06:32:14-04:00',
+    'alt' => NULL,
+    'width' => 736,
+    'height' => 1313,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_1ef7fd4a-10b5-4cd5-b2f3-30021dee0ece.jpg?v=1788172309',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54919998308670',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831397703998,
+      'product_id' => 12594072289598,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:31:47-04:00',
+      'updated_at' => '2026-08-31T06:32:14-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 736,
+        'height' => 1313,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_1ef7fd4a-10b5-4cd5-b2f3-30021dee0ece.jpg?v=1788172309',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831397703998',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355189727550',
+      'updated_at' => '2026-08-31T10:32:14.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-1-3',
+    'name' => 'Coffee',
+    'full_name' => 'Food, Beverages & Tobacco > Beverages > Coffee',
+  ),
+)  
+[2026-08-31 10:32:19] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355189727550","barcode":"89310207"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788172339106880.0]}} 
+[2026-08-31 10:32:20] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:32:20] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355189727550","sku":"NEW-SK-KA-FA-DE-1002-2026"} 
+[2026-08-31 10:32:20] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355189727550","inventoryItem":{"sku":"NEW-SK-KA-FA-DE-1002-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788172340034673.0]}} 
+[2026-08-31 10:32:27] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:32:28] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:34:48] local.INFO: ProductWebhookController call  
+[2026-08-31 10:34:51] local.INFO: generateBarcode job is called  
+[2026-08-31 10:34:51] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 10:34:51] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594072944958',
+  'body_html' => '<p>SKU_GENERATE</p>',
+  'created_at' => '2026-08-31T06:34:46-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594072944958,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_GENERATE',
+  'updated_at' => '2026-08-31T06:34:47-04:00',
+  'vendor' => 'kakshalijani',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355190513982',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T06:34:46-04:00',
+      'id' => 54355190513982,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '120.30',
+      'product_id' => 12594072944958,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T06:34:46-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56374267019582,
+      'inventory_quantity' => 80,
+      'old_inventory_quantity' => 80,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187480412478,
+      'product_id' => 12594072944958,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920003387710,
+      'product_id' => 12594072944958,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:34:27-04:00',
+      'updated_at' => '2026-08-31T06:34:47-04:00',
+      'alt' => NULL,
+      'width' => 736,
+      'height' => 1313,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_e5142834-510d-465e-93db-a9a86a42b916.jpg?v=1788172469',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920003387710',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920003387710,
+    'product_id' => 12594072944958,
+    'position' => 1,
+    'created_at' => '2026-08-31T06:34:27-04:00',
+    'updated_at' => '2026-08-31T06:34:47-04:00',
+    'alt' => NULL,
+    'width' => 736,
+    'height' => 1313,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_e5142834-510d-465e-93db-a9a86a42b916.jpg?v=1788172469',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920003387710',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831401734462,
+      'product_id' => 12594072944958,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:34:27-04:00',
+      'updated_at' => '2026-08-31T06:34:47-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 736,
+        'height' => 1313,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_e5142834-510d-465e-93db-a9a86a42b916.jpg?v=1788172469',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831401734462',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355190513982',
+      'updated_at' => '2026-08-31T10:34:46.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-1-3',
+    'name' => 'Coffee',
+    'full_name' => 'Food, Beverages & Tobacco > Beverages > Coffee',
+  ),
+)  
+[2026-08-31 10:34:51] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355190513982","barcode":"29496291"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788172491091511.0]}} 
+[2026-08-31 10:34:52] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:34:52] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355190513982","sku":"NEW-SK-KA-FA-DE-1002-2026"} 
+[2026-08-31 10:34:52] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355190513982","inventoryItem":{"sku":"NEW-SK-KA-FA-DE-1002-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788172492032193.0]}} 
+[2026-08-31 10:34:58] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:34:59] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:38:57] local.INFO: ProductWebhookController call  
+[2026-08-31 10:38:59] local.INFO: generateBarcode job is called  
+[2026-08-31 10:38:59] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 10:38:59] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594073010494',
+  'body_html' => '<p>SKU-GENERATE</p>',
+  'created_at' => '2026-08-31T06:38:55-04:00',
+  'handle' => 'sku-generate',
+  'id' => 12594073010494,
+  'product_type' => 'fast food',
+  'published_at' => '2026-08-31T06:38:57-04:00',
+  'template_suffix' => NULL,
+  'title' => 'SKU-GENERATE',
+  'updated_at' => '2026-08-31T06:38:57-04:00',
+  'vendor' => 'kakshalijani',
+  'status' => 'active',
+  'published_scope' => 'global',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355190710590',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T06:38:55-04:00',
+      'id' => 54355190710590,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12594073010494,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T06:38:55-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56374267478334,
+      'inventory_quantity' => 80,
+      'old_inventory_quantity' => 80,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187480543550,
+      'product_id' => 12594073010494,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920009482558,
+      'product_id' => 12594073010494,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:38:14-04:00',
+      'updated_at' => '2026-08-31T06:38:56-04:00',
+      'alt' => NULL,
+      'width' => 736,
+      'height' => 1313,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_8cee74e3-9a13-4427-b475-17ebb1b3c70b.jpg?v=1788172696',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920009482558',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920009482558,
+    'product_id' => 12594073010494,
+    'position' => 1,
+    'created_at' => '2026-08-31T06:38:14-04:00',
+    'updated_at' => '2026-08-31T06:38:56-04:00',
+    'alt' => NULL,
+    'width' => 736,
+    'height' => 1313,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_8cee74e3-9a13-4427-b475-17ebb1b3c70b.jpg?v=1788172696',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920009482558',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831407829310,
+      'product_id' => 12594073010494,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:38:14-04:00',
+      'updated_at' => '2026-08-31T06:38:56-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 736,
+        'height' => 1313,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_8cee74e3-9a13-4427-b475-17ebb1b3c70b.jpg?v=1788172696',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831407829310',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355190710590',
+      'updated_at' => '2026-08-31T10:38:55.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-1-3',
+    'name' => 'Coffee',
+    'full_name' => 'Food, Beverages & Tobacco > Beverages > Coffee',
+  ),
+)  
+[2026-08-31 10:39:00] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355190710590","barcode":"54937522"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788172739312008.0]}} 
+[2026-08-31 10:39:00] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:39:00] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355190710590","sku":"NEW-SK-KA-FA-DE-1002-2026"} 
+[2026-08-31 10:39:01] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355190710590","inventoryItem":{"sku":"NEW-SK-KA-FA-DE-1002-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788172740215208.0]}} 
+[2026-08-31 10:39:19] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:39:20] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:40:57] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:40:58] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:42:17] local.INFO: ProductWebhookController call  
+[2026-08-31 10:42:18] local.INFO: generateBarcode job is called  
+[2026-08-31 10:42:18] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 10:42:18] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594073207102',
+  'body_html' => '<p>SKU_GENERATE</p>',
+  'created_at' => '2026-08-31T06:42:15-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594073207102,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_GENERATE',
+  'updated_at' => '2026-08-31T06:42:16-04:00',
+  'vendor' => 'Dumplings',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355193889086',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T06:42:15-04:00',
+      'id' => 54355193889086,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12594073207102,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T06:42:15-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56374270656830,
+      'inventory_quantity' => 100,
+      'old_inventory_quantity' => 100,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187480838462,
+      'product_id' => 12594073207102,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920015085886,
+      'product_id' => 12594073207102,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:41:32-04:00',
+      'updated_at' => '2026-08-31T06:42:16-04:00',
+      'alt' => NULL,
+      'width' => 1122,
+      'height' => 1402,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_waffle_9587a5da-17ca-4fd4-bab4-230bd9702565.jpg?v=1788172893',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920015085886',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920015085886,
+    'product_id' => 12594073207102,
+    'position' => 1,
+    'created_at' => '2026-08-31T06:41:32-04:00',
+    'updated_at' => '2026-08-31T06:42:16-04:00',
+    'alt' => NULL,
+    'width' => 1122,
+    'height' => 1402,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_waffle_9587a5da-17ca-4fd4-bab4-230bd9702565.jpg?v=1788172893',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920015085886',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831413432638,
+      'product_id' => 12594073207102,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:41:32-04:00',
+      'updated_at' => '2026-08-31T06:42:16-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 1122,
+        'height' => 1402,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_waffle_9587a5da-17ca-4fd4-bab4-230bd9702565.jpg?v=1788172893',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831413432638',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355193889086',
+      'updated_at' => '2026-08-31T10:42:15.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-1-4-1',
+    'name' => 'Cakes',
+    'full_name' => 'Food, Beverages & Tobacco > Food Items > Bakery > Cakes & Dessert Bars > Cakes',
+  ),
+)  
+[2026-08-31 10:42:18] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355193889086","barcode":"12529622"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788172938198166.0]}} 
+[2026-08-31 10:42:19] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:42:19] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355193889086","sku":"NEW-SK-DU-FA-DE-1002-2026"} 
+[2026-08-31 10:42:20] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355193889086","inventoryItem":{"sku":"NEW-SK-DU-FA-DE-1002-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788172939111640.0]}} 
+[2026-08-31 10:42:28] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:42:29] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:42:50] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:42:51] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:42:51] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:42:53] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:42:54] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:49:16] local.ERROR: Call to private method App\Jobs\GenerateSkuJob::generateSku() from scope JobTester {"exception":"[object] (Error(code: 0): Call to private method App\\Jobs\\GenerateSkuJob::generateSku() from scope JobTester at /var/www/html/Barcodedemo-app/test_sku3.php:27)
+[stacktrace]
+#0 /var/www/html/Barcodedemo-app/test_sku3.php(31): JobTester->testGen()
+#1 {main}
+"} 
+[2026-08-31 10:50:22] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:50:24] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:50:24] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:50:25] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:50:26] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:50:49] local.INFO: array (
   'sku_prefix' => 'SKU',
   'sku_auto_number_start' => '1001',
   'sku_suffix' => '2026',
   'sku_delimiter' => '-',
-  'segment_product_title' => 'char_2',
-  'segment_product_vendor' => 'char_2',
-  'segment_product_type' => 'char_2',
-  'segment_option1' => 'char_2',
-  'segment_option2' => 'char_2',
-  'segment_option3' => 'char_2',
-  'segment_metafield' => 'custom.dietary_flags',
-  'segment_metafield_rule' => 'char_2',
+  'segment_product_title' => 'full',
+  'segment_product_vendor' => 'full',
+  'segment_product_type' => 'full',
+  'segment_option1' => 'full',
+  'segment_option2' => 'full',
+  'segment_option3' => 'full',
+  'segment_metafield' => 'custom.tasting_notes',
+  'segment_metafield_rule' => 'full',
   'hide_options_1_2_3' => false,
   'force_uppercase_fields' => true,
   'auto_generate_on_create' => true,
 )  
-[2026-08-27 06:59:12] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 49  
-[2026-08-27 06:59:26] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 06:59:26] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 06:59:26] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 07:01:30] local.INFO: ProductWebhookController call  
-[2026-08-27 07:01:31] local.INFO: generateBarcode job is called  
-[2026-08-27 07:01:31] local.INFO: Auto barcode generation disabled.  
-[2026-08-27 07:01:31] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 07:01:31] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54337112932670","sku":"SKU-TE-PA-FA-DE-1001-2026"} 
-[2026-08-27 07:01:32] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54337112932670","inventoryItem":{"sku":"SKU-TE-PA-FA-DE-1001-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1787814091797331.0]}} 
-[2026-08-27 07:01:47] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 07:01:48] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 07:02:16] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 07:02:16] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 07:02:16] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 09:57:06] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 09:57:07] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 09:57:07] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 09:57:42] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 09:57:43] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 09:58:12] local.INFO: array (
+[2026-08-31 10:50:49] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 51  
+[2026-08-31 10:51:05] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:51:06] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:54:03] local.INFO: ProductWebhookController call  
+[2026-08-31 10:54:05] local.INFO: generateBarcode job is called  
+[2026-08-31 10:54:05] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 10:54:05] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594077696318',
+  'body_html' => '<p>SKU_GENERATE</p>',
+  'created_at' => '2026-08-31T06:54:01-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594077696318,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_GENERATE',
+  'updated_at' => '2026-08-31T06:54:02-04:00',
+  'vendor' => 'Coffe',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355209552190',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T06:54:01-04:00',
+      'id' => 54355209552190,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12594077696318,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T06:54:01-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56374286319934,
+      'inventory_quantity' => 80,
+      'old_inventory_quantity' => 80,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187487195454,
+      'product_id' => 12594077696318,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920040513854,
+      'product_id' => 12594077696318,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:51:49-04:00',
+      'updated_at' => '2026-08-31T06:54:01-04:00',
+      'alt' => NULL,
+      'width' => 736,
+      'height' => 1313,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_17bf2af5-89da-4580-8c7d-31d8af380b79.jpg?v=1788173511',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920040513854',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920040513854,
+    'product_id' => 12594077696318,
+    'position' => 1,
+    'created_at' => '2026-08-31T06:51:49-04:00',
+    'updated_at' => '2026-08-31T06:54:01-04:00',
+    'alt' => NULL,
+    'width' => 736,
+    'height' => 1313,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_17bf2af5-89da-4580-8c7d-31d8af380b79.jpg?v=1788173511',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920040513854',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831438238014,
+      'product_id' => 12594077696318,
+      'position' => 1,
+      'created_at' => '2026-08-31T06:51:49-04:00',
+      'updated_at' => '2026-08-31T06:54:01-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 736,
+        'height' => 1313,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/coldcoffe_17bf2af5-89da-4580-8c7d-31d8af380b79.jpg?v=1788173511',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831438238014',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355209552190',
+      'updated_at' => '2026-08-31T10:54:01.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-1-3',
+    'name' => 'Coffee',
+    'full_name' => 'Food, Beverages & Tobacco > Beverages > Coffee',
+  ),
+)  
+[2026-08-31 10:54:06] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355209552190","barcode":"43691406"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788173645429861.0]}} 
+[2026-08-31 10:54:06] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:54:06] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355209552190","sku":"SKU-SKU-GENERATE-COFFE-FAST-FOOD-DEFAULT-TITLE-1001-2026"} 
+[2026-08-31 10:54:07] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355209552190","inventoryItem":{"sku":"SKU-SKU-GENERATE-COFFE-FAST-FOOD-DEFAULT-TITLE-1001-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788173646280474.0]}} 
+[2026-08-31 10:54:24] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:54:25] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:55:57] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 10:55:58] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 10:55:58] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 10:55:59] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:56:00] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:56:40] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:56:41] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:57:20] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:57:21] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 10:59:42] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 10:59:43] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:00:27] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:00:28] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:01:59] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:02:00] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:02:36] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:02:37] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:03:15] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:03:16] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:03:45] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:03:46] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:06:46] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:06:47] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:08:29] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:08:31] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:08:34] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:08:35] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:08:35] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:08:36] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:08:40] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:08:41] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:10:04] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:10:05] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:10:54] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:10:55] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:14] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:15] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:25] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:26] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:32] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:33] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:36] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:37] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:37] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:38] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:42] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:11:43] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:11:43] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:11:47] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:48] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:11:54] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:11:55] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:12:09] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:12:10] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:12:54] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:12:55] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:12:56] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:12:57] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:13:09] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:13:10] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:13:33] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:13:34] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:16:35] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:16:36] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:17:17] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:17:18] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:17:21] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:17:21] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:17:21] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:17:26] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:17:26] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:17:26] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:17:31] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:17:32] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:17:44] local.INFO: BARCODE SETTINGS {"id":42,"user_id":51,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.8]","contextual_pricing_value":"IN","created_at":"2026-08-31T04:06:18.000000Z","updated_at":"2026-08-31T10:12:35.000000Z"} 
+[2026-08-31 11:17:44] local.INFO: TEMPLATE DESIGN {"id":385,"barcode_template_id":384,"selected_variant_id":"gid://shopify/ProductVariant/54136885674302","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"with_currency","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":true,"symbol_enabled":true,"symbol_type":"BARCODE","barcode_format":"UPCA","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":2,"created_at":"2026-08-31T04:09:33.000000Z","updated_at":"2026-08-31T04:09:33.000000Z"} 
+[2026-08-31 11:17:44] local.INFO: FINAL RESPONSE {"id":385,"user_id":51,"auto_generate_on_create":true,"auto_detect_gtin_format":true,"prevent_zero_start_end":true,"barcode_format":"UPCA","barcode_pattern":"[N.8]","contextual_pricing_value":"IN","created_at":"2026-08-31T04:09:33.000000Z","updated_at":"2026-08-31T04:09:33.000000Z","barcode_template_id":384,"selected_variant_id":"gid://shopify/ProductVariant/54136885674302","margin_top":5,"margin_bottom":5,"margin_left":5,"margin_right":5,"line1_sku":true,"line2_name":true,"line2_price":true,"line2_currency_format":"with_currency","line2_show_price_per_unit":false,"line2_variant_option1":true,"line3_vendor":true,"symbol_enabled":true,"symbol_type":"BARCODE","symbol_color":"#000000","symbol_logo_filename":"","symbol_field_source":"barcode_value","hide_barcode_value":false,"symbol_font_size":12,"symbol_bar_width":2,"symbol_bar_height":35,"symbol_width_px":"140","symbol_margin_px":"1","qr_dot_type":"square","qr_corner_dot_type":"square","qr_corner_square_type":"square","print_qty":2,"template_name":"NEW","paper_brand":"zebra","paper_model":"4000d-2x1","layout_settings":{"gapX":0,"gapY":0,"name":"Z-Select 4000D (2\" x 1\")","roll":{"coreDiameter":25.4,"labelsPerRoll":2340,"outerDiameter":127},"rows":1,"type":"roll","label":{"width":50.8,"height":25.4},"paper":{"width":50.8,"height":25.4},"columns":1,"marginTop":0,"marginLeft":0}} 
+[2026-08-31 11:17:44] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:17:46] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:24:10] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:24:11] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:24:38] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:24:39] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:24:49] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:24:49] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:24:49] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:25:00] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:25:01] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:26:11] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:26:12] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:26:17] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:26:17] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:26:17] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:27:32] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:27:33] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:34:30] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:34:31] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:52:09] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:52:10] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:52:10] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:52:10] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:52:11] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:52:25] local.INFO: array (
   'sku_prefix' => 'SKU',
   'sku_auto_number_start' => '1001',
   'sku_suffix' => '2026',
   'sku_delimiter' => '-',
-  'segment_product_title' => 'char_2',
-  'segment_product_vendor' => 'char_2',
-  'segment_product_type' => 'char_2',
-  'segment_option1' => 'char_2',
-  'segment_option2' => 'char_2',
-  'segment_option3' => 'char_2',
-  'segment_metafield' => 'custom.dietary_flags',
-  'segment_metafield_rule' => 'char_2',
+  'segment_product_title' => 'char_3',
+  'segment_product_vendor' => 'char_3',
+  'segment_product_type' => 'char_3',
+  'segment_option1' => 'char_3',
+  'segment_option2' => 'char_3',
+  'segment_option3' => 'char_3',
+  'segment_metafield' => 'custom.tasting_notes',
+  'segment_metafield_rule' => 'char_3',
   'hide_options_1_2_3' => false,
   'force_uppercase_fields' => true,
   'auto_generate_on_create' => true,
 )  
-[2026-08-27 09:58:12] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 50  
-[2026-08-27 09:59:20] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 09:59:21] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 09:59:23] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 09:59:24] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 09:59:36] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 09:59:38] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:00:17] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 10:00:19] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:00:32] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 10:00:32] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 10:00:32] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 10:00:41] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 10:00:42] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:00:44] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 10:00:45] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:00:50] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 10:00:51] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 10:00:51] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 10:01:01] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 10:01:02] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:01:03] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 10:01:04] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:01:19] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 10:01:20] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 10:01:20] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 10:01:30] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 10:01:31] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 10:01:31] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 10:01:33] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
-[2026-08-27 10:01:34] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
-[2026-08-27 10:01:42] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 10:01:43] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 10:01:43] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
-[2026-08-27 10:01:50] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
-[2026-08-27 10:01:51] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
-[2026-08-27 10:01:51] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:52:25] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 51  
+[2026-08-31 11:52:45] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:52:47] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:56:12] local.INFO: ProductWebhookController call  
+[2026-08-31 11:56:15] local.INFO: generateBarcode job is called  
+[2026-08-31 11:56:15] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 11:56:15] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594101158206',
+  'body_html' => '<p>SKU_GENERATE</p>',
+  'created_at' => '2026-08-31T07:56:10-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594101158206,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_GENERATE',
+  'updated_at' => '2026-08-31T07:56:11-04:00',
+  'vendor' => 'Coffe',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355868090686',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T07:56:10-04:00',
+      'id' => 54355868090686,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12594101158206,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'small / brown',
+      'updated_at' => '2026-08-31T07:56:10-04:00',
+      'option1' => 'small',
+      'option2' => 'brown',
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56374957146430,
+      'inventory_quantity' => 80,
+      'old_inventory_quantity' => 80,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'size',
+      'id' => 15187533037886,
+      'product_id' => 12594101158206,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'small',
+      ),
+    ),
+    1 => 
+    array (
+      'name' => 'color',
+      'id' => 15187533070654,
+      'product_id' => 12594101158206,
+      'position' => 2,
+      'values' => 
+      array (
+        0 => 'brown',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920270151998,
+      'product_id' => 12594101158206,
+      'position' => 1,
+      'created_at' => '2026-08-31T07:54:53-04:00',
+      'updated_at' => '2026-08-31T07:56:11-04:00',
+      'alt' => NULL,
+      'width' => 675,
+      'height' => 1200,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_6f64bf79-017f-4a5f-aae2-22d7a8976448.jpg?v=1788177295',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920270151998',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920270151998,
+    'product_id' => 12594101158206,
+    'position' => 1,
+    'created_at' => '2026-08-31T07:54:53-04:00',
+    'updated_at' => '2026-08-31T07:56:11-04:00',
+    'alt' => NULL,
+    'width' => 675,
+    'height' => 1200,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_6f64bf79-017f-4a5f-aae2-22d7a8976448.jpg?v=1788177295',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920270151998',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831661224254,
+      'product_id' => 12594101158206,
+      'position' => 1,
+      'created_at' => '2026-08-31T07:54:53-04:00',
+      'updated_at' => '2026-08-31T07:56:11-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 675,
+        'height' => 1200,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_6f64bf79-017f-4a5f-aae2-22d7a8976448.jpg?v=1788177295',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831661224254',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355868090686',
+      'updated_at' => '2026-08-31T11:56:10.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/so-1-2',
+    'name' => 'Business & Productivity Software',
+    'full_name' => 'Software > Computer Software > Business & Productivity Software',
+  ),
+)  
+[2026-08-31 11:56:16] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355868090686","barcode":"84319726"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788177375972801.0]}} 
+[2026-08-31 11:56:16] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:56:16] local.ERROR: GenerateSkuJob failed. {"message":"Attempt to read property \"sku_delimiter\" on string","file":"/var/www/html/Barcodedemo-app/app/Jobs/GenerateSkuJob.php","line":433} 
+[2026-08-31 11:57:21] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:57:22] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:57:57] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 11:57:58] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 11:57:58] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 11:57:58] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:57:59] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:58:15] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:58:16] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 11:59:20] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 11:59:21] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 12:06:37] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 12:06:38] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 12:06:41] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 12:06:42] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 12:06:42] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 12:07:36] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 12:07:37] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 12:10:36] local.WARNING: ProductWebhookController: HMAC or secret not configured — skipping verification.  
+[2026-08-31 12:10:36] local.INFO: ProductWebhookController: webhook received {"shop":"kakshalijani.myshopify.com","product_id":12594109710654,"admin_graphql_api_id":"gid://shopify/Product/12594109710654","variant_count":1} 
+[2026-08-31 12:10:39] local.INFO: generateBarcode job is called  
+[2026-08-31 12:10:39] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 12:10:39] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594109710654',
+  'body_html' => '<p>SKU_GENERATE</p>',
+  'created_at' => '2026-08-31T08:10:34-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594109710654,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_GENERATE',
+  'updated_at' => '2026-08-31T08:10:34-04:00',
+  'vendor' => 'kakshalijani',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'most_favorite',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355914522942',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T08:10:34-04:00',
+      'id' => 54355914522942,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12594109710654,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T08:10:34-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56375003578686,
+      'inventory_quantity' => 80,
+      'old_inventory_quantity' => 80,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187543621950,
+      'product_id' => 12594109710654,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920399028542,
+      'product_id' => 12594109710654,
+      'position' => 1,
+      'created_at' => '2026-08-31T08:09:27-04:00',
+      'updated_at' => '2026-08-31T08:10:34-04:00',
+      'alt' => NULL,
+      'width' => 675,
+      'height' => 1200,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_03c56450-b704-450e-9262-eefd396404c4.jpg?v=1788178169',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920399028542',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920399028542,
+    'product_id' => 12594109710654,
+    'position' => 1,
+    'created_at' => '2026-08-31T08:09:27-04:00',
+    'updated_at' => '2026-08-31T08:10:34-04:00',
+    'alt' => NULL,
+    'width' => 675,
+    'height' => 1200,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_03c56450-b704-450e-9262-eefd396404c4.jpg?v=1788178169',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920399028542',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831790068030,
+      'product_id' => 12594109710654,
+      'position' => 1,
+      'created_at' => '2026-08-31T08:09:27-04:00',
+      'updated_at' => '2026-08-31T08:10:34-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 675,
+        'height' => 1200,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/chocolet_donart_03c56450-b704-450e-9262-eefd396404c4.jpg?v=1788178169',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831790068030',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355914522942',
+      'updated_at' => '2026-08-31T12:10:34.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-1-8',
+    'name' => 'Donuts',
+    'full_name' => 'Food, Beverages & Tobacco > Food Items > Bakery > Donuts',
+  ),
+)  
+[2026-08-31 12:10:40] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355914522942","barcode":"14605973"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788178239635115.0]}} 
+[2026-08-31 12:10:40] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 12:10:40] local.ERROR: GenerateSkuJob failed. {"message":"Attempt to read property \"sku_delimiter\" on string","file":"/var/www/html/Barcodedemo-app/app/Jobs/GenerateSkuJob.php","line":433} 
+[2026-08-31 12:11:02] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 12:11:03] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 12:12:32] local.WARNING: ProductWebhookController: HMAC or secret not configured — skipping verification.  
+[2026-08-31 12:12:32] local.INFO: ProductWebhookController: webhook received {"shop":"kakshalijani.myshopify.com","product_id":12594112102718,"admin_graphql_api_id":"gid://shopify/Product/12594112102718","variant_count":1} 
+[2026-08-31 12:12:34] local.INFO: generateBarcode job is called  
+[2026-08-31 12:12:34] local.INFO: WEBHOOK PRODUCT DATA  
+[2026-08-31 12:12:34] local.INFO: array (
+  'admin_graphql_api_id' => 'gid://shopify/Product/12594112102718',
+  'body_html' => '<p>SKU_GENERATE</p>',
+  'created_at' => '2026-08-31T08:12:29-04:00',
+  'handle' => 'sku_generate',
+  'id' => 12594112102718,
+  'product_type' => 'fast food',
+  'published_at' => NULL,
+  'template_suffix' => NULL,
+  'title' => 'SKU_GENERATE',
+  'updated_at' => '2026-08-31T08:12:30-04:00',
+  'vendor' => 'kakshalijani',
+  'status' => 'active',
+  'published_scope' => 'web',
+  'tags' => 'fast-food',
+  'variants' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355927236926',
+      'barcode' => NULL,
+      'compare_at_price' => NULL,
+      'created_at' => '2026-08-31T08:12:30-04:00',
+      'id' => 54355927236926,
+      'inventory_policy' => 'deny',
+      'position' => 1,
+      'price' => '140.30',
+      'product_id' => 12594112102718,
+      'sku' => NULL,
+      'taxable' => true,
+      'title' => 'Default Title',
+      'updated_at' => '2026-08-31T08:12:30-04:00',
+      'option1' => 'Default Title',
+      'option2' => NULL,
+      'option3' => NULL,
+      'image_id' => NULL,
+      'inventory_item_id' => 56375016292670,
+      'inventory_quantity' => 80,
+      'old_inventory_quantity' => 80,
+    ),
+  ),
+  'options' => 
+  array (
+    0 => 
+    array (
+      'name' => 'Title',
+      'id' => 15187546046782,
+      'product_id' => 12594112102718,
+      'position' => 1,
+      'values' => 
+      array (
+        0 => 'Default Title',
+      ),
+    ),
+  ),
+  'images' => 
+  array (
+    0 => 
+    array (
+      'id' => 54920425799998,
+      'product_id' => 12594112102718,
+      'position' => 1,
+      'created_at' => '2026-08-31T08:12:04-04:00',
+      'updated_at' => '2026-08-31T08:12:30-04:00',
+      'alt' => NULL,
+      'width' => 236,
+      'height' => 420,
+      'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/icecream_bef68434-2288-41bc-a137-c0c3c556c077.jpg?v=1788178325',
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920425799998',
+    ),
+  ),
+  'image' => 
+  array (
+    'id' => 54920425799998,
+    'product_id' => 12594112102718,
+    'position' => 1,
+    'created_at' => '2026-08-31T08:12:04-04:00',
+    'updated_at' => '2026-08-31T08:12:30-04:00',
+    'alt' => NULL,
+    'width' => 236,
+    'height' => 420,
+    'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/icecream_bef68434-2288-41bc-a137-c0c3c556c077.jpg?v=1788178325',
+    'variant_ids' => 
+    array (
+    ),
+    'admin_graphql_api_id' => 'gid://shopify/ProductImage/54920425799998',
+  ),
+  'media' => 
+  array (
+    0 => 
+    array (
+      'id' => 45831816839486,
+      'product_id' => 12594112102718,
+      'position' => 1,
+      'created_at' => '2026-08-31T08:12:04-04:00',
+      'updated_at' => '2026-08-31T08:12:30-04:00',
+      'alt' => NULL,
+      'status' => 'READY',
+      'media_content_type' => 'IMAGE',
+      'preview_image' => 
+      array (
+        'width' => 236,
+        'height' => 420,
+        'src' => 'https://cdn.shopify.com/s/files/1/0986/5691/1678/files/icecream_bef68434-2288-41bc-a137-c0c3c556c077.jpg?v=1788178325',
+        'status' => 'READY',
+      ),
+      'variant_ids' => 
+      array (
+      ),
+      'admin_graphql_api_id' => 'gid://shopify/MediaImage/45831816839486',
+    ),
+  ),
+  'variant_gids' => 
+  array (
+    0 => 
+    array (
+      'admin_graphql_api_id' => 'gid://shopify/ProductVariant/54355927236926',
+      'updated_at' => '2026-08-31T12:12:30.000Z',
+    ),
+  ),
+  'has_variants_that_requires_components' => false,
+  'category' => 
+  array (
+    'admin_graphql_api_id' => 'gid://shopify/TaxonomyCategory/fb-2-1-4-1',
+    'name' => 'Cakes',
+    'full_name' => 'Food, Beverages & Tobacco > Food Items > Bakery > Cakes & Dessert Bars > Cakes',
+  ),
+)  
+[2026-08-31 12:12:35] local.INFO: Webhook Barcode Updated {"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355927236926","barcode":"73781006"}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":10,"actualQueryCost":10,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1990,"restoreRate":100.0}}}}},"timestamps":[1788178354788340.0]}} 
+[2026-08-31 12:12:35] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 12:12:35] local.ERROR: GenerateSkuJob failed. {"message":"Attempt to read property \"sku_delimiter\" on string","file":"/var/www/html/Barcodedemo-app/app/Jobs/GenerateSkuJob.php","line":433} 
+[2026-08-31 12:12:42] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 12:12:43] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 12:13:06] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 12:13:07] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 12:13:07] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 12:13:08] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 12:13:09] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 12:59:58] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 12:59:58] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 12:59:58] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 12:59:59] local.INFO: Product list: contextual pricing check {"raw_setting":null,"normalized":"","passes_regex":false} 
+[2026-08-31 13:00:00] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"","sample_price":"190.30","sample_currency":"INR","store_default_currency":"INR"} 
+[2026-08-31 13:00:31] local.INFO: array (
+  'sku_prefix' => 'NEW',
+  'sku_auto_number_start' => '1001',
+  'sku_suffix' => '2026',
+  'sku_delimiter' => '-',
+  'segment_product_title' => 'char_3',
+  'segment_product_vendor' => 'char_3',
+  'segment_product_type' => 'char_3',
+  'segment_option1' => 'char_3',
+  'segment_option2' => 'char_3',
+  'segment_option3' => 'char_3',
+  'segment_metafield' => 'custom.dietary_flags',
+  'segment_metafield_rule' => 'char_3',
+  'hide_options_1_2_3' => false,
+  'force_uppercase_fields' => true,
+  'auto_generate_on_create' => true,
+)  
+[2026-08-31 13:00:31] local.INFO: AUTO-SYNC TRIGGERED FROM SETTINGS SAVE FOR SHOP ID: 52  
+[2026-08-31 13:00:45] local.INFO: Contextual pricing countries: fetching markets {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 13:00:46] local.INFO: Contextual pricing countries: market edges found {"market_count":6} 
+[2026-08-31 13:00:46] local.INFO: Contextual pricing countries: final country list {"total_countries":6,"codes":["CA","DE","IN","JP","KR","US"]} 
+[2026-08-31 13:02:23] local.INFO: ProductWebhookController call  
+[2026-08-31 13:02:24] local.INFO: generateBarcode job is called  
+[2026-08-31 13:02:24] local.INFO: Auto barcode generation disabled.  
+[2026-08-31 13:02:25] local.INFO: GenerateSkuJob started {"shop":"kakshalijani.myshopify.com"} 
+[2026-08-31 13:02:25] local.INFO: Generated automatic SKU. {"variant_id":"gid://shopify/ProductVariant/54355970294078","sku":"NEW-SKU-DUM-FAS-DEF-1001-2026"} 
+[2026-08-31 13:02:25] local.INFO: Auto SKU updated successfully. {"variant_count":1,"response":{"errors":false,"response":{"GuzzleHttp\\Psr7\\Response":[]},"status":200,"body":{"Gnikyt\\BasicShopifyAPI\\ResponseAccess":{"data":{"productVariantsBulkUpdate":{"productVariants":[{"id":"gid://shopify/ProductVariant/54355970294078","inventoryItem":{"sku":"NEW-SKU-DUM-FAS-DEF-1001-2026"}}],"userErrors":[]}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":2000.0,"currentlyAvailable":1989,"restoreRate":100.0}}}}},"timestamps":[1788181345030504.0]}} 
+[2026-08-31 13:04:10] local.INFO: Product list: contextual pricing check {"raw_setting":"IN","normalized":"IN","passes_regex":true} 
+[2026-08-31 13:04:11] local.INFO: Product list: sample variant after mapping {"contextual_country_used":"IN","sample_price":"190.3","sample_currency":"INR","store_default_currency":"INR"} 

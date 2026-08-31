@@ -323,6 +323,7 @@ th{background:#f5f5f5;}
   if (loading) {
     return (
       <s-page heading="Print History">
+        <TitleBar title="barcodedemo-app" />
         <s-box padding="loose" alignContent="center">
           <s-spinner accessibilityLabel="Loading print history" size="large" />
         </s-box>
@@ -333,6 +334,7 @@ th{background:#f5f5f5;}
   return (
     <>
       <s-page heading="Print History">
+        <TitleBar title="barcodedemo-app" />
         <s-section>
           <s-button variant="primary" onClick={handlePrintAll}>
             Print All History

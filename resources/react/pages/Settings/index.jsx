@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 
 import BarcodeSkuPanel from './BarcodeSkuPanel';
 import SkuSettingsIndex from './SkuSettingsIndex.jsx';
@@ -405,6 +405,7 @@ export default function SettingsIndex() {
             </ui-save-bar>
 
             <s-page heading="App Settings">
+                <TitleBar title="barcodedemo-app" />
                     <div style={{ height: "48px", borderBottom: "1px solid #e1e3e5", padding: "0 20px",}}>
                         <div style={{ height: "100%", display: "flex", alignItems: "stretch", justifyContent: "flex-start", gap: "28px",}}>
                             {tabs.map((tab, index) => {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { useAppBridge } from '@shopify/app-bridge-react';
+import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 import PaperTemplateSettings, {
@@ -389,6 +389,7 @@ export default function EditTemplate() {
     if (pageLoading) {
         return (
             <s-page heading="Edit Template">
+                <TitleBar title="barcodedemo-app" />
                 <s-box padding="loose" alignContent="center">
                     <s-spinner
                         accessibilityLabel="Syncing template profile details"
@@ -426,6 +427,7 @@ export default function EditTemplate() {
             </ui-save-bar>
 
             <s-page heading={`Edit Template: ${name}`}>
+                <TitleBar title="barcodedemo-app" />
                 <s-box paddingBlockStart="base">
                     <s-stack
                         direction="inline"

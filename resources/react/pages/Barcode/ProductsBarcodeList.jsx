@@ -570,15 +570,19 @@ export default function GenerateBarcode() {
     };
     return (
         <>
-            <s-page heading="Generate Barcode" subheading="Manage and edit your customized Barcode">
-                <s-section>
-                    <div
-                        style={{
-                            display: "flex",
-                            gap: "12px",
-                            alignItems: "center",
-                        }}
-                    >
+            <TitleBar title="barcodedemo-app" />
+            <s-page>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: '24px' 
+                }}>
+                    <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0 }}>
+                        Generate Barcode and Print Template
+                    </h1>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <s-button icon="settings" onClick={() => navigate('/Settingindex')}></s-button>
                         <s-button
                             variant="primary"
                             onClick={() => navigate("/LabelHistory")}
@@ -593,7 +597,7 @@ export default function GenerateBarcode() {
                             Create Template
                         </s-button>
                     </div>
-                </s-section>
+                </div>
 
                 {error && (
                     <s-section>
