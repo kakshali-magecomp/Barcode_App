@@ -8,7 +8,7 @@ use App\Helpers\ShopifyQueryHelper;
 
 class SkuSettingController extends Controller
 {
-     public function show()
+    public function show()
     {
         $user = Auth::user();
         $sku = $user->skuSetting()->firstOrCreate([]);
@@ -69,9 +69,15 @@ class SkuSettingController extends Controller
 
                     // FIXED: Extract variable values safely out of the sequential objects array list
                     $optionsList = $variant['selectedOptions'] ?? [];
-                    $opt1 = isset($optionsList[0]['value']) ? $optionsList[0]['value'] : '';
-                    $opt2 = isset($optionsList[1]['value']) ? $optionsList[1]['value'] : '';
-                    $opt3 = isset($optionsList[2]['value']) ? $optionsList[2]['value'] : '';
+
+                    $cleanOption = function ($value) {
+                        $value = trim((string) $value);
+                        return strcasecmp($value, 'Default Title') === 0 ? '' : $value;
+                    };
+
+                    $opt1 = $cleanOption($optionsList[0]['value'] ?? '');
+                    $opt2 = $cleanOption($optionsList[1]['value'] ?? '');
+                    $opt3 = $cleanOption($optionsList[2]['value'] ?? '');
                     // Build the new SKU string based on your updated settings model parameters
                     $newSku = $this->compileSkuString($product, $skuSettings, $opt1, $opt2, $opt3);
 
@@ -108,6 +114,16 @@ class SkuSettingController extends Controller
             ], 200);
         }
     }
+    private function normalizeDelimiters(string $sku, string $delimiter): string
+    {
+        if ($delimiter === '') {
+            return $sku;
+        }
+        $escaped = preg_quote($delimiter, '/');
+        $sku = preg_replace('/(?:' . $escaped . '){2,}/', $delimiter, $sku);
+        return trim($sku, $delimiter);
+    }
+
     private function compileSkuString($product, $rules, $o1, $o2, $o3)
     {
         $delimiter = $rules->sku_delimiter ?? '-';
@@ -133,35 +149,39 @@ class SkuSettingController extends Controller
             return null;
         };
 
-        if ($p = $parse($product['title'] ?? '', $rules->segment_product_title))
+        $p = $parse($product['title'] ?? '', $rules->segment_product_title);
+        if ($p !== null && $p !== '')
             $segments[] = $p;
-        if ($p = $parse($product['vendor'] ?? '', $rules->segment_product_vendor))
+
+        $p = $parse($product['vendor'] ?? '', $rules->segment_product_vendor);
+        if ($p !== null && $p !== '')
             $segments[] = $p;
-        if ($p = $parse($product['productType'] ?? '', $rules->segment_product_type))
+
+        $p = $parse($product['productType'] ?? '', $rules->segment_product_type);
+        if ($p !== null && $p !== '')
             $segments[] = $p;
 
         $metaValue = '';
         if (!empty($rules->segment_metafield)) {
-            $metaValue =
-                $product['metafields'][$rules->segment_metafield] ?? '';
+            $metaValue = $product['metafields'][$rules->segment_metafield] ?? '';
         }
         if ($metaValue) {
-            if (
-                $p = $parse(
-                    $metaValue,
-                    $rules->segment_metafield_rule
-                )
-            ) {
+            $p = $parse($metaValue, $rules->segment_metafield_rule);
+            if ($p !== null && $p !== '')
                 $segments[] = $p;
-            }
         }
 
         if (!$rules->hide_options_1_2_3) {
-            if ($p = $parse($o1, $rules->segment_option1))
+            $p = $parse($o1, $rules->segment_option1);
+            if ($p !== null && $p !== '')
                 $segments[] = $p;
-            if ($p = $parse($o2, $rules->segment_option2))
+
+            $p = $parse($o2, $rules->segment_option2);
+            if ($p !== null && $p !== '')
                 $segments[] = $p;
-            if ($p = $parse($o3, $rules->segment_option3))
+
+            $p = $parse($o3, $rules->segment_option3);
+            if ($p !== null && $p !== '')
                 $segments[] = $p;
         }
 
@@ -172,7 +192,9 @@ class SkuSettingController extends Controller
         }
 
         $finalStr = str_replace(' ', '', implode($delimiter, $segments));
+        $finalStr = $this->normalizeDelimiters($finalStr, $delimiter);
+
         return $rules->force_uppercase_fields ? strtoupper($finalStr) : $finalStr;
     }
-    
+
 }

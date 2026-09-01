@@ -46,6 +46,25 @@ const modelOptionsMap = {
     ],
 };
 
+export const defaultCustomPaper = {
+    type: "sheet",
+    paper: {
+        width: 215.9,
+        height: 279.4,
+    },
+    label: {
+        width: 66.7,
+        height: 25.4,
+    },
+    rows: 1,
+    columns: 1,
+    gapX: 0,
+    gapY: 0,
+    marginTop: 0,
+    marginLeft: 0,
+    roll: null,
+};
+
 export const PAPER_TEMPLATES = {
     dymo: {
         "30334": {
@@ -151,15 +170,15 @@ export const PAPER_TEMPLATES = {
                 height: 279.4,
             },
             label: {
-                width: 66.7,
+                width: 66.68,
                 height: 25.4,
             },
             rows: 10,
             columns: 3,
-            gapX: 3.2,
+            gapX: 3.175,
             gapY: 0,
             marginTop: 12.7,
-            marginLeft: 4.8,
+            marginLeft: 4.76,
             roll: null,
         },
 
@@ -171,15 +190,15 @@ export const PAPER_TEMPLATES = {
                 height: 279.4,
             },
             label: {
-                width: 44.5,
+                width: 44.45,
                 height: 12.7,
             },
             rows: 20,
             columns: 4,
-            gapX: 5,
+            gapX: 7.62,
             gapY: 0,
             marginTop: 12.7,
-            marginLeft: 7.5,
+            marginLeft: 7.62,
             roll: null,
         },
     },
@@ -576,78 +595,6 @@ export default function PaperTemplateSettings({
                             </div>
                         </>
                     )}
-
-                    <div
-                        style={{
-                            marginTop: "12px",
-                            padding: "10px",
-                            background: "#ffffff",
-                            border: "1px solid #e1e3e5",
-                            borderRadius: "6px",
-                            fontSize: "13px",
-                        }}
-                    >
-                        <strong>Paper:</strong>{" "}
-                        {customPaper?.paper?.width || 0} mm ×{" "}
-                        {customPaper?.paper?.height || 0} mm
-                        <br />
-                        <strong>Label:</strong>{" "}
-                        {customPaper?.label?.width || 0} mm ×{" "}
-                        {customPaper?.label?.height || 0} mm
-                    </div>
-                </div>
-            )}
-
-            {brand !== "custom" && selectedTemplate && (
-                <div
-                    style={{
-                        marginTop: "12px",
-                        padding: "12px",
-                        border: "1px solid #e1e3e5",
-                        borderRadius: "8px",
-                        background: "#f6f6f7",
-                    }}
-                >
-                    <div
-                        style={{
-                            fontWeight: 600,
-                            marginBottom: "8px",
-                        }}
-                    >
-                        {selectedTemplate.name}
-                    </div>
-
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                                "repeat(3, 1fr)",
-                            gap: "8px",
-                            fontSize: "13px",
-                        }}
-                    >
-                        <div>
-                            <strong>Paper:</strong>{" "}
-                            {selectedTemplate.paper.width}
-                            mm ×{" "}
-                            {selectedTemplate.paper.height}
-                            mm
-                        </div>
-
-                        <div>
-                            <strong>Label:</strong>{" "}
-                            {selectedTemplate.label.width}
-                            mm ×{" "}
-                            {selectedTemplate.label.height}
-                            mm
-                        </div>
-
-                        <div>
-                            <strong>Layout:</strong>{" "}
-                            {selectedTemplate.columns} ×{" "}
-                            {selectedTemplate.rows}
-                        </div>
-                    </div>
                 </div>
             )}
         </div>

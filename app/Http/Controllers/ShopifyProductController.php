@@ -105,6 +105,10 @@ class ShopifyProductController extends Controller
 
                         // Extract option mapping arrays securely
                         $options = $variant['selectedOptions'] ?? [];
+                        $cleanOption = function ($value) {
+                            $value = trim((string) $value);
+                            return strcasecmp($value, 'Default Title') === 0 ? '' : $value;
+                        };
 
                         $productImage = isset($product['featuredImage']['url']) ? $product['featuredImage']['url'] : null;
                         $variantImage = isset($variant['image']['url']) ? $variant['image']['url'] : null;
@@ -134,9 +138,9 @@ class ShopifyProductController extends Controller
                             'currency_code' => $variant['contextualPricing']['price']['currencyCode']
                                 ?? $currencyCode,
                             'image' => $finalImage,
-                            'option_1' => $options[0]['value'] ?? '',
-                            'option_2' => $options[1]['value'] ?? '',
-                            'option_3' => $options[2]['value'] ?? '',
+                            'option_1' => $cleanOption($options[0]['value'] ?? ''),
+                            'option_2' => $cleanOption($options[1]['value'] ?? ''),
+                            'option_3' => $cleanOption($options[2]['value'] ?? ''),
 
                             'metafields' => $metafields,
 
@@ -430,9 +434,9 @@ class ShopifyProductController extends Controller
                             "inventory_item_id" => $v["inventoryItem"]["id"],
                             "current_sku" => $v["sku"],
                             "barcode" => $v["barcode"] ?? "",
-                            "option_1" => $v["selectedOptions"][0]["value"] ?? "",
-                            "option_2" => $v["selectedOptions"][1]["value"] ?? "",
-                            "option_3" => $v["selectedOptions"][2]["value"] ?? "",
+                            "option_1" => (strcasecmp(trim($v["selectedOptions"][0]["value"] ?? ""), 'Default Title') === 0) ? "" : ($v["selectedOptions"][0]["value"] ?? ""),
+                            "option_2" => (strcasecmp(trim($v["selectedOptions"][1]["value"] ?? ""), 'Default Title') === 0) ? "" : ($v["selectedOptions"][1]["value"] ?? ""),
+                            "option_3" => (strcasecmp(trim($v["selectedOptions"][2]["value"] ?? ""), 'Default Title') === 0) ? "" : ($v["selectedOptions"][2]["value"] ?? ""),
                             "metafields" => $product["metafields"] ?? [],
                         ];
                     }

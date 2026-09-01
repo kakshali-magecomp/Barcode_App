@@ -143,7 +143,7 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
         style={{ borderBottom: "1px solid #bbc3c9" }}
       >
         <Text variant="headingSm" as="h3">
-          Barcode Line: 1 limited
+          Barcode / QR Code Symbol
         </Text>
 
         <div style={{ color: "#6d7175" }}></div>
@@ -151,12 +151,20 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
 
       <BlockStack gap="300" paddingTop="300">
         <Checkbox
-          label="Symbol"
+          label="Enable Barcode / QR Code Symbol"
           checked={!!design.symbol_enabled}
           onChange={(value) =>
             handleUpdate("symbol_enabled", value)
           }
         />
+
+        {!design.symbol_enabled && (
+          <Box paddingBlockStart="100">
+            <Text tone="subdued" variant="bodySm">
+              Check "Enable Barcode / QR Code Symbol" above to configure barcode type, symbol color, field source, and barcode formatting.
+            </Text>
+          </Box>
+        )}
 
         {design.symbol_enabled && (
           <FormLayout>

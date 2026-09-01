@@ -1,12 +1,27 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Tooltip, Icon } from '@shopify/polaris';
+import { InfoIcon } from '@shopify/polaris-icons';
 import DesignCanvasEdit from '../../components/DesignCanvasEdit.jsx';
 import PaperTemplateSettings, {
     PAPER_TEMPLATES,
 } from '../../components/PaperTemplateSettings';
 
 const SAVE_BAR_ID = 'edit-template-savebar';
+
+const FieldLabel = ({ label, tooltip }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '6px' }}>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: '#303030' }}>{label}</span>
+        {tooltip && (
+            <Tooltip content={tooltip} dismissOnMouseOut>
+                <span style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', color: '#616161' }}>
+                    <Icon source={InfoIcon} tone="subdued" />
+                </span>
+            </Tooltip>
+        )}
+    </div>
+);
 
 export default function EditTemplate() {
     const shopify = useAppBridge();
@@ -466,59 +481,55 @@ export default function EditTemplate() {
                         </s-banner>
                     )}
 
-                    <s-stack
-                        direction="block"
-                        gap="base"
-                    >
-                        <div style={{ paddingRight: '340px' }}>
-                            <s-grid
-                                gridTemplateColumns="1fr 1fr"
-                                gap="base"
-                            >
-                                <s-text-field
-                                    label="Template Name"
-                                    value={name}
-                                    onInput={handleFieldChange(setName)}
-                                    details="Enter a name to easily identify this label template."
+                    <DesignCanvasEdit
+                        templateId={id}
+                        discardSignal={discardSignal}
+                        onChange={handleDesignChange}
+                        onDirty={() => { }}
+                        brand={brand}
+                        model={model}
+                        paperTemplate={selectedPaperTemplate}
+                        topFormFields={
+                            <>
+                                <s-grid gridTemplateColumns="1fr 1fr" gap="base">
+                                    <div>
+                                        <FieldLabel label="Template Name" tooltip="Enter a name to easily identify this label template." />
+                                        <s-text-field
+                                            value={name}
+                                            onInput={handleFieldChange(setName)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <FieldLabel label="Internal Note" tooltip="Add a Short note to help you remember details about this template." />
+                                        <s-text-area
+                                            value={note}
+                                            onInput={handleFieldChange(setNote)}
+                                            rows={2}
+                                        />
+                                    </div>
+                                </s-grid>
+
+                                <div>
+                                    <FieldLabel label="Description" tooltip="Provide a brief description of the template and how it will be used." />
+                                    <s-text-area
+                                        value={description}
+                                        onInput={handleFieldChange(setDescription)}
+                                        rows={3}
+                                    />
+                                </div>
+
+                                <PaperTemplateSettings
+                                    brand={brand}
+                                    model={model}
+                                    customPaper={customPaper}
+                                    onBrandChange={handleBrandChange}
+                                    onModelChange={handleModelChange}
+                                    onCustomChange={handleCustomPaperChange}
                                 />
-
-                                <s-text-area
-                                    label="Internal Note"
-                                    value={note}
-                                    onInput={handleFieldChange(setNote)}
-                                    rows={2}
-                                    details="Add a Short note to help you remember details about this template."
-                                />
-                            </s-grid>
-
-                            <s-text-area
-                                label="Description"
-                                value={description}
-                                onInput={handleFieldChange(setDescription)}
-                                rows={3}
-                                details="Provide a brief description of the template and how it will be used."
-                            />
-
-                            <PaperTemplateSettings
-                                brand={brand}
-                                model={model}
-                                customPaper={customPaper}
-                                onBrandChange={handleBrandChange}
-                                onModelChange={handleModelChange}
-                                onCustomChange={handleCustomPaperChange}
-                            />
-                        </div>
-                    </s-stack>
-
-                    <s-box paddingBlockStart="loose">
-                        <DesignCanvasEdit
-                            templateId={id}
-                            discardSignal={discardSignal}
-                            onChange={handleDesignChange}
-                            onDirty={() => { }}
-                            paperTemplate={selectedPaperTemplate}
-                        />
-                    </s-box>
+                            </>
+                        }
+                    />
                 </s-section>
             </s-page>
         </>

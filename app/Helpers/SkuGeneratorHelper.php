@@ -96,15 +96,28 @@ class SkuGeneratorHelper
 
         //final SKU
         $sku = implode($delimiter, $segments);
+        $sku = self::normalizeDelimiters($sku, $delimiter);
+
         if ($rules->force_uppercase_fields) {
             $sku = strtoupper($sku);
         }
         return $sku;
     }
 
-    private static function addCleanedSegment(&$segments, $value, $delimiter) {
+    private static function normalizeDelimiters($sku, $delimiter)
+    {
+        if ($delimiter === '')
+            return $sku;
+        $escaped = preg_quote($delimiter, '/');
+        $sku = preg_replace('/(?:' . $escaped . '){2,}/', $delimiter, $sku);
+        return trim($sku, $delimiter);
+    }
+
+    private static function addCleanedSegment(&$segments, $value, $delimiter)
+    {
         $value = trim((string) $value);
-        if ($value === '') return;
+        if ($value === '')
+            return;
         // Clean special characters to delimiter just like GenerateSkuJob
         $value = preg_replace('/[^A-Za-z0-9]+/', $delimiter, $value);
         $value = trim($value, $delimiter);
@@ -123,12 +136,17 @@ class SkuGeneratorHelper
         if (!$mode || $mode == "none" || $mode == "disabled") {
             return;
         }
-        
+
         $value = trim((string) $value);
-        if ($value === '') {
+
+        if (strcasecmp($value, 'Default Title') === 0) {
             return;
         }
         
+        if ($value === '') {
+            return;
+        }
+
         $val = '';
         switch ($mode) {
             case "full":

@@ -1,37 +1,42 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { Modal, TitleBar, useAppBridge } from "@shopify/app-bridge-react";
+import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import { useNavigate } from "react-router-dom";
 import { openPrintWindow } from '../../components/Printlayout';
 import TemplateLabelRenderer from "../../components/TemplateLabelRenderer";
-
-const DELETE_MODAL_ID = "delete-history-modal";
-const VIEW_MODAL_ID = "view-history-modal";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 
 export default function LabelHistory() {
   const shopify = useAppBridge();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [histories, setHistories] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [error, setError] = useState("");
-  const [selectedHistory, setSelectedHistory] = useState(null);
+
+  const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [historyDetails, setHistoryDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const printRef = useRef(null);
-  const historyPrintRef = useRef(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemsToDelete, setItemsToDelete] = useState([]);
+
   const [selectedItems, setSelectedItems] = useState([]);
   const [printQuantities, setPrintQuantities] = useState({});
   const [selectedRows, setSelectedRows] = useState([]);
-  const ITEMS_PER_PAGE = 6;
+  const ITEMS_PER_PAGE = 8;
   const [currentPage, setCurrentPage] = useState(1);
   const [currencyCode, setCurrencyCode] = useState('USD');
   const [printSettings, setPrintSettings] = useState(null);
 
+  const historyPrintRef = useRef(null);
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, dateFilter]);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -39,14 +44,14 @@ export default function LabelHistory() {
       const res = await fetch("/api/print-history");
       const json = await res.json();
       if (json.success) {
-        setHistories(json.data);
-        setFilteredHistory(json.data);
+        setHistories(json.data || []);
+        setFilteredHistory(json.data || []);
       } else {
         setError(json.message || "Unable to load history.");
       }
     } catch (err) {
       console.error(err);
-      setError("Unable to load history.");
+      setError("Unable to load print history.");
     } finally {
       setLoading(false);
     }
@@ -74,7 +79,6 @@ export default function LabelHistory() {
       try {
         const res = await fetch("/api/print-settings");
         const json = await res.json();
-
         if (json.success) {
           setPrintSettings(json.settings);
         }
@@ -82,17 +86,16 @@ export default function LabelHistory() {
         console.log(err);
       }
     }
-
     loadPrintSettings();
   }, []);
 
   useEffect(() => {
     let result = histories;
 
-    if (search) {
-      const searchText = search.toLowerCase();
+    if (search.trim()) {
+      const searchText = search.toLowerCase().trim();
       result = result.filter((item) => {
-        const formattedDate = new Date(item.created_at)
+        const formattedDate = new Date(item.created_at || item.printed_at)
           .toLocaleString()
           .toLowerCase();
 
@@ -111,7 +114,7 @@ export default function LabelHistory() {
 
     if (dateFilter) {
       result = result.filter((item) => {
-        const itemDate = new Date(item.created_at).toISOString().slice(0, 10); // YYYY-MM-DD
+        const itemDate = new Date(item.created_at || item.printed_at).toISOString().slice(0, 10);
         return itemDate === dateFilter;
       });
     }
@@ -119,67 +122,82 @@ export default function LabelHistory() {
     setFilteredHistory(result);
   }, [search, dateFilter, histories]);
 
-  const openHistory = async (id) => {
+  const openHistoryDetails = async (id) => {
     try {
+      setSelectedHistoryId(id);
       setLoadingDetails(true);
+      setViewModalOpen(true);
       const res = await fetch(`/api/print-history/${id}`);
       const json = await res.json();
       if (!json.success) {
-        console.error(json.message);
+        shopify.toast.show(json.message || "Failed to load details.");
+        setViewModalOpen(false);
         return;
       }
       const history = json.data;
       setHistoryDetails(history);
       const quantities = {};
 
-      json.data.items.forEach((item, index) => {
-        quantities[index] = Number(item.qty) || 1;
+      (history.items || []).forEach((item, index) => {
+        quantities[index] = Math.max(1, Number(item.qty) || 1);
       });
 
       setPrintQuantities(quantities);
       setSelectedItems((history.items || []).map((_, index) => index));
-      shopify.modal.show(VIEW_MODAL_ID);
     } catch (err) {
       console.error("Failed to load history:", err);
+      shopify.toast.show("Error loading job details.");
+      setViewModalOpen(false);
     } finally {
       setLoadingDetails(false);
     }
   };
 
-  const deleteHistory = async () => {
+  const triggerDeleteSingle = (id) => {
+    setItemsToDelete([id]);
+    setDeleteModalOpen(true);
+  };
+
+  const triggerDeleteBulk = () => {
+    if (selectedRows.length === 0) return;
+    setItemsToDelete(selectedRows);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
     try {
       await Promise.all(
-        selectedRows.map(id =>
+        itemsToDelete.map((id) =>
           fetch(`/api/print-history/${id}`, {
             method: "DELETE",
           })
         )
       );
 
-      shopify.toast.show("History deleted.");
-
+      shopify.toast.show(
+        `${itemsToDelete.length} print history record${itemsToDelete.length !== 1 ? 's' : ''} deleted.`
+      );
       setSelectedRows([]);
+      setDeleteModalOpen(false);
+      setItemsToDelete([]);
       loadHistory();
     } catch (err) {
-      setError("Delete failed.");
+      setError("Failed to delete history items.");
+      setDeleteModalOpen(false);
     }
-
-    shopify.modal.hide(DELETE_MODAL_ID);
   };
 
   const handlePrintHistory = () => {
     if (!historyDetails) return;
 
     if (!selectedItems.length) {
-      shopify.toast.show("Please select at least one product.");
+      shopify.toast.show("Please select at least one product to print.");
       return;
     }
 
     const firstSelectedIndex = selectedItems[0];
     const firstSelectedItem = historyDetails.items[firstSelectedIndex];
-
-    const paper =
-      firstSelectedItem?.template_settings?.layout_settings;
+    const paper = firstSelectedItem?.template_settings?.layout_settings;
 
     if (!paper) {
       shopify.toast.show("Paper template information is missing.");
@@ -193,23 +211,16 @@ export default function LabelHistory() {
     const labels = selectedItems
       .map((index) => {
         const item = historyDetails.items[index];
-
-        const printLabel = document.getElementById(
-          `history-print-label-${index}`
-        );
+        const printLabel = document.getElementById(`history-print-label-${index}`);
 
         if (!printLabel) {
-          console.warn(
-            `Print label not found for history item ${index}`
-          );
+          console.warn(`Print label not found for history item ${index}`);
           return "";
         }
 
         const quantity = Math.max(
           1,
-          Number(printQuantities[index]) ||
-          Number(item.qty) ||
-          1
+          Number(printQuantities[index]) || Number(item.qty) || 1
         );
 
         const labelHtml = printLabel.innerHTML;
@@ -232,17 +243,10 @@ export default function LabelHistory() {
     const tempContainer = document.createElement("div");
     tempContainer.innerHTML = labels;
 
-    const allLabels = Array.from(
-      tempContainer.querySelectorAll(".label")
-    );
-
+    const allLabels = Array.from(tempContainer.querySelectorAll(".label"));
     const sheets = [];
 
-    for (
-      let start = 0;
-      start < allLabels.length;
-      start += labelsPerSheet
-    ) {
+    for (let start = 0; start < allLabels.length; start += labelsPerSheet) {
       const sheetLabels = allLabels
         .slice(start, start + labelsPerSheet)
         .map((label) => label.outerHTML)
@@ -265,37 +269,47 @@ export default function LabelHistory() {
     });
   };
 
-  const handlePrintAll = () => {
+  const handlePrintAllReport = () => {
     const win = window.open("", "_blank");
-    const rows = histories.map((item) => `
+    const rows = filteredHistory.map((item) => `
 <tr>
-<td>${item.id}</td>
-<td>${item.template?.template_name || "-"}</td>
-<td>${item.print_qty}</td>
-<td>${item.client_ip}</td>
-<td>${new Date(item.printed_at).toLocaleString()}</td>
+  <td style="padding: 8px 12px; border: 1px solid #e1e3e5; font-weight: bold;">#${item.id}</td>
+  <td style="padding: 8px 12px; border: 1px solid #e1e3e5;">${item.template?.template_name || "Standard Label"}</td>
+  <td style="padding: 8px 12px; border: 1px solid #e1e3e5; text-align: center; font-weight: bold;">${item.print_qty}</td>
+  <td style="padding: 8px 12px; border: 1px solid #e1e3e5; font-family: monospace;">${item.client_ip || "Local"}</td>
+  <td style="padding: 8px 12px; border: 1px solid #e1e3e5;">${new Date(item.created_at || item.printed_at).toLocaleString()}</td>
 </tr>
 `).join("");
+
     win.document.write(`
+<!DOCTYPE html>
 <html>
 <head>
-<title>Print History</title>
-<style>
-body{font-family:Arial;padding:30px;}
-table{width:100%;border-collapse:collapse;}
-th,td{border:1px solid #ccc;padding:10px;}
-th{background:#f5f5f5;}
-</style>
+  <title>Barcode Print History Log Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 30px; color: #202223; }
+    h2 { color: #01161d; margin-bottom: 4px; }
+    p { color: #6d7175; font-size: 14px; margin-top: 0; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th { background: #f4f6f8; border: 1px solid #e1e3e5; padding: 10px 12px; text-align: left; font-weight: 600; }
+  </style>
 </head>
 <body>
-<h2>Barcode Print History</h2>
-<table>
-<thead>
-<tr><th>ID</th><th>Template</th><th>Total Qty</th><th>Client IP</th><th>Printed At</th></tr>
-</thead>
-<tbody>${rows}</tbody>
-</table>
-<script>window.onload=function(){window.print();window.close();}</script>
+  <h2>Barcode Print History Logs</h2>
+  <p>Generated on ${new Date().toLocaleString()} • ${filteredHistory.length} Total Print Jobs</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Job ID</th>
+        <th>Template Name</th>
+        <th style="text-align: center;">Total Labels</th>
+        <th>Client IP</th>
+        <th>Printed Date & Time</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <script>window.onload = function() { window.print(); setTimeout(() => window.close(), 500); }</script>
 </body>
 </html>
 `);
@@ -303,42 +317,121 @@ th{background:#f5f5f5;}
   };
 
   const summary = {
-    totalPrints: filteredHistory.length,
-    totalLabels: filteredHistory.reduce((total, item) => total + Number(item.print_qty || 0), 0),
-    todayPrints: filteredHistory.filter((item) => {
+    totalPrints: histories.length,
+    totalLabels: histories.reduce((total, item) => total + Number(item.print_qty || 0), 0),
+    todayPrints: histories.filter((item) => {
       const today = new Date().toDateString();
       return new Date(item.created_at || item.printed_at).toDateString() === today;
     }).length,
     lastPrint:
-      filteredHistory.length > 0
-        ? new Date(filteredHistory[0].created_at || filteredHistory[0].printed_at).toLocaleDateString()
+      histories.length > 0
+        ? new Date(histories[0].created_at || histories[0].printed_at).toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        })
         : "-",
   };
 
-  const totalPages = Math.ceil(filteredHistory.length / ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(filteredHistory.length / ITEMS_PER_PAGE));
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedHistory = filteredHistory.slice(startIndex, endIndex);
+
+  const allPageRowsSelected =
+    paginatedHistory.length > 0 &&
+    paginatedHistory.every((item) => selectedRows.includes(item.id));
+
+  const toggleSelectAllPageRows = () => {
+    if (allPageRowsSelected) {
+      setSelectedRows((prev) => prev.filter((id) => !paginatedHistory.some((item) => item.id === id)));
+    } else {
+      const pageIds = paginatedHistory.map((item) => item.id);
+      setSelectedRows((prev) => Array.from(new Set([...prev, ...pageIds])));
+    }
+  };
 
   if (loading) {
     return (
       <s-page heading="Print History">
         <TitleBar title="barcodedemo-app" />
-        <s-box padding="loose" alignContent="center">
-          <s-spinner accessibilityLabel="Loading print history" size="large" />
-        </s-box>
+        <s-section>
+          <s-box padding="loose" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <s-spinner accessibilityLabel="Loading print history" size="large" />
+            <s-text tone="subdued" style={{ marginTop: '12px' }}>Loading print history records...</s-text>
+          </s-box>
+        </s-section>
       </s-page>
     );
   }
 
   return (
     <>
-      <s-page heading="Print History">
-        <TitleBar title="barcodedemo-app" />
+      <TitleBar title="barcodedemo-app" />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        title={`Delete ${itemsToDelete.length} history record${itemsToDelete.length !== 1 ? 's' : ''}?`}
+        message={`Are you sure you want to delete ${itemsToDelete.length === 1 ? 'this print log' : `these ${itemsToDelete.length} print logs`}? This action cannot be undone.`}
+        onConfirm={confirmDelete}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setItemsToDelete([]);
+        }}
+      />
+
+      <s-page heading="Print History" subheading="View, reprint, or export audit logs of all printed barcode sticker jobs.">
+        {/* Banner Section */}
         <s-section>
-          <s-button variant="primary" onClick={handlePrintAll}>
-            Print All History
-          </s-button>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              padding: '16px 20px',
+              borderRadius: '12px',
+              background: 'linear-gradient(90deg, #01161d 0%, #008ba8 100%)',
+              flexWrap: 'wrap',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{ width: '22px', height: '22px', color: '#008ba8' }}>
+                  <s-icon type="clock" tone="inherit" size="base" />
+                </div>
+              </div>
+              <div>
+                <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '16px' }}>
+                  Label Printing History
+                </div>
+                <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', marginTop: '2px' }}>
+                  Audit log of all physical sticker labels printed for your store catalog
+                </div>
+              </div>
+            </div>
+
+            <s-stack direction="inline" gap="base">
+              <s-button icon="arrow-left" onClick={() => navigate("/ProductsBarcodeList")}>
+                Back to Barcode Generator
+              </s-button>
+              <s-button variant="primary" icon="print" onClick={handlePrintAllReport}>
+                Print Log Report
+              </s-button>
+            </s-stack>
+          </div>
         </s-section>
 
         {error && (
@@ -349,171 +442,560 @@ th{background:#f5f5f5;}
           </s-section>
         )}
 
-        <div style={{ margin: 10 }}>
-          <s-grid gridTemplateColumns="1fr 1fr 1fr 1fr" gap="base" >
-            <s-section>
-              <s-heading>{summary.totalPrints}</s-heading>
-              <s-text>Total Prints</s-text>
-            </s-section>
-            <s-section>
-              <s-heading>{summary.totalLabels}</s-heading>
-              <s-text>Total Labels</s-text>
-            </s-section>
-            <s-section>
-              <s-heading>{summary.todayPrints}</s-heading>
-              <s-text>Today's Prints</s-text>
-            </s-section>
-            <s-section>
-              <s-heading>{summary.lastPrint}</s-heading>
-              <s-text>Last Print</s-text>
-            </s-section>
-          </s-grid>
-        </div>
-        <s-section padding="none">
-          <s-box padding="base">
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                background: "#f4f4f5",
-                padding: "12px",
-                borderRadius: "12px",
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <s-search-field
-                  label="Search"
-                  labelAccessibilityVisibility="exclusive"
-                  placeholder="Search by Print ID, Template or Client IP..."
-                  value={search}
-                  onInput={(event) => setSearch(event.currentTarget.value)}
-                />
+        {/* Executive Metrics Overview Cards */}
+        <s-section>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+              gap: '14px',
+            }}
+          >
+            <div style={metricCardStyle}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#6d7175' }}>TOTAL PRINT JOBS</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#01161d', marginTop: '4px' }}>
+                {summary.totalPrints}
+              </div>
+              <div style={{ fontSize: '11px', color: '#8c9196', marginTop: '2px' }}>Lifetime print logs</div>
+            </div>
+
+            <div style={{ ...metricCardStyle, borderColor: '#008ba8', background: '#f0f9fa' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#008ba8' }}>TOTAL STICKERS PRINTED</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#008ba8', marginTop: '4px' }}>
+                {summary.totalLabels}
+              </div>
+              <div style={{ fontSize: '11px', color: '#008ba8', marginTop: '2px' }}>Individual barcode stickers</div>
+            </div>
+
+            <div style={metricCardStyle}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#6d7175' }}>TODAY'S PRINTS</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: '#01161d', marginTop: '4px' }}>
+                {summary.todayPrints}
+              </div>
+              <div style={{ fontSize: '11px', color: '#8c9196', marginTop: '2px' }}>Jobs created today</div>
+            </div>
+
+            <div style={metricCardStyle}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#6d7175' }}>LAST PRINTED</div>
+              <div style={{ fontSize: '18px', fontWeight: 700, color: '#01161d', marginTop: '8px' }}>
+                {summary.lastPrint}
+              </div>
+              <div style={{ fontSize: '11px', color: '#8c9196', marginTop: '2px' }}>Most recent activity</div>
+            </div>
+          </div>
+        </s-section>
+
+        {/* Search, Filter & History Log Table */}
+        <s-section>
+          <s-box padding="base" borderWidth="base" borderRadius="base">
+            <s-stack direction="block" gap="medium">
+              {/* Search Toolbar */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                  flexWrap: 'wrap',
+                  background: '#f8fafc',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: '1px solid #e1e3e5',
+                }}
+              >
+                <div style={{ flex: '1', minWidth: '220px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="Search by Job ID, Template Name or IP..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    style={{
+                      flex: '1',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #c9cccf',
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      background: '#ffffff',
+                    }}
+                  />
+                  <input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    style={{
+                      padding: '7px 10px',
+                      borderRadius: '6px',
+                      border: '1px solid #c9cccf',
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      background: '#ffffff',
+                      color: '#444',
+                    }}
+                  />
+                  {(search || dateFilter) && (
+                    <s-button
+                      variant="tertiary"
+                      onClick={() => {
+                        setSearch("");
+                        setDateFilter("");
+                      }}
+                    >
+                      Clear
+                    </s-button>
+                  )}
+                </div>
+
+                {selectedRows.length > 0 && (
+                  <s-button tone="critical" onClick={triggerDeleteBulk}>
+                    Delete Selected ({selectedRows.length})
+                  </s-button>
+                )}
               </div>
 
-              <s-date-field
-                label="Date"
-                labelAccessibilityVisibility="exclusive"
-                value={dateFilter}
-                onChange={(event) => setDateFilter(event.currentTarget.value)}
-              />
-            </div>
-          </s-box>
+              {/* Data Table */}
+              {filteredHistory.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '48px 20px',
+                    background: '#f9fafb',
+                    borderRadius: '10px',
+                    border: '1px dashed #d2d5d8',
+                  }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#202223', marginBottom: '4px' }}>
+                    No print history records found
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#6d7175', marginBottom: '16px' }}>
+                    {search || dateFilter
+                      ? "No records match your active search filter."
+                      : "No barcode label sticker jobs have been printed yet."}
+                  </div>
+                  {(search || dateFilter) && (
+                    <s-button
+                      onClick={() => {
+                        setSearch("");
+                        setDateFilter("");
+                      }}
+                    >
+                      Reset Search Filters
+                    </s-button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div style={{ border: '1px solid #e1e3e5', borderRadius: '10px', overflow: 'hidden', background: '#ffffff' }}>
+                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#f4f6f8', borderBottom: '1px solid #e1e3e5' }}>
+                          <th style={{ ...thStyle, width: '38px' }}>
+                            <s-checkbox
+                              label="Select all"
+                              labelAccessibilityVisibility="exclusive"
+                              checked={allPageRowsSelected || undefined}
+                              onChange={toggleSelectAllPageRows}
+                            />
+                          </th>
+                          <th style={{ ...thStyle, width: '100px' }}>Print ID</th>
+                          <th style={{ ...thStyle, width: '30%' }}>Template Name</th>
+                          <th style={{ ...thStyle, width: '120px', textAlign: 'center' }}>Total Labels</th>
+                          <th style={{ ...thStyle, width: '140px' }}>Client IP</th>
+                          <th style={{ ...thStyle, width: '22%' }}>Printed Date</th>
+                          <th style={{ ...thStyle, width: '140px', textAlign: 'right' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginatedHistory.map((item) => {
+                          const isChecked = selectedRows.includes(item.id);
+                          const printedDate = new Date(item.created_at || item.printed_at);
+                          const formattedDateStr = printedDate.toLocaleDateString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          });
 
-          {filteredHistory.length === 0 ? (
-            <s-section>
-              <s-box
-                padding="base"
-                background="subdued"
-                border="base"
-                borderRadius="base"
-              >
-                <s-stack direction="block" gap="base" alignItems="center">
-                  <div style={{ maxWidth: "200px", width: "100%" }}>
-                    <s-image
-                      src="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
-                      alt="No print history illustration"
-                      aspectRatio="1/1"
-                      objectFit="contain"
-                    ></s-image>
+                          return (
+                            <tr
+                              key={item.id}
+                              style={{
+                                borderBottom: '1px solid #e1e3e5',
+                                background: isChecked ? '#f0f9fa' : '#ffffff',
+                                transition: 'background 0.15s ease',
+                              }}
+                            >
+                              <td style={tdStyle}>
+                                <s-checkbox
+                                  label={`Select ${item.id}`}
+                                  labelAccessibilityVisibility="exclusive"
+                                  checked={isChecked || undefined}
+                                  onChange={() => {
+                                    setSelectedRows((prev) =>
+                                      prev.includes(item.id)
+                                        ? prev.filter((id) => id !== item.id)
+                                        : [...prev, item.id]
+                                    );
+                                  }}
+                                />
+                              </td>
+                              <td style={tdStyle}>
+                                <span
+                                  onClick={() => openHistoryDetails(item.id)}
+                                  style={{
+                                    fontFamily: 'monospace',
+                                    fontWeight: 700,
+                                    color: '#008ba8',
+                                    cursor: 'pointer',
+                                    background: '#e0f5f8',
+                                    padding: '3px 8px',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                  }}
+                                >
+                                  #{item.id}
+                                </span>
+                              </td>
+                              <td style={tdStyle}>
+                                <div style={{ fontWeight: 600, color: '#202223', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {item.template?.template_name || "Standard Label Template"}
+                                </div>
+                              </td>
+                              <td style={{ ...tdStyle, textAlign: 'center' }}>
+                                <s-badge tone="success">{item.print_qty} stickers</s-badge>
+                              </td>
+                              <td style={tdStyle}>
+                                <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#6d7175' }}>
+                                  {item.client_ip || "127.0.0.1"}
+                                </span>
+                              </td>
+                              <td style={tdStyle}>
+                                <div style={{ fontSize: '12px', color: '#444' }}>{formattedDateStr}</div>
+                              </td>
+                              <td style={{ ...tdStyle, textAlign: 'right' }}>
+                                <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                  <s-button onClick={() => openHistoryDetails(item.id)}>
+                                    View / Print
+                                  </s-button>
+                                  <s-button
+                                    icon="delete"
+                                    variant="tertiary"
+                                    tone="critical"
+                                    onClick={() => triggerDeleteSingle(item.id)}
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
 
-                  <s-heading>
-                    No print history found
-                  </s-heading>
+                  {/* Pagination Footer */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', paddingTop: '4px' }}>
+                    <div style={{ fontSize: '12px', color: '#6d7175' }}>
+                      Showing {startIndex + 1}–{Math.min(endIndex, filteredHistory.length)} of {filteredHistory.length} print records
+                    </div>
 
-                  <s-paragraph>
-                    No barcode labels have been printed yet.
-                  </s-paragraph>
-                </s-stack>
-              </s-box>
-            </s-section>
-          ) : (
-            <>
-              {selectedRows.length > 0 && (
-                <s-box padding="base">
-                  <s-button
-                    tone="critical"
-                    onClick={() => shopify.modal.show(DELETE_MODAL_ID)}
-                  >
-                    Delete ({selectedRows.length})
-                  </s-button>
-                </s-box>
-              )}
-              <s-table
-                paginate
-                hasPreviousPage={currentPage > 1 || undefined}
-                hasNextPage={currentPage < totalPages || undefined}
-                onPreviousPage={() => setCurrentPage((prev) => prev - 1)}
-                onNextPage={() => setCurrentPage((prev) => prev + 1)}
-              >
-                <s-table-header-row>
-                  <s-table-header>
-                    <input
-                      type="checkbox"
-                      checked={
-                        paginatedHistory.length > 0 &&
-                        paginatedHistory.every((item) =>
-                          selectedRows.includes(item.id)
-                        )
-                      }
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedRows(paginatedHistory.map(item => item.id));
-                        } else {
-                          setSelectedRows([]);
-                        }
-                      }}
-                    />
-                  </s-table-header>
-                  <s-table-header>Print ID</s-table-header>
-                  <s-table-header>Template Name</s-table-header>
-                  <s-table-header>Total Labels</s-table-header>
-                  <s-table-header>Client IP</s-table-header>
-                  <s-table-header>Printed At</s-table-header>
-
-                </s-table-header-row>
-                <s-table-body>
-                  {paginatedHistory.map((item) => (
-                    <s-table-row key={item.id}>
-                      <s-table-cell>
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.includes(item.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedRows([...selectedRows, item.id]);
-                            } else {
-                              setSelectedRows(
-                                selectedRows.filter(id => id !== item.id)
-                              );
-                            }
-                          }}
-                        />
-                      </s-table-cell>
-                      <s-table-cell>
-                        <s-button variant="tertiary" onClick={() => openHistory(item.id)}>
-                          #{item.id}
+                    {totalPages > 1 && (
+                      <s-stack direction="inline" gap="tight" alignItems="center">
+                        <s-button
+                          variant="tertiary"
+                          disabled={currentPage <= 1 || undefined}
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        >
+                          Previous
                         </s-button>
-                      </s-table-cell>
-                      <s-table-cell>
-                        <s-text fontWeight="semibold">{item.template?.template_name ?? "-"}</s-text>
-                      </s-table-cell>
-                      <s-table-cell>
-                        <s-badge tone="success">{item.print_qty}</s-badge>
-                      </s-table-cell>
-                      <s-table-cell>{item.client_ip}</s-table-cell>
-                      <s-table-cell>{new Date(item.created_at).toLocaleString()}</s-table-cell>
-                    </s-table-row>
-                  ))}
-                </s-table-body>
-              </s-table>
-            </>
-          )}
+                        <span style={{ fontSize: '12px', color: '#444', fontWeight: 600 }}>
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <s-button
+                          variant="tertiary"
+                          disabled={currentPage >= totalPages || undefined}
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                        >
+                          Next
+                        </s-button>
+                      </s-stack>
+                    )}
+                  </div>
+                </>
+              )}
+            </s-stack>
+          </s-box>
         </s-section>
       </s-page>
 
-      {/* Hidden labels used for printing */}
+      {/* View & Re-Print Details Modal */}
+      {viewModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            boxSizing: 'border-box',
+          }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: '14px',
+              maxWidth: '840px',
+              width: '100%',
+              maxHeight: '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '16px 20px',
+                borderBottom: '1px solid #e1e3e5',
+                background: '#f8fafc',
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: '#01161d' }}>
+                  Print Job #{selectedHistoryId} Details
+                </div>
+                <div style={{ fontSize: '12px', color: '#6d7175', marginTop: '2px' }}>
+                  Template: <strong>{historyDetails?.template?.template_name || 'Standard Template'}</strong>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewModalOpen(false)}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  color: '#6d7175',
+                  lineHeight: 1,
+                  padding: '4px 8px',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+              {loadingDetails ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <s-spinner size="large" />
+                  <div style={{ marginTop: '10px', fontSize: '13px', color: '#666' }}>
+                    Loading job products...
+                  </div>
+                </div>
+              ) : historyDetails ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {/* Quick Re-open in Print Workspace CTA Banner */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      background: '#f0f9fa',
+                      border: '1px solid #c4ebf2',
+                      borderRadius: '10px',
+                      padding: '12px 16px',
+                      flexWrap: 'wrap',
+                      gap: '12px',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '14px', color: '#008ba8' }}>
+                        Re-open this print job in workspace
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#555', marginTop: '2px' }}>
+                        Load all {historyDetails.items.length} products into the print label generator workspace to adjust quantities.
+                      </div>
+                    </div>
+                    <s-button
+                      variant="primary"
+                      onClick={() => {
+                        const selectedProducts = historyDetails.items.filter((_, index) =>
+                          selectedItems.includes(index)
+                        );
+                        navigate("/ProductsBarcodeList", {
+                          state: {
+                            fromHistory: true,
+                            historyId: historyDetails.id,
+                            mode: "print_existing",
+                            selectedProducts,
+                            originalHistoryProducts: historyDetails.items,
+                            templateId: historyDetails.template_id,
+                            historyProducts: historyDetails.items,
+                          },
+                        });
+                        setViewModalOpen(false);
+                      }}
+                    >
+                      Open in Print Workspace
+                    </s-button>
+                  </div>
+
+                  {/* Items List Table */}
+                  <div style={{ border: '1px solid #e1e3e5', borderRadius: '10px', overflow: 'hidden', background: '#ffffff' }}>
+                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#f4f6f8', borderBottom: '1px solid #e1e3e5' }}>
+                          <th style={{ ...thStyle, width: '38px' }}>
+                            <input
+                              type="checkbox"
+                              checked={
+                                historyDetails.items.length > 0 &&
+                                historyDetails.items.every((_, idx) => selectedItems.includes(idx))
+                              }
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedItems(historyDetails.items.map((_, idx) => idx));
+                                } else {
+                                  setSelectedItems([]);
+                                }
+                              }}
+                            />
+                          </th>
+                          <th style={{ ...thStyle, width: '35%' }}>Product Title</th>
+                          <th style={{ ...thStyle, width: '30%' }}>SKU</th>
+                          <th style={{ ...thStyle, width: '20%' }}>Barcode</th>
+                          <th style={{ ...thStyle, width: '110px', textAlign: 'center' }}>Print Qty</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {historyDetails.items.map((item, index) => {
+                          const isChecked = selectedItems.includes(index);
+                          return (
+                            <tr
+                              key={index}
+                              style={{
+                                borderBottom: '1px solid #e1e3e5',
+                                background: isChecked ? '#ffffff' : '#f9fafb',
+                              }}
+                            >
+                              <td style={tdStyle}>
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => {
+                                    setSelectedItems((prev) =>
+                                      prev.includes(index)
+                                        ? prev.filter((i) => i !== index)
+                                        : [...prev, index]
+                                    );
+                                  }}
+                                />
+                              </td>
+                              <td style={tdStyle}>
+                                <div style={{ fontWeight: 600, color: '#202223', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {item.product_title}
+                                </div>
+                                {item.variant_title && item.variant_title !== 'Default Title' && (
+                                  <div style={{ fontSize: '11px', color: '#6d7175' }}>
+                                    {item.variant_title}
+                                  </div>
+                                )}
+                              </td>
+                              <td style={tdStyle}>
+                                <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#444', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {item.current_sku || item.sku || '-'}
+                                </div>
+                              </td>
+                              <td style={tdStyle}>
+                                {item.barcode ? (
+                                  <s-badge tone="info">{item.barcode}</s-badge>
+                                ) : (
+                                  <span style={{ fontSize: '12px', color: '#8c9196' }}>-</span>
+                                )}
+                              </td>
+                              <td style={{ ...tdStyle, textAlign: 'center' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setPrintQuantities((prev) => ({
+                                        ...prev,
+                                        [index]: Math.max(1, (prev[index] || 1) - 1),
+                                      }));
+                                    }}
+                                    style={btnQtyStyle}
+                                  >
+                                    −
+                                  </button>
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    value={printQuantities[index] ?? 1}
+                                    onChange={(e) => {
+                                      const val = e.target.value === "" ? "" : Math.max(1, Number(e.target.value));
+                                      setPrintQuantities((prev) => ({ ...prev, [index]: val }));
+                                    }}
+                                    style={inputQtyStyle}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setPrintQuantities((prev) => ({
+                                        ...prev,
+                                        [index]: (prev[index] || 1) + 1,
+                                      }));
+                                    }}
+                                    style={btnQtyStyle}
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Modal Footer */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '14px 20px',
+                borderTop: '1px solid #e1e3e5',
+                background: '#f8fafc',
+              }}
+            >
+              <s-button onClick={() => setViewModalOpen(false)}>
+                Close
+              </s-button>
+
+              <s-button variant="primary" icon="print" onClick={handlePrintHistory}>
+                Direct Print ({selectedItems.reduce((sum, idx) => sum + (Number(printQuantities[idx]) || 1), 0)} Stickers)
+              </s-button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Offscreen Print Render Containers */}
       <div
         ref={historyPrintRef}
         style={{
@@ -540,131 +1022,70 @@ th{background:#f5f5f5;}
                 barcode: item.barcode,
                 price: item.price,
                 vendor: item.vendor,
-
                 variant_title:
-                  item.variant_title &&
-                    item.variant_title.trim().toLowerCase() !== "default title"
+                  item.variant_title && item.variant_title.trim().toLowerCase() !== "default title"
                     ? item.variant_title
                     : "",
-
                 option_1:
-                  item.option_1 &&
-                    item.option_1.trim().toLowerCase() !== "default title"
+                  item.option_1 && item.option_1.trim().toLowerCase() !== "default title"
                     ? item.option_1
                     : "",
-
                 option_2:
-                  item.option_2 &&
-                    item.option_2.trim().toLowerCase() !== "default title"
+                  item.option_2 && item.option_2.trim().toLowerCase() !== "default title"
                     ? item.option_2
                     : "",
-
                 option_3:
-                  item.option_3 &&
-                    item.option_3.trim().toLowerCase() !== "default title"
+                  item.option_3 && item.option_3.trim().toLowerCase() !== "default title"
                     ? item.option_3
                     : "",
-
                 online_url: item.online_url,
               }}
               barcodeSettings={item.template_settings || {}}
-
               formatPrice={(product) => {
                 const settings = item.template_settings || {};
-
-                // Same decimal setting used by GenerateBarcode
-                const decimals = Number(
-                  printSettings?.price_decimal_number ?? 2
-                );
-
-                // Shopify product price
-                let originalPrice = Number(
-                  product?.price ?? 0
-                );
-
-                // // Shopify sometimes returns cents
-                // if (originalPrice > 999) {
-                //   originalPrice = originalPrice / 100;
-                // }
-
-                // Same VAT calculation used in GenerateBarcode
-                const vatPercentage = Number(
-                  printSettings?.vat_percentage ?? 0
-                );
-
-                const priceWithVat =
-                  originalPrice +
-                  (originalPrice * vatPercentage) / 100;
-
+                const decimals = Number(printSettings?.price_decimal_number ?? 2);
+                let originalPrice = Number(product?.price ?? 0);
+                const vatPercentage = Number(printSettings?.vat_percentage ?? 0);
+                const priceWithVat = originalPrice + (originalPrice * vatPercentage) / 100;
                 const amount = priceWithVat.toFixed(decimals);
 
-                // Template-specific currency format
-                let format = String(
-                  settings.line2_currency_format ?? ""
-                ).trim();
-
-                // Normalize old placeholder formats
+                let format = String(settings.line2_currency_format ?? "").trim();
                 format = format
                   .replace(/\{\{amount\}\}/gi, "{amount}")
                   .replace(/\$amount/gi, "${amount}");
 
-        
                 if (format.includes("{amount}")) {
-                  return format.replace(
-                    /\{amount\}/gi,
-                    amount
-                  );
+                  return format.replace(/\{amount\}/gi, amount);
                 }
 
-                // Same enum values used by GenerateBarcode
-                const ENUM_TOKENS = [
-                  "without_currency",
-                  "with_currency",
-                  "currency_code",
-                ];
+                const ENUM_TOKENS = ["without_currency", "with_currency", "currency_code"];
+                const isEnumToken = ENUM_TOKENS.includes(format.toLowerCase());
 
-                const isEnumToken =
-                  ENUM_TOKENS.includes(format.toLowerCase());
-
-  
                 if (format && !isEnumToken) {
                   return `${format} ${amount}`;
                 }
 
                 const resolvedFormat = isEnumToken
                   ? format.toLowerCase()
-                  : (
-                    printSettings?.currency_format ??
-                    "without_currency"
-                  );
+                  : (printSettings?.currency_format ?? "without_currency");
 
                 const currency = item.currency_code || currencyCode || "USD";
+                const locale = currency === "INR" ? "en-IN" : "en";
 
-                const locale =
-                  currency === "INR"
-                    ? "en-IN"
-                    : "en";
-
-                // Example: 120.30 INR
                 if (resolvedFormat === "currency_code") {
                   return `${amount} ${currency}`;
                 }
 
-                // Example: ₹120.30
                 if (resolvedFormat === "with_currency") {
-                  return new Intl.NumberFormat(
-                    locale,
-                    {
-                      style: "currency",
-                      currency,
-                      currencyDisplay: "symbol",
-                      minimumFractionDigits: decimals,
-                      maximumFractionDigits: decimals,
-                    }
-                  ).format(priceWithVat);
+                  return new Intl.NumberFormat(locale, {
+                    style: "currency",
+                    currency,
+                    currencyDisplay: "symbol",
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals,
+                  }).format(priceWithVat);
                 }
 
-                // Example: 120.30
                 return amount;
               }}
               printMode={true}
@@ -672,156 +1093,61 @@ th{background:#f5f5f5;}
           </div>
         ))}
       </div>
-
-      <Modal id={DELETE_MODAL_ID}>
-        <p style={{ padding: '1rem' }}>
-          Are you sure you want to delete this print history?
-        </p>
-        <TitleBar title="Delete History">
-          <button variant="primary" tone="critical" onClick={deleteHistory}>
-            Delete
-          </button>
-          <button onClick={() => shopify.modal.hide(DELETE_MODAL_ID)}>
-            Cancel
-          </button>
-        </TitleBar>
-      </Modal>
-
-      <Modal id={VIEW_MODAL_ID} variant="large">
-        <div style={{ padding: '1rem' }}>
-          {loadingDetails ? (
-            <s-box padding="base" alignContent="center">
-              <s-spinner />
-            </s-box>
-          ) : (
-            historyDetails && (
-              <div
-                ref={printRef}
-                style={{
-                  border: "1px solid #dfe3e8",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 18px",
-                    background: "#f6f6f7",
-                    borderBottom: "1px solid #dfe3e8",
-                  }}
-                >
-                  <s-text fontWeight="semibold">
-                    {historyDetails.items.length} selected
-                  </s-text>
-                  <s-button
-                    variant="primary"
-                    onClick={() => {
-                      const selectedProducts = historyDetails.items.filter((_, index) =>
-                        selectedItems.includes(index)
-                      );
-                      navigate("/ProductsBarcodeList", {
-                        state: {
-                          fromHistory: true,
-                          historyId: historyDetails.id,
-                          mode: "print_existing",
-                          selectedProducts,
-                          originalHistoryProducts: historyDetails.items,
-                          templateId: historyDetails.template_id,
-                          historyProducts: historyDetails.items,
-                        },
-                      });
-                      shopify.modal.hide(VIEW_MODAL_ID);
-                    }}
-                  >
-                    Generate Barcode
-                  </s-button>
-                </div>
-
-                {historyDetails.items.map((item, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "40px 2fr 2fr 1.5fr 130px",
-                      alignItems: "center",
-                      padding: "12px 18px",
-                      borderBottom:
-                        index !== historyDetails.items.length - 1 ? "1px solid #ececec" : "none",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(index)}
-                      onChange={() => {
-                        if (selectedItems.includes(index)) {
-                          setSelectedItems(selectedItems.filter(i => i !== index));
-                        } else {
-                          setSelectedItems([...selectedItems, index]);
-                        }
-                      }}
-                    />
-                    <div>
-                      <s-text fontWeight="semibold">{item.product_title}</s-text>
-                    </div>
-                    <div>
-                      <s-text tone="subdued">{item.sku}</s-text>
-                    </div>
-                    <div>
-                      <s-badge tone="info">{item.barcode}</s-badge>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      <s-button
-                        variant="tertiary"
-                        accessibilityLabel={`Decrease quantity for ${item.product_title}`}
-                        onClick={() => {
-                          setPrintQuantities((prev) => ({
-                            ...prev,
-                            [index]: Math.max(1, (prev[index] || 1) - 1),
-                          }));
-                        }}
-                      >
-                        −
-                      </s-button>
-
-                      <s-badge tone="success">
-                        {printQuantities[index] || 1}
-                      </s-badge>
-
-                      <s-button
-                        variant="tertiary"
-                        accessibilityLabel={`Increase quantity for ${item.product_title}`}
-                        onClick={() => {
-                          setPrintQuantities((prev) => ({
-                            ...prev,
-                            [index]: (prev[index] || 1) + 1,
-                          }));
-                        }}
-                      >
-                        +
-                      </s-button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-          )}
-        </div>
-        <TitleBar title={`Print Job #${historyDetails?.id || ""}`}>
-          <button variant="primary" onClick={handlePrintHistory}>
-            Print
-          </button>
-        </TitleBar>
-      </Modal>
     </>
   );
 }
+
+const metricCardStyle = {
+  background: '#ffffff',
+  border: '1px solid #e1e3e5',
+  borderRadius: '12px',
+  padding: '16px 18px',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+};
+
+const thStyle = {
+  padding: '10px 12px',
+  fontSize: '12px',
+  fontWeight: 600,
+  color: '#6d7175',
+  textAlign: 'left',
+  boxSizing: 'border-box',
+};
+
+const tdStyle = {
+  padding: '10px 12px',
+  fontSize: '13px',
+  verticalAlign: 'middle',
+  boxSizing: 'border-box',
+};
+
+const btnQtyStyle = {
+  width: '24px',
+  height: '24px',
+  border: '1px solid #c9cccf',
+  background: '#ffffff',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  fontWeight: 600,
+  fontSize: '13px',
+  lineHeight: '1',
+  color: '#333',
+  padding: '0',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const inputQtyStyle = {
+  width: '40px',
+  height: '24px',
+  border: '1px solid #8c9196',
+  borderRadius: '4px',
+  textAlign: 'center',
+  fontSize: '12px',
+  background: '#ffffff',
+  color: '#202223',
+  outline: 'none',
+  boxSizing: 'border-box',
+  padding: '0',
+};

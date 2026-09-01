@@ -418,7 +418,7 @@ class GenerateSkuJob implements ShouldQueue
             $delimiter,
             $parts
         );
-        
+        $sku = $this->normalizeDelimiters($sku, $delimiter);
 
 
         if ($setting->force_uppercase_fields) {
@@ -427,7 +427,15 @@ class GenerateSkuJob implements ShouldQueue
 
         return $sku;
     }
-
+    private function normalizeDelimiters(string $sku, string $delimiter): string
+    {
+        if ($delimiter === '') {
+            return $sku;
+        }
+        $escaped = preg_quote($delimiter, '/');
+        $sku = preg_replace('/(?:' . $escaped . '){2,}/', $delimiter, $sku);
+        return trim($sku, $delimiter);
+    }
     private function parseSegment(
         $value,
         $mode
@@ -493,44 +501,42 @@ class GenerateSkuJob implements ShouldQueue
         }
     }
 
-    private function getVariantOption(
-        $variant,
-        $number
-    ) {
-
+    private function getVariantOption($variant, $number)
+    {
         $key = 'option' . $number;
+        $rawValue = '';
 
-        if (
-            isset($variant[$key]) &&
-            $variant[$key] !== null &&
-            $variant[$key] !== ''
-        ) {
-
-            return (string) $variant[$key];
+        if (isset($variant[$key]) && $variant[$key] !== null && $variant[$key] !== '') {
+            $rawValue = (string) $variant[$key];
+        } else {
+            $selectedOptions = $variant['selectedOptions'] ?? [];
+            $index = $number - 1;
+            if (is_array($selectedOptions) && isset($selectedOptions[$index]['value'])) {
+                $rawValue = (string) $selectedOptions[$index]['value'];
+            }
         }
 
+        $cleaned = $this->stripDefaultPlaceholder($rawValue);
 
-        $selectedOptions =
-            $variant['selectedOptions']
-            ?? [];
+        if ($rawValue !== $cleaned) {
+            Log::info("GenerateSkuJob: stripped placeholder option{$number}", [
+                'raw' => $rawValue,
+                'cleaned' => $cleaned,
+            ]);
+        }
 
-        if (!is_array($selectedOptions)) {
+        return $cleaned;
+    }
+
+    private function stripDefaultPlaceholder(string $value): string
+    {
+        $normalized = trim(preg_replace('/\s+/u', ' ', $value));
+
+        if (preg_match('/^default([\s_-]*title)?$/i', $normalized)) {
             return '';
         }
 
-        $index = $number - 1;
-
-        if (
-            isset(
-                $selectedOptions[$index]['value']
-            )
-        ) {
-
-            return (string)
-                $selectedOptions[$index]['value'];
-        }
-
-        return '';
+        return $value;
     }
 
 
@@ -614,14 +620,14 @@ class GenerateSkuJob implements ShouldQueue
         $delimiter =
             $setting->sku_delimiter ?: '-';
 
-       //replace spacial character
+        //replace spacial character
         $value = preg_replace(
             '/[^A-Za-z0-9]+/',
             $delimiter,
             $value
         );
 
-        
+
         //Remove delimiter from beginning/end
         return trim(
             $value,

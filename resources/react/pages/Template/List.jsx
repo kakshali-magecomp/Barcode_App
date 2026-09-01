@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppBridge, TitleBar } from '@shopify/app-bridge-react';
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal.jsx';
 import { useNavigate } from "react-router-dom";
+import { EmptyState } from '@shopify/polaris';
 
 export default function TemplateList() {
     // Single source of the `shopify` global object.
@@ -77,6 +78,7 @@ export default function TemplateList() {
             setDeleteLoading(false);
         }
     };
+
     const filteredTemplates = templates.filter((template) => {
         const search = searchValue.toLowerCase();
 
@@ -148,18 +150,59 @@ export default function TemplateList() {
 
             <s-page heading="Barcode App" subheading="Manage and edit your customized sticker layout dimensions.">
                 <TitleBar title="barcodedemo-app" />
-                <s-stack direction="inline" gap="base" justifyContent="end">
-                    {selectedIds.length > 0 && (
-                        <s-button tone="critical" onClick={openDeleteSelectedConfirmation}>
-                            Delete Selected ({selectedIds.length})
-                        </s-button>
-                    )}
 
-                    <s-button variant="primary" href="/TamplateCreate">
-                        Create Template
-                    </s-button>
-                </s-stack>
-                <s-box paddingBlockStart="base"></s-box>
+                <s-section>
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '12px',
+                            padding: '14px 18px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(90deg, #01161d 0%, #008ba8 100%)',
+                            flexWrap: 'wrap',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div
+                                style={{
+                                    width: '36px',
+                                    height: '36px',
+                                    borderRadius: '10px',
+                                    background: 'rgb(255, 255, 255)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                <div style={{ width: '18px', height: '18px', color: '#f0e358' }}>
+                                    <s-icon type="note" tone="inherit" size="base" />
+                                </div>
+                            </div>
+                            <div>
+                                <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '15px' }}>
+                                    Templates List
+                                </div>
+                                <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px' }}>
+                                    {templates.length} template{templates.length !== 1 ? 's' : ''} saved
+                                </div>
+                            </div>
+                        </div>
+
+                        <s-stack direction="inline" gap="base">
+                            {selectedIds.length > 0 && (
+                                <s-button tone="critical" onClick={openDeleteSelectedConfirmation}>
+                                    Delete selected ({selectedIds.length})
+                                </s-button>
+                            )}
+                            <s-button variant="primary" href="/TamplateCreate">
+                                Create template
+                            </s-button>
+                        </s-stack>
+                    </div>
+                </s-section>
 
                 <s-section>
                     <s-grid gridTemplateColumns="3fr 1fr" gap="base">
@@ -191,39 +234,21 @@ export default function TemplateList() {
                 )}
 
                 {filteredTemplates.length === 0 ? (
-                    <s-page heading="Label Templates">
-                        <s-section>
-                            <s-box
-                                padding="base"
-                                background="subdued"
-                                border="base"
-                                borderRadius="base"
-                            >
-                                <s-stack direction="block" gap="base" alignItems="center">
-                                    {/* Empty logo icon */}
-                                    <div style={{ transform: "scale(1.8)" }}>
-                                        <s-icon
-                                            type="info"
-                                            tone="auto"
-                                            color="base"
-                                            size="base"
-                                        ></s-icon>
-                                    </div>
-                                    <s-heading>
-                                        Design your first barcode template layout
-                                    </s-heading>
-                                    <s-paragraph>
-                                        Configure paper sizes, padding parameters, and item data
-                                        positions to align accurately with your hardware label rolls.
-                                    </s-paragraph>
-
-                                    <s-button variant="primary" href="/TamplateCreate">
-                                        Create template
-                                    </s-button>
-                                </s-stack>
-                            </s-box>
-                        </s-section>
-                    </s-page>
+                    <s-section>
+                        <EmptyState
+                            heading="Design your first barcode template layout"
+                            action={{
+                                content: 'Create template',
+                                onAction: () => navigate('/TamplateCreate'),
+                            }}
+                            image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                        >
+                            <p>
+                                Configure paper sizes, padding parameters, and item data
+                                positions to align accurately with your hardware label rolls.
+                            </p>
+                        </EmptyState>
+                    </s-section>
                 ) : (
                     <s-section padding="none">
                         <s-table
@@ -264,8 +289,8 @@ export default function TemplateList() {
                                             />
                                         </s-table-cell>
                                         <s-table-cell>
-                                            <s-text fontWeight="bold">{template_name}</s-text>
-                                        </s-table-cell>
+    <s-text fontWeight="bold">{template_name}</s-text>
+</s-table-cell>
                                         <s-table-cell>
                                             <s-badge tone="info">{paper_brand || 'Custom Brand'}</s-badge>
                                         </s-table-cell>
@@ -283,7 +308,6 @@ export default function TemplateList() {
                                                     accessibilityLabel="Edit Template"
                                                     href={`/templates/edit/${id}`}
                                                 />
-
                                             </s-stack>
                                         </s-table-cell>
                                     </s-table-row>

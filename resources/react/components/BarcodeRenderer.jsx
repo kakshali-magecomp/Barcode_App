@@ -109,6 +109,8 @@ export default function BarcodeRenderer({
                 displayValue: !settings.hide_barcode_value,
 
                 fontSize: Number(settings.symbol_font_size) || 16,
+                font: "Inter, Roboto, sans-serif",
+                textMargin: 2,
 
                 lineColor:
                     settings.symbol_color || "#000000",
@@ -136,6 +138,8 @@ export default function BarcodeRenderer({
                     margin: Number(settings.symbol_margin_px) || 2,
                     displayValue: !settings.hide_barcode_value,
                     fontSize: Number(settings.symbol_font_size) || 16,
+                    font: "Inter, Roboto, sans-serif",
+                    textMargin: 2,
                     lineColor:
                         settings.symbol_color || "#000000",
                     background: "#FFFFFF",
@@ -158,20 +162,12 @@ export default function BarcodeRenderer({
             <img
                 ref={barcodeRef}
                 style={{
-                    width: "100%",
-                    maxWidth:
-                        barcodeSettings?.barcode_format === "EAN8"
-                            ? "180px"
-                            : barcodeSettings?.barcode_format === "EAN13"
-                                ? "260px"
-                                : barcodeSettings?.barcode_format === "UPCA"
-                                    ? "260px"
-                                    : barcodeSettings?.barcode_format === "ITF14"
-                                        ? "320px"
-                                        : "280px",
+                    maxWidth: "100%",
+                    maxHeight: "65px",
                     height: "auto",
                     objectFit: "contain",
-                    imageRendering: "pixelated",
+                    display: "block",
+                    margin: "0 auto",
                 }}
             />
         </div>

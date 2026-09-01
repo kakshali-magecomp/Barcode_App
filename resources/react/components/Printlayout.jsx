@@ -43,9 +43,11 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             ? Number(paperTemplate.paper.height)
             : calculatedPaperHeight;
 
-    const fontFactor = opts.fontFactor ?? 0.14;
-    const fontMin = opts.fontMin ?? 3.5;
-    const fontMax = opts.fontMax ?? 7;
+    const isSmallLabel = labelHeight <= 16 || labelWidth <= 50;
+
+    const fontFactor = opts.fontFactor ?? (isSmallLabel ? 0.11 : 0.14);
+    const fontMin = opts.fontMin ?? (isSmallLabel ? 3.0 : 3.5);
+    const fontMax = opts.fontMax ?? (isSmallLabel ? 5.5 : 7);
 
     const textPt = Math.max(
         fontMin,
@@ -56,20 +58,20 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     );
 
     const horizontalPadding = Math.min(
-        2,
-        Math.max(0.4, labelWidth * 0.025)
+        1.5,
+        Math.max(0.2, labelWidth * 0.015)
     );
 
     const verticalPadding = Math.min(
         1,
-        Math.max(0.25, labelHeight * 0.025)
+        Math.max(0.15, labelHeight * 0.015)
     );
 
     const barcodeHeightMm = Math.max(
-        3,
+        2.5,
         Math.min(
-            labelHeight * 0.45,
-            labelHeight - (verticalPadding * 2)
+            isSmallLabel ? labelHeight * 0.32 : labelHeight * 0.45,
+            isSmallLabel ? Math.max(2.5, labelHeight - 7.5) : labelHeight - (verticalPadding * 2)
         )
     );
 
@@ -117,10 +119,10 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     display: grid !important;
 
     grid-template-columns:
-        repeat(${columns}, ${labelWidth}mm) !important;
+        repeat(${columns}, minmax(0, ${labelWidth}mm)) !important;
 
     grid-template-rows:
-        repeat(${rows}, ${labelHeight}mm) !important;
+        repeat(${rows}, minmax(0, ${labelHeight}mm)) !important;
 
     column-gap: ${gapX}mm !important;
     row-gap: ${gapY}mm !important;
@@ -143,13 +145,26 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             break-after: auto !important;
         }
 
+        .label-grid {
+            display: grid !important;
+            grid-template-columns: repeat(${columns}, minmax(0, ${labelWidth}mm)) !important;
+            grid-template-rows: repeat(${rows}, minmax(0, ${labelHeight}mm)) !important;
+            column-gap: ${gapX}mm !important;
+            row-gap: ${gapY}mm !important;
+            align-items: start !important;
+            align-content: start !important;
+            justify-content: start !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         .label {
     width: ${labelWidth}mm !important;
-    min-width: ${labelWidth}mm !important;
+    min-width: 0 !important;
     max-width: ${labelWidth}mm !important;
 
     height: ${labelHeight}mm !important;
-    min-height: ${labelHeight}mm !important;
+    min-height: 0 !important;
     max-height: ${labelHeight}mm !important;
 
     margin: 0 !important;
@@ -171,7 +186,7 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     font-family: Arial, Helvetica, sans-serif !important;
 
     font-size: ${textPt}pt !important;
-    line-height: 1.05 !important;
+    line-height: 1.02 !important;
 
     page-break-inside: avoid !important;
     break-inside: avoid !important;
@@ -179,6 +194,8 @@ export function buildPrintCss(paperTemplate, opts = {}) {
     box-sizing: border-box !important;
 
     flex-shrink: 0 !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
 }
 
         .label-content,
@@ -205,26 +222,71 @@ export function buildPrintCss(paperTemplate, opts = {}) {
         .label-content *,
         .template-label-content * {
             box-sizing: border-box !important;
-
             max-width: 100% !important;
-
             font-family: Arial, Helvetica, sans-serif !important;
-
             line-height: 1.05 !important;
+            word-break: break-word !important;
+            overflow-wrap: anywhere !important;
+            font-size: ${textPt}pt;
         }
 
-        .label .template-label-content {
+        .label .template-label-content,
+        .label .label-content {
             font-size: ${textPt}pt !important;
         }
 
         .print-sku {
-            font-weight: 600 !important;
+            font-weight: 700 !important;
             font-size: ${textPt}pt !important;
 
-            padding: 0 !important;
-            margin: 0 0 0.3mm 0 !important;
+            word-break: break-word !important;
+            overflow-wrap: anywhere !important;
+            white-space: normal !important;
+            max-width: 100% !important;
+            text-align: center !important;
 
-            line-height: 1 !important;
+            padding: 0 !important;
+            margin: 0 0 ${isSmallLabel ? '1mm' : '1.8mm'} 0 !important;
+
+            line-height: 1.15 !important;
+        }
+
+        .print-line2 {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 0.6mm !important;
+            margin: 0 0 0.3mm 0 !important;
+            padding: 0 !important;
+            line-height: 1.1 !important;
+            max-width: 100% !important;
+        }
+
+        .print-title {
+            font-weight: 700 !important;
+            font-size: ${textPt}pt !important;
+            color: #111111 !important;
+        }
+
+        .print-variant {
+            font-size: ${Math.max(3.5, textPt * 0.85).toFixed(2)}pt !important;
+            color: #555555 !important;
+        }
+
+        .print-price {
+            font-weight: 700 !important;
+            font-size: ${textPt}pt !important;
+            color: #111111 !important;
+        }
+
+        .print-vendor {
+            font-weight: 500 !important;
+            font-size: ${Math.max(3.5, textPt * 0.85).toFixed(2)}pt !important;
+            color: #555555 !important;
+            margin: 0 0 0.3mm 0 !important;
+            padding: 0 !important;
+            line-height: 1.1 !important;
         }
 
         .label .barcode,
@@ -271,6 +333,10 @@ export function buildPrintCss(paperTemplate, opts = {}) {
         ` : ""}
 
         @media print {
+            @page {
+                size: ${paperWidth}mm ${paperHeight}mm !important;
+                margin: 0 !important;
+            }
 
             html,
             body {
@@ -284,6 +350,9 @@ export function buildPrintCss(paperTemplate, opts = {}) {
                 height: ${paperHeight}mm !important;
                 min-height: ${paperHeight}mm !important;
                 background: #ffffff !important;
+
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .print-sheet {
@@ -430,13 +499,20 @@ export function jsBarcodeInitScript() {
 `;
 }
 
-export function openPrintWindow({
-    bodyHtml,
-    paperTemplate,
-    useJsBarcodeScript = true,
-    onAfterPrint,
-    fontOptions = {},
-}) {
+export function openPrintWindow(options = {}) {
+    const {
+        bodyHtml,
+        sheetsHtml,
+        paperTemplate,
+        paperSettings,
+        useJsBarcodeScript = true,
+        onAfterPrint,
+        fontOptions = {},
+    } = options;
+
+    const finalPaper = paperTemplate || paperSettings;
+    const finalHtml = bodyHtml || sheetsHtml;
+
     // Prevent multiple print windows
     if (isPrinting) {
         console.log('Print already in progress');
@@ -444,20 +520,20 @@ export function openPrintWindow({
     }
 
     // Validate inputs
-    if (!paperTemplate) {
+    if (!finalPaper) {
         console.error('Paper template is required');
         alert('Paper template is missing. Please select a paper brand and model.');
         return false;
     }
 
-    if (!bodyHtml) {
+    if (!finalHtml) {
         console.error('Body HTML is required');
         alert('No content to print.');
         return false;
     }
 
     // Build CSS
-    const { css } = buildPrintCss(paperTemplate, fontOptions);
+    const { css } = buildPrintCss(finalPaper, fontOptions);
 
     // Open print window
     const printWindow = window.open("", "_blank", "width=1000,height=800");
@@ -489,7 +565,7 @@ export function openPrintWindow({
             </style>
         </head>
         <body class="print-document">
-            ${bodyHtml}
+            ${finalHtml}
             ${useJsBarcodeScript ? jsBarcodeInitScript() : ''}
         </body>
         </html>
