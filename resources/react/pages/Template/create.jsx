@@ -686,27 +686,28 @@ export default function CreateTemplate() {
                                                 flexDirection: 'column',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
+                                                gap: '6px',
                                                 textAlign: 'center',
                                                 boxSizing: 'border-box',
                                                 overflow: 'hidden',
                                             }}
                                         >
                                             {design.line1_sku && (
-                                                <div className="print-sku" style={{ fontWeight: 700, marginBottom: 10, fontSize: 13, wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal', maxWidth: '100%', lineHeight: 1.25, padding: '0 4px', textAlign: 'center', color: '#1a1a1a' }}>
+                                                <div className="print-sku" style={{ fontWeight: 700, margin: 0, fontSize: 13, wordBreak: 'break-word', overflowWrap: 'anywhere', whiteSpace: 'normal', maxWidth: '100%', lineHeight: 1.25, padding: '0 4px', textAlign: 'center', color: '#1a1a1a' }}>
                                                     {previewItem.sku}
                                                 </div>
                                             )}
 
-                                            <div className="print-line2" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, marginBottom: 5, maxWidth: '100%', wordBreak: 'break-word' }}>
+                                            <div className="print-line2" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 6, margin: 0, maxWidth: '100%', wordBreak: 'break-word' }}>
                                                 {design.line2_name && <span className="print-title" style={{ fontWeight: 700, color: '#202223' }}>{previewItem.title}</span>}
                                                 {design.line2_variant_option1 && previewItem.option_1 && <span className="print-variant" style={{ color: '#666' }}>• {previewItem.option_1}</span>}
                                                 {design.line2_price && <span className="print-price" style={{ color: '#000', fontWeight: 700 }}>{formatPreviewPrice()}</span>}
                                             </div>
 
-                                            {design.line3_vendor && <div className="print-vendor" style={{ fontWeight: 500, color: '#666', marginBottom: 5, fontSize: 12 }}>{previewItem.vendor}</div>}
+                                            {design.line3_vendor && <div className="print-vendor" style={{ fontWeight: 500, color: '#666', margin: 0 }}>{previewItem.vendor}</div>}
 
                                             {design.symbol_enabled && (
-                                                <div style={{ width: '100%', display: 'flex', justifyContent: 'center', overflow: 'hidden', marginTop: '4px' }}>
+                                                <div className="label-symbol-wrapper" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: 0, overflow: 'hidden' }}>
                                                     {design.symbol_type === 'BARCODE' ? (
                                                         <BarcodeRenderer
                                                             value={getSymbolTargetValue()}

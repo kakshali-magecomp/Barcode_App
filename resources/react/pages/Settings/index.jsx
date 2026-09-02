@@ -396,7 +396,7 @@ export default function SettingsIndex() {
                     </s-section>
                 )}
 
-                {/* EXACT DESIGN LAYOUT FROM USER REFERENCE IMAGE */}
+                {/* NATURAL CLEAN SETTINGS LAYOUT (MATCHING PRINT SETTINGS UX) */}
                 <div
                     style={{
                         display: "flex",
@@ -488,7 +488,7 @@ export default function SettingsIndex() {
                             </div>
                         </div>
 
-                        {/* Bottom Card: Vertical Settings Menu (exact reference design) */}
+                        {/* Bottom Card: Vertical Settings Menu */}
                         <div
                             style={{
                                 background: "#ffffff",
@@ -538,7 +538,7 @@ export default function SettingsIndex() {
                         </div>
                     </div>
 
-                    {/* RIGHT CONTENT COLUMN (MAIN SETTINGS FORM PANEL CARD - NATURAL HEIGHT, NO SCROLLBAR) */}
+                    {/* RIGHT CONTENT COLUMN (MAIN SETTINGS FORM PANEL CARD - NATURAL FULL HEIGHT, CLEAN UX) */}
                     <div
                         style={{
                             flex: "1 1 500px",

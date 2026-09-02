@@ -24,53 +24,85 @@ export default function ProductPickerModal({
     setSelectedVariantIds(alreadySelectedIds.map(id => String(id)));
     setSearchQuery("");
 
-    // Attempt shopify.resourcePicker if available in Shopify App Bridge
-    if (shopify && typeof shopify.resourcePicker === 'function') {
-      shopify.resourcePicker({
-        type: 'product',
-        multiple: true,
-        action: 'select',
-      }).then((selection) => {
-        if (selection && Array.isArray(selection) && selection.length > 0) {
-          const formatted = [];
-          selection.forEach(p => {
-            const pId = p.id ? String(p.id).split('/').pop() : '';
-            (p.variants || []).forEach(v => {
-              const vId = v.id ? String(v.id).split('/').pop() : '';
-              formatted.push({
-                variant_id: vId,
-                product_id: pId,
-                product_title: p.title,
-                variant_title: v.title === 'Default Title' ? '' : v.title,
-                sku: v.sku || '',
-                current_sku: v.sku || '',
-                barcode: v.barcode || '',
-                price: v.price || '0.00',
-                image: v.image?.src || p.images?.[0]?.src || PLACEHOLDER_IMAGE,
-                available: v.inventoryQuantity ?? 0,
-                inventory_quantity: v.inventoryQuantity ?? 0,
-                vendor: p.vendor || ''
+    async function loadSettingsAndProducts() {
+      let printSettings = null;
+      try {
+        const res = await fetch("/api/print-settings");
+        const json = await res.json();
+        if (json.success) {
+          printSettings = json.settings;
+        }
+      } catch (err) {
+        console.error("Failed to fetch print settings in ProductPickerModal:", err);
+      }
+
+      const filterOpts = {};
+      if (printSettings?.hide_product_draft) {
+        filterOpts.draft = false;
+      }
+      if (printSettings?.hide_product_archived) {
+        filterOpts.archived = false;
+      }
+
+      // Attempt shopify.resourcePicker if available in Shopify App Bridge
+      if (shopify && typeof shopify.resourcePicker === 'function') {
+        const pickerConfig = {
+          type: 'product',
+          multiple: true,
+          action: 'select',
+        };
+        if (Object.keys(filterOpts).length > 0) {
+          pickerConfig.filter = filterOpts;
+        }
+
+        try {
+          const selection = await shopify.resourcePicker(pickerConfig);
+          if (selection && Array.isArray(selection) && selection.length > 0) {
+            const formatted = [];
+            selection.forEach(p => {
+              const pId = p.id ? String(p.id).split('/').pop() : '';
+              (p.variants || []).forEach(v => {
+                const vId = v.id ? String(v.id).split('/').pop() : '';
+                formatted.push({
+                  variant_id: vId,
+                  product_id: pId,
+                  product_title: p.title,
+                  variant_title: v.title === 'Default Title' ? '' : v.title,
+                  sku: v.sku || '',
+                  current_sku: v.sku || '',
+                  barcode: v.barcode || '',
+                  price: v.price || '0.00',
+                  image: v.image?.src || p.images?.[0]?.src || PLACEHOLDER_IMAGE,
+                  available: v.inventoryQuantity ?? 0,
+                  inventory_quantity: v.inventoryQuantity ?? 0,
+                  vendor: p.vendor || ''
+                });
               });
             });
-          });
-          if (formatted.length > 0) {
-            onSelect(formatted);
-            onClose();
-            return;
+            if (formatted.length > 0) {
+              onSelect(formatted);
+              onClose();
+              return;
+            }
           }
+        } catch (err) {
+          // Fallback to local modal if native picker is cancelled or unsupported
         }
-      }).catch(() => {
-        // Fallback to local modal if native picker is cancelled or unsupported
-      });
-    }
+      }
 
-    async function fetchProducts() {
       try {
         setLoading(true);
         const res = await fetch("/api/products");
         const json = await res.json();
         if (json.status && Array.isArray(json.variants)) {
-          setProducts(json.variants);
+          let variants = json.variants;
+          if (printSettings?.hide_product_draft) {
+            variants = variants.filter(v => (v.status || '').toLowerCase() !== 'draft');
+          }
+          if (printSettings?.hide_product_archived) {
+            variants = variants.filter(v => (v.status || '').toLowerCase() !== 'archived');
+          }
+          setProducts(variants);
         }
         if (json.currency_code) {
           setCurrencyCode(json.currency_code);
@@ -82,7 +114,7 @@ export default function ProductPickerModal({
       }
     }
 
-    fetchProducts();
+    loadSettingsAndProducts();
   }, [open, alreadySelectedIds, shopify]);
 
   if (!open) return null;

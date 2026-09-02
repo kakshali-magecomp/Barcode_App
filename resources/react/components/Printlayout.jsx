@@ -207,13 +207,14 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             max-height: 100% !important;
 
             margin: 0 !important;
-            padding: 0 !important;
+            padding: 0.5mm !important;
 
             display: flex !important;
             flex-direction: column !important;
 
             align-items: center !important;
             justify-content: center !important;
+            gap: ${isSmallLabel ? '0.5mm' : '0.8mm'} !important;
 
             overflow: hidden !important;
         }
@@ -246,7 +247,7 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             text-align: center !important;
 
             padding: 0 !important;
-            margin: 0 0 ${isSmallLabel ? '1mm' : '1.8mm'} 0 !important;
+            margin: 0 !important;
 
             line-height: 1.15 !important;
         }
@@ -257,7 +258,7 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             justify-content: center !important;
             align-items: center !important;
             gap: 0.6mm !important;
-            margin: 0 0 0.3mm 0 !important;
+            margin: 0 !important;
             padding: 0 !important;
             line-height: 1.1 !important;
             max-width: 100% !important;
@@ -284,24 +285,27 @@ export function buildPrintCss(paperTemplate, opts = {}) {
             font-weight: 500 !important;
             font-size: ${Math.max(3.5, textPt * 0.85).toFixed(2)}pt !important;
             color: #555555 !important;
-            margin: 0 0 0.3mm 0 !important;
+            margin: 0 !important;
             padding: 0 !important;
             line-height: 1.1 !important;
         }
 
+        .label-symbol-wrapper,
         .label .barcode,
         .label .qr,
         .label svg,
         .label img {
-            display: block !important;
-
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
             width: auto !important;
             max-width: 100% !important;
 
             height: auto !important;
             max-height: ${barcodeHeightMm}mm !important;
 
-            margin: 0.3mm auto !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
 
             flex-shrink: 1 !important;
         }
@@ -477,8 +481,10 @@ export function jsBarcodeInitScript() {
                     displayValue: displayValue,
                     lineColor: color,
                     background: "#ffffff",
-                    margin: 2,
-                    textMargin: 2,
+                    margin: 4,
+                    textMargin: 6,
+                    fontOptions: "bold",
+                    font: "Arial, Helvetica, sans-serif",
                 });
             } catch (e) {
                 console.error('Barcode generation error:', e);

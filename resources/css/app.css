@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Sleek modern scrollbar for settings container matching reference design */
+.settings-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.settings-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+.settings-scroll-container::-webkit-scrollbar-thumb {
+    background: #8c9196;
+    border-radius: 6px;
+}
+.settings-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #5c5f62;
+}
+
+/* Ensure Polaris Icon spans & SVGs center perfectly */
+.Polaris-Icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+}
+
+.Polaris-Icon svg {
+    display: block !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: auto !important;
+}

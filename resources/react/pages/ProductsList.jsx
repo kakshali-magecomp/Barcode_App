@@ -12,35 +12,179 @@ export default function GenerateSku() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [progress, setProgress] = useState(null); // { processed, total }
+    const [skuSettings, setSkuSettings] = useState(null);
+    const [printSettings, setPrintSettings] = useState(null);
     const SUMMARY_PAGE_SIZE = 5;
     const [summaryPage, setSummaryPage] = useState(1);
+
+    // Selected products pagination & search state
+    const [selectedPage, setSelectedPage] = useState(1);
+    const [selectedPageSize, setSelectedPageSize] = useState("10");
+    const [selectedSearchQuery, setSelectedSearchQuery] = useState("");
 
     // Row Selection & Delete Modal state
     const [selectedRowVariantIds, setSelectedRowVariantIds] = useState([]);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [itemsToDelete, setItemsToDelete] = useState([]);
 
+    useEffect(() => {
+        const fetchSkuSettings = async () => {
+            try {
+                const token = await shopify.idToken();
+                const res = await fetch("/api/sku-settings", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const json = await res.json();
+                const data = json.data || json;
+                if (data && typeof data === "object") {
+                    setSkuSettings(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch SKU settings:", err);
+            }
+        };
+        const fetchPrintSettings = async () => {
+            try {
+                const res = await fetch("/api/print-settings");
+                const json = await res.json();
+                if (json.success) {
+                    setPrintSettings(json.settings);
+                }
+            } catch (err) {
+                console.error("Failed to fetch print settings:", err);
+            }
+        };
+        fetchSkuSettings();
+        fetchPrintSettings();
+    }, [shopify]);
+
+    const getPreviewSku = (item, index) => {
+        if (method === "barcode") {
+            return item.barcode ? item.barcode : "No Barcode";
+        }
+        if (!skuSettings) return "Loading...";
+
+        const delimiter = skuSettings.sku_delimiter || "-";
+        const segments = [];
+
+        const addCleanedSegment = (val) => {
+            let value = String(val || "").trim();
+            if (!value) return;
+            const escapedDelim = delimiter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            value = value.replace(/[^A-Za-z0-9]+/g, delimiter).replace(new RegExp(`^${escapedDelim}+|${escapedDelim}+$`, 'g'), '');
+            if (value) segments.push(value);
+        };
+
+        const appendSegment = (val, mode) => {
+            if (!mode || mode === "none" || mode === "disabled") return;
+            let value = String(val || "").trim();
+            if (!value || /^default([\s_-]*title)?$/i.test(value)) return;
+
+            let chunk = "";
+            if (mode === "full") chunk = value;
+            else if (mode === "char_1") chunk = value.substring(0, 1);
+            else if (mode === "char_2") chunk = value.substring(0, 2);
+            else if (mode === "char_3") chunk = value.substring(0, 3);
+            else if (mode === "char_4") chunk = value.substring(0, 4);
+
+            addCleanedSegment(chunk);
+        };
+
+        // Prefix
+        if (skuSettings.sku_prefix) {
+            addCleanedSegment(skuSettings.sku_prefix);
+        }
+
+        // Product title
+        appendSegment(item.product_title, skuSettings.segment_product_title);
+
+        // Vendor
+        appendSegment(item.vendor, skuSettings.segment_product_vendor);
+
+        // Product type
+        appendSegment(item.product_type, skuSettings.segment_product_type);
+
+        // Options
+        if (!skuSettings.hide_options_1_2_3) {
+            appendSegment(item.option_1, skuSettings.segment_option1);
+            appendSegment(item.option_2, skuSettings.segment_option2);
+            appendSegment(item.option_3, skuSettings.segment_option3);
+        }
+
+        // Auto Number
+        const startNum = parseInt(skuSettings.sku_auto_number_start || "1001", 10);
+        addCleanedSegment(startNum + index);
+
+        // Suffix
+        if (skuSettings.sku_suffix) {
+            addCleanedSegment(skuSettings.sku_suffix);
+        }
+
+        let sku = segments.join(delimiter);
+        if (skuSettings.force_uppercase_fields !== false) {
+            sku = sku.toUpperCase();
+        }
+        return sku;
+    };
+
     const handleOpenResourcePicker = async () => {
+        let currentPrintSettings = printSettings;
+        if (!currentPrintSettings) {
+            try {
+                const res = await fetch("/api/print-settings");
+                const json = await res.json();
+                if (json.success) {
+                    currentPrintSettings = json.settings;
+                    setPrintSettings(json.settings);
+                }
+            } catch (err) {
+                console.error("Failed to fetch print settings for resource picker:", err);
+            }
+        }
+
+        const filterOpts = {};
+        if (currentPrintSettings?.hide_product_draft) {
+            filterOpts.draft = false;
+        }
+        if (currentPrintSettings?.hide_product_archived) {
+            filterOpts.archived = false;
+        }
+
         const pickerFn = shopify?.resourcePicker || window?.shopify?.resourcePicker;
         if (typeof pickerFn === "function") {
             try {
-                const selection = await pickerFn({
+                const initialSelection = Array.from(
+                    new Set(selectedProducts.map((p) => p.product_id).filter(Boolean))
+                ).map((pId) => ({
+                    id: String(pId).startsWith("gid://") ? String(pId) : `gid://shopify/Product/${pId}`,
+                }));
+
+                const pickerOptions = {
                     type: "product",
                     multiple: true,
                     action: "select",
-                });
+                    selectionIds: initialSelection.length > 0 ? initialSelection : undefined,
+                };
+                if (Object.keys(filterOpts).length > 0) {
+                    pickerOptions.filter = filterOpts;
+                }
+
+                const selection = await pickerFn(pickerOptions);
                 if (selection && Array.isArray(selection) && selection.length > 0) {
                     const selectedItems = [];
                     selection.forEach((p) => {
                         const pId = p.id ? String(p.id).split("/").pop() : "";
                         (p.variants || []).forEach((v) => {
                             const vId = v.id ? String(v.id).split("/").pop() : "";
+                            const invId = v.inventoryItem?.id ? String(v.inventoryItem.id).split("/").pop() : "";
+                            const isDefault = !v.title || v.title.toLowerCase() === "default title" || v.title.toLowerCase() === "default";
                             selectedItems.push({
                                 variant_id: vId,
                                 product_id: pId,
+                                inventory_item_id: invId,
                                 product_title: p.title,
-                                variant_title: v.title === "Default Title" ? "" : v.title,
-                                option_1: v.title === "Default Title" ? "Default" : v.title,
+                                variant_title: isDefault ? "" : v.title,
+                                option_1: isDefault ? "" : v.title,
                                 sku: v.sku || "",
                                 current_sku: v.sku || "",
                                 barcode: v.barcode || "",
@@ -54,6 +198,7 @@ export default function GenerateSku() {
                     });
                     if (selectedItems.length > 0) {
                         setSelectedProducts(selectedItems);
+                        setUpdatedProducts([]);
                     }
                 }
             } catch (err) {
@@ -66,7 +211,15 @@ export default function GenerateSku() {
             const res = await fetch("/api/products");
             const json = await res.json();
             if (json.status && Array.isArray(json.variants)) {
-                setSelectedProducts(json.variants);
+                let variants = json.variants;
+                if (currentPrintSettings?.hide_product_draft) {
+                    variants = variants.filter(v => (v.status || '').toLowerCase() !== 'draft');
+                }
+                if (currentPrintSettings?.hide_product_archived) {
+                    variants = variants.filter(v => (v.status || '').toLowerCase() !== 'archived');
+                }
+                setSelectedProducts(variants);
+                setUpdatedProducts([]);
             }
         } catch (err) {
             console.error("Fallback product fetch failed:", err);
@@ -138,10 +291,20 @@ export default function GenerateSku() {
                 return;
             }
 
-            setUpdatedProducts(json.updated_products || []);
-            setSelectedProducts([]);
+            const updated = json.updated_products || [];
+            setUpdatedProducts(updated);
+            if (updated.length > 0) {
+                setSelectedProducts(prev =>
+                    prev.map(product => {
+                        const found = updated.find(p =>
+                            (p.variant_title === product.variant_title || (!p.variant_title && !product.variant_title)) &&
+                            p.product_title === product.product_title
+                        );
+                        return found ? { ...product, sku: found.new_sku, current_sku: found.new_sku } : product;
+                    })
+                );
+            }
             setSelectedRowVariantIds([]);
-            setPickerOpen(false);
             setLoading(false);
             shopify.toast.show("SKU generated successfully.");
         } catch (err) {
@@ -172,12 +335,23 @@ export default function GenerateSku() {
                 const op = json.operation;
                 setProgress({ processed: op.processed, total: op.total });
 
-                if (op.status === "completed") {
+                if (op.status === "completed" || op.status === "failed" || op.processed >= op.total) {
                     clearInterval(interval);
-                    setUpdatedProducts(op.updated_products || []);
-                    setSelectedProducts([]);
+                    const updated = op.updated_products || [];
+                    setUpdatedProducts(updated);
+                    if (updated.length > 0) {
+                        setSelectedProducts(prev =>
+                            prev.map(product => {
+                                const found = updated.find(p =>
+                                    (p.variant_id && String(p.variant_id) === String(product.variant_id)) ||
+                                    ((p.variant_title === product.variant_title || (!p.variant_title && !product.variant_title)) &&
+                                        p.product_title === product.product_title)
+                                );
+                                return found ? { ...product, sku: found.new_sku, current_sku: found.new_sku } : product;
+                            })
+                        );
+                    }
                     setSelectedRowVariantIds([]);
-                    setPickerOpen(false);
                     setLoading(false);
                     setProgress(null);
                     shopify.toast.show(
@@ -231,14 +405,42 @@ export default function GenerateSku() {
         setItemsToDelete([]);
     };
 
+    // Filter selected products by search query
+    const filteredSelectedProducts = selectedProducts.filter((item) => {
+        if (!selectedSearchQuery.trim()) return true;
+        const q = selectedSearchQuery.toLowerCase();
+        return (
+            (item.product_title && item.product_title.toLowerCase().includes(q)) ||
+            (item.variant_title && item.variant_title.toLowerCase().includes(q)) ||
+            (item.option_1 && item.option_1.toLowerCase().includes(q)) ||
+            (item.current_sku && item.current_sku.toLowerCase().includes(q)) ||
+            (item.vendor && item.vendor.toLowerCase().includes(q)) ||
+            (item.barcode && item.barcode.toLowerCase().includes(q))
+        );
+    });
+
+    const effectivePageSize = selectedPageSize === "all" ? filteredSelectedProducts.length || 1 : Number(selectedPageSize);
+    const totalSelectedPages = Math.max(1, Math.ceil(filteredSelectedProducts.length / effectivePageSize));
+    const paginatedStartIndex = (selectedPage - 1) * effectivePageSize;
+    const paginatedSelectedProducts = filteredSelectedProducts.slice(
+        paginatedStartIndex,
+        paginatedStartIndex + effectivePageSize
+    );
+
+    useEffect(() => {
+        if (selectedPage > totalSelectedPages) {
+            setSelectedPage(totalSelectedPages);
+        }
+    }, [filteredSelectedProducts.length, selectedPage, totalSelectedPages]);
+
     const totalSummaryPages = Math.max(1, Math.ceil(updatedProducts.length / SUMMARY_PAGE_SIZE));
     const summaryStart = (summaryPage - 1) * SUMMARY_PAGE_SIZE;
     const summaryEnd = summaryStart + SUMMARY_PAGE_SIZE;
     const paginatedSummary = updatedProducts.slice(summaryStart, summaryEnd);
 
     const allRowsSelected =
-        selectedProducts.length > 0 &&
-        selectedProducts.every((p) => selectedRowVariantIds.includes(String(p.variant_id)));
+        filteredSelectedProducts.length > 0 &&
+        filteredSelectedProducts.every((p) => selectedRowVariantIds.includes(String(p.variant_id)));
 
     return (
         <>
@@ -247,11 +449,10 @@ export default function GenerateSku() {
             <DeleteConfirmationModal
                 open={deleteModalOpen}
                 title={`Remove ${itemsToDelete.length} product${itemsToDelete.length !== 1 ? 's' : ''}?`}
-                message={`Are you sure you want to remove ${
-                    itemsToDelete.length === 1
+                message={`Are you sure you want to remove ${itemsToDelete.length === 1
                         ? 'this product'
                         : `these ${itemsToDelete.length} products`
-                } from the SKU generation list?`}
+                    } from the SKU generation list?`}
                 onConfirm={handleConfirmDelete}
                 onClose={() => {
                     setDeleteModalOpen(false);
@@ -306,7 +507,12 @@ export default function GenerateSku() {
                                 SKU Settings
                             </s-button>
                             {method === "missing" && (
-                                <s-button variant="primary" loading={loading || undefined} onClick={generateSku}>
+                                <s-button
+                                    key={loading ? 'sku-btn-loading-top' : 'sku-btn-idle-top'}
+                                    variant="primary"
+                                    loading={loading}
+                                    onClick={generateSku}
+                                >
                                     Generate SKU
                                 </s-button>
                             )}
@@ -325,51 +531,50 @@ export default function GenerateSku() {
                 {/* SKU Method Selection */}
                 <s-section>
                     <s-box padding="base" borderWidth="base" borderRadius="base">
-                        <s-stack direction="block" gap="medium">
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div>
-                                    <s-text fontWeight="bold" fontSize="medium">Choose Generation Method</s-text>
-                                    <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
-                                        Select how products should be targeted for SKU creation
-                                    </div>
+                        <div style={{ padding: '16px' }}>
+                            <div style={{ marginBottom: '12px' }}>
+                                <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a1a' }}>Choose Generation Method</div>
+                                <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
+                                    Select how products should be targeted for SKU creation
                                 </div>
                             </div>
 
-                            <s-choice-list
-                                name="method"
-                                label="SKU generation method"
-                                labelAccessibilityVisibility="exclusive"
-                                onChange={(event) => {
-                                    const selected = event.currentTarget.values?.[0];
-                                    if (selected) setMethod(selected);
-                                }}
-                            >
-                                <s-choice value="missing" selected={method === "missing"}>
+                            {[
+                                { value: 'missing', label: 'Missing SKUs Only', desc: 'Scan all products in store and only generate SKUs for items without existing SKU values.' },
+                                { value: 'replace', label: 'Selected Products (Replace / Create)', desc: 'Generate SKUs for manually selected products. Overwrite any existing SKUs with newly formatted values.' },
+                                { value: 'barcode', label: 'From Barcode Value', desc: 'Copy product barcode values into SKU field for selected items.' },
+                            ].map((opt) => (
+                                <label
+                                    key={opt.value}
+                                    onClick={() => setMethod(opt.value)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                        padding: '10px 12px',
+                                        marginBottom: '6px',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        background: method === opt.value ? '#f0f7ff' : 'transparent',
+                                        border: method === opt.value ? '1.5px solid #008ba8' : '1.5px solid transparent',
+                                        transition: 'all 0.15s ease',
+                                    }}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="sku-method"
+                                        value={opt.value}
+                                        checked={method === opt.value}
+                                        onChange={() => setMethod(opt.value)}
+                                        style={{ marginTop: '3px', accentColor: '#008ba8', flexShrink: 0 }}
+                                    />
                                     <div>
-                                        <strong>Missing SKUs Only</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Scan all products in store and only generate SKUs for items without existing SKU values.
-                                        </div>
+                                        <div style={{ fontWeight: 600, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</div>
+                                        <div style={{ fontSize: '12px', color: '#616161', marginTop: '2px', lineHeight: 1.4 }}>{opt.desc}</div>
                                     </div>
-                                </s-choice>
-                                <s-choice value="replace" selected={method === "replace"}>
-                                    <div>
-                                        <strong>Selected Products (Replace / Create)</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Generate SKUs for manually selected products. Overwrite any existing SKUs with newly formatted values.
-                                        </div>
-                                    </div>
-                                </s-choice>
-                                <s-choice value="barcode" selected={method === "barcode"}>
-                                    <div>
-                                        <strong>From Barcode Value</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Copy product barcode values into SKU field for selected items.
-                                        </div>
-                                    </div>
-                                </s-choice>
-                            </s-choice-list>
-                        </s-stack>
+                                </label>
+                            ))}
+                        </div>
                     </s-box>
                 </s-section>
 
@@ -416,7 +621,7 @@ export default function GenerateSku() {
                 )}
 
                 {/* Selected Products Table / List */}
-                {method !== "missing" && (
+                {method !== "missing" && updatedProducts.length === 0 && (
                     <s-section>
                         <s-box padding="base" borderWidth="base" borderRadius="base">
                             <s-stack direction="block" gap="medium">
@@ -424,14 +629,19 @@ export default function GenerateSku() {
                                     <div>
                                         <s-text fontWeight="bold">Selected Products ({selectedProducts.length})</s-text>
                                         <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
-                                            Products chosen for SKU generation
+                                            Review items, compare current SKUs with new generated previews, and filter selection.
                                         </div>
                                     </div>
-                                    {selectedRowVariantIds.length > 0 && (
-                                        <s-button tone="critical" onClick={triggerDeleteBulk}>
-                                            Delete selected ({selectedRowVariantIds.length})
+                                    <s-stack direction="inline" gap="tight">
+                                        {selectedRowVariantIds.length > 0 && (
+                                            <s-button tone="critical" onClick={triggerDeleteBulk}>
+                                                Delete selected ({selectedRowVariantIds.length})
+                                            </s-button>
+                                        )}
+                                        <s-button onClick={handleOpenResourcePicker}>
+                                            Choose Products ({selectedProducts.length})
                                         </s-button>
-                                    )}
+                                    </s-stack>
                                 </div>
 
                                 {selectedProducts.length === 0 ? (
@@ -456,77 +666,160 @@ export default function GenerateSku() {
                                     </div>
                                 ) : (
                                     <>
-                                        <s-table>
-                                            <s-table-header-row>
-                                                <s-table-header>
-                                                    <s-checkbox
-                                                        label="Select all"
-                                                        labelAccessibilityVisibility="exclusive"
-                                                        checked={allRowsSelected || undefined}
-                                                        onChange={toggleSelectAllRows}
-                                                    />
-                                                </s-table-header>
-                                                <s-table-header>Product Title</s-table-header>
-                                                <s-table-header>Variant / Option</s-table-header>
-                                                <s-table-header>Vendor</s-table-header>
-                                                <s-table-header>Current SKU</s-table-header>
-                                                <s-table-header>Action</s-table-header>
-                                            </s-table-header-row>
-                                            <s-table-body>
-                                                {selectedProducts.map((p) => {
-                                                    const isChecked = selectedRowVariantIds.includes(String(p.variant_id));
-                                                    return (
-                                                        <s-table-row key={p.variant_id}>
-                                                            <s-table-cell>
-                                                                <s-checkbox
-                                                                    label={`Select ${p.product_title}`}
-                                                                    labelAccessibilityVisibility="exclusive"
-                                                                    checked={isChecked || undefined}
-                                                                    onChange={() => toggleSelectRow(p.variant_id)}
-                                                                />
-                                                            </s-table-cell>
-                                                            <s-table-cell>
-                                                                <s-text fontWeight="bold">{p.product_title}</s-text>
-                                                            </s-table-cell>
-                                                            <s-table-cell>
-                                                                <s-text tone="subdued">{p.option_1 || "Default"}</s-text>
-                                                            </s-table-cell>
-                                                            <s-table-cell>
-                                                                <s-badge tone="info">{p.vendor || "N/A"}</s-badge>
-                                                            </s-table-cell>
-                                                            <s-table-cell>
-                                                                {p.current_sku ? (
-                                                                    <s-text fontWeight="bold">{p.current_sku}</s-text>
-                                                                ) : (
-                                                                    <s-badge tone="attention">No SKU</s-badge>
-                                                                )}
-                                                            </s-table-cell>
-                                                            <s-table-cell>
-                                                                <s-button
-                                                                    icon="delete"
-                                                                    variant="tertiary"
-                                                                    tone="critical"
-                                                                    onClick={() => triggerDeleteSingle(p.variant_id)}
-                                                                />
-                                                            </s-table-cell>
-                                                        </s-table-row>
-                                                    );
-                                                })}
-                                            </s-table-body>
-                                        </s-table>
-
-                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px' }}>
-                                            <s-button onClick={handleOpenResourcePicker}>
-                                                Choose Products ({selectedProducts.length})
-                                            </s-button>
-                                            <s-button
-                                                variant="primary"
-                                                loading={loading || undefined}
-                                                onClick={generateSku}
-                                            >
-                                                Generate SKU
-                                            </s-button>
+                                        {/* Search & Pagination Filter Bar */}
+                                        <div style={{ marginTop: '16px', marginBottom: '8px' }}>
+                                            <s-grid gridTemplateColumns="1fr 200px" gap="base" alignment="center">
+                                                <s-text-field
+                                                    placeholder="Search selected items by title, SKU, variant, vendor..."
+                                                    value={selectedSearchQuery}
+                                                    onInput={(e) => {
+                                                        setSelectedSearchQuery(e.currentTarget.value);
+                                                        setSelectedPage(1);
+                                                    }}
+                                                />
+                                                <s-select
+                                                    label="Items per page"
+                                                    labelAccessibilityVisibility="exclusive"
+                                                    value={selectedPageSize}
+                                                    onChange={(e) => {
+                                                        setSelectedPageSize(e.currentTarget.value);
+                                                        setSelectedPage(1);
+                                                    }}
+                                                >
+                                                    <s-option value="5">5 per page</s-option>
+                                                    <s-option value="10">10 per page</s-option>
+                                                    <s-option value="25">25 per page</s-option>
+                                                    <s-option value="50">50 per page</s-option>
+                                                    <s-option value="all">Show All ({filteredSelectedProducts.length})</s-option>
+                                                </s-select>
+                                            </s-grid>
                                         </div>
+
+                                        {filteredSelectedProducts.length === 0 ? (
+                                            <div style={{ textAlign: 'center', padding: '24px', color: '#6d7175' }}>
+                                                No selected products matching "{selectedSearchQuery}".
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <s-table
+                                                    paginate={filteredSelectedProducts.length > (effectivePageSize || 1) || undefined}
+                                                    hasPreviousPage={selectedPage > 1 || undefined}
+                                                    hasNextPage={selectedPage < totalSelectedPages || undefined}
+                                                    onPreviousPage={() => setSelectedPage((p) => Math.max(1, p - 1))}
+                                                    onNextPage={() => setSelectedPage((p) => Math.min(totalSelectedPages, p + 1))}
+                                                >
+                                                    <s-table-header-row>
+                                                        <s-table-header>
+                                                            <s-checkbox
+                                                                label="Select all"
+                                                                labelAccessibilityVisibility="exclusive"
+                                                                checked={allRowsSelected || undefined}
+                                                                onChange={toggleSelectAllRows}
+                                                            />
+                                                        </s-table-header>
+                                                        <s-table-header>Product</s-table-header>
+                                                        <s-table-header>Variant / Option</s-table-header>
+                                                        <s-table-header>Vendor</s-table-header>
+                                                        <s-table-header>Current SKU</s-table-header>
+                                                        <s-table-header>New SKU Preview</s-table-header>
+                                                        <s-table-header>Action</s-table-header>
+                                                    </s-table-header-row>
+                                                    <s-table-body>
+                                                        {paginatedSelectedProducts.map((p, idx) => {
+                                                            const globalIndex = paginatedStartIndex + idx;
+                                                            const isChecked = selectedRowVariantIds.includes(String(p.variant_id));
+                                                            return (
+                                                                <s-table-row key={p.variant_id}>
+                                                                    <s-table-cell>
+                                                                        <s-checkbox
+                                                                            label={`Select ${p.product_title}`}
+                                                                            labelAccessibilityVisibility="exclusive"
+                                                                            checked={isChecked || undefined}
+                                                                            onChange={() => toggleSelectRow(p.variant_id)}
+                                                                        />
+                                                                    </s-table-cell>
+                                                                    <s-table-cell>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                            {p.image ? (
+                                                                                <img
+                                                                                    src={p.image}
+                                                                                    alt={p.product_title}
+                                                                                    style={{
+                                                                                        width: '32px',
+                                                                                        height: '32px',
+                                                                                        borderRadius: '6px',
+                                                                                        objectFit: 'cover',
+                                                                                        border: '1px solid #e1e3e5'
+                                                                                    }}
+                                                                                />
+                                                                            ) : (
+                                                                                <div
+                                                                                    style={{
+                                                                                        width: '32px',
+                                                                                        height: '32px',
+                                                                                        borderRadius: '6px',
+                                                                                        background: '#f1f2f3',
+                                                                                        display: 'flex',
+                                                                                        alignItems: 'center',
+                                                                                        justifyContent: 'center',
+                                                                                    }}
+                                                                                >
+                                                                                    <s-icon type="product" tone="subdued" size="small" />
+                                                                                </div>
+                                                                            )}
+                                                                            <s-text fontWeight="bold">{p.product_title}</s-text>
+                                                                        </div>
+                                                                    </s-table-cell>
+                                                                    <s-table-cell>
+                                                                        <s-text tone="subdued">{p.option_1 || p.variant_title || "Default"}</s-text>
+                                                                    </s-table-cell>
+                                                                    <s-table-cell>
+                                                                        <s-badge tone="info">{p.vendor || "N/A"}</s-badge>
+                                                                    </s-table-cell>
+                                                                    <s-table-cell>
+                                                                        {p.current_sku ? (
+                                                                            <s-text fontWeight="bold">{p.current_sku}</s-text>
+                                                                        ) : (
+                                                                            <s-badge tone="attention">No SKU</s-badge>
+                                                                        )}
+                                                                    </s-table-cell>
+                                                                    <s-table-cell>
+                                                                        <s-text fontWeight="bold" tone="success">
+                                                                            {getPreviewSku(p, globalIndex)}
+                                                                        </s-text>
+                                                                    </s-table-cell>
+                                                                    <s-table-cell>
+                                                                        <s-button
+                                                                            icon="delete"
+                                                                            variant="tertiary"
+                                                                            tone="critical"
+                                                                            onClick={() => triggerDeleteSingle(p.variant_id)}
+                                                                        />
+                                                                    </s-table-cell>
+                                                                </s-table-row>
+                                                            );
+                                                        })}
+                                                    </s-table-body>
+                                                </s-table>
+
+                                                {/* Page Range Info Footer */}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', paddingTop: '8px' }}>
+                                                    <s-text tone="subdued" fontSize="small">
+                                                        Showing {paginatedStartIndex + 1}–{Math.min(paginatedStartIndex + effectivePageSize, filteredSelectedProducts.length)} of {filteredSelectedProducts.length} items (Page {selectedPage} of {totalSelectedPages})
+                                                    </s-text>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                        <s-button
+                                                            key={loading ? 'sku-btn-loading-bottom' : 'sku-btn-idle-bottom'}
+                                                            variant="primary"
+                                                            loading={loading}
+                                                            onClick={generateSku}
+                                                        >
+                                                            Generate SKU
+                                                        </s-button>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
                                     </>
                                 )}
                             </s-stack>
@@ -539,18 +832,23 @@ export default function GenerateSku() {
                     <s-section>
                         <s-box padding="base" borderWidth="base" borderRadius="base">
                             <s-stack direction="block" gap="medium">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
                                     <div>
                                         <s-text fontWeight="bold" fontSize="medium">Generated SKU Results</s-text>
                                         <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
                                             Successfully updated {updatedProducts.length} product SKU codes
                                         </div>
                                     </div>
-                                    {updatedProducts.length > SUMMARY_PAGE_SIZE && (
-                                        <s-text tone="subdued">
-                                            Page {summaryPage} of {totalSummaryPages}
-                                        </s-text>
-                                    )}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        {updatedProducts.length > SUMMARY_PAGE_SIZE && (
+                                            <s-text tone="subdued">
+                                                Page {summaryPage} of {totalSummaryPages}
+                                            </s-text>
+                                        )}
+                                        <s-button variant="primary" onClick={handleOpenResourcePicker}>
+                                            Choose Products
+                                        </s-button>
+                                    </div>
                                 </div>
 
                                 <s-table

@@ -65,8 +65,8 @@ export default function ResourcesBlock() {
                         >
                             <div
                                 style={{
-                                    width: "34px",
-                                    height: "34px",
+                                    width: "36px",
+                                    height: "36px",
                                     borderRadius: "9px",
                                     background: "linear-gradient(135deg, #01161d 0%, #008ba8 100%)",
                                     display: "flex",
@@ -75,7 +75,17 @@ export default function ResourcesBlock() {
                                     flexShrink: 0,
                                 }}
                             >
-                                <div style={{ width: "16px", color: "#ffffff" }}>
+                                <div
+                                    style={{
+                                        width: "18px",
+                                        height: "18px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "#ffffff",
+                                        lineHeight: 0,
+                                    }}
+                                >
                                     <Icon source={item.icon} tone="inherit" />
                                 </div>
                             </div>
@@ -91,7 +101,7 @@ export default function ResourcesBlock() {
                                 </div>
                             </div>
 
-                            <div style={{ width: "14px", color: "#8a8f93", flexShrink: 0 }}>
+                            <div style={{ width: "14px", height: "14px", display: "flex", alignItems: "center", justifyContent: "center", color: "#8a8f93", flexShrink: 0 }}>
                                 <Icon source={ChevronRightIcon} tone="inherit" />
                             </div>
                         </a>

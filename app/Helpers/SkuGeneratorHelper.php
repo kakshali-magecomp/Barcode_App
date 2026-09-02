@@ -139,11 +139,7 @@ class SkuGeneratorHelper
 
         $value = trim((string) $value);
 
-        if (strcasecmp($value, 'Default Title') === 0) {
-            return;
-        }
-        
-        if ($value === '') {
+        if ($value === '' || preg_match('/^default([\s_-]*title)?$/i', $value)) {
             return;
         }
 

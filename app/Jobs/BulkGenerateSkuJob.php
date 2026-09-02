@@ -46,7 +46,6 @@ class BulkGenerateSkuJob implements ShouldQueue
         }
 
         $skuSetting = $user->skuSetting()->firstOrCreate([]);
-        $mutation = ShopifyQueryHelper::updateInventoryItem();
         $counter = $this->startingCounter;
 
         $updatedProducts = [];
@@ -64,7 +63,7 @@ class BulkGenerateSkuJob implements ShouldQueue
                     }
                 } else {
                     $newSku = SkuGeneratorHelper::generate($variant, $skuSetting, $counter);
-                    $counter++; // only barcode-mode doesn't consume the counter
+                    $counter++;
                 }
 
                 if (empty($newSku)) {
@@ -72,28 +71,94 @@ class BulkGenerateSkuJob implements ShouldQueue
                     continue;
                 }
 
-                $variables = [
-                    "id" => trim($variant["inventory_item_id"]),
-                    "input" => ["sku" => trim($newSku)],
-                ];
+                $inventoryItemId = trim($variant["inventory_item_id"] ?? '');
+                $productId = trim($variant["product_id"] ?? '');
+                $variantId = trim($variant["variant_id"] ?? '');
 
-                $response = $user->api()->graph($mutation, $variables);
-                $responseArray = json_decode(json_encode($response), true);
-                $errors = $responseArray['body']['container']['data']['inventoryItemUpdate']['userErrors'] ??
-                    $responseArray['body']['data']['inventoryItemUpdate']['userErrors'] ?? [];
+                $success = false;
 
-                if (!empty($errors)) {
-                    Log::warning("BulkGenerateSkuJob variant failed", ['errors' => $errors, 'variant' => $variant]);
-                    $failedCount++;
-                    continue;
+                // Method 1: Try inventoryItemUpdate if inventory_item_id is present
+                if (!empty($inventoryItemId)) {
+                    $formattedInvId = $inventoryItemId;
+                    if (!str_starts_with($formattedInvId, 'gid://')) {
+                        $formattedInvId = "gid://shopify/InventoryItem/" . $formattedInvId;
+                    }
+
+                    $mutation = ShopifyQueryHelper::updateInventoryItem();
+                    $variables = [
+                        "id" => $formattedInvId,
+                        "input" => ["sku" => trim($newSku)],
+                    ];
+
+                    $response = $user->api()->graph($mutation, $variables);
+                    $responseArray = json_decode(json_encode($response), true);
+                    $topErrors = $responseArray['body']['errors'] ?? $responseArray['errors'] ?? null;
+                    $userErrors = $responseArray['body']['data']['inventoryItemUpdate']['userErrors'] ??
+                        $responseArray['data']['inventoryItemUpdate']['userErrors'] ?? [];
+
+                    if (empty($topErrors) && empty($userErrors)) {
+                        $success = true;
+                    } else {
+                        Log::warning("BulkGenerateSkuJob inventoryItemUpdate failed", [
+                            'top_errors' => $topErrors,
+                            'user_errors' => $userErrors,
+                            'variant' => $variant
+                        ]);
+                    }
                 }
 
-                $updatedProducts[] = [
-                    "product_title" => $variant["product_title"] ?? "",
-                    "variant_title" => $variant["variant_title"] ?? "",
-                    "old_sku" => $currentSku,
-                    "new_sku" => $newSku,
-                ];
+                // Method 2: Try productVariantsBulkUpdate if variant_id and product_id are present
+                if (!$success && !empty($productId) && !empty($variantId)) {
+                    $formattedProdId = $productId;
+                    if (!str_starts_with($formattedProdId, 'gid://')) {
+                        $formattedProdId = "gid://shopify/Product/" . $formattedProdId;
+                    }
+                    $formattedVarId = $variantId;
+                    if (!str_starts_with($formattedVarId, 'gid://')) {
+                        $formattedVarId = "gid://shopify/ProductVariant/" . $formattedVarId;
+                    }
+
+                    $bulkMutation = ShopifyQueryHelper::updateSku();
+                    $bulkVariables = [
+                        "productId" => $formattedProdId,
+                        "variants" => [
+                            [
+                                "id" => $formattedVarId,
+                                "inventoryItem" => [
+                                    "sku" => trim($newSku)
+                                ]
+                            ]
+                        ]
+                    ];
+
+                    $response = $user->api()->graph($bulkMutation, $bulkVariables);
+                    $responseArray = json_decode(json_encode($response), true);
+                    $topErrors = $responseArray['body']['errors'] ?? $responseArray['errors'] ?? null;
+                    $userErrors = $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors'] ??
+                        $responseArray['data']['productVariantsBulkUpdate']['userErrors'] ?? [];
+
+                    if (empty($topErrors) && empty($userErrors)) {
+                        $success = true;
+                    } else {
+                        Log::warning("BulkGenerateSkuJob productVariantsBulkUpdate failed", [
+                            'top_errors' => $topErrors,
+                            'user_errors' => $userErrors,
+                            'variant' => $variant
+                        ]);
+                    }
+                }
+
+                if ($success) {
+                    $updatedProducts[] = [
+                        "variant_id" => $variant["variant_id"] ?? "",
+                        "product_title" => $variant["product_title"] ?? "",
+                        "variant_title" => $variant["variant_title"] ?? "",
+                        "old_sku" => $currentSku,
+                        "new_sku" => $newSku,
+                    ];
+                } else {
+                    $failedCount++;
+                }
             } catch (\Exception $e) {
                 Log::error("BulkGenerateSkuJob variant exception", ['error' => $e->getMessage()]);
                 $failedCount++;

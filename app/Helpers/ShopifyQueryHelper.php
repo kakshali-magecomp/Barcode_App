@@ -210,6 +210,42 @@ mutation updateProductVariantSku(
 }
 GRAPHQL;
     }
+
+    public static function updateSingleVariantSku(): string
+    {
+        return <<<'GRAPHQL'
+mutation productVariantUpdate($input: ProductVariantInput!) {
+    productVariantUpdate(input: $input) {
+        productVariant {
+            id
+            sku
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+GRAPHQL;
+    }
+
+    public static function updateSingleVariantBarcode(): string
+    {
+        return <<<'GRAPHQL'
+mutation productVariantUpdate($input: ProductVariantInput!) {
+    productVariantUpdate(input: $input) {
+        productVariant {
+            id
+            barcode
+        }
+        userErrors {
+            field
+            message
+        }
+    }
+}
+GRAPHQL;
+    }
 public static function marketsCountries(): string
 {
     return <<<'GRAPHQL'

@@ -87,36 +87,27 @@ export default function TemplateLabelRenderer({
             style={{
                 width: "100%",
                 height: "100%",
-
-
                 minHeight: printMode ? 0 : 220,
-
                 boxSizing: "border-box",
-
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-
                 textAlign: "center",
-
                 overflow: "hidden",
-
                 background: "#fff",
-                padding: printMode
-                    ? "2mm"
-                    : "20px",
+                padding: printMode ? "1.5mm" : "12px",
+                gap: printMode ? "0.8mm" : "6px",
             }}
         >
-
-
             {design.line1_sku && (
                 <div
                     className="print-sku"
                     style={{
-                        fontWeight: 600,
-                        marginBottom: printMode ? "1.2mm" : 10,
-                        fontSize: printMode ? undefined : 14,
+                        fontWeight: 700,
+                        margin: 0,
+                        padding: 0,
+                        fontSize: printMode ? undefined : 13,
                         wordBreak: "break-all",
                         whiteSpace: "normal",
                         maxWidth: "100%",
@@ -127,8 +118,6 @@ export default function TemplateLabelRenderer({
                 </div>
             )}
 
-
-
             <div
                 className="print-line2"
                 style={{
@@ -136,12 +125,11 @@ export default function TemplateLabelRenderer({
                     flexWrap: "wrap",
                     justifyContent: "center",
                     alignItems: "center",
-
                     gap: printMode ? "0.6mm" : 6,
-
-                    marginBottom: printMode ? "0.5mm" : 20,
-
+                    margin: 0,
+                    padding: 0,
                     maxWidth: "100%",
+                    lineHeight: 1.2,
                 }}
             >
                 {design.line2_name && (
@@ -149,10 +137,7 @@ export default function TemplateLabelRenderer({
                         className="print-title"
                         style={{
                             fontWeight: 700,
-
-                            fontSize: printMode
-                                ? undefined
-                                : 16,
+                            fontSize: printMode ? undefined : 14,
                         }}
                     >
                         {previewItem.title}
@@ -184,15 +169,15 @@ export default function TemplateLabelRenderer({
                 )}
             </div>
 
-
-
             {design.line3_vendor && (
                 <div
                     className="print-vendor"
                     style={{
-                        marginBottom: printMode ? "0.5mm" : 12,
-
+                        margin: 0,
+                        padding: 0,
+                        fontWeight: 500,
                         color: "#666",
+                        lineHeight: 1.2,
                     }}
                 >
                     {previewItem.vendor}

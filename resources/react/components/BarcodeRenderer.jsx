@@ -104,13 +104,14 @@ export default function BarcodeRenderer({
                                 : format === "ITF14"
                                     ? 70
                                     : 50),
-                margin: Number(settings.symbol_margin_px) || 2,
+                margin: Number(settings.symbol_margin_px) || 4,
 
                 displayValue: !settings.hide_barcode_value,
 
                 fontSize: Number(settings.symbol_font_size) || 16,
-                font: "Inter, Roboto, sans-serif",
-                textMargin: 2,
+                font: "Arial, Helvetica, sans-serif",
+                fontOptions: "bold",
+                textMargin: 6,
 
                 lineColor:
                     settings.symbol_color || "#000000",
@@ -131,15 +132,16 @@ export default function BarcodeRenderer({
             // Last fallback
             try {
                 const sanitizedValue = String(value).replace(/[^\x20-\x7E]/g, "").trim();
-                JsBarcode(barcodeRef.current, String(value), {
+                JsBarcode(barcodeRef.current, String(sanitizedValue), {
                     format: "CODE128",
-                    width: Number(settings.symbol_bar_width) || 3,
-                    height: Number(settings.symbol_bar_height) || 80,
-                    margin: Number(settings.symbol_margin_px) || 2,
+                    width: Number(settings.symbol_bar_width) || 2,
+                    height: Number(settings.symbol_bar_height) || 50,
+                    margin: Number(settings.symbol_margin_px) || 4,
                     displayValue: !settings.hide_barcode_value,
                     fontSize: Number(settings.symbol_font_size) || 16,
-                    font: "Inter, Roboto, sans-serif",
-                    textMargin: 2,
+                    font: "Arial, Helvetica, sans-serif",
+                    fontOptions: "bold",
+                    textMargin: 6,
                     lineColor:
                         settings.symbol_color || "#000000",
                     background: "#FFFFFF",
@@ -152,11 +154,15 @@ export default function BarcodeRenderer({
 
     return (
         <div
+            className="label-symbol-wrapper"
             style={{
                 width: "100%",
                 display: "flex",
                 justifyContent: "center",
+                alignItems: "center",
                 overflow: "hidden",
+                margin: 0,
+                padding: 0,
             }}
         >
             <img

@@ -43,62 +43,119 @@ class BulkGenerateBarcodeJob implements ShouldQueue
         }
 
         $barcodeSetting = $user->barcodeSetting()->firstOrCreate([]);
-
-        $groupedProducts = [];
         $updatedProducts = [];
         $failedCount = 0;
 
+        // Group variants by product_id for productVariantsBulkUpdate mutation
+        $productGroups = [];
+
         foreach ($this->variants as $variant) {
-            try {
-                $oldBarcode = $variant["barcode"] ?? $variant["current_barcode"] ?? "";
+            $productId = trim($variant["product_id"] ?? '');
+            $variantId = trim($variant["variant_id"] ?? '');
 
-                if ($this->method === "sku") {
-                    $newBarcode = trim($variant["current_sku"] ?? "");
-                    if ($newBarcode === "") {
-                        $failedCount++;
-                        continue;
-                    }
-                } else {
-                    $newBarcode = BarcodeGeneratorHelper::generate($variant, $barcodeSetting);
-                    if (empty($newBarcode)) {
-                        $failedCount++;
-                        continue;
-                    }
-                }
-
-                $groupedProducts[$variant["product_id"]][] = [
-                    "id" => $variant["variant_id"],
-                    "barcode" => $newBarcode,
-                ];
-
-                $updatedProducts[] = [
-                    "product_title" => $variant["product_title"] ?? "",
-                    "variant_title" => $variant["variant_title"] ?? "",
-                    "old_barcode" => $oldBarcode,
-                    "new_barcode" => $newBarcode,
-                ];
-            } catch (\Exception $e) {
-                Log::error("BulkGenerateBarcodeJob variant exception", ['error' => $e->getMessage()]);
+            if (empty($variantId)) {
                 $failedCount++;
+                continue;
             }
+
+            $oldBarcode = $variant["barcode"] ?? $variant["current_barcode"] ?? "";
+
+            if ($this->method === "sku") {
+                $newBarcode = trim($variant["current_sku"] ?? $variant["sku"] ?? "");
+                if ($newBarcode === "") {
+                    $failedCount++;
+                    continue;
+                }
+            } else {
+                $newBarcode = BarcodeGeneratorHelper::generate($variant, $barcodeSetting);
+                if (empty($newBarcode)) {
+                    $failedCount++;
+                    continue;
+                }
+            }
+
+            $formattedProdId = $productId;
+            if (!empty($formattedProdId) && !str_starts_with($formattedProdId, 'gid://')) {
+                $formattedProdId = "gid://shopify/Product/" . $formattedProdId;
+            }
+
+            $formattedVarId = $variantId;
+            if (!str_starts_with($formattedVarId, 'gid://')) {
+                $formattedVarId = "gid://shopify/ProductVariant/" . $formattedVarId;
+            }
+
+            $groupKey = !empty($formattedProdId) ? $formattedProdId : $formattedVarId;
+
+            if (!isset($productGroups[$groupKey])) {
+                $productGroups[$groupKey] = [
+                    'product_id' => $formattedProdId,
+                    'items' => []
+                ];
+            }
+
+            $productGroups[$groupKey]['items'][] = [
+                'variant_raw' => $variant,
+                'formatted_var_id' => $formattedVarId,
+                'old_barcode' => $oldBarcode,
+                'new_barcode' => $newBarcode,
+            ];
         }
 
-        // Bulk update per product (fewer API calls than one-per-variant),
-        // same pattern as the original synchronous generateBarcode().
-        $mutation = ShopifyQueryHelper::updateBarcode();
-        foreach ($groupedProducts as $productId => $shopifyVariants) {
-            try {
-                $variables = ["productId" => $productId, "variants" => $shopifyVariants];
-                $response = $user->api()->graph($mutation, $variables);
-                $responseArray = json_decode(json_encode($response), true);
-                $errors = $responseArray['body']['container']['data']['productVariantsBulkUpdate']['userErrors'] ??
-                    $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors'] ?? [];
+        foreach ($productGroups as $groupKey => $group) {
+            $productId = $group['product_id'];
+            $items = $group['items'];
 
-                if (!empty($errors)) {
-                    Log::warning("BulkGenerateBarcodeJob product failed", ['errors' => $errors, 'product_id' => $productId]);
+            $variantsInput = [];
+            foreach ($items as $item) {
+                $variantsInput[] = [
+                    'id' => $item['formatted_var_id'],
+                    'barcode' => trim($item['new_barcode']),
+                ];
+            }
+
+            $success = false;
+
+            if (!empty($productId)) {
+                $bulkMutation = ShopifyQueryHelper::updateBarcode();
+                $bulkVariables = [
+                    "productId" => $productId,
+                    "variants" => $variantsInput
+                ];
+
+                try {
+                    $response = $user->api()->graph($bulkMutation, $bulkVariables);
+                    $responseArray = json_decode(json_encode($response), true);
+
+                    $topErrors = $responseArray['body']['errors'] ?? $responseArray['errors'] ?? null;
+                    $userErrors = $responseArray['body']['data']['productVariantsBulkUpdate']['userErrors'] ??
+                        $responseArray['data']['productVariantsBulkUpdate']['userErrors'] ?? [];
+
+                    if (empty($topErrors) && empty($userErrors)) {
+                        $success = true;
+                    } else {
+                        Log::warning("BulkGenerateBarcodeJob productVariantsBulkUpdate failed", [
+                            'top_errors' => $topErrors,
+                            'user_errors' => $userErrors,
+                            'product_id' => $productId,
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("BulkGenerateBarcodeJob GraphQL exception", ['error' => $e->getMessage()]);
                 }
-            } catch (\Exception $e) {
-                Log::error("BulkGenerateBarcodeJob product exception", ['error' => $e->getMessage()]);
+            }
+
+            if ($success) {
+                foreach ($items as $item) {
+                    $updatedProducts[] = [
+                        "variant_id" => $item['variant_raw']["variant_id"] ?? "",
+                        "product_title" => $item['variant_raw']["product_title"] ?? "",
+                        "variant_title" => $item['variant_raw']["variant_title"] ?? "",
+                        "old_barcode" => $item['old_barcode'],
+                        "new_barcode" => $item['new_barcode'],
+                    ];
+                }
+            } else {
+                $failedCount += count($items);
             }
         }
 

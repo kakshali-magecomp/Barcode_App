@@ -16,7 +16,7 @@ export default function PlanPage() {
         "Custom label templates & designs",
         "Product & inventory sync",
         "Print prices & currencies on labels",
-        "24/7 customer support",
+        "P2P customer support",
     ];
 
     const getShopifyContext = () => {

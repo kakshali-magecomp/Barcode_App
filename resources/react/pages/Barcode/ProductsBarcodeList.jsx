@@ -43,6 +43,8 @@ export default function GenerateBarcode() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [itemsToDelete, setItemsToDelete] = useState([]);
 
+    const [storeVariants, setStoreVariants] = useState([]);
+    const [templatePreviewProduct, setTemplatePreviewProduct] = useState(null);
     const [generatedProducts, setGeneratedProducts] = useState([]);
     const [selectedTemplate, setSelectedTemplate] = useState("");
     const printRef = useRef();
@@ -55,14 +57,48 @@ export default function GenerateBarcode() {
     const [printSettings, setPrintSettings] = useState(null);
 
     const handleOpenResourcePicker = async () => {
+        let currentPrintSettings = printSettings;
+        if (!currentPrintSettings) {
+            try {
+                const res = await fetch("/api/print-settings");
+                const json = await res.json();
+                if (json.success) {
+                    currentPrintSettings = json.settings;
+                    setPrintSettings(json.settings);
+                }
+            } catch (err) {
+                console.error("Failed to fetch print settings for resource picker:", err);
+            }
+        }
+
+        const filterOpts = {};
+        if (currentPrintSettings?.hide_product_draft) {
+            filterOpts.draft = false;
+        }
+        if (currentPrintSettings?.hide_product_archived) {
+            filterOpts.archived = false;
+        }
+
         const pickerFn = shopify?.resourcePicker || window?.shopify?.resourcePicker;
         if (typeof pickerFn === "function") {
             try {
-                const selection = await pickerFn({
+                const initialSelection = Array.from(
+                    new Set(selectedProducts.map((p) => p.product_id).filter(Boolean))
+                ).map((pId) => ({
+                    id: String(pId).startsWith("gid://") ? String(pId) : `gid://shopify/Product/${pId}`,
+                }));
+
+                const pickerOptions = {
                     type: "product",
                     multiple: true,
                     action: "select",
-                });
+                    selectionIds: initialSelection.length > 0 ? initialSelection : undefined,
+                };
+                if (Object.keys(filterOpts).length > 0) {
+                    pickerOptions.filter = filterOpts;
+                }
+
+                const selection = await pickerFn(pickerOptions);
                 if (selection && Array.isArray(selection) && selection.length > 0) {
                     const selectedItems = [];
                     selection.forEach((p) => {
@@ -88,13 +124,14 @@ export default function GenerateBarcode() {
                                 vendor: p.vendor || "",
                                 quantity:
                                     existingQty ??
-                                    printSettings?.default_print_label_quantity ??
+                                    currentPrintSettings?.default_print_label_quantity ??
                                     1,
                             });
                         });
                     });
                     if (selectedItems.length > 0) {
                         setSelectedProducts(selectedItems);
+                        setGeneratedProducts([]);
                         setPreviewItem((prev) => prev || selectedItems[0] || null);
                     }
                 }
@@ -108,11 +145,19 @@ export default function GenerateBarcode() {
             const res = await fetch("/api/products");
             const json = await res.json();
             if (json.status && Array.isArray(json.variants)) {
-                const productsWithQty = json.variants.map((p) => ({
+                let variants = json.variants;
+                if (currentPrintSettings?.hide_product_draft) {
+                    variants = variants.filter(v => (v.status || '').toLowerCase() !== 'draft');
+                }
+                if (currentPrintSettings?.hide_product_archived) {
+                    variants = variants.filter(v => (v.status || '').toLowerCase() !== 'archived');
+                }
+                const productsWithQty = variants.map((p) => ({
                     ...p,
-                    quantity: printSettings?.default_print_label_quantity ?? 1,
+                    quantity: currentPrintSettings?.default_print_label_quantity ?? 1,
                 }));
                 setSelectedProducts(productsWithQty);
+                setGeneratedProducts([]);
                 setPreviewItem((prev) => prev || productsWithQty[0] || null);
             }
         } catch (err) {
@@ -187,17 +232,99 @@ export default function GenerateBarcode() {
     }, []);
 
     useEffect(() => {
-        async function loadStoreCurrency() {
+        async function loadStoreProducts() {
             try {
                 const res = await fetch("/api/products");
                 const json = await res.json();
                 setCurrencyCode(json.currency_code || 'USD');
+                if (json.status && Array.isArray(json.variants)) {
+                    setStoreVariants(json.variants);
+                }
             } catch (err) {
                 console.log(err);
             }
         }
-        loadStoreCurrency();
+        loadStoreProducts();
     }, []);
+
+    useEffect(() => {
+        if (!templateDesign?.selected_variant_id) {
+            setTemplatePreviewProduct(null);
+            return;
+        }
+
+        const targetVariantId = String(templateDesign.selected_variant_id);
+
+        const inSelected = selectedProducts.find(
+            (p) => String(p.variant_id) === targetVariantId
+        );
+        if (inSelected) {
+            setTemplatePreviewProduct({
+                ...inSelected,
+                product_title: inSelected.product_title || inSelected.title || '',
+                current_sku: inSelected.current_sku || inSelected.sku || '',
+                barcode: inSelected.barcode || '',
+                price: inSelected.price || '0.00',
+                vendor: inSelected.vendor || '',
+                variant_title: inSelected.variant_title !== 'Default Title' ? (inSelected.variant_title || '') : '',
+                option_1: inSelected.option_1 || (inSelected.variant_title !== 'Default Title' ? inSelected.variant_title : ''),
+                online_url: inSelected.online_url || '',
+                currency_code: inSelected.currency_code || currencyCode,
+            });
+            return;
+        }
+
+        const inStore = storeVariants.find(
+            (v) => String(v.variant_id) === targetVariantId
+        );
+        if (inStore) {
+            setTemplatePreviewProduct({
+                product_id: inStore.product_id,
+                variant_id: inStore.variant_id,
+                product_title: inStore.product_title,
+                variant_title: inStore.variant_title !== 'Default Title' ? (inStore.variant_title || '') : '',
+                option_1: inStore.option_1 || (inStore.variant_title !== 'Default Title' ? inStore.variant_title : ''),
+                current_sku: inStore.current_sku || inStore.sku || '',
+                sku: inStore.current_sku || inStore.sku || '',
+                barcode: inStore.barcode || '',
+                price: inStore.price || '0.00',
+                vendor: inStore.vendor || '',
+                online_url: inStore.online_url || '',
+                currency_code: inStore.currency_code || currencyCode,
+            });
+            return;
+        }
+
+        if (storeVariants.length === 0) {
+            fetch("/api/products")
+                .then((res) => res.json())
+                .then((json) => {
+                    if (json.status && Array.isArray(json.variants)) {
+                        setStoreVariants(json.variants);
+                        const matched = json.variants.find(
+                            (v) => String(v.variant_id) === targetVariantId
+                        );
+                        if (matched) {
+                            setTemplatePreviewProduct({
+                                product_id: matched.product_id,
+                                variant_id: matched.variant_id,
+                                product_title: matched.product_title,
+                                variant_title: matched.variant_title !== 'Default Title' ? (matched.variant_title || '') : '',
+                                option_1: matched.option_1 || (matched.variant_title !== 'Default Title' ? matched.variant_title : ''),
+                                current_sku: matched.current_sku || matched.sku || '',
+                                sku: matched.current_sku || matched.sku || '',
+                                barcode: matched.barcode || '',
+                                price: matched.price || '0.00',
+                                vendor: matched.vendor || '',
+                                online_url: matched.online_url || '',
+                                currency_code: matched.currency_code || currencyCode,
+                            });
+                        }
+                    }
+                })
+                .catch((err) => console.error(err));
+        }
+    }, [templateDesign, storeVariants, selectedProducts, currencyCode]);
 
     useEffect(() => {
         if (!printSettings) return;
@@ -233,8 +360,10 @@ export default function GenerateBarcode() {
 
     const handleTemplateChange = async (value) => {
         setSelectedTemplate(String(value));
+        setFocusedVariantId(null);
         if (!value) {
             setTemplateDesign(null);
+            setTemplatePreviewProduct(null);
             return;
         }
         try {
@@ -450,18 +579,20 @@ export default function GenerateBarcode() {
                 const op = json.operation;
                 setProgress({ processed: op.processed, total: op.total });
 
-                if (op.status === "completed") {
+                if (op.status === "completed" || op.status === "failed" || op.processed >= op.total) {
                     clearInterval(interval);
                     setProgress({ processed: op.total, total: op.total });
-                    await new Promise((resolve) => setTimeout(resolve, 600));
+                    await new Promise((resolve) => setTimeout(resolve, 300));
                     setGeneratedProducts(op.updated_products || []);
                     setSelectedProducts(prev =>
                         prev.map(product => {
-                            const updated = (op.updated_products || []).find(p => p.variant_title === product.variant_title && p.product_title === product.product_title);
+                            const updated = (op.updated_products || []).find(
+                                p => (p.variant_id && String(p.variant_id) === String(product.variant_id)) ||
+                                    (p.variant_title === product.variant_title && p.product_title === product.product_title)
+                            );
                             return updated ? { ...product, barcode: updated.new_barcode } : product;
                         })
                     );
-                    setPickerOpen(false);
                     setLoading(false);
                     setProgress(null);
                     shopify.toast.show(
@@ -509,9 +640,7 @@ export default function GenerateBarcode() {
             for (let i = 0; i < qty; i++) {
                 allLabels.push(`
                 <div class="label">
-                    <div class="label-content">
-                        ${labelHtml}
-                    </div>
+                    ${labelHtml}
                 </div>
             `);
             }
@@ -666,6 +795,7 @@ export default function GenerateBarcode() {
     // Determine which product is currently focused in preview
     const activeFocusedProduct =
         selectedProducts.find((p) => String(p.variant_id) === String(focusedVariantId)) ||
+        templatePreviewProduct ||
         filteredProducts[0] ||
         selectedProducts[0] || {
             product_title: "Sample Product",
@@ -683,11 +813,10 @@ export default function GenerateBarcode() {
             <DeleteConfirmationModal
                 open={deleteModalOpen}
                 title={`Remove ${itemsToDelete.length} product${itemsToDelete.length !== 1 ? 's' : ''}?`}
-                message={`Are you sure you want to remove ${
-                    itemsToDelete.length === 1
+                message={`Are you sure you want to remove ${itemsToDelete.length === 1
                         ? 'this product'
                         : `these ${itemsToDelete.length} products`
-                } from the barcode list?`}
+                    } from the barcode list?`}
                 onConfirm={handleConfirmDelete}
                 onClose={() => {
                     setDeleteModalOpen(false);
@@ -748,7 +877,12 @@ export default function GenerateBarcode() {
                                 Create Template
                             </s-button>
                             {method === "missing" && (
-                                <s-button variant="primary" loading={loading || undefined} onClick={generateBarcode}>
+                                <s-button
+                                    key={loading ? 'bc-btn-loading-top' : 'bc-btn-idle-top'}
+                                    variant="primary"
+                                    loading={loading}
+                                    onClick={generateBarcode}
+                                >
                                     Generate Barcode
                                 </s-button>
                             )}
@@ -767,56 +901,50 @@ export default function GenerateBarcode() {
                 {/* Generation Method Choice */}
                 <s-section>
                     <s-box padding="base" borderWidth="base" borderRadius="base">
-                        <s-stack direction="block" gap="medium">
-                            <div>
-                                <s-text fontWeight="bold" fontSize="medium">Choose Generation or Print Method</s-text>
+                        <div style={{ padding: '16px' }}>
+                            <div style={{ marginBottom: '12px' }}>
+                                <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a1a' }}>Choose Generation or Print Method</div>
                                 <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
                                     Select how products or barcode labels should be processed
                                 </div>
                             </div>
 
-                            <s-choice-list
-                                name="method"
-                                label="Barcode generation method"
-                                labelAccessibilityVisibility="exclusive"
-                                onChange={(event) => {
-                                    const selected = event.currentTarget.values?.[0];
-                                    if (selected) setMethod(selected);
-                                }}
-                            >
-                                <s-choice value="missing" selected={method === "missing"}>
+                            {[
+                                { value: 'missing', label: 'Missing Barcodes Only', desc: 'Scan store items and only generate barcodes for products or variants missing a barcode.' },
+                                { value: 'replace', label: 'Selected Products (Replace / Create)', desc: 'Generate new barcodes for selected products (overwrites existing barcode values).' },
+                                { value: 'sku', label: 'Generate Barcode from SKU', desc: 'Copy product SKU code into the barcode field for selected items.' },
+                                { value: 'print', label: 'Print Labels Only', desc: 'Choose a paper template and print physical barcode stickers for selected products.' },
+                            ].map((opt) => (
+                                <label
+                                    key={opt.value}
+                                    onClick={() => setMethod(opt.value)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                        padding: '10px 12px',
+                                        marginBottom: '6px',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        background: method === opt.value ? '#f0f7ff' : 'transparent',
+                                        border: method === opt.value ? '1.5px solid #008ba8' : '1.5px solid transparent',
+                                        transition: 'all 0.15s ease',
+                                    }}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="barcode-method"
+                                        value={opt.value}
+                                        checked={method === opt.value}
+                                        onChange={() => setMethod(opt.value)}
+                                        style={{ marginTop: '3px', accentColor: '#008ba8', flexShrink: 0 }}
+                                    />
                                     <div>
-                                        <strong>Missing Barcodes Only</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Scan store items and only generate barcodes for products or variants missing a barcode.
-                                        </div>
+                                        <div style={{ fontWeight: 600, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</div>
+                                        <div style={{ fontSize: '12px', color: '#616161', marginTop: '2px', lineHeight: 1.4 }}>{opt.desc}</div>
                                     </div>
-                                </s-choice>
-                                <s-choice value="replace" selected={method === "replace"}>
-                                    <div>
-                                        <strong>Selected Products (Replace / Create)</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Generate new barcodes for selected products (overwrites existing barcode values).
-                                        </div>
-                                    </div>
-                                </s-choice>
-                                <s-choice value="sku" selected={method === "sku"}>
-                                    <div>
-                                        <strong>Generate Barcode from SKU</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Copy product SKU code into the barcode field for selected items.
-                                        </div>
-                                    </div>
-                                </s-choice>
-                                <s-choice value="print" selected={method === "print"}>
-                                    <div>
-                                        <strong>Print Labels Only</strong>
-                                        <div style={{ color: '#616161', fontSize: '12px', marginTop: '2px' }}>
-                                            Choose a paper template and print physical barcode stickers for selected products.
-                                        </div>
-                                    </div>
-                                </s-choice>
-                            </s-choice-list>
+                                </label>
+                            ))}
 
                             {method === "replace" && (
                                 <s-banner tone="warning">
@@ -860,7 +988,7 @@ export default function GenerateBarcode() {
 
                                 </div>
                             )}
-                        </s-stack>
+                        </div>
                     </s-box>
                 </s-section>
 
@@ -906,8 +1034,8 @@ export default function GenerateBarcode() {
                     </s-section>
                 )}
 
-                {/* Selected Products Table Card (For SKU / Replace Methods) */}
-                {method !== "missing" && method !== "print" && (
+                {/* Selected Products Table Card (Hidden once Barcodes are generated successfully) */}
+                {method !== "missing" && method !== "print" && generatedProducts.length === 0 && (
                     <s-section>
                         <s-box padding="base" borderWidth="base" borderRadius="base">
                             <s-stack direction="block" gap="medium">
@@ -1007,12 +1135,10 @@ export default function GenerateBarcode() {
                                         </s-table>
 
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px' }}>
-                                            <s-button onClick={handleOpenResourcePicker}>
-                                                Choose Products ({selectedProducts.length})
-                                            </s-button>
                                             <s-button
+                                                key={loading ? 'bc-btn-loading-bottom' : 'bc-btn-idle-bottom'}
                                                 variant="primary"
-                                                loading={loading || undefined}
+                                                loading={loading}
                                                 onClick={generateBarcode}
                                             >
                                                 Generate Barcode
@@ -1030,18 +1156,23 @@ export default function GenerateBarcode() {
                     <s-section>
                         <s-box padding="base" borderWidth="base" borderRadius="base">
                             <s-stack direction="block" gap="medium">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
                                     <div>
                                         <s-text fontWeight="bold" fontSize="medium">Generated Barcode Results</s-text>
                                         <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
                                             Successfully generated {generatedProducts.length} barcode values
                                         </div>
                                     </div>
-                                    {generatedProducts.length > SUMMARY_PAGE_SIZE && (
-                                        <s-text tone="subdued">
-                                            Page {summaryPage} of {totalSummaryPages}
-                                        </s-text>
-                                    )}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        {generatedProducts.length > SUMMARY_PAGE_SIZE && (
+                                            <s-text tone="subdued">
+                                                Page {summaryPage} of {totalSummaryPages}
+                                            </s-text>
+                                        )}
+                                        <s-button variant="primary" onClick={handleOpenResourcePicker}>
+                                            Choose Products
+                                        </s-button>
+                                    </div>
                                 </div>
 
                                 <s-table
