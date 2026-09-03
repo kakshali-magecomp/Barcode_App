@@ -423,49 +423,49 @@ export default function SettingsIndex() {
                             marginBottom: "24px",
                         }}
                     >
-                        {/* Top Card: Store Account Badge */}
+                        {/* Top Card: Store Account Badge (Compact Design matching reference) */}
                         <div
                             style={{
                                 background: "#ffffff",
                                 border: "1px solid #e1e3e5",
-                                borderRadius: "14px",
-                                padding: "16px 18px",
+                                borderRadius: "12px",
+                                padding: "10px 14px",
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "14px",
-                                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+                                gap: "10px",
+                                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.03)",
                             }}
                         >
                             {/* Avatar Badge with Store Initial */}
                             <div
                                 style={{
-                                    width: "44px",
-                                    height: "44px",
-                                    borderRadius: "12px",
+                                    width: "36px",
+                                    height: "36px",
+                                    borderRadius: "10px",
                                     background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)",
                                     color: "#ffffff",
                                     fontWeight: 700,
-                                    fontSize: "20px",
+                                    fontSize: "16px",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
                                     flexShrink: 0,
-                                    boxShadow: "0 4px 10px rgba(79, 70, 229, 0.25)",
+                                    boxShadow: "0 2px 8px rgba(79, 70, 229, 0.2)",
                                 }}
                             >
                                 {storeInitial}
                             </div>
 
-                            <div style={{ flex: "1 1 auto", minWidth: 0, overflowWrap: "anywhere", wordBreak: "break-word" }}>
+                            <div style={{ flex: "1 1 auto", minWidth: 0 }}>
                                 <div
                                     style={{
                                         fontWeight: 700,
-                                        fontSize: "14px",
+                                        fontSize: "13px",
                                         color: "#1a1a1a",
-                                        lineHeight: 1.35,
-                                        wordBreak: "break-word",
-                                        overflowWrap: "anywhere",
-                                        whiteSpace: "normal",
+                                        lineHeight: 1.25,
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                        overflow: "hidden",
                                     }}
                                     title={storeDomain}
                                 >
@@ -473,13 +473,13 @@ export default function SettingsIndex() {
                                 </div>
                                 <div
                                     style={{
-                                        fontSize: "12px",
+                                        fontSize: "11px",
                                         color: "#6d7175",
-                                        marginTop: "3px",
-                                        lineHeight: 1.35,
-                                        wordBreak: "break-word",
-                                        overflowWrap: "anywhere",
-                                        whiteSpace: "normal",
+                                        marginTop: "2px",
+                                        lineHeight: 1.25,
+                                        whiteSpace: "nowrap",
+                                        textOverflow: "ellipsis",
+                                        overflow: "hidden",
                                     }}
                                     title={adminEmail}
                                 >

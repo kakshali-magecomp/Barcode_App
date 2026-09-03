@@ -35,11 +35,10 @@ export default function TemplateLabelRenderer({
             "",
 
         barcode:
-            barcodeValue !== null && barcodeValue !== undefined
-                ? String(barcodeValue)
-                : product.current_barcode ||
-                product.barcode ||
-                "",
+            product.current_barcode ||
+            product.barcode ||
+            product.generated_barcode ||
+            "",
 
         price:
             product.price ?? "",
@@ -50,7 +49,7 @@ export default function TemplateLabelRenderer({
         option_1: variantTitle || option1,
 
         online_url:
-            product.online_url || "",
+            product.online_url || (product.handle ? `/products/${product.handle}` : ""),
     };
 
     const displayPrice = formatPrice
@@ -58,26 +57,52 @@ export default function TemplateLabelRenderer({
         : String(previewItem.price ?? "");
 
     const getSymbolValue = () => {
-        switch (design.symbol_field_source) {
+        if (barcodeValue !== null && barcodeValue !== undefined && String(barcodeValue).trim() !== "") {
+            return String(barcodeValue).trim();
+        }
+
+        const fieldSource = design.symbol_field_source || "barcode_value";
+        switch (fieldSource) {
             case "product_name":
-                return previewItem.title;
+            case "title":
+            case "name":
+                return String(previewItem.title || "Product Name").trim();
 
             case "product_price":
-                return displayPrice;
+            case "price":
+                return String(displayPrice || "0.00").trim();
 
             case "product_online_url":
-                return previewItem.online_url;
+            case "product_page_url":
+            case "online_url":
+            case "url": {
+                const params = new URLSearchParams(window.location.search);
+                const shopDomain = params.get('shop') || window.shopify?.config?.shop || 'kakshalijani.myshopify.com';
+                let rawUrl = previewItem.online_url || product.online_url || product.url || "";
+                if (rawUrl && (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) && !rawUrl.includes("store.myshopify.com")) {
+                    return rawUrl.trim();
+                }
+                const handle = product.handle || (previewItem.title || product.product_title || "product").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                const variantParam = product.variant_id ? `?variant=${product.variant_id}` : "";
+                if (rawUrl && rawUrl.startsWith("/")) {
+                    return `https://${shopDomain}${rawUrl}${variantParam}`.trim();
+                }
+                return `https://${shopDomain}/products/${handle}${variantParam}`.trim();
+            }
+
+            case "product_vendor":
+            case "vendor":
+                return String(previewItem.vendor || "Vendor").trim();
+
+            case "sku_value":
+            case "product_sku":
+            case "sku":
+                return String(previewItem.sku || previewItem.barcode || "SKU-EMPTY").trim();
 
             case "barcode_value":
             case "barcode":
-                return previewItem.barcode;
-
-            case "sku_value":
-            case "sku":
-                return previewItem.sku;
-
             default:
-                return previewItem.sku;
+                return String(previewItem.barcode || previewItem.sku || previewItem.title || "123456789012").trim();
         }
     };
 
@@ -185,8 +210,8 @@ export default function TemplateLabelRenderer({
             )}
 
 
-            {design.symbol_enabled && (
-                design.symbol_type === "BARCODE" ? (
+            {(design.symbol_enabled !== false && String(design.symbol_enabled) !== 'false') && (
+                (String(design.symbol_type || 'BARCODE').toUpperCase() === 'BARCODE') ? (
                     <BarcodeRenderer
                         value={getSymbolValue()}
                         field={

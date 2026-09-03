@@ -84,6 +84,7 @@ class ShopifyProductController extends Controller
             }
 
             $skuSettings = $shop->skuSetting()->firstOrCreate([]);
+            $printSetting = $shop->printSetting()->firstOrCreate([]);
 
             $productsEdges = $responseArray['body']['container']['data']['products']['edges'] ??
                 $responseArray['body']['data']['products']['edges'] ?? [];
@@ -124,7 +125,7 @@ class ShopifyProductController extends Controller
                             'status' => strtolower($product['status'] ?? ''),
 
                             // ADDED: Forward store URLs and handles to your React frontend states
-                            'online_url' => "https://{$shop->name}/products/" . $product['handle'],
+                            'online_url' => $product['onlineStoreUrl'] ?? ("https://{$shop->name}/products/" . ($product['handle'] ?? '')),
                             'handle' => $product['handle'] ?? '',
 
                             'variant_id' => $variant['id'] ?? '',
@@ -148,6 +149,12 @@ class ShopifyProductController extends Controller
 
                     }
                 }
+            }
+
+            if (!empty($flattenedVariants) && !empty($printSetting->sort_by_sku)) {
+                usort($flattenedVariants, function ($a, $b) {
+                    return strnatcasecmp($a['current_sku'] ?? '', $b['current_sku'] ?? '');
+                });
             }
 
             if (!empty($flattenedVariants)) {

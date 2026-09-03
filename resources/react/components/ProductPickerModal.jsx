@@ -44,52 +44,6 @@ export default function ProductPickerModal({
         filterOpts.archived = false;
       }
 
-      // Attempt shopify.resourcePicker if available in Shopify App Bridge
-      if (shopify && typeof shopify.resourcePicker === 'function') {
-        const pickerConfig = {
-          type: 'product',
-          multiple: true,
-          action: 'select',
-        };
-        if (Object.keys(filterOpts).length > 0) {
-          pickerConfig.filter = filterOpts;
-        }
-
-        try {
-          const selection = await shopify.resourcePicker(pickerConfig);
-          if (selection && Array.isArray(selection) && selection.length > 0) {
-            const formatted = [];
-            selection.forEach(p => {
-              const pId = p.id ? String(p.id).split('/').pop() : '';
-              (p.variants || []).forEach(v => {
-                const vId = v.id ? String(v.id).split('/').pop() : '';
-                formatted.push({
-                  variant_id: vId,
-                  product_id: pId,
-                  product_title: p.title,
-                  variant_title: v.title === 'Default Title' ? '' : v.title,
-                  sku: v.sku || '',
-                  current_sku: v.sku || '',
-                  barcode: v.barcode || '',
-                  price: v.price || '0.00',
-                  image: v.image?.src || p.images?.[0]?.src || PLACEHOLDER_IMAGE,
-                  available: v.inventoryQuantity ?? 0,
-                  inventory_quantity: v.inventoryQuantity ?? 0,
-                  vendor: p.vendor || ''
-                });
-              });
-            });
-            if (formatted.length > 0) {
-              onSelect(formatted);
-              onClose();
-              return;
-            }
-          }
-        } catch (err) {
-          // Fallback to local modal if native picker is cancelled or unsupported
-        }
-      }
-
       try {
         setLoading(true);
         const res = await fetch("/api/products");
@@ -101,6 +55,11 @@ export default function ProductPickerModal({
           }
           if (printSettings?.hide_product_archived) {
             variants = variants.filter(v => (v.status || '').toLowerCase() !== 'archived');
+          }
+          if (printSettings?.sort_by_sku) {
+            variants.sort((a, b) =>
+              (a.current_sku || a.sku || "").localeCompare(b.current_sku || b.sku || "", undefined, { numeric: true, sensitivity: 'base' })
+            );
           }
           setProducts(variants);
         }
@@ -432,11 +391,40 @@ export default function ProductPickerModal({
                     >
                       {product.product_title}
                     </div>
-                    {product.variant_title && product.variant_title !== "Default Title" && (
-                      <div style={{ fontSize: "12px", color: "#6d7175", marginTop: "2px" }}>
-                        {product.variant_title}
-                      </div>
-                    )}
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "2px" }}>
+                      {product.variant_title && product.variant_title !== "Default Title" && (
+                        <span style={{ fontSize: "12px", color: "#6d7175" }}>
+                          {product.variant_title}
+                        </span>
+                      )}
+                      {(product.current_sku || product.sku) ? (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            color: "#008ba8",
+                            background: "#e4f5f8",
+                            padding: "1px 6px",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          SKU: {product.current_sku || product.sku}
+                        </span>
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            fontWeight: 500,
+                            color: "#8c9196",
+                            background: "#f1f2f3",
+                            padding: "1px 6px",
+                            borderRadius: "4px",
+                          }}
+                        >
+                          No SKU
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div

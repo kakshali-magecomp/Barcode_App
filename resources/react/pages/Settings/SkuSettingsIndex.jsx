@@ -122,23 +122,59 @@ export default function SkuSettingsIndex({ settings = {}, onChange }) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* LIVE PREVIEW BANNER */}
-            <s-section>
-                <s-banner heading="Live SKU Generation Structure Preview" tone="info">
-                    <p
+            {/* LIVE PREVIEW BANNER (STICKY ON SCROLL) */}
+            <div
+                style={{
+                    position: 'sticky',
+                    top: '12px',
+                    zIndex: 10,
+                    background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                    border: '1px solid #bae6fd',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    boxShadow: '0 6px 18px rgba(3, 105, 161, 0.1)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                    marginBottom: '8px',
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div
                         style={{
-                            fontSize: '18px',
-                            fontFamily: 'monospace',
-                            fontWeight: 'bold',
-                            letterSpacing: '0.5px',
-                            color: '#008ba8',
-                            margin: '4px 0 0'
+                            width: '22px',
+                            height: '22px',
+                            borderRadius: '50%',
+                            background: '#0284c7',
+                            color: '#ffffff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            flexShrink: 0,
                         }}
                     >
-                        {generateSkuPreview()}
-                    </p>
-                </s-banner>
-            </s-section>
+                        ℹ
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#0c4a6e' }}>
+                        Live SKU Generation Structure Preview
+                    </span>
+                </div>
+                <div
+                    style={{
+                        fontSize: '16px',
+                        fontFamily: 'monospace',
+                        fontWeight: '700',
+                        letterSpacing: '0.5px',
+                        color: '#0284c7',
+                        paddingLeft: '30px',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    {generateSkuPreview()}
+                </div>
+            </div>
 
             {/* PATTERN BASE PARAMETERS */}
             <s-section>

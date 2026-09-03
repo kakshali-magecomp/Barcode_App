@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAppBridge, TitleBar } from "@shopify/app-bridge-react";
 import { useNavigate } from "react-router-dom";
 import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
+import ProductPickerModal from "../components/ProductPickerModal";
 
 export default function GenerateSku() {
     const shopify = useAppBridge();
@@ -196,6 +197,11 @@ export default function GenerateSku() {
                             });
                         });
                     });
+                    if (currentPrintSettings?.sort_by_sku) {
+                        selectedItems.sort((a, b) =>
+                            (a.current_sku || a.sku || "").localeCompare(b.current_sku || b.sku || "", undefined, { numeric: true, sensitivity: 'base' })
+                        );
+                    }
                     if (selectedItems.length > 0) {
                         setSelectedProducts(selectedItems);
                         setUpdatedProducts([]);
@@ -217,6 +223,11 @@ export default function GenerateSku() {
                 }
                 if (currentPrintSettings?.hide_product_archived) {
                     variants = variants.filter(v => (v.status || '').toLowerCase() !== 'archived');
+                }
+                if (currentPrintSettings?.sort_by_sku) {
+                    variants.sort((a, b) =>
+                        (a.current_sku || a.sku || "").localeCompare(b.current_sku || b.sku || "", undefined, { numeric: true, sensitivity: 'base' })
+                    );
                 }
                 setSelectedProducts(variants);
                 setUpdatedProducts([]);
@@ -450,8 +461,8 @@ export default function GenerateSku() {
                 open={deleteModalOpen}
                 title={`Remove ${itemsToDelete.length} product${itemsToDelete.length !== 1 ? 's' : ''}?`}
                 message={`Are you sure you want to remove ${itemsToDelete.length === 1
-                        ? 'this product'
-                        : `these ${itemsToDelete.length} products`
+                    ? 'this product'
+                    : `these ${itemsToDelete.length} products`
                     } from the SKU generation list?`}
                 onConfirm={handleConfirmDelete}
                 onClose={() => {
@@ -504,7 +515,7 @@ export default function GenerateSku() {
 
                         <s-stack direction="inline" gap="base">
                             <s-button icon="settings" onClick={() => navigate('/Settingindex')}>
-                                SKU Settings
+                                Go to Settings
                             </s-button>
                             {method === "missing" && (
                                 <s-button
@@ -530,52 +541,73 @@ export default function GenerateSku() {
 
                 {/* SKU Method Selection */}
                 <s-section>
-                    <s-box padding="base" borderWidth="base" borderRadius="base">
-                        <div style={{ padding: '16px' }}>
-                            <div style={{ marginBottom: '12px' }}>
-                                <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a1a' }}>Choose Generation Method</div>
-                                <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
-                                    Select how products should be targeted for SKU creation
-                                </div>
-                            </div>
-
-                            {[
-                                { value: 'missing', label: 'Missing SKUs Only', desc: 'Scan all products in store and only generate SKUs for items without existing SKU values.' },
-                                { value: 'replace', label: 'Selected Products (Replace / Create)', desc: 'Generate SKUs for manually selected products. Overwrite any existing SKUs with newly formatted values.' },
-                                { value: 'barcode', label: 'From Barcode Value', desc: 'Copy product barcode values into SKU field for selected items.' },
-                            ].map((opt) => (
-                                <label
-                                    key={opt.value}
-                                    onClick={() => setMethod(opt.value)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'flex-start',
-                                        gap: '10px',
-                                        padding: '10px 12px',
-                                        marginBottom: '6px',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        background: method === opt.value ? '#f0f7ff' : 'transparent',
-                                        border: method === opt.value ? '1.5px solid #008ba8' : '1.5px solid transparent',
-                                        transition: 'all 0.15s ease',
-                                    }}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="sku-method"
-                                        value={opt.value}
-                                        checked={method === opt.value}
-                                        onChange={() => setMethod(opt.value)}
-                                        style={{ marginTop: '3px', accentColor: '#008ba8', flexShrink: 0 }}
-                                    />
-                                    <div>
-                                        <div style={{ fontWeight: 600, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</div>
-                                        <div style={{ fontSize: '12px', color: '#616161', marginTop: '2px', lineHeight: 1.4 }}>{opt.desc}</div>
-                                    </div>
-                                </label>
-                            ))}
+                    <div
+                        style={{
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '14px 16px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '4px' }}>
+                            <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>Choose Generation Method</span>
+                            <span style={{ fontSize: '12px', color: '#64748b' }}>Select how products are targeted for SKU creation</span>
                         </div>
-                    </s-box>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px' }}>
+                            {[
+                                { value: 'missing', label: 'Missing SKUs Only', desc: 'Generate SKUs only for items without existing SKU values.' },
+                                { value: 'replace', label: 'Selected Products', desc: 'Generate & overwrite SKUs for manually selected items.' },
+                                { value: 'barcode', label: 'From Barcode Value', desc: 'Copy product barcode value into SKU field for selected items.' },
+                            ].map((opt) => {
+                                const isActive = method === opt.value;
+                                return (
+                                    <div
+                                        key={opt.value}
+                                        onClick={() => setMethod(opt.value)}
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '4px',
+                                            padding: '10px 12px',
+                                            borderRadius: '10px',
+                                            cursor: 'pointer',
+                                            background: isActive ? '#f0f9ff' : '#f8fafc',
+                                            border: isActive ? '1.5px solid #0284c7' : '1px solid #e2e8f0',
+                                            boxShadow: isActive ? '0 4px 12px rgba(2, 132, 199, 0.08)' : 'none',
+                                            transition: 'all 0.15s ease',
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <input
+                                                type="radio"
+                                                name="sku-method"
+                                                value={opt.value}
+                                                checked={isActive}
+                                                onChange={() => setMethod(opt.value)}
+                                                style={{ accentColor: '#0284c7', margin: 0, cursor: 'pointer' }}
+                                            />
+                                            <span style={{ fontWeight: 700, fontSize: '13px', color: isActive ? '#0369a1' : '#1e293b' }}>
+                                                {opt.label}
+                                            </span>
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: '#64748b', paddingLeft: '20px', lineHeight: 1.3 }}>
+                                            {opt.desc}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {method === "replace" && (
+                            <div style={{ marginTop: '12px' }}>
+                                <s-banner tone="warning">
+                                    <strong>Warning:</strong> Existing SKUs will be replaced with newly generated values.
+                                </s-banner>
+                            </div>
+                        )}
+                    </div>
                 </s-section>
 
                 {/* Progress Bar (when bulk job running) */}
@@ -638,9 +670,11 @@ export default function GenerateSku() {
                                                 Delete selected ({selectedRowVariantIds.length})
                                             </s-button>
                                         )}
-                                        <s-button onClick={handleOpenResourcePicker}>
-                                            Choose Products ({selectedProducts.length})
-                                        </s-button>
+                                        {selectedProducts.length > 0 && (
+                                            <s-button onClick={handleOpenResourcePicker}>
+                                                Choose Products ({selectedProducts.length})
+                                            </s-button>
+                                        )}
                                     </s-stack>
                                 </div>
 

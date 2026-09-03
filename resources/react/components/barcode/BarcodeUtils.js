@@ -130,28 +130,28 @@ export function detectBarcodeFormat(barcode, barcodeSettings = {}) {
 
     // Auto detect only when CODE128 is selected
     const shouldAutoDetect =
-    barcodeSettings.auto_detect_gtin_format &&
-    !barcodeSettings.barcode_format;
+        barcodeSettings.auto_detect_gtin_format &&
+        !barcodeSettings.barcode_format;
 
-if (shouldAutoDetect && isNumeric) {
-    switch (value.length) {
-        case 8:
-            return "EAN8";
+    if (shouldAutoDetect && isNumeric) {
+        switch (value.length) {
+            case 8:
+                return "EAN8";
 
-        case 11:
-        case 12:
-            return "UPCA";
+            case 11:
+            case 12:
+                return "UPCA";
 
-        case 13:
-            return "EAN13";
+            case 13:
+                return "EAN13";
 
-        case 14:
-            return "ITF14";
+            case 14:
+                return "ITF14";
 
-        default:
-            return "CODE128";
+            default:
+                return "CODE128";
+        }
     }
-}
 
     switch (format) {
         case "CODE39":
@@ -228,7 +228,6 @@ function generateEAN13(value) {
 }
 
 // UPCA
-// ===============================
 function generateUPCA(value) {
     let digits = String(value).replace(/\D/g, "");
 
@@ -248,7 +247,7 @@ function generateITF14(value) {
 
 // Final Barcode Value
 export function getBarcodeValue(value, barcodeSettings = {}) {
-    if (!value) return "";
+    if (!value || value === "NO BARCODE" || value === "NO SKU") return value || "";
 
     const format = (
         barcodeSettings.barcode_format || "CODE128"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useAppBridge, TitleBar } from "@shopify/app-bridge-react";
 import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+import ProductPickerModal from "../../components/ProductPickerModal";
 import BarcodeRenderer from "../../components/BarcodeRenderer";
 import QrCodeRenderer from "../../components/QrCodeRenderer";
 import TablePreview from "../../components/TablePreview";
@@ -129,6 +130,12 @@ export default function GenerateBarcode() {
                             });
                         });
                     });
+                    if (currentPrintSettings?.sort_by_sku) {
+                        selectedItems.sort((a, b) =>
+                            (a.current_sku || a.sku || "").localeCompare(b.current_sku || b.sku || "", undefined, { numeric: true, sensitivity: 'base' })
+                        );
+                    }
+
                     if (selectedItems.length > 0) {
                         setSelectedProducts(selectedItems);
                         setGeneratedProducts([]);
@@ -151,6 +158,11 @@ export default function GenerateBarcode() {
                 }
                 if (currentPrintSettings?.hide_product_archived) {
                     variants = variants.filter(v => (v.status || '').toLowerCase() !== 'archived');
+                }
+                if (currentPrintSettings?.sort_by_sku) {
+                    variants.sort((a, b) =>
+                        (a.current_sku || a.sku || "").localeCompare(b.current_sku || b.sku || "", undefined, { numeric: true, sensitivity: 'base' })
+                    );
                 }
                 const productsWithQty = variants.map((p) => ({
                     ...p,
@@ -370,11 +382,18 @@ export default function GenerateBarcode() {
             setLoadingTemplate(true);
             const response = await fetch(`/api/templates/design/${value}`);
             const json = await response.json();
-            if (json.success) {
-                setTemplateDesign(json.data);
+            const loadedDesign = json.design || json.data || json.template?.design_settings || json;
+            const parsedDesign = typeof loadedDesign === 'string' ? JSON.parse(loadedDesign) : loadedDesign;
+            const parsedLayout = typeof json.layout === 'string' ? JSON.parse(json.layout) : (json.template?.layout_settings ? JSON.parse(json.template.layout_settings) : null);
+
+            if (parsedDesign) {
+                setTemplateDesign({
+                    ...parsedDesign,
+                    layout_settings: parsedLayout || parsedDesign?.layout_settings || {},
+                });
             }
         } catch (err) {
-            console.error(err);
+            console.error("Error loading template design:", err);
         } finally {
             setLoadingTemplate(false);
         }
@@ -605,8 +624,9 @@ export default function GenerateBarcode() {
         }, 2000);
     };
 
-    const handlePrint = () => {
-        if (!templateDesign) {
+    const handlePrint = async () => {
+        const designToUse = templateDesign || activeLabelDesign;
+        if (!designToUse) {
             shopify.toast.show("Please select a template.");
             return;
         }
@@ -615,6 +635,8 @@ export default function GenerateBarcode() {
             shopify.toast.show("Please select at least one product.");
             return;
         }
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
         const paper = templateDesign?.layout_settings;
 
@@ -629,22 +651,50 @@ export default function GenerateBarcode() {
         const labelsPerSheet = rows * columns;
         const allLabels = [];
 
-        selectedProducts.forEach((product) => {
-            const printLabel = document.getElementById(`print-label-${product.variant_id}`);
-            if (!printLabel) {
-                console.warn(`Print label not found for variant ${product.variant_id}`);
-                return;
-            }
-            const qty = Math.max(1, Number(product.quantity) || 1);
-            const labelHtml = printLabel.innerHTML;
-            for (let i = 0; i < qty; i++) {
-                allLabels.push(`
-                <div class="label">
-                    ${labelHtml}
-                </div>
-            `);
-            }
-        });
+       const getPrintableLabelHtml = (variantId) => {
+    const printLabel = document.getElementById(`print-label-${variantId}`);
+    if (!printLabel) return null;
+
+    const clone = printLabel.cloneNode(true);
+    const originalCanvases = printLabel.querySelectorAll("canvas");
+    const cloneCanvases = clone.querySelectorAll("canvas");
+
+    originalCanvases.forEach((canvas, i) => {
+        const cloneCanvas = cloneCanvases[i];
+        if (!cloneCanvas || !cloneCanvas.parentNode) return;
+
+        const img = document.createElement("img");
+        try {
+            img.src = canvas.toDataURL("image/png");
+        } catch (e) {
+            console.error("Failed to convert canvas to image for print:", e);
+        }
+        img.width = canvas.width;
+        img.height = canvas.height;
+        img.style.cssText = canvas.style.cssText || "width:100%;height:auto;";
+        img.className = canvas.className;
+
+        cloneCanvas.parentNode.replaceChild(img, cloneCanvas);
+    });
+
+    return clone.innerHTML;
+};
+
+selectedProducts.forEach((product) => {
+    const labelHtml = getPrintableLabelHtml(product.variant_id);
+    if (!labelHtml) {
+        console.warn(`Print label not found for variant ${product.variant_id}`);
+        return;
+    }
+    const qty = Math.max(1, Number(product.quantity) || 1);
+    for (let i = 0; i < qty; i++) {
+        allLabels.push(`
+        <div class="label">
+            ${labelHtml}
+        </div>
+    `);
+    }
+});
 
         if (!allLabels.length) {
             shopify.toast.show("No labels available to print.");
@@ -678,28 +728,50 @@ export default function GenerateBarcode() {
     };
 
     const getSymbolValue = (product) => {
-        if (!templateDesign) return product.barcode || product.current_sku || "";
-        switch (templateDesign.symbol_field_source) {
-            case "barcode_value":
-                return product.barcode || "";
-            case "sku_value":
-                return product.current_sku || "";
+        const design = templateDesign || activeLabelDesign;
+        if (!design) return product.barcode || product.current_sku || product.sku || product.product_title || "123456789012";
+        const fieldSource = design.symbol_field_source || "barcode_value";
+        switch (fieldSource) {
             case "product_name":
-                return product.product_title || "";
-            case "product_price": {
-                const decimals = Number(printSettings?.price_decimal_number ?? 2);
-                let price = Number(product?.price ?? 0);
-                if (price > 999) price = price / 100;
-                const vatPercentage = Number(printSettings?.vat_percentage ?? 0);
-                const priceWithVat = price + (price * vatPercentage) / 100;
-                return priceWithVat.toFixed(decimals);
-            }
+            case "title":
+            case "name":
+                return String(product.product_title || product.title || "Product Name").trim();
+
+            case "product_price":
+            case "price":
+                return String(formatProductPrice(product) || "0.00").trim();
+
             case "product_vendor":
-                return product.vendor || "";
+            case "vendor":
+                return String(product.vendor || "Vendor").trim();
+
             case "product_online_url":
-                return product.online_url || "";
+            case "product_page_url":
+            case "online_url":
+            case "url": {
+                const params = new URLSearchParams(window.location.search);
+                const shopDomain = params.get('shop') || window.shopify?.config?.shop || 'kakshalijani.myshopify.com';
+                let rawUrl = product.online_url || product.url || "";
+                if (rawUrl && (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) && !rawUrl.includes("store.myshopify.com")) {
+                    return rawUrl.trim();
+                }
+                const handle = product.handle || (product.product_title || product.title || "product").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                const variantParam = product.variant_id ? `?variant=${product.variant_id}` : "";
+                if (rawUrl && rawUrl.startsWith("/")) {
+                    return `https://${shopDomain}${rawUrl}${variantParam}`.trim();
+                }
+                return `https://${shopDomain}/products/${handle}${variantParam}`.trim();
+            }
+
+            case "sku_value":
+            case "product_sku":
+            case "sku":
+                return String(product.current_sku || product.sku || product.barcode || "SKU-EMPTY").trim();
+
+            case "barcode_value":
+            case "barcode":
             default:
-                return product.barcode || product.current_sku || "";
+                return String(product.barcode || product.generated_barcode || product.current_barcode || product.current_sku || product.sku || product.product_title || "123456789012").trim();
         }
     };
 
@@ -814,8 +886,8 @@ export default function GenerateBarcode() {
                 open={deleteModalOpen}
                 title={`Remove ${itemsToDelete.length} product${itemsToDelete.length !== 1 ? 's' : ''}?`}
                 message={`Are you sure you want to remove ${itemsToDelete.length === 1
-                        ? 'this product'
-                        : `these ${itemsToDelete.length} products`
+                    ? 'this product'
+                    : `these ${itemsToDelete.length} products`
                     } from the barcode list?`}
                 onConfirm={handleConfirmDelete}
                 onClose={() => {
@@ -868,7 +940,7 @@ export default function GenerateBarcode() {
 
                         <s-stack direction="inline" gap="base">
                             <s-button icon="settings" onClick={() => navigate('/Settingindex')}>
-                                SKU Settings
+                                Go to Settings
                             </s-button>
                             <s-button onClick={() => navigate("/LabelHistory")}>
                                 Label History
@@ -900,96 +972,110 @@ export default function GenerateBarcode() {
 
                 {/* Generation Method Choice */}
                 <s-section>
-                    <s-box padding="base" borderWidth="base" borderRadius="base">
-                        <div style={{ padding: '16px' }}>
-                            <div style={{ marginBottom: '12px' }}>
-                                <div style={{ fontWeight: 600, fontSize: '14px', color: '#1a1a1a' }}>Choose Generation or Print Method</div>
-                                <div style={{ fontSize: '13px', color: '#616161', marginTop: '2px' }}>
-                                    Select how products or barcode labels should be processed
-                                </div>
-                            </div>
+                    <div
+                        style={{
+                            background: '#ffffff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '12px',
+                            padding: '14px 16px',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px', flexWrap: 'wrap', gap: '4px' }}>
+                            <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>Choose Generation or Print Method</span>
+                            <span style={{ fontSize: '12px', color: '#64748b' }}>Select how products or barcode labels should be processed</span>
+                        </div>
 
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px' }}>
                             {[
-                                { value: 'missing', label: 'Missing Barcodes Only', desc: 'Scan store items and only generate barcodes for products or variants missing a barcode.' },
-                                { value: 'replace', label: 'Selected Products (Replace / Create)', desc: 'Generate new barcodes for selected products (overwrites existing barcode values).' },
-                                { value: 'sku', label: 'Generate Barcode from SKU', desc: 'Copy product SKU code into the barcode field for selected items.' },
-                                { value: 'print', label: 'Print Labels Only', desc: 'Choose a paper template and print physical barcode stickers for selected products.' },
-                            ].map((opt) => (
-                                <label
-                                    key={opt.value}
-                                    onClick={() => setMethod(opt.value)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'flex-start',
-                                        gap: '10px',
-                                        padding: '10px 12px',
-                                        marginBottom: '6px',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        background: method === opt.value ? '#f0f7ff' : 'transparent',
-                                        border: method === opt.value ? '1.5px solid #008ba8' : '1.5px solid transparent',
-                                        transition: 'all 0.15s ease',
-                                    }}
-                                >
-                                    <input
-                                        type="radio"
-                                        name="barcode-method"
-                                        value={opt.value}
-                                        checked={method === opt.value}
-                                        onChange={() => setMethod(opt.value)}
-                                        style={{ marginTop: '3px', accentColor: '#008ba8', flexShrink: 0 }}
-                                    />
-                                    <div>
-                                        <div style={{ fontWeight: 600, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.4 }}>{opt.label}</div>
-                                        <div style={{ fontSize: '12px', color: '#616161', marginTop: '2px', lineHeight: 1.4 }}>{opt.desc}</div>
+                                { value: 'missing', label: 'Missing Barcodes Only', desc: 'Generate barcodes only for items missing a barcode.' },
+                                { value: 'replace', label: 'Selected Products', desc: 'Generate new barcodes for selected products.' },
+                                { value: 'sku', label: 'Generate from SKU', desc: 'Copy product SKU code into barcode field.' },
+                                { value: 'print', label: 'Print Labels Only', desc: 'Print physical barcode stickers for selected items.' },
+                            ].map((opt) => {
+                                const isActive = method === opt.value;
+                                return (
+                                    <div
+                                        key={opt.value}
+                                        onClick={() => setMethod(opt.value)}
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            gap: '4px',
+                                            padding: '10px 12px',
+                                            borderRadius: '10px',
+                                            cursor: 'pointer',
+                                            background: isActive ? '#f0f9ff' : '#f8fafc',
+                                            border: isActive ? '1.5px solid #0284c7' : '1px solid #e2e8f0',
+                                            boxShadow: isActive ? '0 4px 12px rgba(2, 132, 199, 0.08)' : 'none',
+                                            transition: 'all 0.15s ease',
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <input
+                                                type="radio"
+                                                name="barcode-method"
+                                                value={opt.value}
+                                                checked={isActive}
+                                                onChange={() => setMethod(opt.value)}
+                                                style={{ accentColor: '#0284c7', margin: 0, cursor: 'pointer' }}
+                                            />
+                                            <span style={{ fontWeight: 700, fontSize: '13px', color: isActive ? '#0369a1' : '#1e293b' }}>
+                                                {opt.label}
+                                            </span>
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: '#64748b', paddingLeft: '20px', lineHeight: 1.3 }}>
+                                            {opt.desc}
+                                        </div>
                                     </div>
-                                </label>
-                            ))}
+                                );
+                            })}
+                        </div>
 
-                            {method === "replace" && (
+                        {method === "replace" && (
+                            <div style={{ marginTop: '12px' }}>
                                 <s-banner tone="warning">
                                     <strong>Warning:</strong> Existing barcodes will be replaced with newly generated values.
                                 </s-banner>
-                            )}
+                            </div>
+                        )}
 
-                            {method === "print" && (
-                                <div
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: '16px',
-                                        flexWrap: 'wrap',
-                                        marginTop: '10px',
-                                        padding: '14px 18px',
-                                        background: '#f4f6f8',
-                                        borderRadius: '10px',
-                                        border: '1px solid #e1e3e5',
-                                    }}
-                                >
-                                    <div style={{ flex: '1', minWidth: '240px', maxWidth: '420px' }}>
-                                        <s-select
-                                            label="Choose a template to print"
-                                            value={selectedTemplate ? String(selectedTemplate) : ""}
-                                            onChange={(event) => {
-                                                const value = event.currentTarget.value;
-                                                setSelectedTemplate(value);
-                                                handleTemplateChange(value);
-                                            }}
-                                        >
-                                            <s-option value="">Select Template</s-option>
-                                            {templates.map((template) => (
-                                                <s-option key={template.id} value={String(template.id)}>
-                                                    {template.template_name}
-                                                </s-option>
-                                            ))}
-                                        </s-select>
-                                    </div>
-
+                        {method === "print" && (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '16px',
+                                    flexWrap: 'wrap',
+                                    marginTop: '10px',
+                                    padding: '14px 18px',
+                                    background: '#f4f6f8',
+                                    borderRadius: '10px',
+                                    border: '1px solid #e1e3e5',
+                                }}
+                            >
+                                <div style={{ flex: '1', minWidth: '240px', maxWidth: '420px' }}>
+                                    <s-select
+                                        label="Choose a template to print"
+                                        value={selectedTemplate ? String(selectedTemplate) : ""}
+                                        onChange={(event) => {
+                                            const value = event.currentTarget.value;
+                                            setSelectedTemplate(value);
+                                            handleTemplateChange(value);
+                                        }}
+                                    >
+                                        <s-option value="">Select Template</s-option>
+                                        {templates.map((template) => (
+                                            <s-option key={template.id} value={String(template.id)}>
+                                                {template.template_name}
+                                            </s-option>
+                                        ))}
+                                    </s-select>
                                 </div>
-                            )}
-                        </div>
-                    </s-box>
+                            </div>
+                        )}
+                    </div>
                 </s-section>
 
                 {/* Progress Bar (when bulk job running) */}
@@ -1615,18 +1701,19 @@ export default function GenerateBarcode() {
                         overflow: "hidden",
                     }}
                 >
-                    {templateDesign && selectedProducts.map((product) => (
+                    {(templateDesign || activeLabelDesign) && selectedProducts.map((product) => (
                         <div
                             key={`print-${product.variant_id}`}
                             id={`print-label-${product.variant_id}`}
                             className="print-template-label"
                         >
                             <TemplateLabelRenderer
-                                design={templateDesign}
+                                design={activeLabelDesign}
                                 product={product}
-                                barcodeSettings={templateDesign}
+                                barcodeSettings={activeLabelDesign}
                                 formatPrice={formatProductPrice}
                                 printMode={true}
+                                barcodeValue={getSymbolValue(product)}
                             />
                         </div>
                     ))}

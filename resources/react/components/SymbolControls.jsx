@@ -279,27 +279,21 @@ export default function SymbolControls({ design, handleUpdate, barcodeSettings, 
                 <FormLayout.Group>
                   <Select
                     label="Barcode Format"
-                    options={
-                      design.symbol_field_source === "barcode_value"
-                        ? [
-                          { label: "Code 128", value: "CODE128" },
-                          { label: "Code 39", value: "CODE39" },
-                          { label: "UPC-A", value: "UPCA" },
-                          { label: "EAN 8", value: "EAN8" },
-                          { label: "EAN 13", value: "EAN13" },
-                          { label: "ITF-14", value: "ITF14" },
-                        ]
-                        : [
-                          { label: "Code 128", value: "CODE128" },
-                        ]
-                    }
+                    options={[
+                      { label: "CODE128", value: "CODE128" },
+                      { label: "CODE39", value: "CODE39" },
+                      { label: "EAN8", value: "EAN8" },
+                      { label: "EAN13", value: "EAN13" },
+                      { label: "UPCA", value: "UPCA" },
+                      { label: "ITF14", value: "ITF14" },
+                    ]}
                     value={
                       design.barcode_format ||
                       barcodeSettings?.barcode_format ||
+                      barcodeSettings?.data?.barcode_format ||
                       "CODE128"
                     }
                     onChange={(value) => {
-                      console.log("Selected Format =", value);
                       handleUpdate("barcode_format", value);
                     }}
                   />

@@ -119,34 +119,85 @@ export default function BarcodeSkuPanel({ settings = {}, onChange }) {
                             </s-select>
                         </div>
 
-                        {/* DIGIT FORMAT REFERENCE BOX WITH CLEAR SPACING */}
+                        {/* SLEEK BARCODE PATTERNS INFO BANNER (STICKY ON SCROLL) */}
                         <div
                             style={{
-                                background: '#f8fafc',
-                                border: '1px solid #e1e3e5',
-                                borderRadius: '10px',
-                                padding: '16px',
-                                marginBottom: '20px',
+                                position: 'sticky',
+                                top: '12px',
+                                zIndex: 10,
+                                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                                border: '1px solid #bae6fd',
+                                borderRadius: '12px',
+                                padding: '12px 16px',
+                                marginBottom: '16px',
+                                boxShadow: '0 6px 18px rgba(3, 105, 161, 0.1)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px',
                             }}
                         >
-                            <div style={{ fontSize: '13px', fontWeight: '700', color: '#1a1a1a', marginBottom: '10px' }}>
-                                Used to generate barcodes. Supported pattern formats & digit counts:
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div
+                                    style={{
+                                        width: '22px',
+                                        height: '22px',
+                                        borderRadius: '50%',
+                                        background: '#0284c7',
+                                        color: '#ffffff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '12px',
+                                        fontWeight: '700',
+                                        flexShrink: 0,
+                                    }}
+                                >
+                                    ℹ
+                                </div>
+                                <span style={{ fontSize: '13px', fontWeight: '700', color: '#0c4a6e' }}>
+                                    Supported Barcode Patterns & Tokens
+                                </span>
                             </div>
                             <div
                                 style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
-                                    gap: '10px',
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    alignItems: 'center',
+                                    gap: '6px 12px',
                                     fontSize: '12px',
-                                    color: '#475569',
+                                    color: '#334155',
+                                    paddingLeft: '30px',
                                 }}
                             >
-                                <div><code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#008ba8', fontWeight: 'bold' }}>[A.8]</code> — 8 alpha characters</div>
-                                <div><code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#008ba8', fontWeight: 'bold' }}>[N.8]</code> — 8 numeric characters</div>
-                                <div><code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#008ba8', fontWeight: 'bold' }}>[EAN8]</code> — 7 numeric characters</div>
-                                <div><code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#008ba8', fontWeight: 'bold' }}>[EAN13]</code> — 12 numeric characters</div>
-                                <div><code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#008ba8', fontWeight: 'bold' }}>[UPC-A]</code> — 11 numeric characters</div>
-                                <div><code style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#008ba8', fontWeight: 'bold' }}>[ITF14]</code> — 13 numeric characters</div>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <code style={{ background: '#ffffff', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: '700', fontSize: '11px', fontFamily: 'monospace' }}>[A.8]</code>
+                                    <span style={{ color: '#475569', fontSize: '12px' }}>8 alpha</span>
+                                </span>
+                                <span style={{ color: '#94a3b8' }}>•</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <code style={{ background: '#ffffff', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: '700', fontSize: '11px', fontFamily: 'monospace' }}>[N.8]</code>
+                                    <span style={{ color: '#475569', fontSize: '12px' }}>8 numeric</span>
+                                </span>
+                                <span style={{ color: '#94a3b8' }}>•</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <code style={{ background: '#ffffff', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: '700', fontSize: '11px', fontFamily: 'monospace' }}>[N.7]</code>
+                                    <span style={{ color: '#475569', fontSize: '12px' }}>EAN8</span>
+                                </span>
+                                <span style={{ color: '#94a3b8' }}>•</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <code style={{ background: '#ffffff', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: '700', fontSize: '11px', fontFamily: 'monospace' }}>[N.12]</code>
+                                    <span style={{ color: '#475569', fontSize: '12px' }}>EAN13</span>
+                                </span>
+                                <span style={{ color: '#94a3b8' }}>•</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <code style={{ background: '#ffffff', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: '700', fontSize: '11px', fontFamily: 'monospace' }}>[N.11]</code>
+                                    <span style={{ color: '#475569', fontSize: '12px' }}>UPC-A</span>
+                                </span>
+                                <span style={{ color: '#94a3b8' }}>•</span>
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                    <code style={{ background: '#ffffff', color: '#0284c7', padding: '2px 6px', borderRadius: '4px', border: '1px solid #cbd5e1', fontWeight: '700', fontSize: '11px', fontFamily: 'monospace' }}>[N.13]</code>
+                                    <span style={{ color: '#475569', fontSize: '12px' }}>ITF14</span>
+                                </span>
                             </div>
                         </div>
 

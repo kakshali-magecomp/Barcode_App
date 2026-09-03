@@ -424,9 +424,6 @@ export default function LabelHistory() {
             </div>
 
             <s-stack direction="inline" gap="base">
-              <s-button icon="arrow-left" onClick={() => navigate("/ProductsBarcodeList")}>
-                Back to Barcode Generator
-              </s-button>
               <s-button variant="primary" icon="print" onClick={handlePrintAllReport}>
                 Print Log Report
               </s-button>
@@ -487,246 +484,277 @@ export default function LabelHistory() {
 
         {/* Search, Filter & History Log Table */}
         <s-section>
-          <s-box padding="base" borderWidth="base" borderRadius="base">
-            <s-stack direction="block" gap="medium">
-              {/* Search Toolbar */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '12px',
-                  flexWrap: 'wrap',
-                  background: '#f8fafc',
-                  padding: '12px 14px',
-                  borderRadius: '10px',
-                  border: '1px solid #e1e3e5',
-                }}
-              >
-                <div style={{ flex: '1', minWidth: '220px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Search & Action Bar */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '12px',
+                flexWrap: 'wrap',
+                padding: '14px 16px',
+                borderBottom: '1px solid #e2e8f0',
+                background: '#ffffff',
+              }}
+            >
+              <div style={{ flex: '1', minWidth: '240px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div style={{ flex: '1', position: 'relative' }}>
                   <input
                     type="text"
                     placeholder="Search by Job ID, Template Name or IP..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     style={{
-                      flex: '1',
-                      padding: '8px 12px',
-                      borderRadius: '6px',
-                      border: '1px solid #c9cccf',
+                      width: '100%',
+                      padding: '8px 12px 8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
                       fontSize: '13px',
                       outline: 'none',
                       boxSizing: 'border-box',
-                      background: '#ffffff',
+                      background: '#f8fafc',
+                      color: '#0f172a',
                     }}
                   />
-                  <input
-                    type="date"
-                    value={dateFilter}
-                    onChange={(e) => setDateFilter(e.target.value)}
-                    style={{
-                      padding: '7px 10px',
-                      borderRadius: '6px',
-                      border: '1px solid #c9cccf',
-                      fontSize: '13px',
-                      outline: 'none',
-                      boxSizing: 'border-box',
-                      background: '#ffffff',
-                      color: '#444',
-                    }}
-                  />
-                  {(search || dateFilter) && (
-                    <s-button
-                      variant="tertiary"
-                      onClick={() => {
-                        setSearch("");
-                        setDateFilter("");
-                      }}
-                    >
-                      Clear
-                    </s-button>
-                  )}
                 </div>
-
-                {selectedRows.length > 0 && (
-                  <s-button tone="critical" onClick={triggerDeleteBulk}>
-                    Delete Selected ({selectedRows.length})
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  style={{
+                    padding: '7px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    background: '#f8fafc',
+                    color: '#334155',
+                  }}
+                />
+                {(search || dateFilter) && (
+                  <s-button
+                    variant="tertiary"
+                    onClick={() => {
+                      setSearch("");
+                      setDateFilter("");
+                    }}
+                  >
+                    Clear
                   </s-button>
                 )}
               </div>
 
-              {/* Data Table */}
-              {filteredHistory.length === 0 ? (
+              {selectedRows.length > 0 && (
+                <s-button tone="critical" onClick={triggerDeleteBulk}>
+                  Delete Selected ({selectedRows.length})
+                </s-button>
+              )}
+            </div>
+
+            {/* Data Table Area */}
+            {filteredHistory.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '50px 20px',
+                  background: '#ffffff',
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: '15px', color: '#1e293b', marginBottom: '4px' }}>
+                  No print history records found
+                </div>
+                <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px' }}>
+                  {search || dateFilter
+                    ? "No records match your active search filter."
+                    : "No barcode label sticker jobs have been printed yet."}
+                </div>
+                {(search || dateFilter) && (
+                  <s-button
+                    onClick={() => {
+                      setSearch("");
+                      setDateFilter("");
+                    }}
+                  >
+                    Reset Search Filters
+                  </s-button>
+                )}
+              </div>
+            ) : (
+              <>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                        <th style={{ ...thStyle, width: '42px', paddingLeft: '16px' }}>
+                          <s-checkbox
+                            label="Select all"
+                            labelAccessibilityVisibility="exclusive"
+                            checked={allPageRowsSelected || undefined}
+                            onChange={toggleSelectAllPageRows}
+                          />
+                        </th>
+                        <th style={{ ...thStyle, width: '100px' }}>Print ID</th>
+                        <th style={{ ...thStyle, width: '28%' }}>Template Name</th>
+                        <th style={{ ...thStyle, width: '130px', textAlign: 'center' }}>Total Labels</th>
+                        <th style={{ ...thStyle, width: '130px' }}>Client IP</th>
+                        <th style={{ ...thStyle, width: '22%' }}>Printed Date</th>
+                        <th style={{ ...thStyle, width: '130px', textAlign: 'right', paddingRight: '16px' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedHistory.map((item) => {
+                        const isChecked = selectedRows.includes(item.id);
+                        const printedDate = new Date(item.created_at || item.printed_at);
+                        const formattedDateStr = printedDate.toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        });
+
+                        return (
+                          <tr
+                            key={item.id}
+                            style={{
+                              borderBottom: '1px solid #f1f5f9',
+                              background: isChecked ? '#f0f9ff' : '#ffffff',
+                              transition: 'background 0.15s ease',
+                            }}
+                          >
+                            <td style={{ ...tdStyle, paddingLeft: '16px' }}>
+                              <s-checkbox
+                                label={`Select ${item.id}`}
+                                labelAccessibilityVisibility="exclusive"
+                                checked={isChecked || undefined}
+                                onChange={() => {
+                                  setSelectedRows((prev) =>
+                                    prev.includes(item.id)
+                                      ? prev.filter((id) => id !== item.id)
+                                      : [...prev, item.id]
+                                  );
+                                }}
+                              />
+                            </td>
+                            <td style={tdStyle}>
+                              <span
+                                onClick={() => openHistoryDetails(item.id)}
+                                style={{
+                                  fontFamily: 'monospace',
+                                  fontWeight: 700,
+                                  color: '#0284c7',
+                                  cursor: 'pointer',
+                                  background: '#e0f2fe',
+                                  padding: '3px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                }}
+                              >
+                                #{item.id}
+                              </span>
+                            </td>
+                            <td style={tdStyle}>
+                              <div style={{ fontWeight: 600, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.template?.template_name || "Standard Label Template"}
+                              </div>
+                            </td>
+                            <td style={{ ...tdStyle, textAlign: 'center' }}>
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  background: '#dcfce7',
+                                  color: '#15803d',
+                                  fontWeight: 600,
+                                  fontSize: '12px',
+                                  padding: '3px 9px',
+                                  borderRadius: '12px',
+                                }}
+                              >
+                                {item.print_qty} stickers
+                              </span>
+                            </td>
+                            <td style={tdStyle}>
+                              <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#64748b' }}>
+                                {item.client_ip || "127.0.0.1"}
+                              </span>
+                            </td>
+                            <td style={tdStyle}>
+                              <div style={{ fontSize: '13px', color: '#334155' }}>{formattedDateStr}</div>
+                            </td>
+                            <td style={{ ...tdStyle, textAlign: 'right', paddingRight: '16px' }}>
+                              <div style={{ display: 'inline-flex', gap: '4px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                                <s-button
+                                  icon="view"
+                                  variant="tertiary"
+                                  onClick={() => openHistoryDetails(item.id)}
+                                />
+                                <s-button
+                                  icon="delete"
+                                  variant="tertiary"
+                                  tone="critical"
+                                  onClick={() => triggerDeleteSingle(item.id)}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination Footer */}
                 <div
                   style={{
-                    textAlign: 'center',
-                    padding: '48px 20px',
-                    background: '#f9fafb',
-                    borderRadius: '10px',
-                    border: '1px dashed #d2d5d8',
+                    display: 'flex',
+                    justify: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    borderTop: '1px solid #e2e8f0',
+                    background: '#f8fafc',
                   }}
                 >
-                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#202223', marginBottom: '4px' }}>
-                    No print history records found
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>
+                    Showing {startIndex + 1}–{Math.min(endIndex, filteredHistory.length)} of {filteredHistory.length} print records
                   </div>
-                  <div style={{ fontSize: '13px', color: '#6d7175', marginBottom: '16px' }}>
-                    {search || dateFilter
-                      ? "No records match your active search filter."
-                      : "No barcode label sticker jobs have been printed yet."}
-                  </div>
-                  {(search || dateFilter) && (
-                    <s-button
-                      onClick={() => {
-                        setSearch("");
-                        setDateFilter("");
-                      }}
-                    >
-                      Reset Search Filters
-                    </s-button>
+
+                  {totalPages > 1 && (
+                    <s-stack direction="inline" gap="tight" alignItems="center">
+                      <s-button
+                        variant="tertiary"
+                        disabled={currentPage <= 1 || undefined}
+                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      >
+                        Previous
+                      </s-button>
+                      <span style={{ fontSize: '12px', color: '#334155', fontWeight: 600 }}>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                      <s-button
+                        variant="tertiary"
+                        disabled={currentPage >= totalPages || undefined}
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      >
+                        Next
+                      </s-button>
+                    </s-stack>
                   )}
                 </div>
-              ) : (
-                <>
-                  <div style={{ border: '1px solid #e1e3e5', borderRadius: '10px', overflow: 'hidden', background: '#ffffff' }}>
-                    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ background: '#f4f6f8', borderBottom: '1px solid #e1e3e5' }}>
-                          <th style={{ ...thStyle, width: '38px' }}>
-                            <s-checkbox
-                              label="Select all"
-                              labelAccessibilityVisibility="exclusive"
-                              checked={allPageRowsSelected || undefined}
-                              onChange={toggleSelectAllPageRows}
-                            />
-                          </th>
-                          <th style={{ ...thStyle, width: '100px' }}>Print ID</th>
-                          <th style={{ ...thStyle, width: '30%' }}>Template Name</th>
-                          <th style={{ ...thStyle, width: '120px', textAlign: 'center' }}>Total Labels</th>
-                          <th style={{ ...thStyle, width: '140px' }}>Client IP</th>
-                          <th style={{ ...thStyle, width: '22%' }}>Printed Date</th>
-                          <th style={{ ...thStyle, width: '140px', textAlign: 'right' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedHistory.map((item) => {
-                          const isChecked = selectedRows.includes(item.id);
-                          const printedDate = new Date(item.created_at || item.printed_at);
-                          const formattedDateStr = printedDate.toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          });
-
-                          return (
-                            <tr
-                              key={item.id}
-                              style={{
-                                borderBottom: '1px solid #e1e3e5',
-                                background: isChecked ? '#f0f9fa' : '#ffffff',
-                                transition: 'background 0.15s ease',
-                              }}
-                            >
-                              <td style={tdStyle}>
-                                <s-checkbox
-                                  label={`Select ${item.id}`}
-                                  labelAccessibilityVisibility="exclusive"
-                                  checked={isChecked || undefined}
-                                  onChange={() => {
-                                    setSelectedRows((prev) =>
-                                      prev.includes(item.id)
-                                        ? prev.filter((id) => id !== item.id)
-                                        : [...prev, item.id]
-                                    );
-                                  }}
-                                />
-                              </td>
-                              <td style={tdStyle}>
-                                <span
-                                  onClick={() => openHistoryDetails(item.id)}
-                                  style={{
-                                    fontFamily: 'monospace',
-                                    fontWeight: 700,
-                                    color: '#008ba8',
-                                    cursor: 'pointer',
-                                    background: '#e0f5f8',
-                                    padding: '3px 8px',
-                                    borderRadius: '6px',
-                                    fontSize: '12px',
-                                  }}
-                                >
-                                  #{item.id}
-                                </span>
-                              </td>
-                              <td style={tdStyle}>
-                                <div style={{ fontWeight: 600, color: '#202223', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                  {item.template?.template_name || "Standard Label Template"}
-                                </div>
-                              </td>
-                              <td style={{ ...tdStyle, textAlign: 'center' }}>
-                                <s-badge tone="success">{item.print_qty} stickers</s-badge>
-                              </td>
-                              <td style={tdStyle}>
-                                <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#6d7175' }}>
-                                  {item.client_ip || "127.0.0.1"}
-                                </span>
-                              </td>
-                              <td style={tdStyle}>
-                                <div style={{ fontSize: '12px', color: '#444' }}>{formattedDateStr}</div>
-                              </td>
-                              <td style={{ ...tdStyle, textAlign: 'right' }}>
-                                <div style={{ display: 'inline-flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                  <s-button onClick={() => openHistoryDetails(item.id)}>
-                                    View / Print
-                                  </s-button>
-                                  <s-button
-                                    icon="delete"
-                                    variant="tertiary"
-                                    tone="critical"
-                                    onClick={() => triggerDeleteSingle(item.id)}
-                                  />
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Pagination Footer */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', paddingTop: '4px' }}>
-                    <div style={{ fontSize: '12px', color: '#6d7175' }}>
-                      Showing {startIndex + 1}–{Math.min(endIndex, filteredHistory.length)} of {filteredHistory.length} print records
-                    </div>
-
-                    {totalPages > 1 && (
-                      <s-stack direction="inline" gap="tight" alignItems="center">
-                        <s-button
-                          variant="tertiary"
-                          disabled={currentPage <= 1 || undefined}
-                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                        >
-                          Previous
-                        </s-button>
-                        <span style={{ fontSize: '12px', color: '#444', fontWeight: 600 }}>
-                          Page {currentPage} of {totalPages}
-                        </span>
-                        <s-button
-                          variant="tertiary"
-                          disabled={currentPage >= totalPages || undefined}
-                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                        >
-                          Next
-                        </s-button>
-                      </s-stack>
-                    )}
-                  </div>
-                </>
-              )}
-            </s-stack>
-          </s-box>
+              </>
+            )}
+          </div>
         </s-section>
       </s-page>
 
@@ -1106,16 +1134,18 @@ const metricCardStyle = {
 };
 
 const thStyle = {
-  padding: '10px 12px',
-  fontSize: '12px',
-  fontWeight: 600,
-  color: '#6d7175',
+  padding: '12px 14px',
+  fontSize: '11px',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+  color: '#475569',
   textAlign: 'left',
   boxSizing: 'border-box',
 };
 
 const tdStyle = {
-  padding: '10px 12px',
+  padding: '12px 14px',
   fontSize: '13px',
   verticalAlign: 'middle',
   boxSizing: 'border-box',

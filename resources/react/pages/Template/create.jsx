@@ -223,7 +223,7 @@ export default function CreateTemplate() {
                 price: selected.price,
                 vendor: selected.vendor,
                 option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-                online_url: selected.online_url || selected.url || (selected.handle ? `https://${shopify?.config?.shop || 'store'}.myshopify.com/products/${selected.handle}` : 'https://store.myshopify.com/products/dumplings'),
+                online_url: selected.online_url || selected.url || `https://${new URLSearchParams(window.location.search).get('shop') || window.shopify?.config?.shop || 'kakshalijani.myshopify.com'}/products/${selected.handle || 'product'}`,
                 currency_code: selected.currency_code || currencyCode,
             });
         }
@@ -253,7 +253,7 @@ export default function CreateTemplate() {
                 price: selected.price,
                 vendor: selected.vendor,
                 option_1: selected.variant_title !== 'Default Title' ? selected.variant_title : '',
-                online_url: selected.online_url || selected.url || (selected.handle ? `https://${shopify?.config?.shop || 'store'}.myshopify.com/products/${selected.handle}` : 'https://store.myshopify.com/products/dumplings'),
+                online_url: selected.online_url || selected.url || `https://${new URLSearchParams(window.location.search).get('shop') || window.shopify?.config?.shop || 'kakshalijani.myshopify.com'}/products/${selected.handle || 'product'}`,
                 currency_code: selected.currency_code || currencyCode,
             });
         }
@@ -314,8 +314,15 @@ export default function CreateTemplate() {
             case 'product_online_url':
             case 'product_page_url':
             case 'online_url':
-            case 'url':
-                return previewItem.online_url || 'https://store.myshopify.com/products/dumplings';
+            case 'url': {
+                const shopDomain = new URLSearchParams(window.location.search).get('shop') || window.shopify?.config?.shop || 'kakshalijani.myshopify.com';
+                let rawUrl = previewItem.online_url || '';
+                if (rawUrl && (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) && !rawUrl.includes('store.myshopify.com')) {
+                    return rawUrl.trim();
+                }
+                const handle = (previewItem.title || 'product').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                return `https://${shopDomain}/products/${handle}`.trim();
+            }
 
             case 'sku_value':
             case 'product_sku':

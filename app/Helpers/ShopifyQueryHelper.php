@@ -83,6 +83,7 @@ class ShopifyQueryHelper
                     vendor
                     productType
                     handle
+                    onlineStoreUrl
                     status
 
                     featuredImage {

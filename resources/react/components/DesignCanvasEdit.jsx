@@ -296,8 +296,16 @@ export default function DesignCanvasEdit({
             case "product_online_url":
             case "product_page_url":
             case "online_url":
-            case "url":
-                return previewItem.online_url || "https://store.myshopify.com/products/dumplings";
+            case "url": {
+                const params = new URLSearchParams(window.location.search);
+                const shopDomain = params.get('shop') || window.shopify?.config?.shop || 'kakshalijani.myshopify.com';
+                let rawUrl = previewItem.online_url || "";
+                if (rawUrl && (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) && !rawUrl.includes("store.myshopify.com")) {
+                    return rawUrl.trim();
+                }
+                const handle = (previewItem.title || "product").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                return `https://${shopDomain}/products/${handle}`.trim();
+            }
 
             case "sku_value":
             case "product_sku":

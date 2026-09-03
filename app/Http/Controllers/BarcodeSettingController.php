@@ -11,7 +11,11 @@ class BarcodeSettingController extends Controller
     {
         $user = Auth::user();
         $barcodeSettings = $user->barcodeSetting()->firstOrCreate([]);
-        return response()->json($barcodeSettings);
+        return response()->json([
+            'success'  => true,
+            'settings' => $barcodeSettings,
+            'data'     => $barcodeSettings,
+        ]);
     }
 
     public function update(Request $request)
